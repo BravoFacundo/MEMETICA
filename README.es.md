@@ -1,7 +1,7 @@
 # Memética
 
-Videojuego de puzzles 3D en complementación de una tesis sobre el uso de información cultural (MEMES).
-Este videojuego utiliza memes y sus características reproducibles como mecánicas de resolución de Puzzles que modifican el mundo. Hecho en Unity, C#.
+Videojuego de puzzles 3D en complementación de una tesis sobre el uso de información cultural (MEMES). Hecho en Unity, C#.
+Este videojuego utiliza memes y sus características reproducibles como mecánicas de resolución de Puzzles que modifican el mundo.
 
 *If you prefer, you can read this in [English](README.md)*
 
