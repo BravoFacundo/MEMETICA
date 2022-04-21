@@ -1,8 +1,7 @@
 # Memética
 
-3D Puzzle Video Game in complementation to a Thesis on the use of cultural information (MEMES).
+3D Puzzle Video Game in complementation to a Thesis on the use of cultural information (MEMES). Made with Unity, C#.
 This game uses memes and their replicability as puzzle solving mechanics that change the world. 
-Made with Unity, C#.
 
 *Si lo prefieres, puedes leer esto en [español](README.es.md)*
 
