@@ -29,6 +29,14 @@ Los puzzles se resuelven mirando las pinturas y depositando en el pedestal el or
 
 La dificultad del juego radica en que las áreas desbloqueadas van agrandando el puzzle, obligando al jugador a buscar orbes dejados atrás y planear sus movimientos.
 
+# Galería de imágenes
+
+![1](https://user-images.githubusercontent.com/88951560/164586659-8470af57-a577-4197-8639-bd198d45d23b.png)
+![2](https://user-images.githubusercontent.com/88951560/164586663-4d0f5d69-4f71-43d4-80c0-1f537b728676.png)
+![3](https://user-images.githubusercontent.com/88951560/164586665-99cd7cad-0322-4f6a-a8e5-141a961bd5d0.png)
+![4](https://user-images.githubusercontent.com/88951560/164586671-6a5c87c8-2b8b-406f-9ea7-8d871aee0b55.png)
+![5](https://user-images.githubusercontent.com/88951560/164586674-b183d6c7-f7b7-472b-b362-ee035fa1d5a7.png)
+
 # Créditos y links
 
 Assets Utilizados:
