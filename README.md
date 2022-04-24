@@ -11,6 +11,8 @@ Developed using:
 - C# Language
 - Unity 2021
 
+*You can see the code [here](Assets/Scripts/)*
+
 # Idea and development
 
 Memes are fragments of cultural information that are quickly transmitted with our help.
