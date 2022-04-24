@@ -3,7 +3,9 @@
 Videojuego de puzzles 3D en complementación de una tesis sobre el uso de información cultural (MEMES). Hecho en Unity, C#.
 Este videojuego utiliza memes y sus características reproducibles como mecánicas de resolución de Puzzles que modifican el mundo.
 
-*If you prefer, you can read this in [English](README.md)*
+Puedes descargar y jugar el juego en mi [itch.io](https://facundo-bravo.itch.io/memetica).
+
+*If you prefer, you can read this in [English](README.md).*
 
 # Tecnologías
 
@@ -11,7 +13,7 @@ Desarrollado utilizando:
 - Lenguaje C#
 - Unity 2021
 
-*Puedes ver el código [aquí](Assets/Scripts/)*
+Puedes ver el código [aquí](Assets/Scripts/).
 
 # Idea y desarrollo
 
