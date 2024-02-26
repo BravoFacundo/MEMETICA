@@ -7,6 +7,8 @@ This game uses memes and their replicability as puzzle solving mechanics that ch
 
 You can download and play the game on my [itch.io](https://facundo-bravo.itch.io/memetica).
 
+I also designed the UI of the game. You can see the UI design document on my [Behance](https://www.behance.net/gallery/175545155/MEMETICA-Videogame-UI-Design).
+
 ## Technologies
 
 Developed using:
