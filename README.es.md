@@ -7,6 +7,8 @@ Este videojuego utiliza memes y sus características reproducibles como mecánic
 
 Puedes descargar y jugar el juego en mi [itch.io](https://facundo-bravo.itch.io/memetica).
 
+Tambien diseñe la UI para el videojuego. Puedes ver el documento de diseño UI en mi [Behance](https://www.behance.net/gallery/175545155/MEMETICA-Videogame-UI-Design).
+
 ## Tecnologías
 
 Desarrollado utilizando:
