@@ -15,7 +15,7 @@ Desarrollado utilizando:
 - Lenguaje C#
 - Unity 2021
 
-*Puedes ver el código [aquí](Assets/Scripts/).*
+*Puedes ver el código [aquí](Assets/_Scripts).*
 
 ## Idea y desarrollo
 
