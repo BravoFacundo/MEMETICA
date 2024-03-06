@@ -45,6 +45,9 @@ The difficulty of the game is based on the fact that the unlocked areas enlarge 
 
 ## Links and credits
 
+The music and some SFX of the game was made particularly for this project by a collaborator.
+- @quelinda_nube: Instagram.
+
 Used Assets:
 - ["Generic Low Poly Pack"](https://assetstore.unity.com/packages/3d/environments/generic-low-poly-pack-141077)
 - ["RPG Poly Pack - Lite"](https://assetstore.unity.com/packages/3d/environments/landscapes/rpg-poly-pack-lite-148410)
