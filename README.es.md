@@ -45,6 +45,9 @@ La dificultad del juego radica en que las áreas desbloqueadas van agrandando el
 
 ## Créditos y links
 
+La música del juego y algunos SFX fueron hechos particularmente para este proyecto por un colaborador.
+- @quelinda_nube: Instagram.
+
 Assets Utilizados:
 - ["Generic Low Poly Pack"](https://assetstore.unity.com/packages/3d/environments/generic-low-poly-pack-141077)
 - ["RPG Poly Pack - Lite"](https://assetstore.unity.com/packages/3d/environments/landscapes/rpg-poly-pack-lite-148410)
