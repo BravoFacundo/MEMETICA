@@ -7,28 +7,16 @@ public class OrbMemes: MonoBehaviour
 {
     public bool isHolded = false;
     public bool isCrossing = false;
-    public float distance;
     public GameObject Player;
 
     public bool changeLock = false;
 
     private bool canDo1 = true;
     private bool canDo2 = true;
-    private bool canDo3 = true;
-    private bool canDo4 = true;
 
-    public List<AudioClip> Audios = new List<AudioClip>();
     public List<Material> materials = new List<Material>();
-    private float cantidadAud;
     public float cantidadMat;
     public int matCount;
-    public float min;
-    public float max;
-
-    public AudioSource AudioEmiter;
-    public AudioClip Au1;
-    public AudioClip Au2;
-    public AudioClip Au3;
 
     [Header("Mutación: cambia mientras lo llevás y te movés")]
     public AudioClip warnClip;       // aviso: "está por cambiar"
@@ -59,15 +47,10 @@ public class OrbMemes: MonoBehaviour
     void Start()
     {
         Player = GameObject.Find("Player");
-        AudioEmiter = this.gameObject.GetComponent<AudioSource>();
 
         switch (this.gameObject.transform.name)
         {
             case "1Aa":
-                cantidadAud = 2;
-                //Au1 = Resources.Load<AudioClip>("Memes/Holy Sound 2"); Audios.Add(Au1);
-                //Au2 = Resources.Load<AudioClip>("Memes/Hallelujah Chorus 2"); Audios.Add(Au2);
-
                 cantidadMat = 6;
                 for (int i = 0; i < cantidadMat; i++)
                 {
@@ -76,11 +59,6 @@ public class OrbMemes: MonoBehaviour
                 break;
 
             case "1Ba":
-                cantidadAud = 3;
-                //Au1 = Resources.Load<AudioClip>("Memes/The eagle has landed");    Audios.Add(Au1);
-                //Au2 = Resources.Load<AudioClip>("Memes/Un gran paso completo");   Audios.Add(Au2);
-                //Au3 = Resources.Load<AudioClip>("Memes/Un gran paso incompleto"); Audios.Add(Au3);
-
                 cantidadMat = 5;
                 for (int i = 0; i < cantidadMat; i++)
                 {
@@ -89,11 +67,6 @@ public class OrbMemes: MonoBehaviour
                 
                 break;
             case "3Aa":
-                cantidadAud = 3;
-                //Au1 = Resources.Load<AudioClip>("Memes/The eagle has landed"); Audios.Add(Au1);
-                //Au2 = Resources.Load<AudioClip>("Memes/Un gran paso completo"); Audios.Add(Au2);
-                //Au3 = Resources.Load<AudioClip>("Memes/Un gran paso incompleto"); Audios.Add(Au3);
-
                 cantidadMat = 4;
                 for (int i = 0; i < cantidadMat; i++)
                 {
@@ -101,11 +74,6 @@ public class OrbMemes: MonoBehaviour
                 }
                 break;
             case "4Aa":
-                cantidadAud = 3;
-                //Au1 = Resources.Load<AudioClip>("Memes/The eagle has landed"); Audios.Add(Au1);
-                //Au2 = Resources.Load<AudioClip>("Memes/Un gran paso completo"); Audios.Add(Au2);
-                //Au3 = Resources.Load<AudioClip>("Memes/Un gran paso incompleto"); Audios.Add(Au3);
-
                 cantidadMat = 4;
                 for (int i = 0; i < cantidadMat; i++)
                 {
@@ -123,19 +91,10 @@ public class OrbMemes: MonoBehaviour
         mpb = new MaterialPropertyBlock();
         playerMove = Player.GetComponent<PlayerMove>();
         lastPlayerPos = Player.transform.position;
-
-        for (int i = 0; i < cantidadAud; i++)
-        {
-            
-        }
-        //Audios.Add();
-        //Charge = Resources.Load<AudioClip>("Sounds/PedestalCharge");
     }
 
     void Update()
     {
-        distance = Vector3.Distance(this.gameObject.transform.position, Player.transform.position);
-        
         //Imagen: muta con el tiempo mientras lo llevás y te movés
         UpdateMutation();
 
@@ -151,19 +110,6 @@ public class OrbMemes: MonoBehaviour
             StartCoroutine("NotHolding");
             canDo2 = false;
         }
-        /*if (!isHolded)
-        {
-            if (distance <= 10f && canDo3) //si es menor o igual a 10 (Se escucha desde esa isla)
-            {
-                StartCoroutine("Calling");
-                canDo3 = false;
-            }
-            if (distance <= 10f && distance <= 35f && canDo4) //si es menor o igual a 35 (Se escucha en islas a la redonda)
-            {
-                //StartCoroutine("Calling2");
-                canDo4 = false;
-            }
-        }*/
     }
 
     // ---------- MUTACIÓN ----------
@@ -281,23 +227,6 @@ public class OrbMemes: MonoBehaviour
             yield return null;
         }
         memeRenderer.SetPropertyBlock(null);
-    }
-
-    public IEnumerator Calling() //Llamar la atencion del usuario //Falta agregar para que no repita el ultimo audio
-    {        
-        yield return new WaitForSeconds(Random.Range(min,max)); //Debug.Log("Se inicio y espero un tiempo random");
-
-        int index = Random.Range(0, 2 ); // (int)Cantidad - 1 Pick random element from the list //no se si es solo cantidad o cantidad -1 :c
-        AudioClip i = Audios[index]; //  i = the number that was randomly picked
-
-        AudioEmiter.loop = false; AudioEmiter.clip = Audios[index]; AudioEmiter.Play(); //  Reproducir ese audio
-
-        //yield return new WaitForSeconds(AudioEmiter.clip.length);
-        //Debug.Log("Espero lo que dura el audio");
-        //Audios.RemoveAt(index); //  Remove chosen element
-
-        canDo3 = true; //Debug.Log("Se vuelve a activar");
-        StopCoroutine("Calling");
     }
 
     public IEnumerator Holding()

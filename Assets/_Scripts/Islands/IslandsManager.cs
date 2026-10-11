@@ -89,13 +89,6 @@ public class IslandsManager : MonoBehaviour
         bridges = GameObject.FindGameObjectsWithTag("Puente");
     }
 
-    public IEnumerator ShakeCamera()
-    {
-        yield return new WaitForSeconds(0.2f);
-        StartCoroutine(Camera.main.GetComponent<CameraShake>().ShakeTheCamera(0.1f, .1f));
-        yield return null;
-    }
-
     public IEnumerator GameComplete()
     {
         GameObject.Find("Player").GetComponent<PlayerMove>().ascend = true;
