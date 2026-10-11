@@ -103,6 +103,8 @@ public class PedestalTrigger : MonoBehaviour
             pedAudio.clip = Charge; pedAudio.Play();
             if (!keylessPedestal) //SI EL PEDESTAL NECESITA LLAVE
             {
+                // Barrido de imágenes solo en los pedestales que evalúan (blancos)
+                if (orbe.TryGetComponent(out OrbMemes orbMemes)) orbMemes.Sweep(pedAudio.clip.length);
                 yield return new WaitForSeconds(pedAudio.clip.length);
                 if (orbe.name.StartsWith(keyID))
                 {

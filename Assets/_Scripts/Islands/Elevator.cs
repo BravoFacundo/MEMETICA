@@ -69,9 +69,27 @@ public class Elevator : MonoBehaviour
                 orbRespawn.SetRespawn(pivotArea1);
             GameObject.Find("ElevatorZ").transform.SetParent(GameObject.Find("Area1").transform);
 
+            StartCoroutine(BreakPedestalWhenOrbTaken());
+
             oneLock = true;
         }
     }
 
+    // Ya arriba: cuando el jugador saca el orbe del pedestal del ascensor, el pedestal se vuelca y queda roto
+    IEnumerator BreakPedestalWhenOrbTaken()
+    {
+        GameObject orb = GameObject.Find("1Ba");
+        GameObject pedestalObj = GameObject.Find("PedestalElevador");
+        if (orb == null || pedestalObj == null) yield break;
 
+        Pedestal pedestal = pedestalObj.GetComponent<Pedestal>();
+        OrbMemes memes = orb.GetComponent<OrbMemes>();
+        Vector3 startPos = orb.transform.position;
+
+        // Espera a que lo agarre o lo mueva de su lugar
+        while ((memes == null || !memes.isHolded) && Vector3.Distance(orb.transform.position, startPos) < 1f)
+            yield return null;
+
+        pedestal.Break(GameObject.Find("Player").transform.position);
+    }
 }

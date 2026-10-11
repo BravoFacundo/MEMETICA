@@ -122,6 +122,10 @@ public class PlayerMove : MonoBehaviour
                     hit1Lock = false;
                     hit2Lock = true;
                     prevIsland = FindParentWithTag(hit.transform.gameObject, "Isla");
+
+                    // Cada isla nueva a la que llevás el orbe desbloquea una versión más de su imagen
+                    GameObject held = Camera.main.GetComponent<PlayerHoldObjects>().heldObject;
+                    if (held != null && held.TryGetComponent(out OrbMemes heldMemes)) heldMemes.IslandVisited(prevIsland);
                 }
             }            
         }

@@ -311,6 +311,8 @@ MonoBehaviour:
   correctClip: {fileID: 8300000, guid: 708aa9b78c6214e49a245c4f88139d62, type: 3}
   incorrectClip: {fileID: 8300000, guid: 15c2f96a00068b0469720d72634f0a85, type: 3}
   snapClip: {fileID: 8300000, guid: 8069a62e7b897a14393029d89482ec73, type: 3}
+  breakClip: {fileID: 8300000, guid: f155031a589b30a4b948c6ee6eb17bfc, type: 3}
+  toppleTime: 0.7
   OrbInPedestal: {fileID: 0}
   OrbInPedestalisCorrect: 0
 --- !u!1 &3226923576589091976
