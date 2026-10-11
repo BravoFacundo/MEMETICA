@@ -1,12 +1,14 @@
 // Cursor por software: una Image que sigue al mouse y reemplaza al cursor de Windows.
 // Va en el Canvas "RetroCursor". El punto de clic de cada cursor es el PIVOT de su sprite
-// (flecha → Top Left, mano (Grab) → Center). Para cambiar de cursor sobre un elemento, usar CursorHover.
+// (flecha y mano que señala → donde apunta la punta, mano que agarra → Center). El cambio de cursor al pasar por un ícono lo hace DesktopIcon.
 
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 
-public enum CursorState { Default, Grab }
+// Point: algo clickeable (íconos) | Grab: algo que se agarra (orbes) | Busy: cargando (lo pone el UIManager)
+// NotAllowed: algo interactuable pero bloqueado (no hace nada)
+public enum CursorState { Default, Grab, Busy, Point, NotAllowed }
 
 [RequireComponent(typeof(Canvas))]
 public class RetroCursor : MonoBehaviour
@@ -24,6 +26,7 @@ public class RetroCursor : MonoBehaviour
     public List<CursorStyle> styles = new List<CursorStyle>();
 
     private RectTransform rect;
+    private bool busy;   // mientras carga, nada más cambia el cursor
 
     void Awake()
     {
@@ -43,8 +46,18 @@ public class RetroCursor : MonoBehaviour
         rect.position = Input.mousePosition;   // en un Canvas Overlay, pantalla = posición
     }
 
+    // Cursor de carga: lo pone el UIManager y bloquea cualquier otro cambio hasta que se saque
+    public void SetBusy(bool value)
+    {
+        busy = false;
+        SetState(value ? CursorState.Busy : CursorState.Default);
+        busy = value;
+    }
+
     public void SetState(CursorState state)
     {
+        if (busy) return;
+
         foreach (CursorStyle s in styles)
         {
             if (s.state != state || s.sprite == null) continue;
@@ -53,5 +66,6 @@ public class RetroCursor : MonoBehaviour
             rect.pivot = new Vector2(s.sprite.pivot.x / s.sprite.rect.width, s.sprite.pivot.y / s.sprite.rect.height);
             return;
         }
+        Debug.LogWarning("[RetroCursor] No hay sprite asignado para el estado " + state + " en Styles.", this);
     }
 }
