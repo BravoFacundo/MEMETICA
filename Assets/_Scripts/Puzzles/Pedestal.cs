@@ -26,6 +26,12 @@ public class Pedestal : MonoBehaviour
     public string[] ControlledBridges;
     public string[] ControlledElevators;
 
+    [Header("Sounds")] // Se asignan en el prefab Pedestal (antes se cargaban desde Resources)
+    public AudioClip chargeClip;
+    public AudioClip correctClip;
+    public AudioClip incorrectClip;
+    public AudioClip snapClip;
+
     [Header("Status Variables")]
     public GameObject OrbInPedestal;
     public bool OrbInPedestalisCorrect = false;

@@ -68,10 +68,14 @@ public class PedestalTrigger : MonoBehaviour
         pedParticles = Pedestal.GetComponent<Pedestal>().pedParticles;
         pedAudio = Pedestal.GetComponent<Pedestal>().pedAudio;
         //Audio Sources
-        Charge = Resources.Load<AudioClip>("Sounds/PedestalCharge");
-        Correct     = Resources.Load<AudioClip>("Sounds/PedestalWin");
-        Incorrect    = Resources.Load<AudioClip>("Sounds/PedestalLoss");
-        Snap = Resources.Load<AudioClip>("Sounds/PedestalSnap");
+        // Sonidos por referencia (asignados en el componente Pedestal del prefab)
+        Pedestal ped = Pedestal.GetComponent<Pedestal>();
+        Charge    = ped.chargeClip;
+        Correct   = ped.correctClip;
+        Incorrect = ped.incorrectClip;
+        Snap      = ped.snapClip;
+        if (Charge == null || Correct == null || Incorrect == null || Snap == null)
+            Debug.LogWarning("Pedestal sin sonidos asignados: " + Pedestal.name, Pedestal);
     }
 
     public void Update()
