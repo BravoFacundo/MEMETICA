@@ -60,8 +60,13 @@ public class Elevator : MonoBehaviour
             GameObject.Find("ElevatorLocks").SetActive(false);
             GameObject.Find("Cage").GetComponent<Collider>().enabled = true;
 
-            Transform respawnPos = GameObject.Find("Respawn Pivot").GetComponent<Transform>();
-            respawnPos = GameObject.Find("PivotArea1").GetComponent<Transform>();
+            // FIX: antes guardaba PivotArea1 en una variable local que no usaba nadie, y el respawn seguía en el tutorial.
+            // Ahora se lo pasa al Player y al orbe que viajó en el ascensor.
+            Transform pivotArea1 = GameObject.Find("PivotArea1").transform;
+            GameObject.Find("Player").GetComponent<PlayerRespawn>().SetRespawn(pivotArea1);
+            GameObject orbeAscensor = GameObject.Find("1Ba");
+            if (orbeAscensor != null && orbeAscensor.TryGetComponent(out PlayerRespawn orbRespawn))
+                orbRespawn.SetRespawn(pivotArea1);
             GameObject.Find("ElevatorZ").transform.SetParent(GameObject.Find("Area1").transform);
 
             oneLock = true;

@@ -9,63 +9,37 @@ using UnityEngine;
 public class PlayerRespawn : MonoBehaviour
 {
     private Transform respawnPosition;
+    private Transform lastHit;
+    private GameObject lastIsland;
 
     private void Start()
     {
-        respawnPosition = GameObject.Find("Respawn Pivot").GetComponent<Transform>();
+        // FIX: el juego arranca en el tutorial, pero "Respawn Pivot" está arriba del Área 1.
+        // AreaTuto no tiene el tag "Isla", así que el raycast nunca lo registraba y caerse en el tutorial te mandaba al Área 1.
+        respawnPosition = GameObject.Find("PivotAreaTuto").transform;
     }
 
     private void Update()
     {
-        if (Physics.Raycast(gameObject.transform.position, transform.TransformDirection(Vector3.down), out RaycastHit hit, 5f)
-            && FindParentWithTag(hit.transform.gameObject, "Isla") != null)
-        {
-            switch (FindParentWithTag(hit.transform.gameObject, "Isla").transform.name)
-            {
-                case "AreaTuto":
-                    respawnPosition = GameObject.Find("PivotAreaTuto").GetComponent<Transform>();
-                    break;
+        if (!Physics.Raycast(transform.position, transform.TransformDirection(Vector3.down), out RaycastHit hit, 5f)) return;
+        if (hit.transform == lastHit) return;              // sigue parado sobre lo mismo: nada que hacer
+        lastHit = hit.transform;
 
-                case "Area1":
-                    respawnPosition = GameObject.Find("PivotArea1").GetComponent<Transform>();
-                    break;
-                case "Area2":
-                    respawnPosition = GameObject.Find("PivotArea2").GetComponent<Transform>();
-                    break;
-                case "Area3":
-                    respawnPosition = GameObject.Find("PivotArea3").GetComponent<Transform>();
-                    break;
-                case "Area4":
-                    respawnPosition = GameObject.Find("PivotArea4").GetComponent<Transform>();
-                    break;
-                case "Area5":
-                    respawnPosition = GameObject.Find("PivotArea5").GetComponent<Transform>();
-                    break;
-                case "Area6":
-                    respawnPosition = GameObject.Find("PivotArea6").GetComponent<Transform>();
-                    break;
-                case "Area7":
-                    respawnPosition = GameObject.Find("PivotArea7").GetComponent<Transform>();
-                    break;
+        GameObject isla = FindParentWithTag(hit.transform.gameObject, "Isla");
+        if (isla == null || isla == lastIsland) return;    // un puente, o la misma isla
+        lastIsland = isla;
 
-                case "AreaA":
-                    respawnPosition = GameObject.Find("PivotAreaA").GetComponent<Transform>();
-                    break;
-                case "AreaB":
-                    respawnPosition = GameObject.Find("PivotAreaB").GetComponent<Transform>();
-                    break;
-                case "AreaC":
-                    respawnPosition = GameObject.Find("PivotAreaC").GetComponent<Transform>();
-                    break;
-                case "AreaD":
-                    respawnPosition = GameObject.Find("PivotAreaD").GetComponent<Transform>();
-                    break;
-
-                case null:
-                    break;
-            }
-        }
+        // Cada isla tiene su pivote llamado "Pivot" + nombre (AreaTuto -> PivotAreaTuto, Area3 -> PivotArea3...)
+        GameObject pivot = GameObject.Find("Pivot" + isla.name);
+        if (pivot != null) respawnPosition = pivot.transform;
     }
+    // Fija el respawn a mano. Lo usa el ascensor: el jugador llega al Área 1 sin haberla pisado.
+    public void SetRespawn(Transform pivot)
+    {
+        respawnPosition = pivot;
+        lastHit = null;   // obliga a volver a revisar el piso en el próximo frame
+    }
+
     public void OnTriggerExit(Collider other)
     {
         // FIX: solo reaparecer si salió de la jaula por ABAJO (se cayó al vacío).
