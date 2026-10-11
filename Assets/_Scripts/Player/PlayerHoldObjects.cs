@@ -71,8 +71,9 @@ public class PlayerHoldObjects : MonoBehaviour
                 }
                 else
                 {
-                    string name; name = heldObject.transform.name; 
-                    GameObject.Find(name).GetComponent<OrbMemes>().StartCoroutine("NotHolding"); //no funciono para detener el reverb
+                    // FIX: usar el objeto agarrado directamente (GameObject.Find por nombre podia devolver otro objeto)
+                    OrbMemes memes = heldObject.GetComponent<OrbMemes>();
+                    if (memes != null) memes.StartCoroutine("NotHolding"); //no funciono para detener el reverb
 
                     DropObject();
                 }
@@ -110,9 +111,11 @@ public class PlayerHoldObjects : MonoBehaviour
             UltimoAgarrado = objectRb.gameObject;
             FueAgarrada = true;
 
-            string name; name = heldObject.transform.name;
-            GameObject.Find(name).GetComponent<OrbMemes>().isHolded = true;
-            GameObject.Find(name).GetComponent<OrbPosition>().isHolded = true;
+            // FIX: componentes del objeto agarrado, con chequeo por si el orbe no los tiene (ej: orbe del tutorial)
+            OrbMemes memes = heldObject.GetComponent<OrbMemes>();
+            if (memes != null) memes.isHolded = true;
+            OrbPosition orbPos = heldObject.GetComponent<OrbPosition>();
+            if (orbPos != null) orbPos.isHolded = true;
         }
     }
     public void DropObject()
@@ -123,10 +126,15 @@ public class PlayerHoldObjects : MonoBehaviour
         heldRig.freezeRotation = false;
         heldRig.drag = 1;
 
-        string name; name = heldObject.transform.name;
-        GameObject.Find(name).GetComponent<OrbMemes>().isHolded = false;
-        GameObject.Find(name).GetComponent<OrbPosition>().isHolded = false;
-        GameObject.Find(name).GetComponent<OrbPosition>().isGroundedLock = false;
+        // FIX: componentes del objeto agarrado, con chequeo por si el orbe no los tiene
+        OrbMemes memes = heldObject.GetComponent<OrbMemes>();
+        if (memes != null) memes.isHolded = false;
+        OrbPosition orbPos = heldObject.GetComponent<OrbPosition>();
+        if (orbPos != null)
+        {
+            orbPos.isHolded = false;
+            orbPos.isGroundedLock = false;
+        }
 
         heldObject.transform.parent = null;
         heldObject = null;
@@ -145,9 +153,13 @@ public class PlayerHoldObjects : MonoBehaviour
 
         if (heldObject != null && heldObject == orbe) //si tenes un objeto agarrado y si es el mismo que entro al trigger
         {
-            string name; name = heldObject.transform.name;
-            GameObject.Find(name).GetComponent<OrbMemes>().isHolded = false;
-            GameObject.Find(name).GetComponent<OrbMemes>().StartCoroutine("NotHolding");
+            // FIX: componentes del objeto agarrado, con chequeo
+            OrbMemes memes = heldObject.GetComponent<OrbMemes>();
+            if (memes != null)
+            {
+                memes.isHolded = false;
+                memes.StartCoroutine("NotHolding");
+            }
 
             if (heldObject.transform.parent != null) heldObject.transform.parent = null; //si tiene padre entonces lo sacas del padre
             heldObject = null; //ya no hay mas objeto agarrado
