@@ -25777,9 +25777,10 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 251033095}
+  - component: {fileID: 251033096}
   m_Layer: 0
-  m_Name: "IslaOto\xF1o"
-  m_TagString: Isla
+  m_Name: IslaVacia_01
+  m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -25802,6 +25803,22 @@ Transform:
   - {fileID: 1895401933}
   m_Father: {fileID: 1592269844}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &251033096
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 251033094}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ede337a3db383c24f82a62544d2e3bf9, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  amplitude: 1.25
+  period: 25
+  tiltDegrees: 2.2
+  tiltPeriod: 22
 --- !u!1001 &254286708
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -26399,19 +26416,22 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   isHolded: 0
   isCrossing: 0
-  distance: 0
   Player: {fileID: 0}
   changeLock: 0
-  Audios: []
   materials: []
   cantidadMat: 0
   matCount: 0
-  min: 0
-  max: 0
-  AudioEmiter: {fileID: 0}
-  Au1: {fileID: 0}
-  Au2: {fileID: 0}
-  Au3: {fileID: 0}
+  warnClip: {fileID: 8300000, guid: 1c7ed042ff75e17419921e1d0d6130e3, type: 3}
+  changeClip: {fileID: 8300000, guid: db64e738f22ef4945834da5b19582892, type: 3}
+  returnClip: {fileID: 8300000, guid: 995437a5722e2e147860694c5eb19ad1, type: 3}
+  sweepTickClip: {fileID: 8300000, guid: 8f16159e82a5f4645a1686d7878244cf, type: 3}
+  firstChangeAfter: 3
+  changeInterval: {x: 4, y: 8}
+  variantDuration: {x: 1.5, y: 2.5}
+  warnLead: 0.6
+  graceAfterEvent: 1
+  flashIntensity: 2
+  sweepPortion: 0.75
 --- !u!54 &270262298
 Rigidbody:
   m_ObjectHideFlags: 0
@@ -27204,19 +27224,22 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   isHolded: 0
   isCrossing: 0
-  distance: 0
   Player: {fileID: 0}
   changeLock: 0
-  Audios: []
   materials: []
   cantidadMat: 0
   matCount: 0
-  min: 0
-  max: 0
-  AudioEmiter: {fileID: 0}
-  Au1: {fileID: 0}
-  Au2: {fileID: 0}
-  Au3: {fileID: 0}
+  warnClip: {fileID: 8300000, guid: 1c7ed042ff75e17419921e1d0d6130e3, type: 3}
+  changeClip: {fileID: 8300000, guid: db64e738f22ef4945834da5b19582892, type: 3}
+  returnClip: {fileID: 8300000, guid: 995437a5722e2e147860694c5eb19ad1, type: 3}
+  sweepTickClip: {fileID: 8300000, guid: 8f16159e82a5f4645a1686d7878244cf, type: 3}
+  firstChangeAfter: 3
+  changeInterval: {x: 4, y: 8}
+  variantDuration: {x: 1.5, y: 2.5}
+  warnLead: 0.6
+  graceAfterEvent: 1
+  flashIntensity: 2
+  sweepPortion: 0.75
 --- !u!54 &306690107
 Rigidbody:
   m_ObjectHideFlags: 0
@@ -86947,9 +86970,10 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 907290214}
+  - component: {fileID: 907290215}
   m_Layer: 0
-  m_Name: "IslaOto\xF1o (1)"
-  m_TagString: Isla
+  m_Name: IslaVacia_02
+  m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -86972,6 +86996,22 @@ Transform:
   - {fileID: 400552259}
   m_Father: {fileID: 1592269844}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &907290215
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 907290213}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ede337a3db383c24f82a62544d2e3bf9, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  amplitude: 1.25
+  period: 25
+  tiltDegrees: 2.2
+  tiltPeriod: 22
 --- !u!1 &907837357
 GameObject:
   m_ObjectHideFlags: 0
@@ -86981,6 +87021,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 907837358}
+  - component: {fileID: 907837359}
   m_Layer: 0
   m_Name: IslaObelisco
   m_TagString: Untagged
@@ -87020,6 +87061,22 @@ Transform:
   - {fileID: 1264883386}
   m_Father: {fileID: 1592269844}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &907837359
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 907837357}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ede337a3db383c24f82a62544d2e3bf9, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  amplitude: 1.25
+  period: 25
+  tiltDegrees: 2.2
+  tiltPeriod: 22
 --- !u!1 &907909345
 GameObject:
   m_ObjectHideFlags: 0
@@ -134597,8 +134654,8 @@ Transform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
-  - {fileID: 1725674344}
   - {fileID: 907837358}
+  - {fileID: 1725674344}
   - {fileID: 251033095}
   - {fileID: 907290214}
   - {fileID: 970318745}
@@ -141839,6 +141896,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 1725674344}
+  - component: {fileID: 1725674345}
   m_Layer: 0
   m_Name: IslaFlorealis
   m_TagString: Untagged
@@ -141865,6 +141923,22 @@ Transform:
   - {fileID: 1413589955}
   m_Father: {fileID: 1592269844}
   m_LocalEulerAnglesHint: {x: 0, y: 69.641, z: 0}
+--- !u!114 &1725674345
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1725674343}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ede337a3db383c24f82a62544d2e3bf9, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  amplitude: 1.25
+  period: 25
+  tiltDegrees: 2.2
+  tiltPeriod: 22
 --- !u!43 &1730549613
 Mesh:
   m_ObjectHideFlags: 0
@@ -165374,19 +165448,22 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   isHolded: 0
   isCrossing: 0
-  distance: 0
   Player: {fileID: 0}
   changeLock: 0
-  Audios: []
   materials: []
   cantidadMat: 0
   matCount: 0
-  min: 0
-  max: 0
-  AudioEmiter: {fileID: 0}
-  Au1: {fileID: 0}
-  Au2: {fileID: 0}
-  Au3: {fileID: 0}
+  warnClip: {fileID: 8300000, guid: 1c7ed042ff75e17419921e1d0d6130e3, type: 3}
+  changeClip: {fileID: 8300000, guid: db64e738f22ef4945834da5b19582892, type: 3}
+  returnClip: {fileID: 8300000, guid: 995437a5722e2e147860694c5eb19ad1, type: 3}
+  sweepTickClip: {fileID: 8300000, guid: 8f16159e82a5f4645a1686d7878244cf, type: 3}
+  firstChangeAfter: 3
+  changeInterval: {x: 4, y: 8}
+  variantDuration: {x: 1.5, y: 2.5}
+  warnLead: 0.6
+  graceAfterEvent: 1
+  flashIntensity: 2
+  sweepPortion: 0.75
 --- !u!54 &1893306332
 Rigidbody:
   m_ObjectHideFlags: 0
@@ -171911,19 +171988,22 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   isHolded: 0
   isCrossing: 0
-  distance: 0
   Player: {fileID: 0}
   changeLock: 0
-  Audios: []
   materials: []
   cantidadMat: 0
   matCount: 0
-  min: 0
-  max: 0
-  AudioEmiter: {fileID: 0}
-  Au1: {fileID: 0}
-  Au2: {fileID: 0}
-  Au3: {fileID: 0}
+  warnClip: {fileID: 8300000, guid: 1c7ed042ff75e17419921e1d0d6130e3, type: 3}
+  changeClip: {fileID: 8300000, guid: db64e738f22ef4945834da5b19582892, type: 3}
+  returnClip: {fileID: 8300000, guid: 995437a5722e2e147860694c5eb19ad1, type: 3}
+  sweepTickClip: {fileID: 8300000, guid: 8f16159e82a5f4645a1686d7878244cf, type: 3}
+  firstChangeAfter: 3
+  changeInterval: {x: 4, y: 8}
+  variantDuration: {x: 1.5, y: 2.5}
+  warnLead: 0.6
+  graceAfterEvent: 1
+  flashIntensity: 2
+  sweepPortion: 0.75
 --- !u!114 &2121772793
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -185120,6 +185200,8 @@ MonoBehaviour:
   correctClip: {fileID: 8300000, guid: 708aa9b78c6214e49a245c4f88139d62, type: 3}
   incorrectClip: {fileID: 8300000, guid: 15c2f96a00068b0469720d72634f0a85, type: 3}
   snapClip: {fileID: 8300000, guid: 8069a62e7b897a14393029d89482ec73, type: 3}
+  breakClip: {fileID: 0}
+  toppleTime: 0.7
   OrbInPedestal: {fileID: 0}
   OrbInPedestalisCorrect: 0
 --- !u!33 &6551726144960023446
