@@ -81,16 +81,30 @@ public static class HierarchyValidator
         foreach (var tag in RequiredTags)
             if (!all.Any(g => g.CompareTag(tag))) Error($"Ningún objeto tiene el tag '{tag}'.");
 
-        // 7. Grupos (objetos vacíos con hijos en la raíz): deben estar en 0,0,0 / sin rotación / escala 1
-        foreach (var root in SceneManager.GetActiveScene().GetRootGameObjects())
+        // 7. Grupos de organización: objetos vacíos, sin tag, que contienen islas, puentes o ascensores.
+        //    Son los únicos donde la posición del padre importa (esos objetos se mueven con posiciones de mundo).
+        //    Las islas en sí (AreaTuto, Area1...) tienen tag "Isla" y quedan excluidas: NO se resetean.
+        foreach (var go in all)
         {
-            bool isEmptyGroup = root.transform.childCount > 0 && root.GetComponents<Component>().Length == 1;
-            if (!isEmptyGroup) continue;
-            var t = root.transform;
+            bool isEmpty = go.GetComponents<Component>().Length == 1 && go.transform.childCount > 0;
+            bool untagged = go.CompareTag("Untagged");
+            bool containsMovers = go.GetComponentsInChildren<Island>(true).Length > 0
+                               || go.GetComponentsInChildren<Bridge>(true).Length > 0
+                               || go.GetComponentsInChildren<Elevator>(true).Length > 0;
+            bool isGroup = isEmpty && untagged && containsMovers && !RequiredNames.Contains(go.name);
+            if (!isGroup) continue;
+            var t = go.transform;
             if (t.localPosition != Vector3.zero || t.localRotation != Quaternion.identity || t.localScale != Vector3.one)
-                Warn($"El grupo '{root.name}' no está en posición 0 / rotación 0 / escala 1. Sus hijos pueden quedar desplazados (Reset en el Transform).", root);
-            if (!root.activeSelf)
-                Error($"El grupo '{root.name}' está desactivado: todo lo de adentro deja de existir para GameObject.Find.", root);
+                Warn($"El grupo '{go.name}' no está en posición 0 / rotación 0 / escala 1. Sus hijos pueden quedar desplazados (Reset en el Transform).", go);
+            if (!go.activeSelf)
+                Error($"El grupo '{go.name}' está desactivado: todo lo de adentro deja de existir para GameObject.Find.", go);
+        }
+
+        // 8. Scripts faltantes ("The referenced script on this Behaviour is missing")
+        foreach (var go in all)
+        {
+            int missing = GameObjectUtility.GetMonoBehavioursWithMissingScriptCount(go);
+            if (missing > 0) Warn($"'{go.name}' tiene {missing} script(s) faltante(s) (Missing Script).", go);
         }
 
         string result = errors == 0 && warnings == 0

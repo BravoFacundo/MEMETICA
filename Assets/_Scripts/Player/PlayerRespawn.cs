@@ -68,7 +68,10 @@ public class PlayerRespawn : MonoBehaviour
     }
     public void OnTriggerExit(Collider other)
     {
-        if (other.CompareTag("Respawn"))
+        // FIX: solo reaparecer si salió de la jaula por ABAJO (se cayó al vacío).
+        // Los orbes de las islas 3 y 4 empiezan DENTRO de la jaula y salen por ARRIBA cuando su isla sube:
+        // antes eso los teletransportaba al pivote de respawn y quedaban flotando sobre la isla.
+        if (other.CompareTag("Respawn") && transform.position.y < other.bounds.center.y)
             gameObject.transform.position = respawnPosition.transform.position;
     }
 
