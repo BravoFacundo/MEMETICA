@@ -6,7 +6,7 @@ public class Bridge : MonoBehaviour
 {
     [Header ("References")]
     private GameObject estePuente;
-    private IslandsManager islandManager;
+    private LevelManager level;
     
     [Header("Speed Variables")]
     private float upSpeed; 
@@ -16,27 +16,24 @@ public class Bridge : MonoBehaviour
     public bool exclusion; 
 
     private Transform bridgePos;
-    private Vector3 masterpivot;
     private Vector3 upperPivot;
     public Vector3 lowerpivot;
-    private Vector3 fallLimit;
     private Vector3 offsetVector;
     public float offset;
     
 
     void Start()
     {
-        islandManager = GameObject.Find("Scene Manager").GetComponent<IslandsManager>();
+        level = LevelManager.Instance;
         estePuente = gameObject;
-        upSpeed = islandManager.speed;
-        fallSpeed = islandManager.fallSpeed;
+        upSpeed = level.speed;
+        fallSpeed = level.fallSpeed;
 
         bridgePos = estePuente.transform;
-        if (!exclusion) masterpivot = GameObject.Find("MasterPivot").transform.position;
-        else masterpivot = GameObject.Find("PivotPuenteZ").transform.position;
-        upperPivot = new Vector3(bridgePos.position.x, masterpivot.y, bridgePos.position.z);
-        fallLimit = GameObject.Find("LimiteCaida").transform.position;
-        lowerpivot = new Vector3(bridgePos.position.x, fallLimit.y, bridgePos.position.z);
+        // Alturas desde el LevelManager (antes: MasterPivot y LimiteCaida). El puente del tutorial (exclusion) sube hasta PivotPuenteZ.
+        float topY = exclusion ? GameObject.Find("PivotPuenteZ").transform.position.y : level.topY;
+        upperPivot = new Vector3(bridgePos.position.x, topY, bridgePos.position.z);
+        lowerpivot = new Vector3(bridgePos.position.x, level.bottomY, bridgePos.position.z);
         offsetVector = new Vector3(0, offset, 0);
     }
 

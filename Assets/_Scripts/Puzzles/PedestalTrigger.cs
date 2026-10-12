@@ -8,7 +8,7 @@ public class PedestalTrigger : MonoBehaviour
     private GameObject[] Pedestals;
     private GameObject pedPivot;
 
-    private IslandsManager IslandManager;
+    private LevelManager level;
     private PlayerHoldObjects HoldObjects;
 
     public GameObject OrbInPedestal;
@@ -37,7 +37,7 @@ public class PedestalTrigger : MonoBehaviour
     {
         Pedestal = gameObject.transform.parent.gameObject;
         Pedestals = GameObject.FindGameObjectsWithTag("Pedestal");
-        IslandManager = GameObject.Find("Scene Manager").GetComponent<IslandsManager>();
+        level = LevelManager.Instance;
         HoldObjects = GameObject.Find("Player").GetComponentInChildren<PlayerHoldObjects>();
         
 
@@ -144,7 +144,7 @@ public class PedestalTrigger : MonoBehaviour
                             LinkedPedestals[i].GetComponentInChildren<PedestalTrigger>().pedAudio.Play();
                         }
                     }
-                    IslandManager.SubirIsla("0");
+                    level.SubirIsla("0");
                 }                
             }
         }
@@ -184,13 +184,13 @@ public class PedestalTrigger : MonoBehaviour
                 if (target.name.StartsWith(keyID))
                 {
                     for (int i = 0; i < ControlledBridges.Length; i++)
-                        IslandManager.BajarPuente(ControlledBridges[i]); //Debug.Log("se baja: Puente " + ControlledBridges[i]);
+                        level.BajarPuente(ControlledBridges[i]); //Debug.Log("se baja: Puente " + ControlledBridges[i]);
                 }
             }
             else
             {
                 for (int i = 0; i < ControlledBridges.Length; i++)
-                    IslandManager.BajarPuente(ControlledBridges[i]); //Debug.Log("se baja: Puente " + ControlledBridges[i]);           
+                    level.BajarPuente(ControlledBridges[i]); //Debug.Log("se baja: Puente " + ControlledBridges[i]);           
             } 
         }
     }
@@ -207,10 +207,10 @@ public class PedestalTrigger : MonoBehaviour
         }
 
         for (int i = 0; i < ControlledIslands.Length; i++)
-            IslandManager.SubirIsla(ControlledIslands[i]); //Debug.Log("se levanta: Area " + ControlledIslands[i]);
+            level.SubirIsla(ControlledIslands[i]); //Debug.Log("se levanta: Area " + ControlledIslands[i]);
 
         for (int i = 0; i < ControlledBridges.Length; i++)
-            IslandManager.SubirPuente(ControlledBridges[i]); //Debug.Log("se levanta: Puente " + ControlledBridges[i]);
+            level.SubirPuente(ControlledBridges[i]); //Debug.Log("se levanta: Puente " + ControlledBridges[i]);
     }
     public void IncorrectKey()
     {
@@ -220,7 +220,7 @@ public class PedestalTrigger : MonoBehaviour
         }
 
         for (int i = 0; i < ControlledBridges.Length; i++)
-            IslandManager.BajarPuente(ControlledBridges[i]); //Debug.Log("se baja: Puente " + ControlledBridges[i]);
+            level.BajarPuente(ControlledBridges[i]); //Debug.Log("se baja: Puente " + ControlledBridges[i]);
     }
 
     public void OrbSnap(GameObject orbe) 

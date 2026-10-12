@@ -2,14 +2,29 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class IslandsManager : MonoBehaviour
+// Todo lo general del nivel. Va en Managers > LevelManager.
+// - Alturas y caídas (antes: objetos MasterPivot, LimiteCaida y las Cage)
+// - Subir y bajar islas, puentes y ascensores (antes: IslandsManager en "Scene Manager")
+// Los demás scripts lo usan con LevelManager.Instance.
+public class LevelManager : MonoBehaviour
 {
+    public static LevelManager Instance { get; private set; }
+
     public Collider[] cols;
 
-    [Header("VARIABLES")]
+    [Header("ALTURAS")]
+    [Tooltip("Hasta dónde suben islas, puentes y ascensores (antes: MasterPivot)")]
+    public float topY = 0f;
+    [Tooltip("Hasta dónde bajan al caer (antes: LimiteCaida)")]
+    public float bottomY = -30f;
+
+    [Header("CAÍDAS")]
+    [Tooltip("Metros por debajo del último piso pisado para considerar que cayó al vacío (antes: Cage)")]
+    public float fallDistance = 20f;
+
+    [Header("VELOCIDADES")]
     public float speed = 5;
     public float fallSpeed = 6;
-    private Transform LimiteCaida;
 
     [Header("ISLAS PRIMARIAS")]
     public Transform Isla1; 
@@ -52,9 +67,13 @@ public class IslandsManager : MonoBehaviour
     public GameObject[] islands;
     public GameObject[] bridges;
 
+    void Awake()
+    {
+        Instance = this;   // antes de que las islas, puentes y pedestales lo usen en su Start
+    }
+
     void Start()
     {
-        LimiteCaida = GameObject.Find("LimiteCaida").transform; //Transform del limite de caida de los puentes 
         
         IslaTuto = GameObject.Find("AreaTuto").transform;
         Isla1 = GameObject.Find("Area1").transform;    
@@ -162,7 +181,6 @@ public class IslandsManager : MonoBehaviour
                     {
                         cols[i].enabled = true;
                     }
-                    GameObject.Find("Cage").GetComponent<Collider>().enabled = false;
                     GameObject.Find("PedestalElevador").GetComponentInChildren<SphereCollider>().enabled = false; //Desactiva el pedestal (apagando el collider trigger)
                     elevatorLock = true;
                 }          

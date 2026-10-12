@@ -4,7 +4,7 @@ using UnityEngine;
 
 public class Elevator : MonoBehaviour
 {
-    private IslandsManager islandManager;
+    private LevelManager level;
     private GameObject esteElevador;
     private float upSpeed = 20f; 
     private float fallSpeed; 
@@ -12,24 +12,21 @@ public class Elevator : MonoBehaviour
     public bool oneLock = false; 
 
     private Transform elevadorPos;
-    private Vector3 masterpivot;
     private Vector3 upperpivot;
-    private Vector3 limiteCaida;
     public  Vector3 lowerpivot;
     private Vector3 offsetVector;
     public float offset;
 
     void Start()
     {
-        islandManager = GameObject.Find("Scene Manager").GetComponent<IslandsManager>();
+        level = LevelManager.Instance;
         esteElevador = gameObject;
-        fallSpeed = islandManager.fallSpeed;
+        fallSpeed = level.fallSpeed;
 
         elevadorPos = esteElevador.transform;
-        masterpivot = GameObject.Find("MasterPivot").transform.position;
-        upperpivot = new Vector3(elevadorPos.position.x, masterpivot.y, elevadorPos.position.z);
-        limiteCaida = GameObject.Find("LimiteCaida").transform.position;
-        lowerpivot = new Vector3(elevadorPos.position.x, limiteCaida.y, elevadorPos.position.z);
+        // Alturas desde el LevelManager (antes: objetos MasterPivot y LimiteCaida)
+        upperpivot = new Vector3(elevadorPos.position.x, level.topY, elevadorPos.position.z);
+        lowerpivot = new Vector3(elevadorPos.position.x, level.bottomY, elevadorPos.position.z);
         offsetVector = new Vector3(0, offset, 0);
     }
     
@@ -58,7 +55,6 @@ public class Elevator : MonoBehaviour
             GameObject.Find("Player").transform.SetParent(null);
             Camera.main.GetComponent<PlayerHoldObjects>().canHold = true;
             GameObject.Find("ElevatorLocks").SetActive(false);
-            GameObject.Find("Cage").GetComponent<Collider>().enabled = true;
 
             // FIX: antes guardaba PivotArea1 en una variable local que no usaba nadie, y el respawn seguía en el tutorial.
             // Ahora se lo pasa al Player y al orbe que viajó en el ascensor.

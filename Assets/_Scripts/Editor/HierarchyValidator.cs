@@ -17,11 +17,11 @@ public static class HierarchyValidator
         // Jugador y UI
         "Player", "Main Camera", "GrabPivot",
         // Sistemas y pivotes
-        "Scene Manager", "Respawn Pivot", "LimiteCaida", "MasterPivot", "PivotPuenteZ",
+        "PivotPuenteZ",
         // Nivel
         "AreaTuto", "Area1", "Area2", "Area3", "Area4", "Area5", "Area6", "AreaA", "AreaB", "AreaC",
         "Puente1", "Puente2", "Puente3", "Puente4", "Puente5", "Puente6", "PuenteA", "PuenteC", "PuenteZ",
-        "ElevatorZ", "ElevatorX", "ElevatorLocks", "PedestalElevador", "Cage",
+        "ElevatorZ", "ElevatorX", "ElevatorLocks", "PedestalElevador",
         "PivotAreaTuto", "PivotArea1", "PivotArea2", "PivotArea3", "PivotArea4", "PivotArea5", "PivotArea6",
         "PivotAreaA", "PivotAreaB", "PivotAreaC",
         // Orbes (los pedestales leen su nombre)

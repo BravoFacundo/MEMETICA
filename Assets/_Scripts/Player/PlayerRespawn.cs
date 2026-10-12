@@ -11,17 +11,27 @@ public class PlayerRespawn : MonoBehaviour
     private Transform respawnPosition;
     private Transform lastHit;
     private GameObject lastIsland;
+    private float lastGroundY;   // altura del último piso pisado: caer muy por debajo = cayó al vacío
 
     private void Start()
     {
         // FIX: el juego arranca en el tutorial, pero "Respawn Pivot" está arriba del Área 1.
         // AreaTuto no tiene el tag "Isla", así que el raycast nunca lo registraba y caerse en el tutorial te mandaba al Área 1.
         respawnPosition = GameObject.Find("PivotAreaTuto").transform;
+        lastGroundY = transform.position.y;
     }
 
     private void Update()
     {
+        // ¿Cayó al vacío? (antes lo detectaba la Cage; ahora es la distancia al último piso)
+        if (LevelManager.Instance != null && transform.position.y < lastGroundY - LevelManager.Instance.fallDistance)
+        {
+            Respawn();
+            return;
+        }
+
         if (!Physics.Raycast(transform.position, transform.TransformDirection(Vector3.down), out RaycastHit hit, 5f)) return;
+        lastGroundY = hit.point.y;                          // el piso de abajo (sigue a islas y ascensores que se mueven)
         if (hit.transform == lastHit) return;              // sigue parado sobre lo mismo: nada que hacer
         lastHit = hit.transform;
 
@@ -40,13 +50,17 @@ public class PlayerRespawn : MonoBehaviour
         lastHit = null;   // obliga a volver a revisar el piso en el próximo frame
     }
 
-    public void OnTriggerExit(Collider other)
+    void Respawn()
     {
-        // FIX: solo reaparecer si salió de la jaula por ABAJO (se cayó al vacío).
-        // Los orbes de las islas 3 y 4 empiezan DENTRO de la jaula y salen por ARRIBA cuando su isla sube:
-        // antes eso los teletransportaba al pivote de respawn y quedaban flotando sobre la isla.
-        if (other.CompareTag("Respawn") && transform.position.y < other.bounds.center.y)
-            gameObject.transform.position = respawnPosition.transform.position;
+        // El CharacterController del jugador ignora el cambio de posición si está prendido
+        CharacterController cc = GetComponent<CharacterController>();
+        if (cc != null) cc.enabled = false;
+        transform.position = respawnPosition.position;
+        if (cc != null) cc.enabled = true;
+
+        // Los orbes reaparecen quietos
+        Rigidbody rb = GetComponent<Rigidbody>();
+        if (rb != null) { rb.velocity = Vector3.zero; rb.angularVelocity = Vector3.zero; }
     }
 
     //In the project, the objects tagged "island" may be too far up the hierarchy from the object the raycast hits.

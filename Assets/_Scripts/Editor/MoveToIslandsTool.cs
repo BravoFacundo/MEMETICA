@@ -3,7 +3,7 @@
 // - PivotAreaX  → hijo de AreaX
 // - AreaXAudio  → hijo de AreaX
 // Las islas que suben (tienen el script Island) arrancan abajo: la herramienta calcula su posición
-// final (a la altura de MasterPivot) para que el pivote y el sonido queden bien cuando la isla suba.
+// final (a la altura Top Y del LevelManager) para que el pivote y el sonido queden bien cuando la isla suba.
 // Lo que no tiene isla clara (por ejemplo PivotArea1-AreaA) no se toca y se avisa en la consola.
 // Se deshace todo junto con Ctrl+Z.
 
@@ -24,8 +24,8 @@ public static class MoveToIslandsTool
         List<Transform> all = SceneManager.GetActiveScene().GetRootGameObjects()
             .SelectMany(r => r.GetComponentsInChildren<Transform>(true)).ToList();
 
-        Transform master = all.FirstOrDefault(t => t.name == "MasterPivot");
-        if (master == null) { Debug.LogError("[Islas] No encuentro MasterPivot."); return; }
+        LevelManager level = Object.FindObjectOfType<LevelManager>();
+        if (level == null) { Debug.LogError("[Islas] No encuentro el LevelManager en la escena."); return; }
 
         // Islas = objetos que tienen un pivote llamado "Pivot" + su nombre
         HashSet<string> names = new HashSet<string>(all.Select(t => t.name));
@@ -41,7 +41,7 @@ public static class MoveToIslandsTool
         {
             Transform island = kv.Value;
             Vector3 finalPos = island.GetComponent<Island>() != null
-                ? new Vector3(island.position.x, master.position.y, island.position.z)   // sube hasta MasterPivot
+                ? new Vector3(island.position.x, level.topY, island.position.z)   // sube hasta Top Y
                 : island.position;                                                         // no se mueve
 
             foreach (string childName in new[] { "Pivot" + kv.Key, kv.Key + "Audio" })

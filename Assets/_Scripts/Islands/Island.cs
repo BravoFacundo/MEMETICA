@@ -4,7 +4,7 @@ using UnityEngine;
 
 public class Island : MonoBehaviour
 {
-    private IslandsManager islandManager;
+    private LevelManager level;
     private GameObject estaIsla;
     private float upSpeed;
     private float fallSpeed;
@@ -13,9 +13,7 @@ public class Island : MonoBehaviour
     public bool islaIsMoving;
 
     private Transform islaPos;
-    private Vector3 masterpivot;
     private Vector3 upperpivot;
-    private Vector3 limiteCaida;
     private Vector3 lowerpivot;
 
     private CameraShake camShake;
@@ -23,16 +21,15 @@ public class Island : MonoBehaviour
 
     void Start()
     {
-        islandManager = GameObject.Find("Scene Manager").GetComponent<IslandsManager>();
+        level = LevelManager.Instance;
         estaIsla = gameObject;
-        upSpeed = islandManager.speed;
-        fallSpeed = islandManager.fallSpeed;
+        upSpeed = level.speed;
+        fallSpeed = level.fallSpeed;
 
         islaPos = estaIsla.transform;
-        masterpivot = GameObject.Find("MasterPivot").transform.position;
-        upperpivot = new Vector3(islaPos.position.x, masterpivot.y, islaPos.position.z);
-        limiteCaida = GameObject.Find("LimiteCaida").transform.position;
-        lowerpivot = new Vector3(islaPos.position.x, limiteCaida.y, islaPos.position.z);
+        // Alturas desde el LevelManager (antes: objetos MasterPivot y LimiteCaida)
+        upperpivot = new Vector3(islaPos.position.x, level.topY, islaPos.position.z);
+        lowerpivot = new Vector3(islaPos.position.x, level.bottomY, islaPos.position.z);
 
         camShake = Camera.main.GetComponent<CameraShake>();
     }
