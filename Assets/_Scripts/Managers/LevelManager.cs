@@ -6,11 +6,14 @@ using UnityEngine;
 // - Alturas y caídas (antes: objetos MasterPivot, LimiteCaida y las Cage)
 // - Subir y bajar islas, puentes y ascensores (antes: IslandsManager en "Scene Manager")
 // Los demás scripts lo usan con LevelManager.Instance.
+//
+// Los pedestales piden cosas por ID y acá se buscan por nombre:
+//   isla "3" → objeto "Area3"   |   puente "A" → objeto "PuenteA"   |   ascensor "Z" → objeto "ElevatorZ"
+//   isla "0" → fin del juego     |   isla "Z" / "X" → ascensores
+// Para sumar una isla o un puente nuevo no hace falta tocar este script: alcanza con respetar el nombre.
 public class LevelManager : MonoBehaviour
 {
     public static LevelManager Instance { get; private set; }
-
-    public Collider[] cols;
 
     [Header("ALTURAS")]
     [Tooltip("Hasta dónde suben islas, puentes y ascensores (antes: MasterPivot)")]
@@ -26,252 +29,89 @@ public class LevelManager : MonoBehaviour
     public float speed = 5;
     public float fallSpeed = 6;
 
-    [Header("ISLAS PRIMARIAS")]
-    public Transform Isla1; 
-    public Transform Isla2;
-    public Transform Isla3;
-    public Transform Isla4;
-    public Transform Isla5;
-    public Transform Isla6;
-    public Transform IslaTuto;
+    [Header("FIN DEL JUEGO")]
+    [Tooltip("Segundos que caen las islas antes de cerrar el juego")]
+    public float endingDuration = 10f;
 
-    [Header("ISLAS SECUNDARIAS")]    
-    public Transform IslaA;
-    public Transform IslaB;
-    public Transform IslaC;
-    public Transform IslaD;
-
-    [Header("ISLAS ELEVADORES")]
-    public Transform ElevadorZ;
-    public Transform ElevadorX;
-
-    [Header("PUENTES PRIMARIOS")] 
-    public Transform Puente1;
-    public Transform Puente2;
-    public Transform Puente3;
-    public Transform Puente4;
-    public Transform Puente5;
-    public Transform Puente6;
-
-    public Transform PuenteZ;
-
-    [Header("PUENTES SECUNDARIOS")]
-    public Transform PuenteA;
-    public Transform PuenteB;
-    public Transform PuenteC;
-
-    [Header("BOOLEANAS DE ACTIVACION")]
-    public bool IslasBajan = false;
-    public bool elevatorLock = false;
-
-    public GameObject[] islands;
-    public GameObject[] bridges;
+    // Se arman solas al empezar, buscando los scripts en la escena
+    private readonly Dictionary<string, Island> islands = new Dictionary<string, Island>();
+    private readonly Dictionary<string, Bridge> bridges = new Dictionary<string, Bridge>();
+    private readonly Dictionary<string, Elevator> elevators = new Dictionary<string, Elevator>();
+    private bool elevatorZUsed;
 
     void Awake()
     {
         Instance = this;   // antes de que las islas, puentes y pedestales lo usen en su Start
+
+        foreach (Island i in FindObjectsOfType<Island>()) islands[i.name] = i;
+        foreach (Bridge b in FindObjectsOfType<Bridge>()) bridges[b.name] = b;
+        foreach (Elevator e in FindObjectsOfType<Elevator>()) elevators[e.name] = e;
     }
 
-    void Start()
+    // ---------- Lo que piden los pedestales ----------
+
+    public void SubirIsla(string id)
     {
-        
-        IslaTuto = GameObject.Find("AreaTuto").transform;
-        Isla1 = GameObject.Find("Area1").transform;    
-        Isla2 = GameObject.Find("Area2").transform;    
-        Isla3 = GameObject.Find("Area3").transform;    
-        Isla4 = GameObject.Find("Area4").transform;    
-        Isla5 = GameObject.Find("Area5").transform;    
-        Isla6 = GameObject.Find("Area6").transform;  
-
-        IslaA = GameObject.Find("AreaA").transform;    
-        IslaB = GameObject.Find("AreaB").transform;    
-        IslaC = GameObject.Find("AreaC").transform;
-        //IslaD = GameObject.Find("AreaD").transform;
-
-        ElevadorZ = GameObject.Find("ElevatorZ").transform;
-        ElevadorX = GameObject.Find("ElevatorX").transform;
-
-        Puente1 = GameObject.Find("Puente1").transform;   
-        Puente2 = GameObject.Find("Puente2").transform;   
-        Puente3 = GameObject.Find("Puente3").transform;
-        Puente4 = GameObject.Find("Puente4").transform;
-        Puente5 = GameObject.Find("Puente5").transform;
-        Puente6 = GameObject.Find("Puente6").transform;
-
-        PuenteA = GameObject.Find("PuenteA").transform;
-        //PuenteB = GameObject.Find("PuenteB").transform;
-        PuenteC = GameObject.Find("PuenteC").transform;
-
-        PuenteZ = GameObject.Find("PuenteZ").transform;
-
-        islands = GameObject.FindGameObjectsWithTag("Isla");
-        bridges = GameObject.FindGameObjectsWithTag("Puente");
+        switch (id)
+        {
+            case "0": StartCoroutine(GameComplete()); break;
+            case "Z": StartElevatorZ(); break;
+            case "X": if (TryGet(elevators, "ElevatorX", out Elevator x)) x.elevadorSube = true; break;
+            default:  if (TryGet(islands, "Area" + id, out Island isla)) isla.islaSube = true; break;
+        }
     }
 
-    public IEnumerator GameComplete()
+    public void SubirPuente(string id)
+    {
+        if (TryGet(bridges, "Puente" + id, out Bridge puente)) puente.bridgeGoUp = true;
+    }
+
+    public void BajarPuente(string id)
+    {
+        if (TryGet(bridges, "Puente" + id, out Bridge puente)) puente.bridgeGoUp = false;
+    }
+
+    // ---------- Casos especiales ----------
+
+    // Ascensor del tutorial: congela al jugador y lo lleva al Área 1 (solo una vez)
+    void StartElevatorZ()
+    {
+        if (elevatorZUsed || !TryGet(elevators, "ElevatorZ", out Elevator elevator)) return;
+        elevatorZUsed = true;
+
+        Transform ascensor = elevator.transform;
+        elevator.elevadorSube = true;
+
+        GameObject player = GameObject.Find("Player");
+        player.GetComponent<PlayerMove>().playerCanMove = false;
+        player.transform.SetParent(ascensor);
+        GameObject.Find("1Ba").transform.SetParent(ascensor);
+        Camera.main.GetComponent<PlayerHoldObjects>().canHold = false;
+
+        foreach (Collider col in GameObject.Find("ElevatorLocks").GetComponentsInChildren<Collider>()) col.enabled = true;
+        GameObject.Find("PedestalElevador").GetComponentInChildren<SphereCollider>().enabled = false;   // el pedestal deja de funcionar
+    }
+
+    IEnumerator GameComplete()
     {
         GameObject.Find("Player").GetComponent<PlayerMove>().ascend = true;
-        //GameObject.Find("White").GetComponent<Color>().a = 1; //falta el fade progresivo a blanco
 
-        //Primero caen los puentes randomente en intervalos de unos segundos, luego las islas
-        //Al caer se van ocultando antes de llegar a donde frenan, de ser posible con un shader que las va haciendo invisibles
-        for (int i = 0; i < islands.Length; i++)
+        // Todas las islas caen (más adelante: primero los puentes, al azar, y que se desvanezcan)
+        foreach (Island isla in islands.Values)
         {
-            if (islands[i].GetComponent<Island>() != null)
-            {
-                islands[i].GetComponent<Island>().islasBajan = true;
-                islands[i].GetComponent<Island>().islaSube  = false;
-                //IslaisMoving = true; //Igual creo que no hace falta porque se puede checkear desde los scripts individuales
-            }
+            isla.islasBajan = true;
+            isla.islaSube = false;
         }
-        yield return new WaitForSeconds(10f);
-        FindObjectOfType<PauseMenu>().QuitGame();   // antes: GameObject.Find("Canvas"), que ahora es un contenedor vacío
+
+        yield return new WaitForSeconds(endingDuration);
+        FindObjectOfType<PauseMenu>().QuitGame();
     }
 
-    void Update()
-    {   
-        //if (Input.GetKeyDown("o")) StartCoroutine("GameComplete");
-    }
-
-    public void SubirIsla(string ControlledIslands) //cambiar por switch cases
-    {        
-        switch (ControlledIslands)
-        {
-            case "2":
-                Isla2.GetComponent<Island>().islaSube = true;
-                break;
-            case "3":
-                Isla3.GetComponent<Island>().islaSube = true;
-                break;
-            case "4":
-                Isla4.GetComponent<Island>().islaSube = true;
-                break;
-            case "5":
-                Isla5.GetComponent<Island>().islaSube = true;
-                break;
-            case "6":
-                Isla6.GetComponent<Island>().islaSube = true;
-                break;
-
-            case "A":
-                IslaA.GetComponent<Island>().islaSube = true;
-                break;
-            case "B":
-                IslaB.GetComponent<Island>().islaSube = true;
-                break;
-            case "C":
-                IslaC.GetComponent<Island>().islaSube = true;
-                break;
-
-            case "0":
-                StartCoroutine("GameComplete");
-                break;
-
-            case "Z":
-                //This case only can happend once
-                if (!elevatorLock)
-                {
-                    ElevadorZ.GetComponent<Elevator>().elevadorSube = true;
-                    GameObject.Find("1Ba").transform.SetParent(ElevadorZ);
-                    GameObject.Find("Player").GetComponent<PlayerMove>().playerCanMove = false;
-                    GameObject.Find("Player").transform.SetParent(ElevadorZ);
-                    Camera.main.GetComponent<PlayerHoldObjects>().canHold = false;
-                    cols = GameObject.Find("ElevatorLocks").GetComponentsInChildren<Collider>();
-                    for (int i = 0; i < cols.Length; i++)
-                    {
-                        cols[i].enabled = true;
-                    }
-                    GameObject.Find("PedestalElevador").GetComponentInChildren<SphereCollider>().enabled = false; //Desactiva el pedestal (apagando el collider trigger)
-                    elevatorLock = true;
-                }          
-
-                //Transform respawnPos = GameObject.Find("Respawn Pivot").GetComponent<Transform>();
-                //respawnPos = GameObject.Find("PivotArea1").GetComponent<Transform>();
-
-                //queda un error que si el jugador se cae del elevador (que ya lelgo a la isla 1) sin tocar la isla 1 entonces respawnea abajo
-
-                break;
-            case "X":
-                ElevadorX.GetComponent<Elevator>().elevadorSube = true;
-                //congelar al player
-                break;
-        }
-    }
-    public void SubirPuente(string ControlledBridges)
+    // Busca y avisa en la consola si un pedestal pide algo que no existe
+    bool TryGet<T>(Dictionary<string, T> table, string objectName, out T value)
     {
-        switch (ControlledBridges)
-        {
-            case "1":
-                Puente1.GetComponent<Bridge>().bridgeGoUp = true;
-                break;
-            case "2":
-                Puente2.GetComponent<Bridge>().bridgeGoUp = true;
-                break;
-            case "3":
-                Puente3.GetComponent<Bridge>().bridgeGoUp = true;
-                break;
-            case "4":
-                Puente4.GetComponent<Bridge>().bridgeGoUp = true;
-                break;
-            case "5":
-                Puente5.GetComponent<Bridge>().bridgeGoUp = true;
-                break;
-            case "6":
-                Puente6.GetComponent<Bridge>().bridgeGoUp = true;
-                break;
-
-            case "A":
-                PuenteA.GetComponent<Bridge>().bridgeGoUp = true;
-                break;
-            case "B":
-                PuenteB.GetComponent<Bridge>().bridgeGoUp = true;
-                break;
-            case "C":
-                PuenteC.GetComponent<Bridge>().bridgeGoUp = true;
-                break;
-
-            case "Z":
-                PuenteZ.GetComponent<Bridge>().bridgeGoUp = true;
-                break;
-        }
-    }
-    public void BajarPuente(string ControlledBridges)
-    {
-        switch (ControlledBridges)
-        {
-            case "1":
-                Puente1.GetComponent<Bridge>().bridgeGoUp = false;
-                break;
-            case "2":
-                Puente2.GetComponent<Bridge>().bridgeGoUp = false;
-                break;
-            case "3":
-                Puente3.GetComponent<Bridge>().bridgeGoUp = false;
-                break;
-            case "4":
-                Puente4.GetComponent<Bridge>().bridgeGoUp = false;
-                break;
-            case "5":
-                Puente5.GetComponent<Bridge>().bridgeGoUp = false;
-                break;
-            case "6":
-                Puente6.GetComponent<Bridge>().bridgeGoUp = false;
-                break;
-
-            case "A":
-                PuenteA.GetComponent<Bridge>().bridgeGoUp = false;
-                break;
-            case "B":
-                PuenteB.GetComponent<Bridge>().bridgeGoUp = false;
-                break;
-            case "C":
-                PuenteC.GetComponent<Bridge>().bridgeGoUp = false;
-                break;
-
-            case "Z":
-                PuenteZ.GetComponent<Bridge>().bridgeGoUp = false;
-                break;
-
-        }
+        if (table.TryGetValue(objectName, out value)) return true;
+        Debug.LogWarning("[LevelManager] No existe '" + objectName + "' en la escena (revisá el ID en el pedestal).", this);
+        return false;
     }
 }
