@@ -13,7 +13,8 @@ public class Bridge : MonoBehaviour
     private float fallSpeed; 
 
     public bool bridgeGoUp; 
-    public bool exclusion; 
+    [Tooltip("Opcional: si está asignado, el puente sube hasta la altura de este objeto en vez de la general (lo usa el puente del tutorial)")]
+    public Transform topOverride;
 
     private Transform bridgePos;
     private Vector3 upperPivot;
@@ -30,8 +31,8 @@ public class Bridge : MonoBehaviour
         fallSpeed = level.fallSpeed;
 
         bridgePos = estePuente.transform;
-        // Alturas desde el LevelManager (antes: MasterPivot y LimiteCaida). El puente del tutorial (exclusion) sube hasta PivotPuenteZ.
-        float topY = exclusion ? GameObject.Find("PivotPuenteZ").transform.position.y : level.topY;
+        // Alturas desde el LevelManager. Un puente con Top Override (el del tutorial) sube hasta ese objeto.
+        float topY = topOverride != null ? topOverride.position.y : level.topY;
         upperPivot = new Vector3(bridgePos.position.x, topY, bridgePos.position.z);
         lowerpivot = new Vector3(bridgePos.position.x, level.bottomY, bridgePos.position.z);
         offsetVector = new Vector3(0, offset, 0);

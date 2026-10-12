@@ -15,9 +15,8 @@ public class PlayerRespawn : MonoBehaviour
 
     private void Start()
     {
-        // FIX: el juego arranca en el tutorial, pero "Respawn Pivot" está arriba del Área 1.
-        // AreaTuto no tiene el tag "Isla", así que el raycast nunca lo registraba y caerse en el tutorial te mandaba al Área 1.
-        respawnPosition = GameObject.Find("PivotAreaTuto").transform;
+        // El juego arranca en el tutorial (la isla del tutorial no tiene el tag "Isla", así que se fija acá)
+        respawnPosition = LevelManager.Instance.startRespawnPoint;
         lastGroundY = transform.position.y;
     }
 
@@ -39,9 +38,9 @@ public class PlayerRespawn : MonoBehaviour
         if (isla == null || isla == lastIsland) return;    // un puente, o la misma isla
         lastIsland = isla;
 
-        // Cada isla tiene su pivote llamado "Pivot" + nombre (AreaTuto -> PivotAreaTuto, Area3 -> PivotArea3...)
-        GameObject pivot = GameObject.Find("Pivot" + isla.name);
-        if (pivot != null) respawnPosition = pivot.transform;
+        // Cada isla tiene un hijo RespawnPoint
+        Transform point = LevelManager.Instance.RespawnPointOf(isla);
+        if (point != null) respawnPosition = point;
     }
     // Fija el respawn a mano. Lo usa el ascensor: el jugador llega al Área 1 sin haberla pisado.
     public void SetRespawn(Transform pivot)

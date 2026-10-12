@@ -14,16 +14,8 @@ public static class HierarchyValidator
     // Objetos que el código busca con GameObject.Find("...") → deben existir, ser únicos y estar activos
     static readonly string[] RequiredNames =
     {
-        // Jugador y UI
+        // Jugador
         "Player", "Main Camera", "GrabPivot",
-        // Sistemas y pivotes
-        "PivotPuenteZ",
-        // Nivel
-        "AreaTuto", "Area1", "Area2", "Area3", "Area4", "Area5", "Area6", "AreaA", "AreaB", "AreaC",
-        "Puente1", "Puente2", "Puente3", "Puente4", "Puente5", "Puente6", "PuenteA", "PuenteC", "PuenteZ",
-        "ElevatorZ", "ElevatorX", "ElevatorLocks", "PedestalElevador",
-        "PivotAreaTuto", "PivotArea1", "PivotArea2", "PivotArea3", "PivotArea4", "PivotArea5", "PivotArea6",
-        "PivotAreaA", "PivotAreaB", "PivotAreaC",
         // Orbes (los pedestales leen su nombre)
         "1Aa", "1Ba", "3Aa", "4Aa",
     };
@@ -48,6 +40,26 @@ public static class HierarchyValidator
                 if (found.Count > 1) Error($"Hay {found.Count} objetos llamados '{name}'. GameObject.Find agarra uno cualquiera.", found[1]);
                 if (!found[0].activeInHierarchy) Error($"'{name}' está desactivado (o su padre). GameObject.Find no encuentra objetos inactivos.", found[0]);
             }
+        }
+
+        // 1b. LevelManager: referencias y convención de nombres
+        LevelManager level = Object.FindObjectOfType<LevelManager>(true);
+        if (level == null) Error("No hay LevelManager en la escena.");
+        else
+        {
+            if (level.startRespawnPoint == null) Error("LevelManager: falta asignar Start Respawn Point.", level);
+            if (level.elevatorZLocks == null) Warn("LevelManager: falta asignar Elevator Z Locks.", level);
+            if (level.elevatorZPedestal == null) Warn("LevelManager: falta asignar Elevator Z Pedestal.", level);
+
+            foreach (var isla in Object.FindObjectsOfType<Island>(true))
+            {
+                if (!isla.name.StartsWith(level.islandPrefix)) Warn($"La isla '{isla.name}' no sigue la convención '{level.islandPrefix}ID'.", isla);
+                else if (isla.transform.Find(level.respawnPointName) == null) Error($"La isla '{isla.name}' no tiene hijo '{level.respawnPointName}'.", isla);
+            }
+            foreach (var puente in Object.FindObjectsOfType<Bridge>(true))
+                if (!puente.name.StartsWith(level.bridgePrefix)) Warn($"El puente '{puente.name}' no sigue la convención '{level.bridgePrefix}ID'.", puente);
+            foreach (var ascensor in Object.FindObjectsOfType<Elevator>(true))
+                if (!ascensor.name.StartsWith(level.elevatorPrefix)) Warn($"El ascensor '{ascensor.name}' no sigue la convención '{level.elevatorPrefix}ID'.", ascensor);
         }
 
         // 2. Pedestales: hijos directos que busca el código + tener padre (busca "Pintura" como hermano)
@@ -98,6 +110,18 @@ public static class HierarchyValidator
                 Warn($"El grupo '{go.name}' no está en posición 0 / rotación 0 / escala 1. Sus hijos pueden quedar desplazados (Reset en el Transform).", go);
             if (!go.activeSelf)
                 Error($"El grupo '{go.name}' está desactivado: todo lo de adentro deja de existir para GameObject.Find.", go);
+        }
+
+        // 8b. Estructura estándar: en islas y puentes, los props van dentro de "Decor"
+        if (level != null)
+        {
+            var containers = Object.FindObjectsOfType<Island>(true).Select(c => c.transform)
+                .Concat(Object.FindObjectsOfType<Bridge>(true).Select(c => c.transform));
+            foreach (var c in containers)
+            {
+                int loose = c.Cast<Transform>().Count(ch => ch.gameObject.activeSelf && !LevelStructureTool.IsGameplay(ch, level));
+                if (loose > 0) Warn($"'{c.name}' tiene {loose} prop(s) fuera de '{LevelStructureTool.DecorName}' (Memetica > Ordenar estructura de niveles).", c);
+            }
         }
 
         // 8. Scripts faltantes ("The referenced script on this Behaviour is missing")

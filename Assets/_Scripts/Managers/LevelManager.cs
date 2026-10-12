@@ -7,10 +7,12 @@ using UnityEngine;
 // - Subir y bajar islas, puentes y ascensores (antes: IslandsManager en "Scene Manager")
 // Los demás scripts lo usan con LevelManager.Instance.
 //
-// Los pedestales piden cosas por ID y acá se buscan por nombre:
-//   isla "3" → objeto "Area3"   |   puente "A" → objeto "PuenteA"   |   ascensor "Z" → objeto "ElevatorZ"
-//   isla "0" → fin del juego     |   isla "Z" / "X" → ascensores
-// Para sumar una isla o un puente nuevo no hace falta tocar este script: alcanza con respetar el nombre.
+// Los pedestales piden cosas por ID y acá se buscan por nombre, con la convención Tipo_ID:
+//   isla "3" → "Island_3"   |   puente "A" → "Bridge_A"   |   ascensor "Z" → "Elevator_Z"
+//   isla "0" → fin del juego |   isla "Z" / "X" → ascensores
+// Cada isla tiene un hijo "RespawnPoint" donde reaparece el jugador.
+// Para sumar una isla o un puente no hace falta tocar código: alcanza con respetar la convención.
+// Los prefijos se pueden cambiar en el Inspector (sección NOMBRES).
 public class LevelManager : MonoBehaviour
 {
     public static LevelManager Instance { get; private set; }
@@ -28,6 +30,21 @@ public class LevelManager : MonoBehaviour
     [Header("VELOCIDADES")]
     public float speed = 5;
     public float fallSpeed = 6;
+
+    [Header("NOMBRES (convención Tipo_ID)")]
+    public string islandPrefix = "Island_";
+    public string bridgePrefix = "Bridge_";
+    public string elevatorPrefix = "Elevator_";
+    [Tooltip("Nombre del hijo de cada isla donde se reaparece")]
+    public string respawnPointName = "RespawnPoint";
+
+    [Header("REFERENCIAS")]
+    [Tooltip("Donde reaparece todo al empezar: el RespawnPoint de la isla del tutorial")]
+    public Transform startRespawnPoint;
+    [Tooltip("Paredes invisibles que encierran al jugador mientras sube el ascensor del tutorial")]
+    public GameObject elevatorZLocks;
+    [Tooltip("Pedestal que va arriba del ascensor del tutorial")]
+    public GameObject elevatorZPedestal;
 
     [Header("FIN DEL JUEGO")]
     [Tooltip("Segundos que caen las islas antes de cerrar el juego")]
@@ -56,19 +73,33 @@ public class LevelManager : MonoBehaviour
         {
             case "0": StartCoroutine(GameComplete()); break;
             case "Z": StartElevatorZ(); break;
-            case "X": if (TryGet(elevators, "ElevatorX", out Elevator x)) x.elevadorSube = true; break;
-            default:  if (TryGet(islands, "Area" + id, out Island isla)) isla.islaSube = true; break;
+            case "X": if (TryGet(elevators, elevatorPrefix + "X", out Elevator x)) x.elevadorSube = true; break;
+            default:  if (TryGet(islands, islandPrefix + id, out Island isla)) isla.islaSube = true; break;
         }
     }
 
     public void SubirPuente(string id)
     {
-        if (TryGet(bridges, "Puente" + id, out Bridge puente)) puente.bridgeGoUp = true;
+        if (TryGet(bridges, bridgePrefix + id, out Bridge puente)) puente.bridgeGoUp = true;
     }
 
     public void BajarPuente(string id)
     {
-        if (TryGet(bridges, "Puente" + id, out Bridge puente)) puente.bridgeGoUp = false;
+        if (TryGet(bridges, bridgePrefix + id, out Bridge puente)) puente.bridgeGoUp = false;
+    }
+
+    // ---------- Consultas ----------
+
+    // La isla con ese ID (por ejemplo "1" → Island_1), o null
+    public GameObject GetIsland(string id)
+    {
+        return TryGet(islands, islandPrefix + id, out Island isla) ? isla.gameObject : null;
+    }
+
+    // El punto de reaparición de una isla (su hijo RespawnPoint), o null
+    public Transform RespawnPointOf(GameObject island)
+    {
+        return island != null ? island.transform.Find(respawnPointName) : null;
     }
 
     // ---------- Casos especiales ----------
@@ -76,7 +107,7 @@ public class LevelManager : MonoBehaviour
     // Ascensor del tutorial: congela al jugador y lo lleva al Área 1 (solo una vez)
     void StartElevatorZ()
     {
-        if (elevatorZUsed || !TryGet(elevators, "ElevatorZ", out Elevator elevator)) return;
+        if (elevatorZUsed || !TryGet(elevators, elevatorPrefix + "Z", out Elevator elevator)) return;
         elevatorZUsed = true;
 
         Transform ascensor = elevator.transform;
@@ -88,8 +119,10 @@ public class LevelManager : MonoBehaviour
         GameObject.Find("1Ba").transform.SetParent(ascensor);
         Camera.main.GetComponent<PlayerHoldObjects>().canHold = false;
 
-        foreach (Collider col in GameObject.Find("ElevatorLocks").GetComponentsInChildren<Collider>()) col.enabled = true;
-        GameObject.Find("PedestalElevador").GetComponentInChildren<SphereCollider>().enabled = false;   // el pedestal deja de funcionar
+        if (elevatorZLocks != null)
+            foreach (Collider col in elevatorZLocks.GetComponentsInChildren<Collider>()) col.enabled = true;
+        if (elevatorZPedestal != null)
+            elevatorZPedestal.GetComponentInChildren<SphereCollider>().enabled = false;   // el pedestal deja de funcionar
     }
 
     IEnumerator GameComplete()

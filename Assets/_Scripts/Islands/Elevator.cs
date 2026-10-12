@@ -54,16 +54,16 @@ public class Elevator : MonoBehaviour
             GameObject.Find("Player").GetComponent<PlayerMove>().playerCanMove = true;
             GameObject.Find("Player").transform.SetParent(null);
             Camera.main.GetComponent<PlayerHoldObjects>().canHold = true;
-            GameObject.Find("ElevatorLocks").SetActive(false);
+            if (level.elevatorZLocks != null) level.elevatorZLocks.SetActive(false);
 
-            // FIX: antes guardaba PivotArea1 en una variable local que no usaba nadie, y el respawn seguía en el tutorial.
-            // Ahora se lo pasa al Player y al orbe que viajó en el ascensor.
-            Transform pivotArea1 = GameObject.Find("PivotArea1").transform;
-            GameObject.Find("Player").GetComponent<PlayerRespawn>().SetRespawn(pivotArea1);
+            // El jugador y el orbe que viajaron llegan al Área 1 sin pisarla: se les fija ahí el respawn
+            GameObject island1 = level.GetIsland("1");
+            Transform island1Respawn = level.RespawnPointOf(island1);
+            GameObject.Find("Player").GetComponent<PlayerRespawn>().SetRespawn(island1Respawn);
             GameObject orbeAscensor = GameObject.Find("1Ba");
             if (orbeAscensor != null && orbeAscensor.TryGetComponent(out PlayerRespawn orbRespawn))
-                orbRespawn.SetRespawn(pivotArea1);
-            GameObject.Find("ElevatorZ").transform.SetParent(GameObject.Find("Area1").transform);
+                orbRespawn.SetRespawn(island1Respawn);
+            if (island1 != null) transform.SetParent(island1.transform);   // el ascensor queda como parte del Área 1
 
             StartCoroutine(BreakPedestalWhenOrbTaken());
 
@@ -75,7 +75,7 @@ public class Elevator : MonoBehaviour
     IEnumerator BreakPedestalWhenOrbTaken()
     {
         GameObject orb = GameObject.Find("1Ba");
-        GameObject pedestalObj = GameObject.Find("PedestalElevador");
+        GameObject pedestalObj = level.elevatorZPedestal;
         if (orb == null || pedestalObj == null) yield break;
 
         Pedestal pedestal = pedestalObj.GetComponent<Pedestal>();
