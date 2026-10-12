@@ -167268,6 +167268,9 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   mixer: {fileID: 0}
+  masterParam: volume
+  musicParam: MusicVolume
+  sfxParam: SfxVolume
   musicSource: {fileID: 0}
   menuMusic: {fileID: 0}
 --- !u!1001 &2073039551
@@ -170978,6 +170981,10 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 88082609}
     m_Modifications:
+    - target: {fileID: 2080069279818173709, guid: 55878bd61f528bd4b90b49ed95211835, type: 3}
+      propertyPath: m_MatchWidthOrHeight
+      value: 1
+      objectReference: {fileID: 0}
     - target: {fileID: 4259137245738521607, guid: 55878bd61f528bd4b90b49ed95211835, type: 3}
       propertyPath: m_Pivot.x
       value: 0
@@ -174700,7 +174707,7 @@ MonoBehaviour:
   m_ScaleFactor: 1
   m_ReferenceResolution: {x: 1920, y: 1080}
   m_ScreenMatchMode: 0
-  m_MatchWidthOrHeight: 0.5
+  m_MatchWidthOrHeight: 1
   m_PhysicalUnit: 3
   m_FallbackScreenDPI: 96
   m_DefaultSpriteDPI: 96
@@ -175750,6 +175757,10 @@ PrefabInstance:
       propertyPath: playerLook
       value: 
       objectReference: {fileID: 1775379611}
+    - target: {fileID: 4991800545653113286, guid: 15db11ad97b8df047977b7e859b93f38, type: 3}
+      propertyPath: m_MatchWidthOrHeight
+      value: 1
+      objectReference: {fileID: 0}
     - target: {fileID: 6152319105184477866, guid: 15db11ad97b8df047977b7e859b93f38, type: 3}
       propertyPath: m_Pivot.x
       value: 0
@@ -182372,7 +182383,7 @@ MonoBehaviour:
   pedestalID: 
   ControlledIslands: []
   ControlledBridges:
-  - Z
+  - Tutorial
   group: {fileID: 0}
   socket: {fileID: 6550854910321787551}
   visualKeyed: {fileID: 7653041071600983024}

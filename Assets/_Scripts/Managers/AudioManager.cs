@@ -10,6 +10,10 @@ public class AudioManager : MonoBehaviour
 {
     [Header("Mixer")]
     public AudioMixer mixer;
+    [Tooltip("Exposed mixer parameters for the volume sliders (leave empty if not exposed yet)")]
+    public string masterParam = "volume";
+    public string musicParam = "MusicVolume";
+    public string sfxParam = "SfxVolume";
 
     [Space(10)]
     [Header("Música")]
@@ -19,7 +23,20 @@ public class AudioManager : MonoBehaviour
 
     void Start()
     {
+        ApplySettings();
+        GameSettings.Changed += ApplySettings;
         if (menuMusic != null) PlayMusic(menuMusic);
+    }
+
+    void OnDestroy() => GameSettings.Changed -= ApplySettings;
+
+    // Saved volumes → mixer (on start and whenever the settings window changes them)
+    void ApplySettings()
+    {
+        if (mixer == null) return;
+        if (!string.IsNullOrEmpty(masterParam)) SetVolume(masterParam, GameSettings.MasterVolume);
+        if (!string.IsNullOrEmpty(musicParam)) SetVolume(musicParam, GameSettings.MusicVolume);
+        if (!string.IsNullOrEmpty(sfxParam)) SetVolume(sfxParam, GameSettings.SfxVolume);
     }
 
     public void PlayMusic(AudioClip clip)

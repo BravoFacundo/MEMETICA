@@ -30,7 +30,14 @@ public class PlayerLook : MonoBehaviour
     {
         playerTransform = transform.parent.parent.GetComponent<Transform>();
         Cursor.lockState = CursorLockMode.Locked;
+
+        // Sensitivity comes from the saved settings and follows the settings window
+        ApplySettings();
+        GameSettings.Changed += ApplySettings;
     }
+
+    void OnDestroy() => GameSettings.Changed -= ApplySettings;
+    void ApplySettings() => mouseSensitivity = GameSettings.MouseSensitivityValue;
     
     void Update()
     {        

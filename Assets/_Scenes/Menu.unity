@@ -25441,6 +25441,9 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   mixer: {fileID: 24100000, guid: edc7c8f8554cfad488b31b89d90046f7, type: 2}
+  masterParam: volume
+  musicParam: MusicVolume
+  sfxParam: SfxVolume
   musicSource: {fileID: 1464918824}
   menuMusic: {fileID: 8300000, guid: 0d76de7a8bc768e4cb78df047425f439, type: 3}
 --- !u!4 &701905378 stripped
@@ -116253,6 +116256,10 @@ PrefabInstance:
       propertyPath: onClick.m_PersistentCalls.m_Calls.Array.data[0].m_Target
       value: 
       objectReference: {fileID: 425335312}
+    - target: {fileID: 2137301826812863281, guid: 51519634598f43149a0e1ff447634786, type: 3}
+      propertyPath: m_MatchWidthOrHeight
+      value: 1
+      objectReference: {fileID: 0}
     - target: {fileID: 2152323331970699384, guid: 51519634598f43149a0e1ff447634786, type: 3}
       propertyPath: m_AnchorMax.y
       value: 0
@@ -116686,6 +116693,10 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 4991800545653113286, guid: 15db11ad97b8df047977b7e859b93f38, type: 3}
+      propertyPath: m_MatchWidthOrHeight
+      value: 1
+      objectReference: {fileID: 0}
     - target: {fileID: 6468800741917739402, guid: 15db11ad97b8df047977b7e859b93f38, type: 3}
       propertyPath: m_Name
       value: Canvas_Cursor
@@ -116901,6 +116912,10 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 363801713}
     m_Modifications:
+    - target: {fileID: 2080069279818173709, guid: 55878bd61f528bd4b90b49ed95211835, type: 3}
+      propertyPath: m_MatchWidthOrHeight
+      value: 1
+      objectReference: {fileID: 0}
     - target: {fileID: 2699613553496521287, guid: 55878bd61f528bd4b90b49ed95211835, type: 3}
       propertyPath: m_Name
       value: Canvas_Frame
