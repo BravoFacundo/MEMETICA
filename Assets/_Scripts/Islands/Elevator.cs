@@ -22,10 +22,25 @@ public class Elevator : MonoBehaviour
     public Transform departFrom;
     [Tooltip("Meters it moves away from the islands when leaving and when arriving")]
     public float clearance = 3f;
+    [Tooltip("Optional: empty object that pulls the first half of the curve (replaces the automatic one)")]
+    public Transform leaveVia;
+    [Tooltip("Optional: empty object that pulls the second half of the curve, e.g. beside the island so it docks from outside")]
+    public Transform arriveVia;
+
+    [System.Serializable]
+    public class RidePopup
+    {
+        [Tooltip("Popup (child of Canvas_Tutorial)")]
+        public GameObject popup;
+        [Tooltip("When it appears, as a fraction of the ride (0 = start, 1 = docked)")]
+        [Range(0f, 1f)] public float showAt = 0.1f;
+        [Tooltip("When it disappears, as a fraction of the ride")]
+        [Range(0f, 1f)] public float hideAt = 0.5f;
+    }
 
     [Header("Tutorial")]
-    [Tooltip("Popups shown while it rides (children of Canvas_Tutorial)")]
-    public GameObject[] ridePopups;
+    [Tooltip("Popups shown in sequence during the ride. Times are fractions of Ride Duration, so they scale with it")]
+    public RidePopup[] ridePopups;
 
     [Header("Passengers")]
     [Tooltip("Objects that ride along besides the player (e.g. the orb on its pedestal)")]
@@ -66,22 +81,19 @@ public class Elevator : MonoBehaviour
         if (hold != null) hold.canHold = false;
         if (locks != null) locks.SetActive(true);
         if (pedestal != null && pedestal.TryGetComponent(out SphereCollider trigger)) trigger.enabled = false;
-        foreach (GameObject popup in ridePopups) if (TutorialManager.Instance != null) TutorialManager.Instance.Show(popup);
 
         // Ride along an S curve (scaled time: it stops while the game is paused).
         // It moves away from the island it leaves, rises, and comes in to the destination from outside,
         // so it never cuts through either island. Starts slow and docks slow (smoothstep).
         Vector3 from = transform.position, to = dockPoint.position;
-        Island destination = dockPoint.GetComponentInParent<Island>();
-        Vector3 leaveDir = departFrom != null ? Flat(from - departFrom.position) : Vector3.zero;
-        Vector3 arriveDir = destination != null ? Flat(to - destination.transform.position) : Vector3.zero;
-        Vector3 p1 = from + leaveDir * clearance;    // out from the start island
-        Vector3 p2 = to + arriveDir * clearance;     // out from the destination island
+        ControlPoints(from, to, out Vector3 p1, out Vector3 p2);
+        bool[] shown = new bool[ridePopups.Length];
 
         for (float t = 0f; t < 1f; )
         {
             t = Mathf.Min(1f, t + Time.deltaTime / Mathf.Max(rideDuration, 0.01f));
             transform.position = Bezier(from, p1, p2, to, t * t * (3f - 2f * t));
+            UpdatePopups(t, shown);
             yield return null;
         }
 
@@ -100,10 +112,39 @@ public class Elevator : MonoBehaviour
             if (p != null && respawn != null && p.TryGetComponent(out PlayerRespawn r)) r.SetRespawn(respawn);
         if (hold != null) hold.canHold = true;
         if (locks != null) locks.SetActive(false);
-        foreach (GameObject popup in ridePopups) if (TutorialManager.Instance != null) TutorialManager.Instance.Hide(popup);
+        for (int i = 0; i < ridePopups.Length; i++) if (shown[i]) SetPopup(ridePopups[i].popup, false);
 
         IsRiding = false;
         if (pedestal != null && pedestalOrb != null) StartCoroutine(BreakPedestalWhenOrbTaken(pedestalOrb));
+    }
+
+    // Shows each popup between its showAt and hideAt (only on changes, so the fades work)
+    void UpdatePopups(float t, bool[] shown)
+    {
+        for (int i = 0; i < ridePopups.Length; i++)
+        {
+            bool visible = t >= ridePopups[i].showAt && t < ridePopups[i].hideAt;
+            if (visible == shown[i]) continue;
+            shown[i] = visible;
+            SetPopup(ridePopups[i].popup, visible);
+        }
+    }
+
+    static void SetPopup(GameObject popup, bool visible)
+    {
+        if (TutorialManager.Instance == null) return;
+        if (visible) TutorialManager.Instance.Show(popup); else TutorialManager.Instance.Hide(popup);
+    }
+
+    // The two points that bend the curve: the Via objects if set, otherwise automatic
+    // (out from the island it leaves, and out from the destination island)
+    void ControlPoints(Vector3 from, Vector3 to, out Vector3 p1, out Vector3 p2)
+    {
+        Island destination = dockPoint.GetComponentInParent<Island>();
+        p1 = leaveVia != null ? leaveVia.position
+           : from + (departFrom != null ? Flat(from - departFrom.position) : Vector3.zero) * clearance;
+        p2 = arriveVia != null ? arriveVia.position
+           : to + (destination != null ? Flat(to - destination.transform.position) : Vector3.zero) * clearance;
     }
 
     // Horizontal direction, normalized (zero if there is none)
@@ -122,13 +163,16 @@ public class Elevator : MonoBehaviour
     {
         if (dockPoint == null || Application.isPlaying) return;
         Vector3 from = transform.position, to = dockPoint.position;
-        Island destination = dockPoint.GetComponentInParent<Island>();
-        Vector3 p1 = from + (departFrom != null ? Flat(from - departFrom.position) : Vector3.zero) * clearance;
-        Vector3 p2 = to + (destination != null ? Flat(to - destination.transform.position) : Vector3.zero) * clearance;
+        ControlPoints(from, to, out Vector3 p1, out Vector3 p2);
         Gizmos.color = new Color(0.4f, 0.9f, 1f);
         Vector3 prev = from;
-        for (int i = 1; i <= 24; i++) { Vector3 p = Bezier(from, p1, p2, to, i / 24f); Gizmos.DrawLine(prev, p); prev = p; }
+        for (int i = 1; i <= 32; i++) { Vector3 p = Bezier(from, p1, p2, to, i / 32f); Gizmos.DrawLine(prev, p); prev = p; }
         Gizmos.DrawWireSphere(to, 0.3f);
+
+        // Handles: where each half of the curve is pulled to
+        Gizmos.color = new Color(1f, 0.6f, 0.2f);
+        Gizmos.DrawLine(from, p1); Gizmos.DrawWireSphere(p1, 0.25f);
+        Gizmos.DrawLine(to, p2);   Gizmos.DrawWireSphere(p2, 0.25f);
     }
 #endif
 
