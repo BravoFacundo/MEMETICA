@@ -1,32 +1,33 @@
 ﻿Estado;Carpeta principal;Ruta;Tamaño KB
-En uso (escena);_Prefabs;Assets/_Prefabs/Area1.prefab;647
-En uso (escena);_Prefabs;Assets/_Prefabs/Area2.prefab;362
-En uso (escena);_Prefabs;Assets/_Prefabs/AreaTree 1.prefab;317
+Solo escenas viejas;_Prefabs;Assets/_Prefabs/Area1.prefab;647
+Solo escenas viejas;_Prefabs;Assets/_Prefabs/Area2.prefab;362
+Solo escenas viejas;_Prefabs;Assets/_Prefabs/AreaTree 1.prefab;317
 Sin usar;_Prefabs;Assets/_Prefabs/AreaTree.prefab;317
-En uso (escena);_Prefabs;Assets/_Prefabs/AreaTuto 1.prefab;116
+Solo escenas viejas;_Prefabs;Assets/_Prefabs/AreaTuto 1.prefab;116
 En uso (escena);_Prefabs;Assets/_Prefabs/Elevator1.prefab;25
-En uso (escena);_Prefabs;Assets/_Prefabs/Elevator2.prefab;193
+Solo escenas viejas;_Prefabs;Assets/_Prefabs/Elevator2.prefab;193
 En uso (escena);_Prefabs;Assets/_Prefabs/Pedestal.prefab;130
-En uso (escena);_Prefabs;Assets/_Prefabs/Puente1.prefab;19
+En uso (escena);_Prefabs;Assets/_Prefabs/Player.prefab;10
+Solo escenas viejas;_Prefabs;Assets/_Prefabs/Puente1.prefab;19
 Sin usar;_Prefabs;Assets/_Prefabs/PuenteA.prefab;54
 En uso (escena);_Prefabs;Assets/_Prefabs/UI/Canvas_Cursor.prefab;6
-En uso (escena);_Prefabs;Assets/_Prefabs/UI/Canvas_Desktop.prefab;67
 En uso (escena);_Prefabs;Assets/_Prefabs/UI/Canvas_Frame.prefab;5
 En uso (escena);_Scenes;Assets/_Scenes/CC.asset;8
-En uso (escena);_Scenes;Assets/_Scenes/Game.unity;6520
+En uso (escena);_Scenes;Assets/_Scenes/Game.unity;6486
 En uso (escena);_Scenes;Assets/_Scenes/Menu.unity;3002
-En uso (escena);_Scenes;Assets/_Scenes/Unused/OldMenu.unity;1133
-En uso (escena);_Scenes;Assets/_Scenes/Unused/OldTutorial.unity;764
-Editor;_Scripts;Assets/_Scripts/Editor/AssetUsageReport.cs;3
+Solo escenas viejas;_Scenes;Assets/_Scenes/Unused/OldMenu.unity;1133
+Solo escenas viejas;_Scenes;Assets/_Scenes/Unused/OldTutorial.unity;764
+Editor;_Scripts;Assets/_Scripts/Editor/AssetUsageReport.cs;4
 Editor;_Scripts;Assets/_Scripts/Editor/DesktopLayoutTool.cs;5
 Editor;_Scripts;Assets/_Scripts/Editor/HierarchyValidator.cs;6
+Editor;_Scripts;Assets/_Scripts/Editor/MoveToIslandsTool.cs;4
 En uso (escena);_Scripts;Assets/_Scripts/Islands/Bridge.cs;1
 En uso (escena);_Scripts;Assets/_Scripts/Islands/Elevator.cs;3
 En uso (escena);_Scripts;Assets/_Scripts/Islands/Island.cs;2
-Script sin referencia;_Scripts;Assets/_Scripts/Islands/IslandsHide.cs;1
-En uso (escena);_Scripts;Assets/_Scripts/Islands/IslandsManager.cs;9
+Script;_Scripts;Assets/_Scripts/Islands/IslandsHide.cs;1
 En uso (escena);_Scripts;Assets/_Scripts/Islands/Platform.cs;3
 En uso (escena);_Scripts;Assets/_Scripts/Managers/AudioManager.cs;1
+En uso (escena);_Scripts;Assets/_Scripts/Managers/LevelManager.cs;4
 En uso (escena);_Scripts;Assets/_Scripts/Managers/UIManager.cs;3
 En uso (escena);_Scripts;Assets/_Scripts/Misc/FloatBob.cs;1
 En uso (escena);_Scripts;Assets/_Scripts/Misc/LookAtPlayer.cs;0
@@ -35,19 +36,19 @@ En uso (escena);_Scripts;Assets/_Scripts/Player/CameraShake.cs;1
 En uso (escena);_Scripts;Assets/_Scripts/Player/PlayerHoldObjects.cs;5
 En uso (escena);_Scripts;Assets/_Scripts/Player/PlayerLook.cs;2
 En uso (escena);_Scripts;Assets/_Scripts/Player/PlayerLookAtVideo.cs;2
-En uso (escena);_Scripts;Assets/_Scripts/Player/PlayerMove.cs;5
-En uso (escena);_Scripts;Assets/_Scripts/Player/PlayerRespawn.cs;2
+En uso (escena);_Scripts;Assets/_Scripts/Player/PlayerMove.cs;4
+En uso (escena);_Scripts;Assets/_Scripts/Player/PlayerRespawn.cs;3
 En uso (escena);_Scripts;Assets/_Scripts/Puzzles/Atril.cs;0
 En uso (escena);_Scripts;Assets/_Scripts/Puzzles/OrbMemes.cs;10
 En uso (escena);_Scripts;Assets/_Scripts/Puzzles/OrbPosition.cs;1
 En uso (escena);_Scripts;Assets/_Scripts/Puzzles/Pedestal.cs;5
 En uso (escena);_Scripts;Assets/_Scripts/Puzzles/PedestalTrigger.cs;9
 En uso (escena);_Scripts;Assets/_Scripts/UI/Crosshair.cs;1
-En uso (escena);_Scripts;Assets/_Scripts/UI/DesktopIcon.cs;1
+Script;_Scripts;Assets/_Scripts/UI/DesktopIcon.cs;1
 En uso (escena);_Scripts;Assets/_Scripts/UI/PauseMenu.cs;2
 En uso (escena);_Scripts;Assets/_Scripts/UI/RetroCursor.cs;3
 En uso (escena);_Scripts;Assets/_Scripts/UI/StartTutorialScreen.cs;0
-En uso (escena);_Scripts;Assets/_Scripts/UI/WindowButton.cs;1
+Script;_Scripts;Assets/_Scripts/UI/WindowButton.cs;1
 En uso (escena);Art;Assets/Art/Materials/Bridges.mat;2
 En uso (escena);Art;Assets/Art/Materials/Fall_Leafs.mat;2
 En uso (escena);Art;Assets/Art/Materials/FallingRocks.mat;2
@@ -259,7 +260,7 @@ En uso (escena);Art;Assets/Art/Prefabs/Mountain Path 2.prefab;2
 En uso (escena);Art;Assets/Art/Prefabs/Mountain Path 3.prefab;2
 En uso (escena);Art;Assets/Art/Prefabs/Mountain Path 4.prefab;2
 En uso (escena);Art;Assets/Art/Prefabs/Mountain Path 5.prefab;2
-En uso (escena);Art;Assets/Art/Prefabs/painting_easel.prefab;35
+Solo escenas viejas;Art;Assets/Art/Prefabs/painting_easel.prefab;35
 En uso (escena);Art;Assets/Art/Prefabs/Palm_tree.prefab;2
 En uso (escena);Art;Assets/Art/Prefabs/Rock 1.prefab;2
 En uso (escena);Art;Assets/Art/Prefabs/Rock 3.prefab;2
@@ -289,7 +290,7 @@ En uso (escena);Art;Assets/Art/Prefabs/rpgpp_lt_rock_03.prefab;2
 En uso (escena);Art;Assets/Art/Prefabs/rpgpp_lt_rock_small_01.prefab;2
 En uso (escena);Art;Assets/Art/Prefabs/rpgpp_lt_rocks_tiny_01.prefab;2
 En uso (escena);Art;Assets/Art/Prefabs/rpgpp_lt_sky_01.prefab;2
-En uso (escena);Art;Assets/Art/Prefabs/rpgpp_lt_table_01.prefab;2
+Solo escenas viejas;Art;Assets/Art/Prefabs/rpgpp_lt_table_01.prefab;2
 En uso (escena);Art;Assets/Art/Prefabs/rpgpp_lt_terrain_grass_01.prefab;2
 En uso (escena);Art;Assets/Art/Prefabs/rpgpp_lt_terrain_path_01a.prefab;2
 En uso (escena);Art;Assets/Art/Prefabs/rpgpp_lt_terrain_sand_01.prefab;2
@@ -300,7 +301,7 @@ En uso (escena);Art;Assets/Art/Prefabs/Sign 2.prefab;2
 En uso (escena);Art;Assets/Art/Prefabs/Sign Post 1.prefab;2
 En uso (escena);Art;Assets/Art/Prefabs/Spruce_A.prefab;2
 En uso (escena);Art;Assets/Art/Prefabs/Spruce_B.prefab;2
-En uso (escena);Art;Assets/Art/Prefabs/Stalactite 2.prefab;2
+Solo escenas viejas;Art;Assets/Art/Prefabs/Stalactite 2.prefab;2
 En uso (escena);Art;Assets/Art/Prefabs/Stalactite 3.prefab;2
 En uso (escena);Art;Assets/Art/Prefabs/Stalactite 4.prefab;2
 En uso (escena);Art;Assets/Art/Prefabs/Stalactite 5.prefab;2
@@ -347,32 +348,32 @@ En uso (escena);Art;Assets/Art/Textures/TreesClouds_TreesClouds_MetallicSmoothne
 En uso (escena);Art;Assets/Art/Textures/TreesClouds_TreesClouds_Roughness.png;8
 Sin usar;Art;Assets/Art/UI/Background.png;1390
 En uso (escena);Art;Assets/Art/UI/Cursors/Cursor_Arrow.png;1
-En uso (escena);Art;Assets/Art/UI/Cursors/Cursor_Busy.png;9
+Sin usar;Art;Assets/Art/UI/Cursors/Cursor_Busy.png;9
 En uso (escena);Art;Assets/Art/UI/Cursors/Cursor_Dot.png;1
 En uso (escena);Art;Assets/Art/UI/Cursors/Cursor_Grab.png;3
-En uso (escena);Art;Assets/Art/UI/Cursors/Cursor_NotAllowed.png;2
-En uso (escena);Art;Assets/Art/UI/Cursors/Cursor_Point.png;3
+Sin usar;Art;Assets/Art/UI/Cursors/Cursor_NotAllowed.png;2
+Sin usar;Art;Assets/Art/UI/Cursors/Cursor_Point.png;3
 En uso (escena);Art;Assets/Art/UI/Cursors/Cursor_Zoom.png;8
 En uso (escena);Art;Assets/Art/UI/Cursors/Cursor_ZoomIn.png;8
 En uso (escena);Art;Assets/Art/UI/Cursors/Cursor_ZoomOut.png;8
-En uso (escena);Art;Assets/Art/UI/Icons/Icon_Config.png;9
-En uso (escena);Art;Assets/Art/UI/Icons/Icon_Exit.png;7
-En uso (escena);Art;Assets/Art/UI/Icons/Icon_Image.png;9
-En uso (escena);Art;Assets/Art/UI/Icons/Icon_Play.png;18
-En uso (escena);Art;Assets/Art/UI/Icons/Icon_Trash.png;6
+Sin usar;Art;Assets/Art/UI/Icons/Icon_Config.png;9
+Sin usar;Art;Assets/Art/UI/Icons/Icon_Exit.png;7
+Sin usar;Art;Assets/Art/UI/Icons/Icon_Image.png;9
+Sin usar;Art;Assets/Art/UI/Icons/Icon_Play.png;18
+Sin usar;Art;Assets/Art/UI/Icons/Icon_Trash.png;6
 Sin usar;Art;Assets/Art/UI/Logo.png;15
 En uso (escena);Art;Assets/Art/UI/PCFrame.png;13
 Sin usar;Art;Assets/Art/UI/Tutorial/Barra.png;34
 Sin usar;Art;Assets/Art/UI/Tutorial/Camara.png;28
 Sin usar;Art;Assets/Art/UI/Tutorial/ClickDerecho.png;28
 Sin usar;Art;Assets/Art/UI/Tutorial/ClickIzquierdo.png;30
-En uso (escena);Art;Assets/Art/UI/Tutorial/Escape.png;21
+Sin usar;Art;Assets/Art/UI/Tutorial/Escape.png;21
 En uso (escena);Art;Assets/Art/UI/Tutorial/PauseMenu.png;333
 Sin usar;Art;Assets/Art/UI/Tutorial/Shift.png;25
 En uso (escena);Art;Assets/Art/UI/Tutorial/StartTutorialScreen.png;1384
 Sin usar;Art;Assets/Art/UI/Tutorial/Wasd.png;40
-En uso (escena);Art;Assets/Art/UI/Windows/Windows_Exit.png;55
-En uso (escena);Art;Assets/Art/UI/Windows/Windows_Logo.png;19
+Sin usar;Art;Assets/Art/UI/Windows/Windows_Exit.png;55
+Sin usar;Art;Assets/Art/UI/Windows/Windows_Logo.png;19
 En uso (escena);Audio;Assets/Audio/MainMixer.mixer;1
 En uso (escena);Audio;Assets/Audio/Music/MainTheme_QueLindaNube.mp3;6177
 En uso (escena);Audio;Assets/Audio/SFX/OrbChange.wav;9
@@ -385,33 +386,33 @@ En uso (escena);Audio;Assets/Audio/SFX/PedestalLoss.wav;10
 En uso (escena);Audio;Assets/Audio/SFX/PedestalSnap.wav;24
 En uso (escena);Audio;Assets/Audio/SFX/PedestalWin.wav;4
 Sin usar;Audio;Assets/Audio/SFX/PedestalWinGame.mp3;73
-En uso (escena);Audio;Assets/Audio/SFX/Wind Fuerte.wav;10004
+Solo escenas viejas;Audio;Assets/Audio/SFX/Wind Fuerte.wav;10004
 En uso (escena);Audio;Assets/Audio/SFX/Wind Tranqui.wav;12505
-En uso (escena);Resources;Assets/Resources/Images/Alunizaje1.png;112
-En uso (escena);Resources;Assets/Resources/Images/Alunizaje2.png;185
-En uso (escena);Resources;Assets/Resources/Images/Astronauta 2.png;1532
-En uso (escena);Resources;Assets/Resources/Images/Group 25 (1).png;200
-En uso (escena);Resources;Assets/Resources/Images/image 16 (1).png;186
+En uso (Resources);Resources;Assets/Resources/Images/Alunizaje1.png;112
+En uso (Resources);Resources;Assets/Resources/Images/Alunizaje2.png;185
+En uso (Resources);Resources;Assets/Resources/Images/Astronauta 2.png;1532
+En uso (Resources);Resources;Assets/Resources/Images/Group 25 (1).png;200
+En uso (Resources);Resources;Assets/Resources/Images/image 16 (1).png;186
 En uso (escena);Resources;Assets/Resources/Images/image 84.png;682
 En uso (Resources);Resources;Assets/Resources/Images/Imagenes De Orbes (2).png;117
-En uso (escena);Resources;Assets/Resources/Images/Materials/Alunizaje2.mat;2
-En uso (escena);Resources;Assets/Resources/Images/Materials/Astronauta 2.mat;2
-En uso (escena);Resources;Assets/Resources/Images/Materials/Group 25 (2).mat;2
-En uso (escena);Resources;Assets/Resources/Images/Materials/image 16 (1) 1.mat;2
-En uso (escena);Resources;Assets/Resources/Images/Materials/image 16 (1).mat;2
+En uso (Resources);Resources;Assets/Resources/Images/Materials/Alunizaje2.mat;2
+En uso (Resources);Resources;Assets/Resources/Images/Materials/Astronauta 2.mat;2
+En uso (Resources);Resources;Assets/Resources/Images/Materials/Group 25 (2).mat;2
+En uso (Resources);Resources;Assets/Resources/Images/Materials/image 16 (1) 1.mat;2
+En uso (Resources);Resources;Assets/Resources/Images/Materials/image 16 (1).mat;2
 En uso (escena);Resources;Assets/Resources/Images/Materials/image 84.mat;2
 En uso (Resources);Resources;Assets/Resources/Images/Materials/Imagenes De Orbes (1).mat;2
 En uso (Resources);Resources;Assets/Resources/Images/Materials/Imagenes De Orbes (2).mat;2
 En uso (escena);Resources;Assets/Resources/Images/Materials/Michelangelo_Creazione_di_Adamo 2.mat;2
 En uso (escena);Resources;Assets/Resources/Images/Michelangelo_Creazione_di_Adamo 2.png;2421
 En uso (escena);Resources;Assets/Resources/Materials/Birch_Leaf.tif;83
-En uso (escena);Resources;Assets/Resources/Materials/Color_Player.mat;2
+En uso (Resources);Resources;Assets/Resources/Materials/Color_Player.mat;2
 En uso (Resources);Resources;Assets/Resources/Materials/Cuadro.mat;2
 En uso (Resources);Resources;Assets/Resources/Materials/Friction.physicMaterial;0
 En uso (escena);Resources;Assets/Resources/Materials/Glass.mat;2
 En uso (escena);Resources;Assets/Resources/Materials/GlowingParticleMaterial.mat;2
 En uso (escena);Resources;Assets/Resources/Materials/LeavesGreen.mat;2
-En uso (escena);Resources;Assets/Resources/Materials/LimiteCaida.mat;2
+En uso (Resources);Resources;Assets/Resources/Materials/LimiteCaida.mat;2
 En uso (Resources);Resources;Assets/Resources/Materials/Player.mat;2
 En uso (escena);Resources;Assets/Resources/Materials/Wind.mat;2
 En uso (escena);Resources;Assets/Resources/Materials/WindAlpha.mat;2
@@ -617,50 +618,50 @@ En uso (Resources);ThirdParty;Assets/ThirdParty/PostProcessing/Resources/Shaders
 En uso (Resources);ThirdParty;Assets/ThirdParty/PostProcessing/Resources/Shaders/Tonemapping.cginc;3
 En uso (Resources);ThirdParty;Assets/ThirdParty/PostProcessing/Resources/Shaders/Uber.shader;11
 En uso (Resources);ThirdParty;Assets/ThirdParty/PostProcessing/Resources/Shaders/UberSecondPass.cginc;1
-Script sin referencia;ThirdParty;Assets/ThirdParty/PostProcessing/Runtime/Attributes/GetSetAttribute.cs;0
-Script sin referencia;ThirdParty;Assets/ThirdParty/PostProcessing/Runtime/Attributes/MinAttribute.cs;0
-Script sin referencia;ThirdParty;Assets/ThirdParty/PostProcessing/Runtime/Attributes/TrackballAttribute.cs;0
-Script sin referencia;ThirdParty;Assets/ThirdParty/PostProcessing/Runtime/Attributes/TrackballGroupAttribute.cs;0
-Script sin referencia;ThirdParty;Assets/ThirdParty/PostProcessing/Runtime/Components/AmbientOcclusionComponent.cs;7
-Script sin referencia;ThirdParty;Assets/ThirdParty/PostProcessing/Runtime/Components/BloomComponent.cs;6
-Script sin referencia;ThirdParty;Assets/ThirdParty/PostProcessing/Runtime/Components/BuiltinDebugViewsComponent.cs;9
-Script sin referencia;ThirdParty;Assets/ThirdParty/PostProcessing/Runtime/Components/ChromaticAberrationComponent.cs;2
-Script sin referencia;ThirdParty;Assets/ThirdParty/PostProcessing/Runtime/Components/ColorGradingComponent.cs;18
-Script sin referencia;ThirdParty;Assets/ThirdParty/PostProcessing/Runtime/Components/DepthOfFieldComponent.cs;7
-Script sin referencia;ThirdParty;Assets/ThirdParty/PostProcessing/Runtime/Components/DitheringComponent.cs;2
-Script sin referencia;ThirdParty;Assets/ThirdParty/PostProcessing/Runtime/Components/EyeAdaptationComponent.cs;7
-Script sin referencia;ThirdParty;Assets/ThirdParty/PostProcessing/Runtime/Components/FogComponent.cs;3
-Script sin referencia;ThirdParty;Assets/ThirdParty/PostProcessing/Runtime/Components/FxaaComponent.cs;1
-Script sin referencia;ThirdParty;Assets/ThirdParty/PostProcessing/Runtime/Components/GrainComponent.cs;2
-Script sin referencia;ThirdParty;Assets/ThirdParty/PostProcessing/Runtime/Components/MotionBlurComponent.cs;19
-Script sin referencia;ThirdParty;Assets/ThirdParty/PostProcessing/Runtime/Components/ScreenSpaceReflectionComponent.cs;13
-Script sin referencia;ThirdParty;Assets/ThirdParty/PostProcessing/Runtime/Components/TaaComponent.cs;8
-Script sin referencia;ThirdParty;Assets/ThirdParty/PostProcessing/Runtime/Components/UserLutComponent.cs;1
-Script sin referencia;ThirdParty;Assets/ThirdParty/PostProcessing/Runtime/Components/VignetteComponent.cs;2
-Script sin referencia;ThirdParty;Assets/ThirdParty/PostProcessing/Runtime/Models/AmbientOcclusionModel.cs;2
-Script sin referencia;ThirdParty;Assets/ThirdParty/PostProcessing/Runtime/Models/AntialiasingModel.cs;8
-Script sin referencia;ThirdParty;Assets/ThirdParty/PostProcessing/Runtime/Models/BloomModel.cs;2
-Script sin referencia;ThirdParty;Assets/ThirdParty/PostProcessing/Runtime/Models/BuiltinDebugViewsModel.cs;3
-Script sin referencia;ThirdParty;Assets/ThirdParty/PostProcessing/Runtime/Models/ChromaticAberrationModel.cs;1
-Script sin referencia;ThirdParty;Assets/ThirdParty/PostProcessing/Runtime/Models/ColorGradingModel.cs;10
-Script sin referencia;ThirdParty;Assets/ThirdParty/PostProcessing/Runtime/Models/DepthOfFieldModel.cs;2
-Script sin referencia;ThirdParty;Assets/ThirdParty/PostProcessing/Runtime/Models/DitheringModel.cs;0
-Script sin referencia;ThirdParty;Assets/ThirdParty/PostProcessing/Runtime/Models/EyeAdaptationModel.cs;3
-Script sin referencia;ThirdParty;Assets/ThirdParty/PostProcessing/Runtime/Models/FogModel.cs;0
-Script sin referencia;ThirdParty;Assets/ThirdParty/PostProcessing/Runtime/Models/GrainModel.cs;1
-Script sin referencia;ThirdParty;Assets/ThirdParty/PostProcessing/Runtime/Models/MotionBlurModel.cs;1
-Script sin referencia;ThirdParty;Assets/ThirdParty/PostProcessing/Runtime/Models/ScreenSpaceReflectionModel.cs;4
-Script sin referencia;ThirdParty;Assets/ThirdParty/PostProcessing/Runtime/Models/UserLutModel.cs;1
-Script sin referencia;ThirdParty;Assets/ThirdParty/PostProcessing/Runtime/Models/VignetteModel.cs;2
+Script;ThirdParty;Assets/ThirdParty/PostProcessing/Runtime/Attributes/GetSetAttribute.cs;0
+Script;ThirdParty;Assets/ThirdParty/PostProcessing/Runtime/Attributes/MinAttribute.cs;0
+Script;ThirdParty;Assets/ThirdParty/PostProcessing/Runtime/Attributes/TrackballAttribute.cs;0
+Script;ThirdParty;Assets/ThirdParty/PostProcessing/Runtime/Attributes/TrackballGroupAttribute.cs;0
+Script;ThirdParty;Assets/ThirdParty/PostProcessing/Runtime/Components/AmbientOcclusionComponent.cs;7
+Script;ThirdParty;Assets/ThirdParty/PostProcessing/Runtime/Components/BloomComponent.cs;6
+Script;ThirdParty;Assets/ThirdParty/PostProcessing/Runtime/Components/BuiltinDebugViewsComponent.cs;9
+Script;ThirdParty;Assets/ThirdParty/PostProcessing/Runtime/Components/ChromaticAberrationComponent.cs;2
+Script;ThirdParty;Assets/ThirdParty/PostProcessing/Runtime/Components/ColorGradingComponent.cs;18
+Script;ThirdParty;Assets/ThirdParty/PostProcessing/Runtime/Components/DepthOfFieldComponent.cs;7
+Script;ThirdParty;Assets/ThirdParty/PostProcessing/Runtime/Components/DitheringComponent.cs;2
+Script;ThirdParty;Assets/ThirdParty/PostProcessing/Runtime/Components/EyeAdaptationComponent.cs;7
+Script;ThirdParty;Assets/ThirdParty/PostProcessing/Runtime/Components/FogComponent.cs;3
+Script;ThirdParty;Assets/ThirdParty/PostProcessing/Runtime/Components/FxaaComponent.cs;1
+Script;ThirdParty;Assets/ThirdParty/PostProcessing/Runtime/Components/GrainComponent.cs;2
+Script;ThirdParty;Assets/ThirdParty/PostProcessing/Runtime/Components/MotionBlurComponent.cs;19
+Script;ThirdParty;Assets/ThirdParty/PostProcessing/Runtime/Components/ScreenSpaceReflectionComponent.cs;13
+Script;ThirdParty;Assets/ThirdParty/PostProcessing/Runtime/Components/TaaComponent.cs;8
+Script;ThirdParty;Assets/ThirdParty/PostProcessing/Runtime/Components/UserLutComponent.cs;1
+Script;ThirdParty;Assets/ThirdParty/PostProcessing/Runtime/Components/VignetteComponent.cs;2
+Script;ThirdParty;Assets/ThirdParty/PostProcessing/Runtime/Models/AmbientOcclusionModel.cs;2
+Script;ThirdParty;Assets/ThirdParty/PostProcessing/Runtime/Models/AntialiasingModel.cs;8
+Script;ThirdParty;Assets/ThirdParty/PostProcessing/Runtime/Models/BloomModel.cs;2
+Script;ThirdParty;Assets/ThirdParty/PostProcessing/Runtime/Models/BuiltinDebugViewsModel.cs;3
+Script;ThirdParty;Assets/ThirdParty/PostProcessing/Runtime/Models/ChromaticAberrationModel.cs;1
+Script;ThirdParty;Assets/ThirdParty/PostProcessing/Runtime/Models/ColorGradingModel.cs;10
+Script;ThirdParty;Assets/ThirdParty/PostProcessing/Runtime/Models/DepthOfFieldModel.cs;2
+Script;ThirdParty;Assets/ThirdParty/PostProcessing/Runtime/Models/DitheringModel.cs;0
+Script;ThirdParty;Assets/ThirdParty/PostProcessing/Runtime/Models/EyeAdaptationModel.cs;3
+Script;ThirdParty;Assets/ThirdParty/PostProcessing/Runtime/Models/FogModel.cs;0
+Script;ThirdParty;Assets/ThirdParty/PostProcessing/Runtime/Models/GrainModel.cs;1
+Script;ThirdParty;Assets/ThirdParty/PostProcessing/Runtime/Models/MotionBlurModel.cs;1
+Script;ThirdParty;Assets/ThirdParty/PostProcessing/Runtime/Models/ScreenSpaceReflectionModel.cs;4
+Script;ThirdParty;Assets/ThirdParty/PostProcessing/Runtime/Models/UserLutModel.cs;1
+Script;ThirdParty;Assets/ThirdParty/PostProcessing/Runtime/Models/VignetteModel.cs;2
 En uso (escena);ThirdParty;Assets/ThirdParty/PostProcessing/Runtime/PostProcessingBehaviour.cs;17
-Script sin referencia;ThirdParty;Assets/ThirdParty/PostProcessing/Runtime/PostProcessingComponent.cs;1
-Script sin referencia;ThirdParty;Assets/ThirdParty/PostProcessing/Runtime/PostProcessingContext.cs;1
-Script sin referencia;ThirdParty;Assets/ThirdParty/PostProcessing/Runtime/PostProcessingModel.cs;0
+Script;ThirdParty;Assets/ThirdParty/PostProcessing/Runtime/PostProcessingComponent.cs;1
+Script;ThirdParty;Assets/ThirdParty/PostProcessing/Runtime/PostProcessingContext.cs;1
+Script;ThirdParty;Assets/ThirdParty/PostProcessing/Runtime/PostProcessingModel.cs;0
 En uso (escena);ThirdParty;Assets/ThirdParty/PostProcessing/Runtime/PostProcessingProfile.cs;2
-Script sin referencia;ThirdParty;Assets/ThirdParty/PostProcessing/Runtime/Utils/ColorGradingCurve.cs;1
-Script sin referencia;ThirdParty;Assets/ThirdParty/PostProcessing/Runtime/Utils/GraphicsUtils.cs;4
-Script sin referencia;ThirdParty;Assets/ThirdParty/PostProcessing/Runtime/Utils/MaterialFactory.cs;1
-Script sin referencia;ThirdParty;Assets/ThirdParty/PostProcessing/Runtime/Utils/RenderTextureFactory.cs;2
+Script;ThirdParty;Assets/ThirdParty/PostProcessing/Runtime/Utils/ColorGradingCurve.cs;1
+Script;ThirdParty;Assets/ThirdParty/PostProcessing/Runtime/Utils/GraphicsUtils.cs;4
+Script;ThirdParty;Assets/ThirdParty/PostProcessing/Runtime/Utils/MaterialFactory.cs;1
+Script;ThirdParty;Assets/ThirdParty/PostProcessing/Runtime/Utils/RenderTextureFactory.cs;2
 Sin usar;ThirdParty;Assets/ThirdParty/PostProcessing/Textures/Lens Dirt/LensDirt00.png;4912
 Sin usar;ThirdParty;Assets/ThirdParty/PostProcessing/Textures/Lens Dirt/LensDirt01.png;8324
 Sin usar;ThirdParty;Assets/ThirdParty/PostProcessing/Textures/Lens Dirt/LensDirt02.png;11725
@@ -671,30 +672,30 @@ Sin usar;ThirdParty;Assets/ThirdParty/PostProcessing/Textures/Spectral LUTs/Spec
 Sin usar;ThirdParty;Assets/ThirdParty/PostProcessing/Textures/Spectral LUTs/SpectralLut_GreenPurple.tga;0
 Sin usar;ThirdParty;Assets/ThirdParty/PostProcessing/Textures/Spectral LUTs/SpectralLut_PurpleGreen.tga;0
 Sin usar;ThirdParty;Assets/ThirdParty/PostProcessing/Textures/Spectral LUTs/SpectralLut_RedBlue.tga;0
-En uso (escena);ThirdParty;Assets/ThirdParty/PostProcessing/Utilities/CustomMotionTexture/CustomMotionVectorDebugProfile.asset;8
-En uso (escena);ThirdParty;Assets/ThirdParty/PostProcessing/Utilities/CustomMotionTexture/ExampleScene.unity;39
-En uso (escena);ThirdParty;Assets/ThirdParty/PostProcessing/Utilities/CustomMotionTexture/ExampleSceneSettings.lighting;1
-En uso (escena);ThirdParty;Assets/ThirdParty/PostProcessing/Utilities/CustomMotionTexture/ExampleWheelController.cs;1
-En uso (escena);ThirdParty;Assets/ThirdParty/PostProcessing/Utilities/CustomMotionTexture/Materials/DebugMotionVectors.mat;2
-En uso (escena);ThirdParty;Assets/ThirdParty/PostProcessing/Utilities/CustomMotionTexture/Materials/DebugQuad.mat;2
-En uso (escena);ThirdParty;Assets/ThirdParty/PostProcessing/Utilities/CustomMotionTexture/Materials/UVChecker.mat;2
-En uso (escena);ThirdParty;Assets/ThirdParty/PostProcessing/Utilities/CustomMotionTexture/Materials/WheelMotionVectors.mat;2
-En uso (escena);ThirdParty;Assets/ThirdParty/PostProcessing/Utilities/CustomMotionTexture/Models/WheelMovecs.FBX;30
-En uso (escena);ThirdParty;Assets/ThirdParty/PostProcessing/Utilities/CustomMotionTexture/Shaders/CustomMotionVectorTexture.shader;2
-En uso (escena);ThirdParty;Assets/ThirdParty/PostProcessing/Utilities/CustomMotionTexture/Textures/DebugMotionVectors.png;166
-En uso (escena);ThirdParty;Assets/ThirdParty/PostProcessing/Utilities/CustomMotionTexture/Textures/UVChecker.png;12
-En uso (escena);ThirdParty;Assets/ThirdParty/PostProcessing/Utilities/CustomMotionTexture/Textures/WheelMotionVectors.png;379
+Solo escenas viejas;ThirdParty;Assets/ThirdParty/PostProcessing/Utilities/CustomMotionTexture/CustomMotionVectorDebugProfile.asset;8
+Solo escenas viejas;ThirdParty;Assets/ThirdParty/PostProcessing/Utilities/CustomMotionTexture/ExampleScene.unity;39
+Solo escenas viejas;ThirdParty;Assets/ThirdParty/PostProcessing/Utilities/CustomMotionTexture/ExampleSceneSettings.lighting;1
+Script;ThirdParty;Assets/ThirdParty/PostProcessing/Utilities/CustomMotionTexture/ExampleWheelController.cs;1
+Solo escenas viejas;ThirdParty;Assets/ThirdParty/PostProcessing/Utilities/CustomMotionTexture/Materials/DebugMotionVectors.mat;2
+Solo escenas viejas;ThirdParty;Assets/ThirdParty/PostProcessing/Utilities/CustomMotionTexture/Materials/DebugQuad.mat;2
+Solo escenas viejas;ThirdParty;Assets/ThirdParty/PostProcessing/Utilities/CustomMotionTexture/Materials/UVChecker.mat;2
+Solo escenas viejas;ThirdParty;Assets/ThirdParty/PostProcessing/Utilities/CustomMotionTexture/Materials/WheelMotionVectors.mat;2
+Solo escenas viejas;ThirdParty;Assets/ThirdParty/PostProcessing/Utilities/CustomMotionTexture/Models/WheelMovecs.FBX;30
+Solo escenas viejas;ThirdParty;Assets/ThirdParty/PostProcessing/Utilities/CustomMotionTexture/Shaders/CustomMotionVectorTexture.shader;2
+Solo escenas viejas;ThirdParty;Assets/ThirdParty/PostProcessing/Utilities/CustomMotionTexture/Textures/DebugMotionVectors.png;166
+Solo escenas viejas;ThirdParty;Assets/ThirdParty/PostProcessing/Utilities/CustomMotionTexture/Textures/UVChecker.png;12
+Solo escenas viejas;ThirdParty;Assets/ThirdParty/PostProcessing/Utilities/CustomMotionTexture/Textures/WheelMotionVectors.png;379
 Sin usar;ThirdParty;Assets/ThirdParty/TextMesh Pro/Documentation/TextMesh Pro User Guide 2016.pdf;678
 En uso (Resources);ThirdParty;Assets/ThirdParty/TextMesh Pro/Fonts/impact.ttf;132
 Sin usar;ThirdParty;Assets/ThirdParty/TextMesh Pro/Fonts/LiberationSans - OFL.txt;4
 En uso (Resources);ThirdParty;Assets/ThirdParty/TextMesh Pro/Fonts/LiberationSans.ttf;341
-En uso (escena);ThirdParty;Assets/ThirdParty/TextMesh Pro/Fonts/Nunito-VariableFont_wght.ttf;269
+En uso (Resources);ThirdParty;Assets/ThirdParty/TextMesh Pro/Fonts/Nunito-VariableFont_wght.ttf;269
 En uso (Resources);ThirdParty;Assets/ThirdParty/TextMesh Pro/Resources/Fonts & Materials/impact SDF.asset;2068
 En uso (Resources);ThirdParty;Assets/ThirdParty/TextMesh Pro/Resources/Fonts & Materials/LiberationSans SDF - Drop Shadow.mat;2
 En uso (Resources);ThirdParty;Assets/ThirdParty/TextMesh Pro/Resources/Fonts & Materials/LiberationSans SDF - Fallback.asset;9
 En uso (Resources);ThirdParty;Assets/ThirdParty/TextMesh Pro/Resources/Fonts & Materials/LiberationSans SDF - Outline.mat;2
 En uso (Resources);ThirdParty;Assets/ThirdParty/TextMesh Pro/Resources/Fonts & Materials/LiberationSans SDF.asset;2203
-En uso (escena);ThirdParty;Assets/ThirdParty/TextMesh Pro/Resources/Fonts & Materials/Nunito SDF - Outline 2.asset;627
+En uso (Resources);ThirdParty;Assets/ThirdParty/TextMesh Pro/Resources/Fonts & Materials/Nunito SDF - Outline 2.asset;627
 En uso (Resources);ThirdParty;Assets/ThirdParty/TextMesh Pro/Resources/Fonts & Materials/Nunito SDF - Outline.asset;18
 En uso (Resources);ThirdParty;Assets/ThirdParty/TextMesh Pro/Resources/Fonts & Materials/Nunito-VariableFont_wght SDF.asset;2070
 En uso (Resources);ThirdParty;Assets/ThirdParty/TextMesh Pro/Resources/LineBreaking Following Characters.txt;0
@@ -707,7 +708,7 @@ Sin usar;ThirdParty;Assets/ThirdParty/TextMesh Pro/Shaders/TMP_Bitmap-Custom-Atl
 Sin usar;ThirdParty;Assets/ThirdParty/TextMesh Pro/Shaders/TMP_Bitmap-Mobile.shader;3
 Sin usar;ThirdParty;Assets/ThirdParty/TextMesh Pro/Shaders/TMP_SDF Overlay.shader;10
 Sin usar;ThirdParty;Assets/ThirdParty/TextMesh Pro/Shaders/TMP_SDF SSD.shader;11
-En uso (escena);ThirdParty;Assets/ThirdParty/TextMesh Pro/Shaders/TMP_SDF.shader;10
+En uso (Resources);ThirdParty;Assets/ThirdParty/TextMesh Pro/Shaders/TMP_SDF.shader;10
 Sin usar;ThirdParty;Assets/ThirdParty/TextMesh Pro/Shaders/TMP_SDF-Mobile Masking.shader;7
 Sin usar;ThirdParty;Assets/ThirdParty/TextMesh Pro/Shaders/TMP_SDF-Mobile Overlay.shader;7
 Sin usar;ThirdParty;Assets/ThirdParty/TextMesh Pro/Shaders/TMP_SDF-Mobile SSD.shader;2
