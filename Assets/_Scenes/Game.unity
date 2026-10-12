@@ -43772,6 +43772,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   audioManager: {fileID: 2071885306}
   gameScene: Game
+  menuScene: Menu
   minLoadingTime: 1.5
   quitDelay: 2
 --- !u!1001 &400552258
@@ -118073,6 +118074,7 @@ MonoBehaviour:
   pauseMenuUI: {fileID: 1576062731}
   frameUI: {fileID: 2699613553590147861}
   audioMixer: {fileID: 24100000, guid: edc7c8f8554cfad488b31b89d90046f7, type: 2}
+  uiManager: {fileID: 396937338}
 --- !u!1001 &1243944968
 PrefabInstance:
   m_ObjectHideFlags: 0

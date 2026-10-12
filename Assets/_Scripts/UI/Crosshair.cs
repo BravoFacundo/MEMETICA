@@ -25,6 +25,12 @@ public class Crosshair : MonoBehaviour
 
     void Start()
     {
+        // Crosshair decides the cursor mode for its scene:
+        //   no player (Menu) → free cursor that follows the mouse, and this component turns off
+        //   player (Game)    → fixed aim in the center
+        bool hasPlayer = playerLook != null && playerHold != null;
+        if (RetroCursor.Instance != null) RetroCursor.Instance.SetFollowMouse(!hasPlayer);
+        if (!hasPlayer) { enabled = false; return; }
         cam = playerLook.GetComponent<Camera>();
     }
 

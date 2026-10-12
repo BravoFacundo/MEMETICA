@@ -59,7 +59,11 @@ public class RetroCursor : MonoBehaviour
     public void SetFollowMouse(bool value)
     {
         followMouse = value;
-        if (value) Cursor.visible = false;   // en la pausa se ve nuestra flecha, no la de Windows
+        if (value)
+        {
+            Cursor.visible = false;                   // our arrow is shown, not the Windows one
+            Cursor.lockState = CursorLockMode.None;   // free mouse (Menu and pause)
+        }
     }
 
     // Cursor de carga: lo pone el UIManager y bloquea cualquier otro cambio hasta que se saque

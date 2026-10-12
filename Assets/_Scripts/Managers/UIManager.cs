@@ -15,6 +15,7 @@ public class UIManager : MonoBehaviour
     [Space(10)]
     [Header("Escenas")]
     public string gameScene = "Game";
+    public string menuScene = "Menu";
 
     [Header("Carga")]
     [Tooltip("Segundos mínimos de carga, aunque el juego cargue antes")]
@@ -29,7 +30,14 @@ public class UIManager : MonoBehaviour
     public void PlayGame()
     {
         if (loading) return;   // evita cargar dos veces si se hace doble clic de más
-        StartCoroutine(LoadGame());
+        StartCoroutine(LoadScene(gameScene));
+    }
+
+    // Used by the pause window (Game → Menu)
+    public void GoToMenu()
+    {
+        if (loading) return;
+        StartCoroutine(LoadScene(menuScene));
     }
 
     public void QuitGame()
@@ -72,7 +80,7 @@ public class UIManager : MonoBehaviour
 #endif
     }
 
-    IEnumerator LoadGame()
+    IEnumerator LoadScene(string sceneName)
     {
         loading = true;
 
@@ -83,13 +91,17 @@ public class UIManager : MonoBehaviour
         yield return null;   // un frame para que se vea el cursor de espera antes de empezar
 
         // Carga en segundo plano, sin pasar todavía a la escena nueva
-        AsyncOperation op = SceneManager.LoadSceneAsync(gameScene);
+        AsyncOperation op = SceneManager.LoadSceneAsync(sceneName);
         op.allowSceneActivation = false;
         float start = Time.unscaledTime;
 
         // Unity deja el progreso en 0.9 hasta que se permite activar la escena
         while (op.progress < 0.9f || Time.unscaledTime - start < minLoadingTime)
             yield return null;
+
+        // Leave the time and pause state clean for the next scene (coming from the pause window)
+        Time.timeScale = 1f;
+        PauseMenu.GameIsPaused = false;
 
         op.allowSceneActivation = true;   // acá se cambia de escena
     }

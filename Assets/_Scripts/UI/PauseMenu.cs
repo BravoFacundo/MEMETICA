@@ -12,10 +12,14 @@ public class PauseMenu : MonoBehaviour
     [SerializeField] private GameObject pauseMenuUI;
     [SerializeField] private GameObject frameUI;   // Canvas_Frame: el marco del monitor, solo en pausa
     [SerializeField] private AudioMixer audioMixer;
-        
+    [SerializeField] private UIManager uiManager;  // loads the Menu and quits with the busy cursor
+
     void Start()
     {
-        if (frameUI != null) frameUI.SetActive(GameIsPaused);
+        // A fresh Game scene always starts unpaused (the static flag survives scene loads)
+        GameIsPaused = false;
+        Time.timeScale = 1f;
+        if (frameUI != null) frameUI.SetActive(false);
     }
 
     void Update()
@@ -63,10 +67,17 @@ public class PauseMenu : MonoBehaviour
         Cursor.lockState = CursorLockMode.None;
     }
 
+    // Pause → Menu: the game stays frozen behind the busy cursor; UIManager unpauses right before switching
+    public void ReturnToMenu()
+    {
+        if (uiManager != null) uiManager.GoToMenu();
+        else Debug.LogWarning("[PauseMenu] Assign the UIManager to return to the Menu.", this);
+    }
+
     public void QuitGame()
     {
-        Debug.Log("Cerrando el juego");
-        Application.Quit();
+        if (uiManager != null) uiManager.QuitGame();
+        else Application.Quit();
     }
 
     public void SetVolume(float volume)

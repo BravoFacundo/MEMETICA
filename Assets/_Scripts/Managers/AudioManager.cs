@@ -24,6 +24,7 @@ public class AudioManager : MonoBehaviour
 
     public void PlayMusic(AudioClip clip)
     {
+        if (musicSource == null) return;   // scene without music (e.g. Game for now)
         StopAllCoroutines();
         musicSource.clip = clip;
         musicSource.loop = true;
@@ -33,6 +34,7 @@ public class AudioManager : MonoBehaviour
 
     public void FadeOutMusic(float duration)
     {
+        if (musicSource == null) return;   // nothing to fade
         StopAllCoroutines();
         StartCoroutine(FadeOut(duration));
     }
