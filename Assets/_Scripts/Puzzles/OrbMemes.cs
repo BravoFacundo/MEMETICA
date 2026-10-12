@@ -14,8 +14,8 @@ public class OrbMemes: MonoBehaviour
     private bool canDo1 = true;
     private bool canDo2 = true;
 
+    [Header("Imágenes (la 0 es la original)")]
     public List<Material> materials = new List<Material>();
-    public float cantidadMat;
     public int matCount;
 
     [Header("Mutación: cambia mientras lo llevás y te movés")]
@@ -49,39 +49,8 @@ public class OrbMemes: MonoBehaviour
     {
         Player = GameObject.Find("Player");
 
-        switch (this.gameObject.transform.name)
-        {
-            case "1Aa":
-                cantidadMat = 6;
-                for (int i = 0; i < cantidadMat; i++)
-                {
-                    materials.Add(Resources.Load("Memes/Reli/Materials/" +i, typeof(Material)) as Material);
-                }
-                break;
-
-            case "1Ba":
-                cantidadMat = 5;
-                for (int i = 0; i < cantidadMat; i++)
-                {
-                    materials.Add(Resources.Load("Memes/Consp/Materials/" + i, typeof(Material)) as Material);
-                }
-                
-                break;
-            case "3Aa":
-                cantidadMat = 4;
-                for (int i = 0; i < cantidadMat; i++)
-                {
-                    materials.Add(Resources.Load("Memes/Memes/Materials/" + i, typeof(Material)) as Material);
-                }
-                break;
-            case "4Aa":
-                cantidadMat = 4;
-                for (int i = 0; i < cantidadMat; i++)
-                {
-                    materials.Add(Resources.Load("Memes/Fashion/Materials/" + i, typeof(Material)) as Material);
-                }
-                break;
-        }
+        // Las imágenes se asignan en el Inspector (antes se cargaban de Resources según el nombre del orbe)
+        if (materials.Count == 0) { Debug.LogError("[OrbMemes] '" + name + "' no tiene imágenes asignadas.", this); enabled = false; return; }
         matCount = 0;
         memeRenderer = gameObject.transform.Find("Meme").GetComponent<MeshRenderer>();
         memeRenderer.sharedMaterial = materials[matCount];
