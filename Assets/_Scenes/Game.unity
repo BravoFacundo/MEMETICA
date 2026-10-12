@@ -457,6 +457,7 @@ GameObject:
   - component: {fileID: 32968217}
   - component: {fileID: 32968219}
   - component: {fileID: 32968218}
+  - component: {fileID: 32968220}
   m_Layer: 8
   m_Name: Particle System
   m_TagString: Untagged
@@ -5285,6 +5286,19 @@ ParticleSystem:
         m_PostInfinity: 2
         m_RotationOrder: 4
     vectorLabel1_3: W
+--- !u!114 &32968220
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 32968216}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b64991bdcf1076c4ab66ae36a28e1e28, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  strengthMultiplier: 1
 --- !u!4 &34455843 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 108507113624698413, guid: eebb56c82efbd8d4bb0eb6bd925a0e9d, type: 3}
@@ -7441,6 +7455,7 @@ GameObject:
   - component: {fileID: 116522266}
   - component: {fileID: 116522265}
   - component: {fileID: 116522264}
+  - component: {fileID: 116522267}
   m_Layer: 6
   m_Name: WindParticles 2 (5)
   m_TagString: Untagged
@@ -12324,6 +12339,19 @@ Transform:
   m_Children: []
   m_Father: {fileID: 970318745}
   m_LocalEulerAnglesHint: {x: 0, y: -80.105, z: -9.011}
+--- !u!114 &116522267
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 116522263}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b64991bdcf1076c4ab66ae36a28e1e28, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  strengthMultiplier: 1
 --- !u!1001 &118463144
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -13150,6 +13178,7 @@ GameObject:
   - component: {fileID: 159480276}
   - component: {fileID: 159480278}
   - component: {fileID: 159480277}
+  - component: {fileID: 159480279}
   m_Layer: 8
   m_Name: Particle System
   m_TagString: Untagged
@@ -17978,6 +18007,19 @@ ParticleSystem:
         m_PostInfinity: 2
         m_RotationOrder: 4
     vectorLabel1_3: W
+--- !u!114 &159480279
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 159480275}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b64991bdcf1076c4ab66ae36a28e1e28, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  strengthMultiplier: 1
 --- !u!1 &163665290
 GameObject:
   m_ObjectHideFlags: 0
@@ -20118,6 +20160,7 @@ GameObject:
   - component: {fileID: 227270875}
   - component: {fileID: 227270877}
   - component: {fileID: 227270876}
+  - component: {fileID: 227270878}
   m_Layer: 8
   m_Name: Particle System
   m_TagString: Untagged
@@ -24946,6 +24989,19 @@ ParticleSystem:
         m_PostInfinity: 2
         m_RotationOrder: 4
     vectorLabel1_3: W
+--- !u!114 &227270878
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 227270874}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b64991bdcf1076c4ab66ae36a28e1e28, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  strengthMultiplier: 1
 --- !u!4 &227272465 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 1805616374771606476, guid: 94c51fd839663604fa1027f8f1329fe2, type: 3}
@@ -27923,6 +27979,7 @@ GameObject:
   - component: {fileID: 349427736}
   - component: {fileID: 349427735}
   - component: {fileID: 349427734}
+  - component: {fileID: 349427737}
   m_Layer: 6
   m_Name: WindParticles (4)
   m_TagString: Untagged
@@ -32851,6 +32908,19 @@ Transform:
   m_Children: []
   m_Father: {fileID: 970318745}
   m_LocalEulerAnglesHint: {x: 0, y: -90, z: 0}
+--- !u!114 &349427737
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 349427733}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b64991bdcf1076c4ab66ae36a28e1e28, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  strengthMultiplier: 1
 --- !u!43 &358251406
 Mesh:
   m_ObjectHideFlags: 0
@@ -33193,6 +33263,7 @@ GameObject:
   - component: {fileID: 374258423}
   - component: {fileID: 374258425}
   - component: {fileID: 374258424}
+  - component: {fileID: 374258426}
   m_Layer: 8
   m_Name: Particle System
   m_TagString: Untagged
@@ -38021,6 +38092,19 @@ ParticleSystem:
         m_PostInfinity: 2
         m_RotationOrder: 4
     vectorLabel1_3: W
+--- !u!114 &374258426
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 374258422}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b64991bdcf1076c4ab66ae36a28e1e28, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  strengthMultiplier: 1
 --- !u!1001 &375615194
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -38795,6 +38879,7 @@ GameObject:
   - component: {fileID: 395422725}
   - component: {fileID: 395422727}
   - component: {fileID: 395422726}
+  - component: {fileID: 395422728}
   m_Layer: 8
   m_Name: Particle System
   m_TagString: Untagged
@@ -43623,6 +43708,19 @@ ParticleSystem:
         m_PostInfinity: 2
         m_RotationOrder: 4
     vectorLabel1_3: W
+--- !u!114 &395422728
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 395422724}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b64991bdcf1076c4ab66ae36a28e1e28, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  strengthMultiplier: 1
 --- !u!1 &395546251 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 2544436480761032049, guid: 58a04ed3b9a72fe4eb0b19e2cba9eba5, type: 3}
@@ -43855,6 +43953,7 @@ GameObject:
   - component: {fileID: 406497347}
   - component: {fileID: 406497346}
   - component: {fileID: 406497345}
+  - component: {fileID: 406497348}
   m_Layer: 6
   m_Name: WindParticles 2 (3)
   m_TagString: Untagged
@@ -48738,6 +48837,19 @@ Transform:
   m_Children: []
   m_Father: {fileID: 970318745}
   m_LocalEulerAnglesHint: {x: 0, y: -80.105, z: -9.011}
+--- !u!114 &406497348
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 406497344}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b64991bdcf1076c4ab66ae36a28e1e28, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  strengthMultiplier: 1
 --- !u!1001 &406517914
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -51976,6 +52088,7 @@ GameObject:
   - component: {fileID: 506496470}
   - component: {fileID: 506496469}
   - component: {fileID: 506496468}
+  - component: {fileID: 506496471}
   m_Layer: 6
   m_Name: WindParticles (2)
   m_TagString: Untagged
@@ -56904,6 +57017,19 @@ Transform:
   m_Children: []
   m_Father: {fileID: 970318745}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &506496471
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 506496467}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b64991bdcf1076c4ab66ae36a28e1e28, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  strengthMultiplier: 1
 --- !u!1001 &506995803
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -58796,6 +58922,7 @@ GameObject:
   - component: {fileID: 579314785}
   - component: {fileID: 579314787}
   - component: {fileID: 579314786}
+  - component: {fileID: 579314788}
   m_Layer: 8
   m_Name: Particle System
   m_TagString: Untagged
@@ -63624,6 +63751,19 @@ ParticleSystem:
         m_PostInfinity: 2
         m_RotationOrder: 4
     vectorLabel1_3: W
+--- !u!114 &579314788
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 579314784}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b64991bdcf1076c4ab66ae36a28e1e28, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  strengthMultiplier: 1
 --- !u!4 &582229634 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 2544436480760738129, guid: 58a04ed3b9a72fe4eb0b19e2cba9eba5, type: 3}
@@ -68468,6 +68608,7 @@ GameObject:
   - component: {fileID: 785762880}
   - component: {fileID: 785762882}
   - component: {fileID: 785762881}
+  - component: {fileID: 785762883}
   m_Layer: 8
   m_Name: Particle System
   m_TagString: Untagged
@@ -73296,6 +73437,19 @@ ParticleSystem:
         m_PostInfinity: 2
         m_RotationOrder: 4
     vectorLabel1_3: W
+--- !u!114 &785762883
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 785762879}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b64991bdcf1076c4ab66ae36a28e1e28, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  strengthMultiplier: 1
 --- !u!1001 &785818171
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -74427,6 +74581,7 @@ GameObject:
   - component: {fileID: 837878125}
   - component: {fileID: 837878124}
   - component: {fileID: 837878123}
+  - component: {fileID: 837878126}
   m_Layer: 6
   m_Name: WindParticles (1)
   m_TagString: Untagged
@@ -79355,6 +79510,19 @@ Transform:
   m_Children: []
   m_Father: {fileID: 970318745}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &837878126
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 837878122}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b64991bdcf1076c4ab66ae36a28e1e28, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  strengthMultiplier: 1
 --- !u!64 &845977214
 MeshCollider:
   m_ObjectHideFlags: 0
@@ -79388,6 +79556,7 @@ GameObject:
   - component: {fileID: 846153753}
   - component: {fileID: 846153752}
   - component: {fileID: 846153751}
+  - component: {fileID: 846153754}
   m_Layer: 6
   m_Name: WindParticles (3)
   m_TagString: Untagged
@@ -84316,6 +84485,19 @@ Transform:
   m_Children: []
   m_Father: {fileID: 970318745}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &846153754
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 846153750}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b64991bdcf1076c4ab66ae36a28e1e28, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  strengthMultiplier: 1
 --- !u!4 &847098908 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 7590256825491148333, guid: 7669eb9ed2d05c9498179584afaabb12, type: 3}
@@ -85600,6 +85782,7 @@ GameObject:
   - component: {fileID: 907909348}
   - component: {fileID: 907909347}
   - component: {fileID: 907909346}
+  - component: {fileID: 907909349}
   m_Layer: 6
   m_Name: WindParticles 2 (2)
   m_TagString: Untagged
@@ -90483,6 +90666,19 @@ Transform:
   m_Children: []
   m_Father: {fileID: 970318745}
   m_LocalEulerAnglesHint: {x: 0, y: -80.105, z: -9.011}
+--- !u!114 &907909349
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 907909345}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b64991bdcf1076c4ab66ae36a28e1e28, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  strengthMultiplier: 1
 --- !u!1 &908206780
 GameObject:
   m_ObjectHideFlags: 0
@@ -92925,6 +93121,7 @@ GameObject:
   - component: {fileID: 1010556142}
   - component: {fileID: 1010556141}
   - component: {fileID: 1010556140}
+  - component: {fileID: 1010556143}
   m_Layer: 6
   m_Name: WindParticles 2 (4)
   m_TagString: Untagged
@@ -97808,6 +98005,19 @@ Transform:
   m_Children: []
   m_Father: {fileID: 970318745}
   m_LocalEulerAnglesHint: {x: 0, y: -80.105, z: -9.011}
+--- !u!114 &1010556143
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1010556139}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b64991bdcf1076c4ab66ae36a28e1e28, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  strengthMultiplier: 1
 --- !u!1 &1014028607
 GameObject:
   m_ObjectHideFlags: 0
@@ -97850,6 +98060,7 @@ GameObject:
   - component: {fileID: 1031116078}
   - component: {fileID: 1031116077}
   - component: {fileID: 1031116076}
+  - component: {fileID: 1031116079}
   m_Layer: 6
   m_Name: WindParticles 2 (1)
   m_TagString: Untagged
@@ -102733,6 +102944,19 @@ Transform:
   m_Children: []
   m_Father: {fileID: 970318745}
   m_LocalEulerAnglesHint: {x: 0, y: -80.105, z: -9.011}
+--- !u!114 &1031116079
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1031116075}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b64991bdcf1076c4ab66ae36a28e1e28, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  strengthMultiplier: 1
 --- !u!1 &1033270764 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 1694894201118028, guid: 6dcae7204dd466c4c862bc640ea7c02e, type: 3}
@@ -103968,6 +104192,7 @@ GameObject:
   - component: {fileID: 1066039975}
   - component: {fileID: 1066039977}
   - component: {fileID: 1066039976}
+  - component: {fileID: 1066039978}
   m_Layer: 8
   m_Name: Particle System
   m_TagString: Untagged
@@ -108796,6 +109021,19 @@ ParticleSystem:
         m_PostInfinity: 2
         m_RotationOrder: 4
     vectorLabel1_3: W
+--- !u!114 &1066039978
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1066039974}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b64991bdcf1076c4ab66ae36a28e1e28, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  strengthMultiplier: 1
 --- !u!64 &1070705064
 MeshCollider:
   m_ObjectHideFlags: 0
@@ -110175,6 +110413,7 @@ GameObject:
   - component: {fileID: 1115815021}
   - component: {fileID: 1115815020}
   - component: {fileID: 1115815019}
+  - component: {fileID: 1115815022}
   m_Layer: 6
   m_Name: WindParticles 2
   m_TagString: Untagged
@@ -115058,6 +115297,19 @@ Transform:
   m_Children: []
   m_Father: {fileID: 970318745}
   m_LocalEulerAnglesHint: {x: 0, y: -120, z: 0}
+--- !u!114 &1115815022
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1115815018}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b64991bdcf1076c4ab66ae36a28e1e28, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  strengthMultiplier: 1
 --- !u!1 &1117510022
 GameObject:
   m_ObjectHideFlags: 0
@@ -123338,6 +123590,7 @@ GameObject:
   - component: {fileID: 1414397459}
   - component: {fileID: 1414397461}
   - component: {fileID: 1414397460}
+  - component: {fileID: 1414397462}
   m_Layer: 8
   m_Name: Particle System
   m_TagString: Untagged
@@ -128166,6 +128419,19 @@ ParticleSystem:
         m_PostInfinity: 2
         m_RotationOrder: 4
     vectorLabel1_3: W
+--- !u!114 &1414397462
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1414397458}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b64991bdcf1076c4ab66ae36a28e1e28, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  strengthMultiplier: 1
 --- !u!64 &1415071771
 MeshCollider:
   m_ObjectHideFlags: 0
@@ -132979,6 +133245,7 @@ GameObject:
   - component: {fileID: 1649259267}
   - component: {fileID: 1649259269}
   - component: {fileID: 1649259268}
+  - component: {fileID: 1649259270}
   m_Layer: 8
   m_Name: Particle System
   m_TagString: Untagged
@@ -137807,6 +138074,19 @@ ParticleSystem:
         m_PostInfinity: 2
         m_RotationOrder: 4
     vectorLabel1_3: W
+--- !u!114 &1649259270
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1649259266}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b64991bdcf1076c4ab66ae36a28e1e28, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  strengthMultiplier: 1
 --- !u!1 &1649931557
 GameObject:
   m_ObjectHideFlags: 0
@@ -140219,6 +140499,7 @@ GameObject:
   - component: {fileID: 1762435504}
   - component: {fileID: 1762435503}
   - component: {fileID: 1762435502}
+  - component: {fileID: 1762435505}
   m_Layer: 6
   m_Name: WindParticles
   m_TagString: Untagged
@@ -145147,6 +145428,19 @@ Transform:
   m_Children: []
   m_Father: {fileID: 970318745}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1762435505
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1762435501}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b64991bdcf1076c4ab66ae36a28e1e28, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  strengthMultiplier: 1
 --- !u!1 &1768682694 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 9067630255382165061, guid: c3057579327b43e4582b33e1580c5a07, type: 3}
@@ -146406,6 +146700,7 @@ GameObject:
   - component: {fileID: 1839480433}
   - component: {fileID: 1839480435}
   - component: {fileID: 1839480434}
+  - component: {fileID: 1839480436}
   m_Layer: 8
   m_Name: Particle System
   m_TagString: Untagged
@@ -151234,6 +151529,19 @@ ParticleSystem:
         m_PostInfinity: 2
         m_RotationOrder: 4
     vectorLabel1_3: W
+--- !u!114 &1839480436
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1839480432}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b64991bdcf1076c4ab66ae36a28e1e28, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  strengthMultiplier: 1
 --- !u!1 &1846965211
 GameObject:
   m_ObjectHideFlags: 0
@@ -151959,6 +152267,7 @@ GameObject:
   - component: {fileID: 1869328126}
   - component: {fileID: 1869328128}
   - component: {fileID: 1869328127}
+  - component: {fileID: 1869328129}
   m_Layer: 8
   m_Name: Particle System
   m_TagString: Untagged
@@ -156787,6 +157096,19 @@ ParticleSystem:
         m_PostInfinity: 2
         m_RotationOrder: 4
     vectorLabel1_3: W
+--- !u!114 &1869328129
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1869328125}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b64991bdcf1076c4ab66ae36a28e1e28, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  strengthMultiplier: 1
 --- !u!1001 &1870803886
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -157425,6 +157747,7 @@ GameObject:
   - component: {fileID: 1889992084}
   - component: {fileID: 1889992083}
   - component: {fileID: 1889992082}
+  - component: {fileID: 1889992085}
   m_Layer: 6
   m_Name: WindParticles 2 (6)
   m_TagString: Untagged
@@ -162308,6 +162631,19 @@ Transform:
   m_Children: []
   m_Father: {fileID: 970318745}
   m_LocalEulerAnglesHint: {x: 0, y: -108.271, z: 0}
+--- !u!114 &1889992085
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1889992081}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b64991bdcf1076c4ab66ae36a28e1e28, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  strengthMultiplier: 1
 --- !u!1 &1891692441
 GameObject:
   m_ObjectHideFlags: 0

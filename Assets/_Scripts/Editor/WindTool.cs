@@ -6,6 +6,9 @@
 //   - Destilda "Batching Static" (el shader lo necesita).
 //   - Si la escena no tiene WindController, lo crea.
 // Ctrl+Z deshace los cambios en la escena.
+//
+// Menú: Memetica > Viento > Partículas siguen el viento
+//   Agrega ParticleWind a las partículas de hojas (material con "Lea"/"Leaf") y de ráfagas (objetos "WindParticles").
 
 using System.Linq;
 using UnityEditor;
@@ -69,6 +72,31 @@ public static class WindTool
         EditorSceneManager.MarkSceneDirty(SceneManager.GetActiveScene());
         AssetDatabase.SaveAssets();
         Debug.Log($"[Viento] Listo: {renderers} renderers con viento, {created} materiales _Wind nuevos en {Folder}.");
+    }
+
+    [MenuItem("Memetica/Viento/Partículas siguen el viento")]
+    static void AddParticleWind()
+    {
+        Undo.SetCurrentGroupName("Partículas siguen el viento");
+        int undoGroup = Undo.GetCurrentGroup();
+        int added = 0;
+
+        foreach (ParticleSystem ps in Object.FindObjectsOfType<ParticleSystem>(true))
+        {
+            if (ps.GetComponent<ParticleWind>() != null) continue;
+            Material mat = ps.GetComponent<ParticleSystemRenderer>()?.sharedMaterial;
+            bool leaves = mat != null && (mat.name.Contains("Lea") || mat.name.Contains("Leaf"));
+            bool gusts = ps.name.StartsWith("WindParticles");
+            if (!leaves && !gusts) continue;
+
+            Undo.AddComponent<ParticleWind>(ps.gameObject);
+            added++;
+            Debug.Log("[Viento] ParticleWind → " + ps.transform.parent?.name + "/" + ps.name, ps);
+        }
+
+        Undo.CollapseUndoOperations(undoGroup);
+        EditorSceneManager.MarkSceneDirty(SceneManager.GetActiveScene());
+        Debug.Log("[Viento] Listo: " + added + " sistemas de partículas siguen el viento.");
     }
 
     [MenuItem("Memetica/Viento/Aplicar viento a la selección", true)]
