@@ -10,7 +10,7 @@ public class PlayerLook : MonoBehaviour
     private Transform playerTransform;
     
     [Header("Player Look")]
-    public bool playerCanLook = false;
+    public bool playerCanLook = true;   // the game starts looking (tutorial popups no longer block it)
     public float mouseSensitivity = 100f;
     private float sensitivityReduction = 1;
     private float xRotation = 0f;

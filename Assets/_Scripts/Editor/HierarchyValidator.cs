@@ -48,8 +48,6 @@ public static class HierarchyValidator
         else
         {
             if (level.startRespawnPoint == null) Error("LevelManager: falta asignar Start Respawn Point.", level);
-            if (level.elevatorZLocks == null) Warn("LevelManager: falta asignar Elevator Z Locks.", level);
-            if (level.elevatorZPedestal == null) Warn("LevelManager: falta asignar Elevator Z Pedestal.", level);
 
             foreach (var isla in Object.FindObjectsOfType<Island>(true))
             {
@@ -58,8 +56,12 @@ public static class HierarchyValidator
             }
             foreach (var puente in Object.FindObjectsOfType<Bridge>(true))
                 if (!puente.name.StartsWith(level.bridgePrefix)) Warn($"El puente '{puente.name}' no sigue la convención '{level.bridgePrefix}ID'.", puente);
-            foreach (var ascensor in Object.FindObjectsOfType<Elevator>(true))
-                if (!ascensor.name.StartsWith(level.elevatorPrefix)) Warn($"El ascensor '{ascensor.name}' no sigue la convención '{level.elevatorPrefix}ID'.", ascensor);
+            foreach (var elevator in Object.FindObjectsOfType<Elevator>(true))
+            {
+                if (!elevator.name.StartsWith(level.elevatorPrefix)) Warn($"Elevator '{elevator.name}' does not follow the '{level.elevatorPrefix}ID' convention.", elevator);
+                if (elevator.dockPoint == null) Error($"Elevator '{elevator.name}' has no Dock Point.", elevator);
+                else if (elevator.dockPoint.GetComponentInParent<Island>() == null) Warn($"Elevator '{elevator.name}': its Dock Point is not inside an island (no respawn or docking on arrival).", elevator);
+            }
         }
 
         // 2. Pedestales: partes asignadas, trigger y audio en la raíz, sonidos. Pinturas con su pedestal.

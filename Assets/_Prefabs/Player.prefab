@@ -141,7 +141,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 7a3735e6fe9d121418f58bc95de845a0, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  playerCanLook: 0
+  playerCanLook: 1
   mouseSensitivity: 3
   isZooming: 0
   zoomingSpeed: 5

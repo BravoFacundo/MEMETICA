@@ -10,7 +10,6 @@ public class PauseMenu : MonoBehaviour
 
     [Header("References")]
     [SerializeField] private GameObject pauseMenuUI;
-    [SerializeField] private GameObject frameUI;   // Canvas_Frame: el marco del monitor, solo en pausa
     [SerializeField] private AudioMixer audioMixer;
     [SerializeField] private UIManager uiManager;  // loads the Menu and quits with the busy cursor
 
@@ -19,7 +18,7 @@ public class PauseMenu : MonoBehaviour
         // A fresh Game scene always starts unpaused (the static flag survives scene loads)
         GameIsPaused = false;
         Time.timeScale = 1f;
-        if (frameUI != null) frameUI.SetActive(false);
+        // The monitor frame is animated by PauseViewport
     }
 
     void Update()
@@ -43,7 +42,6 @@ public class PauseMenu : MonoBehaviour
         GameIsPaused = false;
 
         pauseMenuUI.SetActive(false);
-        if (frameUI != null) frameUI.SetActive(false);
         if (RetroCursor.Instance != null) RetroCursor.Instance.SetFollowMouse(false);   // vuelve la mira fija (Crosshair pone el ícono)
 
         Time.timeScale = 1f;
@@ -55,7 +53,6 @@ public class PauseMenu : MonoBehaviour
         GameIsPaused = true;
 
         pauseMenuUI.SetActive(true);
-        if (frameUI != null) frameUI.SetActive(true);
         if (RetroCursor.Instance != null)
         {
             RetroCursor.Instance.SetFollowMouse(true);              // cursor libre, como en el menú

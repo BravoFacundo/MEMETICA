@@ -8,8 +8,8 @@ using UnityEngine;
 // Los demás scripts lo usan con LevelManager.Instance.
 //
 // Los pedestales piden cosas por ID y acá se buscan por nombre, con la convención Tipo_ID:
-//   isla "3" → "Island_3"   |   puente "A" → "Bridge_A"   |   ascensor "Z" → "Elevator_Z"
-//   isla "0" → fin del juego |   isla "Z" / "X" → ascensores
+//   isla "3" → "Island_3"   |   puente "A" → "Bridge_A"   |   isla "0" → fin del juego
+//   elevators: "Tutorial_02" → "Elevator_Tutorial_02" (an island ID that matches an elevator starts its ride)
 // Cada isla tiene un hijo "RespawnPoint" donde reaparece el jugador.
 // Para sumar una isla o un puente no hace falta tocar código: alcanza con respetar la convención.
 // Los prefijos se pueden cambiar en el Inspector (sección NOMBRES).
@@ -41,10 +41,6 @@ public class LevelManager : MonoBehaviour
     [Header("REFERENCIAS")]
     [Tooltip("Donde reaparece todo al empezar: el RespawnPoint de la isla del tutorial")]
     public Transform startRespawnPoint;
-    [Tooltip("Paredes invisibles que encierran al jugador mientras sube el ascensor del tutorial")]
-    public GameObject elevatorZLocks;
-    [Tooltip("Pedestal que va arriba del ascensor del tutorial")]
-    public GameObject elevatorZPedestal;
 
     [Header("FIN DEL JUEGO")]
     [Tooltip("Segundos que caen las islas antes de cerrar el juego")]
@@ -54,7 +50,6 @@ public class LevelManager : MonoBehaviour
     private readonly Dictionary<string, Island> islands = new Dictionary<string, Island>();
     private readonly Dictionary<string, Bridge> bridges = new Dictionary<string, Bridge>();
     private readonly Dictionary<string, Elevator> elevators = new Dictionary<string, Elevator>();
-    private bool elevatorZUsed;
 
     void Awake()
     {
@@ -72,9 +67,11 @@ public class LevelManager : MonoBehaviour
         switch (id)
         {
             case "0": StartCoroutine(GameComplete()); break;
-            case "Z": StartElevatorZ(); break;
-            case "X": if (TryGet(elevators, elevatorPrefix + "X", out Elevator x)) x.elevadorSube = true; break;
-            default:  if (TryGet(islands, islandPrefix + id, out Island isla)) isla.islaSube = true; break;
+            default:
+                // Elevators share the pedestal IDs with islands: if one matches, it starts its ride
+                if (elevators.TryGetValue(elevatorPrefix + id, out Elevator elevator)) elevator.StartRide();
+                else if (TryGet(islands, islandPrefix + id, out Island isla)) isla.islaSube = true;
+                break;
         }
     }
 
@@ -100,29 +97,6 @@ public class LevelManager : MonoBehaviour
     public Transform RespawnPointOf(GameObject island)
     {
         return island != null ? island.transform.Find(respawnPointName) : null;
-    }
-
-    // ---------- Casos especiales ----------
-
-    // Ascensor del tutorial: congela al jugador y lo lleva al Área 1 (solo una vez)
-    void StartElevatorZ()
-    {
-        if (elevatorZUsed || !TryGet(elevators, elevatorPrefix + "Z", out Elevator elevator)) return;
-        elevatorZUsed = true;
-
-        Transform ascensor = elevator.transform;
-        elevator.elevadorSube = true;
-
-        GameObject player = GameObject.Find("Player");
-        player.GetComponent<PlayerMove>().playerCanMove = false;
-        player.transform.SetParent(ascensor);
-        GameObject.Find("1Ba").transform.SetParent(ascensor);
-        Camera.main.GetComponent<PlayerHoldObjects>().canHold = false;
-
-        if (elevatorZLocks != null)
-            foreach (Collider col in elevatorZLocks.GetComponentsInChildren<Collider>()) col.enabled = true;
-        if (elevatorZPedestal != null)
-            elevatorZPedestal.GetComponentInChildren<SphereCollider>().enabled = false;   // el pedestal deja de funcionar
     }
 
     IEnumerator GameComplete()
