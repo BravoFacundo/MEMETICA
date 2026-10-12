@@ -1,16 +1,12 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.SceneManagement;
-using UnityEngine.Audio;
 
 public class PauseMenu : MonoBehaviour
 {
     public static bool GameIsPaused = false;
 
     [Header("References")]
+    [Tooltip("The pause window (SettingsWindow): shown while paused")]
     [SerializeField] private GameObject pauseMenuUI;
-    [SerializeField] private AudioMixer audioMixer;
     [SerializeField] private UIManager uiManager;  // loads the Menu and quits with the busy cursor
 
     void Start()
@@ -42,7 +38,7 @@ public class PauseMenu : MonoBehaviour
         GameIsPaused = false;
 
         pauseMenuUI.SetActive(false);
-        if (RetroCursor.Instance != null) RetroCursor.Instance.SetFollowMouse(false);   // vuelve la mira fija (Crosshair pone el ícono)
+        if (RetroCursor.Instance != null) RetroCursor.Instance.SetFollowMouse(false);   // back to the fixed crosshair (Crosshair sets the icon)
 
         Time.timeScale = 1f;
         Camera.main.GetComponent<PlayerLook>().playerCanLook = true;
@@ -55,8 +51,8 @@ public class PauseMenu : MonoBehaviour
         pauseMenuUI.SetActive(true);
         if (RetroCursor.Instance != null)
         {
-            RetroCursor.Instance.SetFollowMouse(true);              // cursor libre, como en el menú
-            RetroCursor.Instance.SetState(CursorState.Default);     // la flecha
+            RetroCursor.Instance.SetFollowMouse(true);              // free cursor, like in the menu
+            RetroCursor.Instance.SetState(CursorState.Default);     // the arrow
         }
 
         Time.timeScale = 0f;
@@ -76,14 +72,4 @@ public class PauseMenu : MonoBehaviour
         if (uiManager != null) uiManager.QuitGame();
         else Application.Quit();
     }
-
-    public void SetVolume(float volume)
-    {
-        audioMixer.SetFloat("volume", volume);
-    }
-    public void SetMouseSens(float Sens)
-    {
-        GameObject.Find("Main Camera").GetComponent<PlayerLook>().mouseSensitivity = Sens;
-    }
-
 }

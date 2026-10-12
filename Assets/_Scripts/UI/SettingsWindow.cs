@@ -7,16 +7,15 @@ using UnityEngine.UI;
 // Anyone who cares (AudioManager, PlayerLook) listens to Changed and applies the new values.
 public static class GameSettings
 {
-    // Mouse sensitivity is stored as 0..1 and mapped to this range of PlayerLook.mouseSensitivity
-    public const float SensitivityMin = 20f;
-    public const float SensitivityMax = 300f;
 
     public static float MasterVolume { get => PlayerPrefs.GetFloat("MasterVolume", 0.8f); set => PlayerPrefs.SetFloat("MasterVolume", value); }
     public static float MusicVolume  { get => PlayerPrefs.GetFloat("MusicVolume", 0.8f);  set => PlayerPrefs.SetFloat("MusicVolume", value); }
     public static float SfxVolume    { get => PlayerPrefs.GetFloat("SfxVolume", 0.8f);    set => PlayerPrefs.SetFloat("SfxVolume", value); }
-    public static float MouseSensitivity { get => PlayerPrefs.GetFloat("MouseSensitivity", 0.3f); set => PlayerPrefs.SetFloat("MouseSensitivity", value); }
+    // Slider 0..1, middle (0.5) = the sensitivity set on PlayerLook in the Inspector
+    public static float MouseSensitivity { get => PlayerPrefs.GetFloat("MouseSensitivityScale", 0.5f); set => PlayerPrefs.SetFloat("MouseSensitivityScale", value); }
 
-    public static float MouseSensitivityValue => Mathf.Lerp(SensitivityMin, SensitivityMax, MouseSensitivity);
+    // Multiplier for PlayerLook: 0 → x0.25, 0.5 → x1, 1 → x4 (exponential, so both halves feel even)
+    public static float MouseSensitivityMultiplier => Mathf.Pow(4f, (MouseSensitivity - 0.5f) * 2f);
 
     public static event Action Changed;
     public static void NotifyChanged() => Changed?.Invoke();
