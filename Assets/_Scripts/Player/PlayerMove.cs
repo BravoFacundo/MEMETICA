@@ -7,11 +7,15 @@ using UnityEngine;
 public class PlayerMove : MonoBehaviour
 {
     private CharacterController characterController;
-    
+    private PlayerHoldObjects hold;   // está en la Main Camera; se guarda una vez
+
     [Header("Player Move")]
     public bool playerCanMove = true;
-    public float speed = 12f;
-    Vector3 velocity;
+    public float walkSpeed = 5f;
+    [Tooltip("Con Shift, solo en el piso (en el aire se vuelve a Walk Speed, como en el original)")]
+    public float runSpeed = 10f;
+    private float currentSpeed;
+    private Vector3 velocity;
 
     [Header("Player Jump")]
     public float jumpHeight = 3f;
@@ -19,26 +23,23 @@ public class PlayerMove : MonoBehaviour
     public Transform groundCheck;
     public float groundDistance = 0.2f;
     public LayerMask groundMask;
-
     public bool isGrounded;
 
-    [Header("Lock bools")]
-    public bool lockOneTime;
+    [Header("Cruces con orbe (puente → isla)")]
     public bool hit1Lock = false;
     public bool hit2Lock = false;
     public GameObject prevIsland;
     public GameObject prevBridge;
 
-
-    //public bool playerCanMove = true;
-    public bool ascend = false;
-
-    public bool creativeMode = false;
+    [Header("Final")]
+    public bool ascend = false;   // lo prende el LevelManager al terminar el juego
 
     private void Start()
     {
         characterController = GetComponent<CharacterController>();
         groundCheck = transform.Find("GroundCheck").GetComponent<Transform>();
+        hold = Camera.main.GetComponent<PlayerHoldObjects>();
+        currentSpeed = walkSpeed;
     }
 
     void Update()
@@ -52,82 +53,62 @@ public class PlayerMove : MonoBehaviour
                 velocity.y = -2f;
             }
 
+            // Caminar o correr: correr solo en el piso; en el aire vuelve a caminar (comportamiento original)
+            currentSpeed = (isGrounded && Input.GetKey(KeyCode.LeftShift)) ? runSpeed : walkSpeed;
+
             float x = Input.GetAxis("Horizontal");
             float z = Input.GetAxis("Vertical");
-            float y = Input.GetAxis("Mouse ScrollWheel");
+            Vector3 move = transform.right * x + transform.forward * z;   // (se sacó el vuelo con la ruedita del mouse)
+            characterController.Move(move * currentSpeed * Time.deltaTime);
 
-            //Vector3 move = transform.right * x + transform.forward * z;
-            Vector3 move = transform.right * x + transform.forward * z + transform.up * y * speed;
-
-
-            characterController.Move(move * speed * Time.deltaTime);
-
-            if (Input.GetKeyDown("space") && isGrounded)
+            if (Input.GetKeyDown(KeyCode.Space) && isGrounded)
             {
                 velocity.y = Mathf.Sqrt(jumpHeight * -2f * gravity);
             }
-            if (Input.GetKey("left shift") && isGrounded)
-            {
-                speed = 10f;
-            }
-            else
-            {
-                speed = 5f;
-            }
 
             velocity.y += gravity * Time.deltaTime;
-
             characterController.Move(velocity * Time.deltaTime);
         }
 
         if (ascend)
         {
-            //canMove = false;
             velocity.y += 25f * Time.deltaTime;
         }
-        
-        //Plataformas que caen
-        RaycastHit hit;
-        if (Physics.Raycast(this.gameObject.transform.position, transform.TransformDirection(Vector3.down), out hit)) 
+
+        // Un solo rayo hacia abajo para todo (antes eran dos, más varios GetComponent por frame)
+        if (!Physics.Raycast(transform.position, Vector3.down, out RaycastHit hit)) return;
+
+        // Plataformas que caen
+        if (isGrounded && hit.transform.TryGetComponent(out Platform platform))
         {
-            if (hit.transform.tag == "Platform" && (isGrounded == true) && hit.transform.gameObject.GetComponent<Platform>() != null)
-            {
-                hit.transform.gameObject.GetComponent<Platform>().onTop = true;
-            }
+            platform.onTop = true;
         }
 
-        //Orbes que cambian 
-        RaycastHit hit1;
-        if (Physics.Raycast(this.gameObject.transform.position, transform.TransformDirection(Vector3.down), out hit1))
-        {
-            if (Camera.main.GetComponent<PlayerHoldObjects>().FueAgarrada == true)
-            {
-                if (FindParentWithTag(hit.transform.gameObject, "Puente") != null && hit1Lock == false
-                    && prevBridge != FindParentWithTag(hit.transform.gameObject, "Puente"))
-                {
-                    
-                    
-                    if (Camera.main.GetComponent<PlayerHoldObjects>().heldObject != null)
-                    {
-                        Camera.main.GetComponent<PlayerHoldObjects>().heldObject.GetComponent<OrbMemes>().isCrossing = true;
-                        Camera.main.GetComponent<PlayerHoldObjects>().heldObject.GetComponent<OrbMemes>().changeLock = false;
-                    }
-                    hit2Lock = false;
-                    hit1Lock = true;
-                    prevBridge = FindParentWithTag(hit.transform.gameObject, "Puente");
-                }
-                if (FindParentWithTag(hit.transform.gameObject, "Isla") != null && hit2Lock == false
-                    && prevIsland != FindParentWithTag(hit.transform.gameObject, "Isla"))
-                {                    
-                    hit1Lock = false;
-                    hit2Lock = true;
-                    prevIsland = FindParentWithTag(hit.transform.gameObject, "Isla");
+        // Orbes que cambian: cruzar un puente y llegar a una isla nueva con el orbe en la mano
+        if (!hold.FueAgarrada) return;
 
-                    // Cada isla nueva a la que llevás el orbe desbloquea una versión más de su imagen
-                    GameObject held = Camera.main.GetComponent<PlayerHoldObjects>().heldObject;
-                    if (held != null && held.TryGetComponent(out OrbMemes heldMemes)) heldMemes.IslandVisited(prevIsland);
-                }
-            }            
+        GameObject bridge = FindParentWithTag(hit.transform.gameObject, "Puente");
+        if (bridge != null && !hit1Lock && prevBridge != bridge)
+        {
+            if (hold.heldObject != null && hold.heldObject.TryGetComponent(out OrbMemes crossingMemes))
+            {
+                crossingMemes.isCrossing = true;
+                crossingMemes.changeLock = false;
+            }
+            hit2Lock = false;
+            hit1Lock = true;
+            prevBridge = bridge;
+        }
+
+        GameObject island = FindParentWithTag(hit.transform.gameObject, "Isla");
+        if (island != null && !hit2Lock && prevIsland != island)
+        {
+            hit1Lock = false;
+            hit2Lock = true;
+            prevIsland = island;
+
+            // Cada isla nueva a la que llevás el orbe desbloquea una versión más de su imagen
+            if (hold.heldObject != null && hold.heldObject.TryGetComponent(out OrbMemes heldMemes)) heldMemes.IslandVisited(island);
         }
     }
 
