@@ -6,22 +6,29 @@ Sin usar;_Prefabs;Assets/_Prefabs/AreaTree.prefab;317
 En uso (escena);_Prefabs;Assets/_Prefabs/AreaTuto 1.prefab;116
 En uso (escena);_Prefabs;Assets/_Prefabs/Elevator1.prefab;25
 En uso (escena);_Prefabs;Assets/_Prefabs/Elevator2.prefab;193
-En uso (escena);_Prefabs;Assets/_Prefabs/Pedestal.prefab;129
+En uso (escena);_Prefabs;Assets/_Prefabs/Pedestal.prefab;130
 En uso (escena);_Prefabs;Assets/_Prefabs/Puente1.prefab;19
 Sin usar;_Prefabs;Assets/_Prefabs/PuenteA.prefab;54
+En uso (escena);_Prefabs;Assets/_Prefabs/UI/Canvas_Cursor.prefab;6
+En uso (escena);_Prefabs;Assets/_Prefabs/UI/Canvas_Desktop.prefab;67
+En uso (escena);_Prefabs;Assets/_Prefabs/UI/Canvas_Frame.prefab;5
 En uso (escena);_Scenes;Assets/_Scenes/CC.asset;8
-En uso (escena);_Scenes;Assets/_Scenes/Game.unity;6511
-En uso (escena);_Scenes;Assets/_Scenes/Menu.unity;1133
-En uso (escena);_Scenes;Assets/_Scenes/Tutorial.unity;764
+En uso (escena);_Scenes;Assets/_Scenes/Game.unity;6520
+En uso (escena);_Scenes;Assets/_Scenes/Menu.unity;3002
+En uso (escena);_Scenes;Assets/_Scenes/Unused/OldMenu.unity;1133
+En uso (escena);_Scenes;Assets/_Scenes/Unused/OldTutorial.unity;764
 Editor;_Scripts;Assets/_Scripts/Editor/AssetUsageReport.cs;3
-Editor;_Scripts;Assets/_Scripts/Editor/AssetUsageReport.csv;132
-Editor;_Scripts;Assets/_Scripts/Editor/HierarchyValidator.cs;5
+Editor;_Scripts;Assets/_Scripts/Editor/DesktopLayoutTool.cs;5
+Editor;_Scripts;Assets/_Scripts/Editor/HierarchyValidator.cs;6
 En uso (escena);_Scripts;Assets/_Scripts/Islands/Bridge.cs;1
-En uso (escena);_Scripts;Assets/_Scripts/Islands/Elevator.cs;2
+En uso (escena);_Scripts;Assets/_Scripts/Islands/Elevator.cs;3
 En uso (escena);_Scripts;Assets/_Scripts/Islands/Island.cs;2
 Script sin referencia;_Scripts;Assets/_Scripts/Islands/IslandsHide.cs;1
 En uso (escena);_Scripts;Assets/_Scripts/Islands/IslandsManager.cs;9
 En uso (escena);_Scripts;Assets/_Scripts/Islands/Platform.cs;3
+En uso (escena);_Scripts;Assets/_Scripts/Managers/AudioManager.cs;1
+En uso (escena);_Scripts;Assets/_Scripts/Managers/UIManager.cs;3
+En uso (escena);_Scripts;Assets/_Scripts/Misc/FloatBob.cs;1
 En uso (escena);_Scripts;Assets/_Scripts/Misc/LookAtPlayer.cs;0
 En uso (escena);_Scripts;Assets/_Scripts/Misc/VideoStartPaused.cs;0
 En uso (escena);_Scripts;Assets/_Scripts/Player/CameraShake.cs;1
@@ -29,15 +36,18 @@ En uso (escena);_Scripts;Assets/_Scripts/Player/PlayerHoldObjects.cs;5
 En uso (escena);_Scripts;Assets/_Scripts/Player/PlayerLook.cs;2
 En uso (escena);_Scripts;Assets/_Scripts/Player/PlayerLookAtVideo.cs;2
 En uso (escena);_Scripts;Assets/_Scripts/Player/PlayerMove.cs;5
-En uso (escena);_Scripts;Assets/_Scripts/Player/PlayerRespawn.cs;3
+En uso (escena);_Scripts;Assets/_Scripts/Player/PlayerRespawn.cs;2
 En uso (escena);_Scripts;Assets/_Scripts/Puzzles/Atril.cs;0
-En uso (escena);_Scripts;Assets/_Scripts/Puzzles/OrbMemes.cs;8
+En uso (escena);_Scripts;Assets/_Scripts/Puzzles/OrbMemes.cs;10
 En uso (escena);_Scripts;Assets/_Scripts/Puzzles/OrbPosition.cs;1
-Script sin referencia;_Scripts;Assets/_Scripts/Puzzles/OrbRespawn.cs;0
-En uso (escena);_Scripts;Assets/_Scripts/Puzzles/Pedestal.cs;2
+En uso (escena);_Scripts;Assets/_Scripts/Puzzles/Pedestal.cs;5
 En uso (escena);_Scripts;Assets/_Scripts/Puzzles/PedestalTrigger.cs;9
-En uso (escena);_Scripts;Assets/_Scripts/UI/PauseMenu.cs;1
+En uso (escena);_Scripts;Assets/_Scripts/UI/Crosshair.cs;1
+En uso (escena);_Scripts;Assets/_Scripts/UI/DesktopIcon.cs;1
+En uso (escena);_Scripts;Assets/_Scripts/UI/PauseMenu.cs;2
+En uso (escena);_Scripts;Assets/_Scripts/UI/RetroCursor.cs;3
 En uso (escena);_Scripts;Assets/_Scripts/UI/StartTutorialScreen.cs;0
+En uso (escena);_Scripts;Assets/_Scripts/UI/WindowButton.cs;1
 En uso (escena);Art;Assets/Art/Materials/Bridges.mat;2
 En uso (escena);Art;Assets/Art/Materials/Fall_Leafs.mat;2
 En uso (escena);Art;Assets/Art/Materials/FallingRocks.mat;2
@@ -335,8 +345,41 @@ En uso (escena);Art;Assets/Art/Textures/TreesClouds_TreesClouds_AlbedoTransparen
 En uso (escena);Art;Assets/Art/Textures/TreesClouds_TreesClouds_AO.png;1418
 En uso (escena);Art;Assets/Art/Textures/TreesClouds_TreesClouds_MetallicSmoothness.png;20
 En uso (escena);Art;Assets/Art/Textures/TreesClouds_TreesClouds_Roughness.png;8
+Sin usar;Art;Assets/Art/UI/Background.png;1390
+En uso (escena);Art;Assets/Art/UI/Cursors/Cursor_Arrow.png;1
+En uso (escena);Art;Assets/Art/UI/Cursors/Cursor_Busy.png;9
+En uso (escena);Art;Assets/Art/UI/Cursors/Cursor_Dot.png;1
+En uso (escena);Art;Assets/Art/UI/Cursors/Cursor_Grab.png;3
+En uso (escena);Art;Assets/Art/UI/Cursors/Cursor_NotAllowed.png;2
+En uso (escena);Art;Assets/Art/UI/Cursors/Cursor_Point.png;3
+En uso (escena);Art;Assets/Art/UI/Cursors/Cursor_Zoom.png;8
+En uso (escena);Art;Assets/Art/UI/Cursors/Cursor_ZoomIn.png;8
+En uso (escena);Art;Assets/Art/UI/Cursors/Cursor_ZoomOut.png;8
+En uso (escena);Art;Assets/Art/UI/Icons/Icon_Config.png;9
+En uso (escena);Art;Assets/Art/UI/Icons/Icon_Exit.png;7
+En uso (escena);Art;Assets/Art/UI/Icons/Icon_Image.png;9
+En uso (escena);Art;Assets/Art/UI/Icons/Icon_Play.png;18
+En uso (escena);Art;Assets/Art/UI/Icons/Icon_Trash.png;6
+Sin usar;Art;Assets/Art/UI/Logo.png;15
+En uso (escena);Art;Assets/Art/UI/PCFrame.png;13
+Sin usar;Art;Assets/Art/UI/Tutorial/Barra.png;34
+Sin usar;Art;Assets/Art/UI/Tutorial/Camara.png;28
+Sin usar;Art;Assets/Art/UI/Tutorial/ClickDerecho.png;28
+Sin usar;Art;Assets/Art/UI/Tutorial/ClickIzquierdo.png;30
+En uso (escena);Art;Assets/Art/UI/Tutorial/Escape.png;21
+En uso (escena);Art;Assets/Art/UI/Tutorial/PauseMenu.png;333
+Sin usar;Art;Assets/Art/UI/Tutorial/Shift.png;25
+En uso (escena);Art;Assets/Art/UI/Tutorial/StartTutorialScreen.png;1384
+Sin usar;Art;Assets/Art/UI/Tutorial/Wasd.png;40
+En uso (escena);Art;Assets/Art/UI/Windows/Windows_Exit.png;55
+En uso (escena);Art;Assets/Art/UI/Windows/Windows_Logo.png;19
 En uso (escena);Audio;Assets/Audio/MainMixer.mixer;1
-Sin usar;Audio;Assets/Audio/Music/MainTheme_QueLindaNube.mp3;6177
+En uso (escena);Audio;Assets/Audio/Music/MainTheme_QueLindaNube.mp3;6177
+En uso (escena);Audio;Assets/Audio/SFX/OrbChange.wav;9
+En uso (escena);Audio;Assets/Audio/SFX/OrbReturn.wav;8
+En uso (escena);Audio;Assets/Audio/SFX/OrbSweepTick.wav;6
+En uso (escena);Audio;Assets/Audio/SFX/OrbWarn.wav;14
+En uso (escena);Audio;Assets/Audio/SFX/PedestalBreak.wav;17
 En uso (escena);Audio;Assets/Audio/SFX/PedestalCharge.wav;42
 En uso (escena);Audio;Assets/Audio/SFX/PedestalLoss.wav;10
 En uso (escena);Audio;Assets/Audio/SFX/PedestalSnap.wav;24
@@ -641,15 +684,41 @@ En uso (escena);ThirdParty;Assets/ThirdParty/PostProcessing/Utilities/CustomMoti
 En uso (escena);ThirdParty;Assets/ThirdParty/PostProcessing/Utilities/CustomMotionTexture/Textures/DebugMotionVectors.png;166
 En uso (escena);ThirdParty;Assets/ThirdParty/PostProcessing/Utilities/CustomMotionTexture/Textures/UVChecker.png;12
 En uso (escena);ThirdParty;Assets/ThirdParty/PostProcessing/Utilities/CustomMotionTexture/Textures/WheelMotionVectors.png;379
-Sin usar;UI;Assets/UI/Background.png;1390
-En uso (escena);UI;Assets/UI/Cursor_Grab.png;22
-Sin usar;UI;Assets/UI/Logo.png;15
-Sin usar;UI;Assets/UI/Tutorial/Barra.png;34
-Sin usar;UI;Assets/UI/Tutorial/Camara.png;28
-Sin usar;UI;Assets/UI/Tutorial/ClickDerecho.png;28
-Sin usar;UI;Assets/UI/Tutorial/ClickIzquierdo.png;30
-En uso (escena);UI;Assets/UI/Tutorial/Escape.png;21
-En uso (escena);UI;Assets/UI/Tutorial/PauseMenu.png;333
-Sin usar;UI;Assets/UI/Tutorial/Shift.png;25
-En uso (escena);UI;Assets/UI/Tutorial/StartTutorialScreen.png;1384
-Sin usar;UI;Assets/UI/Tutorial/Wasd.png;40
+Sin usar;ThirdParty;Assets/ThirdParty/TextMesh Pro/Documentation/TextMesh Pro User Guide 2016.pdf;678
+En uso (Resources);ThirdParty;Assets/ThirdParty/TextMesh Pro/Fonts/impact.ttf;132
+Sin usar;ThirdParty;Assets/ThirdParty/TextMesh Pro/Fonts/LiberationSans - OFL.txt;4
+En uso (Resources);ThirdParty;Assets/ThirdParty/TextMesh Pro/Fonts/LiberationSans.ttf;341
+En uso (escena);ThirdParty;Assets/ThirdParty/TextMesh Pro/Fonts/Nunito-VariableFont_wght.ttf;269
+En uso (Resources);ThirdParty;Assets/ThirdParty/TextMesh Pro/Resources/Fonts & Materials/impact SDF.asset;2068
+En uso (Resources);ThirdParty;Assets/ThirdParty/TextMesh Pro/Resources/Fonts & Materials/LiberationSans SDF - Drop Shadow.mat;2
+En uso (Resources);ThirdParty;Assets/ThirdParty/TextMesh Pro/Resources/Fonts & Materials/LiberationSans SDF - Fallback.asset;9
+En uso (Resources);ThirdParty;Assets/ThirdParty/TextMesh Pro/Resources/Fonts & Materials/LiberationSans SDF - Outline.mat;2
+En uso (Resources);ThirdParty;Assets/ThirdParty/TextMesh Pro/Resources/Fonts & Materials/LiberationSans SDF.asset;2203
+En uso (escena);ThirdParty;Assets/ThirdParty/TextMesh Pro/Resources/Fonts & Materials/Nunito SDF - Outline 2.asset;627
+En uso (Resources);ThirdParty;Assets/ThirdParty/TextMesh Pro/Resources/Fonts & Materials/Nunito SDF - Outline.asset;18
+En uso (Resources);ThirdParty;Assets/ThirdParty/TextMesh Pro/Resources/Fonts & Materials/Nunito-VariableFont_wght SDF.asset;2070
+En uso (Resources);ThirdParty;Assets/ThirdParty/TextMesh Pro/Resources/LineBreaking Following Characters.txt;0
+En uso (Resources);ThirdParty;Assets/ThirdParty/TextMesh Pro/Resources/LineBreaking Leading Characters.txt;0
+En uso (Resources);ThirdParty;Assets/ThirdParty/TextMesh Pro/Resources/Sprite Assets/EmojiOne.asset;13
+En uso (Resources);ThirdParty;Assets/ThirdParty/TextMesh Pro/Resources/Style Sheets/Default Style Sheet.asset;4
+En uso (Resources);ThirdParty;Assets/ThirdParty/TextMesh Pro/Resources/TMP Settings.asset;1
+Sin usar;ThirdParty;Assets/ThirdParty/TextMesh Pro/Shaders/TMP_Bitmap.shader;3
+Sin usar;ThirdParty;Assets/ThirdParty/TextMesh Pro/Shaders/TMP_Bitmap-Custom-Atlas.shader;3
+Sin usar;ThirdParty;Assets/ThirdParty/TextMesh Pro/Shaders/TMP_Bitmap-Mobile.shader;3
+Sin usar;ThirdParty;Assets/ThirdParty/TextMesh Pro/Shaders/TMP_SDF Overlay.shader;10
+Sin usar;ThirdParty;Assets/ThirdParty/TextMesh Pro/Shaders/TMP_SDF SSD.shader;11
+En uso (escena);ThirdParty;Assets/ThirdParty/TextMesh Pro/Shaders/TMP_SDF.shader;10
+Sin usar;ThirdParty;Assets/ThirdParty/TextMesh Pro/Shaders/TMP_SDF-Mobile Masking.shader;7
+Sin usar;ThirdParty;Assets/ThirdParty/TextMesh Pro/Shaders/TMP_SDF-Mobile Overlay.shader;7
+Sin usar;ThirdParty;Assets/ThirdParty/TextMesh Pro/Shaders/TMP_SDF-Mobile SSD.shader;2
+En uso (Resources);ThirdParty;Assets/ThirdParty/TextMesh Pro/Shaders/TMP_SDF-Mobile.shader;7
+Sin usar;ThirdParty;Assets/ThirdParty/TextMesh Pro/Shaders/TMP_SDF-Surface.shader;4
+Sin usar;ThirdParty;Assets/ThirdParty/TextMesh Pro/Shaders/TMP_SDF-Surface-Mobile.shader;3
+En uso (Resources);ThirdParty;Assets/ThirdParty/TextMesh Pro/Shaders/TMP_Sprite.shader;2
+Sin usar;ThirdParty;Assets/ThirdParty/TextMesh Pro/Shaders/TMPro.cginc;2
+Sin usar;ThirdParty;Assets/ThirdParty/TextMesh Pro/Shaders/TMPro_Mobile.cginc;5
+Sin usar;ThirdParty;Assets/ThirdParty/TextMesh Pro/Shaders/TMPro_Properties.cginc;2
+Sin usar;ThirdParty;Assets/ThirdParty/TextMesh Pro/Shaders/TMPro_Surface.cginc;3
+Sin usar;ThirdParty;Assets/ThirdParty/TextMesh Pro/Sprites/EmojiOne Attribution.txt;0
+Sin usar;ThirdParty;Assets/ThirdParty/TextMesh Pro/Sprites/EmojiOne.json;4
+En uso (Resources);ThirdParty;Assets/ThirdParty/TextMesh Pro/Sprites/EmojiOne.png;109
