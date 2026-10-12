@@ -52,7 +52,7 @@ public class PlayerLookAtVideo : MonoBehaviour
                     {
                         paintingVideo = hit.transform.GetComponentInChildren<VideoPlayer>();
                         audioSource = hit.transform.GetComponentInChildren<AudioSource>();
-                        orbIsCorrect = hit.transform.GetComponentInChildren<Atril>().orbInPedestalIsCorrect;
+                        orbIsCorrect = hit.transform.GetComponentInChildren<Atril>().IsCorrect;
                     }                 
                     looking = true;
                     rayHitLock = true;

@@ -62,15 +62,22 @@ public static class HierarchyValidator
                 if (!ascensor.name.StartsWith(level.elevatorPrefix)) Warn($"El ascensor '{ascensor.name}' no sigue la convención '{level.elevatorPrefix}ID'.", ascensor);
         }
 
-        // 2. Pedestales: hijos directos que busca el código + tener padre (busca "Pintura" como hermano)
+        // 2. Pedestales: partes asignadas, trigger y audio en la raíz, sonidos. Pinturas con su pedestal.
         foreach (var ped in Object.FindObjectsOfType<Pedestal>(true))
         {
-            foreach (var child in new[] { "PedTrigger", "PedPivot", "PedAudio", "PedParticles" })
-                if (ped.transform.Find(child) == null) Error($"El pedestal '{ped.name}' perdió su hijo directo '{child}'.", ped);
-            if (ped.transform.parent == null) Error($"El pedestal '{ped.name}' no tiene padre (busca 'Pintura' como hermano).", ped);
+            if (ped.transform.Find("PedTrigger") != null) Error($"El pedestal '{ped.name}' tiene la estructura vieja (Memetica > Migrar pedestales).", ped);
+            if (ped.socket == null) Error($"El pedestal '{ped.name}' no tiene Socket asignado.", ped);
+            if (ped.visualKeyed == null || ped.visualKeyless == null) Warn($"El pedestal '{ped.name}' no tiene asignados Visual_Keyed / Visual_Keyless.", ped);
+            if (!ped.TryGetComponent(out SphereCollider col) || !col.isTrigger) Error($"El pedestal '{ped.name}' no tiene SphereCollider trigger en la raíz.", ped);
+            if (!ped.TryGetComponent(out AudioSource _)) Error($"El pedestal '{ped.name}' no tiene AudioSource en la raíz.", ped);
             if (ped.chargeClip == null || ped.correctClip == null || ped.incorrectClip == null || ped.snapClip == null)
                 Warn($"El pedestal '{ped.name}' tiene sonidos sin asignar.", ped);
         }
+        foreach (var atril in Object.FindObjectsOfType<Atril>(true))
+            if (atril.pedestal == null) Warn($"La pintura '{atril.name}' (en {atril.transform.parent?.parent?.name}) no tiene pedestal asignado.", atril);
+        foreach (var group in Object.FindObjectsOfType<PedestalGroup>(true))
+            foreach (var p in group.pedestals)
+                if (p == null || p.group != group) Error($"El grupo '{group.name}' tiene un pedestal vacío o que no lo referencia.", group);
 
         // 3. Orbes: hijos "Meme" y "Audio"
         foreach (var orb in Object.FindObjectsOfType<OrbMemes>(true))
