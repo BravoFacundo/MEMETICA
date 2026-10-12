@@ -30,7 +30,8 @@ public class PlayerHoldObjects : MonoBehaviour
         if (!PauseMenu.GameIsPaused || canHold)
         {
             // ¿Está mirando un orbe? (antes prendía y apagaba GrabIcon; ahora la mira la maneja Crosshair)
-            LookingAtOrb = Physics.Raycast(transform.position, transform.TransformDirection(Vector3.forward), out RaycastHit hit2, pickUpRange)
+            // Ignora triggers: si no, la zona del pedestal (que envuelve al orbe) tapa el rayo
+            LookingAtOrb = Physics.Raycast(transform.position, transform.forward, out RaycastHit hit2, pickUpRange, ~0, QueryTriggerInteraction.Ignore)
                            && hit2.transform.CompareTag("Meme");
 
             if (Input.GetMouseButtonDown(0))
@@ -38,7 +39,7 @@ public class PlayerHoldObjects : MonoBehaviour
                 if (heldObject == null)
                 {
                     RaycastHit hit;
-                    if (Physics.Raycast(transform.position, transform.TransformDirection(Vector3.forward), out hit, pickUpRange))
+                    if (Physics.Raycast(transform.position, transform.forward, out hit, pickUpRange, ~0, QueryTriggerInteraction.Ignore))
                     {
                         //Debug.Log(hit.transform.name);
                         if (hit.transform.tag == "Meme")

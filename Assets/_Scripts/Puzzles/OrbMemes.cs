@@ -42,6 +42,7 @@ public class OrbMemes: MonoBehaviour
     private Vector3 lastPlayerPos;
     private bool wasHolded;
     private Coroutine mutationRoutine;
+    private Coroutine sweepRoutine;
     private int lastVariant;
 
     void Start()
@@ -143,6 +144,8 @@ public class OrbMemes: MonoBehaviour
 
     void OnPickUp()
     {
+        // Si lo sacás del pedestal a mitad del barrido, el barrido se corta y vuelve al original
+        if (sweepRoutine != null) { StopCoroutine(sweepRoutine); sweepRoutine = null; SetImage(0); }
         movingTime = 0f;
         nextChangeAt = firstChangeAfter;
     }
@@ -188,7 +191,8 @@ public class OrbMemes: MonoBehaviour
     public void Sweep(float duration)
     {
         if (mutationRoutine != null) { StopCoroutine(mutationRoutine); mutationRoutine = null; }
-        StartCoroutine(SweepRoutine(duration));
+        if (sweepRoutine != null) StopCoroutine(sweepRoutine);
+        sweepRoutine = StartCoroutine(SweepRoutine(duration));
     }
 
     IEnumerator SweepRoutine(float duration)
@@ -202,6 +206,7 @@ public class OrbMemes: MonoBehaviour
             yield return new WaitForSeconds(step);
         }
         SetImage(0); StartCoroutine(Flash(1f));
+        sweepRoutine = null;
     }
 
     void SetImage(int i)
