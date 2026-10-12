@@ -7,7 +7,7 @@ Material:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: Scene_21_Wind
+  m_Name: Scene_16_Wind - Copy
   m_Shader: {fileID: 4800000, guid: fc74417301d89da45998ce85d986fa7b, type: 3}
   m_Parent: {fileID: 0}
   m_ModifiedSerializedProperties: 0
@@ -33,5 +33,5 @@ Material:
     - _Metallic: 0.115
     - _WindMultiplier: 1
     m_Colors:
-    - _Color: {r: 0.72, g: 0.34476, b: 0.2952, a: 1}
+    - _Color: {r: 0.43382353, g: 0.3738538, b: 0.28389922, a: 1}
   m_BuildTextureStacks: []

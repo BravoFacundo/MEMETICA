@@ -1,7 +1,8 @@
 // Herramienta de editor: pone viento a los objetos seleccionados (y sus hijos).
 // Menú: Memetica > Viento > Aplicar viento a la selección
 //   - Cada material de cada Mesh Renderer se cambia por su copia "_Wind" (shader Memetica/Wind Sway).
-//     La copia se crea una sola vez en Art/Materials/Wind y se reutiliza (sirve para materiales atlas).
+//     La copia se crea una sola vez en la MISMA carpeta que el shader WindSway y se reutiliza (sirve para atlas).
+//     Así, si movés la carpeta, la herramienta la sigue sola.
 //     Copia color, textura, smoothness y metallic del original.
 //   - Destilda "Batching Static" (el shader lo necesita).
 //   - Si la escena no tiene WindController, lo crea.
@@ -19,14 +20,13 @@ using UnityEngine.SceneManagement;
 public static class WindTool
 {
     const string ShaderName = "Memetica/Wind Sway";
-    const string Folder = "Assets/Art/Materials/Wind";
 
     [MenuItem("Memetica/Viento/Aplicar viento a la selección")]
     static void ApplyToSelection()
     {
         Shader wind = Shader.Find(ShaderName);
         if (wind == null) { Debug.LogError("[Viento] No encuentro el shader " + ShaderName); return; }
-        if (!AssetDatabase.IsValidFolder(Folder)) AssetDatabase.CreateFolder("Assets/Art/Materials", "Wind");
+        string folder = System.IO.Path.GetDirectoryName(AssetDatabase.GetAssetPath(wind)).Replace('\\', '/');
 
         Undo.SetCurrentGroupName("Aplicar viento");
         int undoGroup = Undo.GetCurrentGroup();
@@ -40,7 +40,7 @@ public static class WindTool
             for (int i = 0; i < mats.Length; i++)
             {
                 if (mats[i] == null || mats[i].shader == wind) continue;
-                mats[i] = GetWindCopy(mats[i], wind, ref created);
+                mats[i] = GetWindCopy(mats[i], wind, folder, ref created);
                 changed = true;
             }
             if (changed)
@@ -71,7 +71,7 @@ public static class WindTool
         Undo.CollapseUndoOperations(undoGroup);
         EditorSceneManager.MarkSceneDirty(SceneManager.GetActiveScene());
         AssetDatabase.SaveAssets();
-        Debug.Log($"[Viento] Listo: {renderers} renderers con viento, {created} materiales _Wind nuevos en {Folder}.");
+        Debug.Log($"[Viento] Listo: {renderers} renderers con viento, {created} materiales _Wind nuevos en {folder}.");
     }
 
     [MenuItem("Memetica/Viento/Partículas siguen el viento")]
@@ -102,9 +102,9 @@ public static class WindTool
     [MenuItem("Memetica/Viento/Aplicar viento a la selección", true)]
     static bool HasSelection() => Selection.gameObjects.Length > 0;
 
-    static Material GetWindCopy(Material src, Shader wind, ref int created)
+    static Material GetWindCopy(Material src, Shader wind, string folder, ref int created)
     {
-        string path = Folder + "/" + src.name + "_Wind.mat";
+        string path = folder + "/" + src.name + "_Wind.mat";
         Material copy = AssetDatabase.LoadAssetAtPath<Material>(path);
         if (copy != null) return copy;
 
