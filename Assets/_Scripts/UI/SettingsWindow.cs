@@ -1,6 +1,6 @@
 using System;
-using TMPro;
 using UnityEngine;
+using UnityEngine.Serialization;
 using UnityEngine.UI;
 
 // Global game settings: saved with PlayerPrefs, shared by the Menu and the Game.
@@ -24,28 +24,18 @@ public static class GameSettings
 }
 
 // The configuration window, shared by the Menu (Game Configuration) and the pause (Pause Menu).
-// Same prefab in both scenes; per scene you choose which tabs exist and which buttons are shown.
-//   Tabs:    each tab button calls SelectTab(index) (WindowButton → On Click). Opens on Default Tab.
+//   Pages:   one GameObject per tab; each tab button calls SelectTab(index) (WindowButton → On Click). Opens on Default Page.
 //   Sliders: changes apply live (you hear/feel them right away).
 //   Apply:   keeps the changes and closes.  Cancel: goes back to the values it had when opened, and closes.
 //   Closing the window any other way (e.g. Continue in the pause) keeps the changes.
 public class SettingsWindow : MonoBehaviour
 {
-    [Serializable]
-    public class Tab
-    {
-        [Tooltip("Content shown when this tab is selected")]
-        public GameObject panel;
-        [Tooltip("The tab button image (swaps between normal and selected sprite)")]
-        public Image tabImage;
-    }
-
-    [Header("Tabs")]
-    public Tab[] tabs;
-    [Tooltip("Tab selected every time the window opens")]
-    public int defaultTab = 0;
-    public Sprite tabNormal;
-    public Sprite tabSelected;
+    [Header("Pages")]
+    [Tooltip("One page per tab, in the same order as the SelectTab indexes")]
+    public GameObject[] pages;
+    [Tooltip("Page shown every time the window opens")]
+    [FormerlySerializedAs("defaultTab")]
+    public int defaultPage = 0;
 
     [Header("Sound")]
     public Slider masterSlider;
@@ -54,10 +44,6 @@ public class SettingsWindow : MonoBehaviour
 
     [Header("Mouse")]
     public Slider sensitivitySlider;
-
-    [Header("Display")]
-    [Tooltip("Optional: shows the current resolution as text (read only)")]
-    public TMP_Text resolutionText;
 
     float savedMaster, savedMusic, savedSfx, savedSensitivity;   // values when the window opened (for Cancel)
 
@@ -77,9 +63,7 @@ public class SettingsWindow : MonoBehaviour
         savedSensitivity = GameSettings.MouseSensitivity;
 
         RefreshSliders();
-        if (resolutionText != null)
-            resolutionText.text = Screen.width + " x " + Screen.height + " - " + Mathf.RoundToInt((float)Screen.currentResolution.refreshRateRatio.value) + " Hz";
-        SelectTab(defaultTab);
+        SelectTab(defaultPage);
     }
 
     void OnDisable() => GameSettings.Save();
@@ -88,13 +72,8 @@ public class SettingsWindow : MonoBehaviour
 
     public void SelectTab(int index)
     {
-        for (int i = 0; i < tabs.Length; i++)
-        {
-            bool selected = i == index;
-            if (tabs[i].panel != null) tabs[i].panel.SetActive(selected);
-            if (tabs[i].tabImage != null && tabNormal != null && tabSelected != null)
-                tabs[i].tabImage.sprite = selected ? tabSelected : tabNormal;
-        }
+        for (int i = 0; i < pages.Length; i++)
+            if (pages[i] != null) pages[i].SetActive(i == index);
     }
 
     public void Apply()
