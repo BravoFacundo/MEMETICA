@@ -106,7 +106,7 @@ public class IslandsManager : MonoBehaviour
             }
         }
         yield return new WaitForSeconds(10f);
-        GameObject.Find("Canvas").GetComponent<PauseMenu>().QuitGame();
+        FindObjectOfType<PauseMenu>().QuitGame();   // antes: GameObject.Find("Canvas"), que ahora es un contenedor vacío
     }
 
     void Update()

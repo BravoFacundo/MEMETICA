@@ -12,7 +12,9 @@ public class PlayerHoldObjects : MonoBehaviour
     public float moveForce = 250;
     public Transform holdParent;
     public GameObject heldObject;
-    public GameObject grabIcon;
+
+    // Lo lee Crosshair para mostrar la mano
+    public bool LookingAtOrb { get; private set; }
 
     public bool FueAgarrada = false;
     public bool canHold = true;
@@ -21,39 +23,15 @@ public class PlayerHoldObjects : MonoBehaviour
     void Start()
     {
         holdParent = GameObject.Find("GrabPivot").GetComponent<Transform>();
-        grabIcon = GameObject.Find("GrabIcon");
     }
 
     void Update()
     {
         if (!PauseMenu.GameIsPaused || canHold)
         {
-            RaycastHit hit2;
-            if (Physics.Raycast(transform.position, transform.TransformDirection(Vector3.forward), out hit2, pickUpRange))
-            {
-                //Debug.Log(hit2.transform.name);
-                if (hit2.transform.tag == "Meme")
-                {
-                    if (heldObject != null)
-                    {
-                        grabIcon.GetComponent<Image>().enabled = false;
-                    }
-                    else if (heldObject == null)
-                    {
-                        grabIcon.GetComponent<Image>().enabled = true;
-
-                    }
-                }
-                else if (hit2.transform.tag != "Meme")
-                {
-                    grabIcon.GetComponent<Image>().enabled = false;
-                }
-            }
-            else
-            {
-                grabIcon.GetComponent<Image>().enabled = false;
-
-            }
+            // ¿Está mirando un orbe? (antes prendía y apagaba GrabIcon; ahora la mira la maneja Crosshair)
+            LookingAtOrb = Physics.Raycast(transform.position, transform.TransformDirection(Vector3.forward), out RaycastHit hit2, pickUpRange)
+                           && hit2.transform.CompareTag("Meme");
 
             if (Input.GetMouseButtonDown(0))
             {

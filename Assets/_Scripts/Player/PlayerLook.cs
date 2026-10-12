@@ -21,6 +21,11 @@ public class PlayerLook : MonoBehaviour
     [SerializeField] private int defaultFOV = 90;
     [SerializeField] private int zoomFOV = 20;
 
+    // Los lee Crosshair para mostrar las lupas
+    public bool IsZooming => isZooming;
+    public float DefaultFOV => defaultFOV;
+    public float ZoomFOV => zoomFOV;
+
     void Start()
     {
         playerTransform = transform.parent.parent.GetComponent<Transform>();

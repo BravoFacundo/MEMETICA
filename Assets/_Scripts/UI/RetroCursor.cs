@@ -1,5 +1,8 @@
-// Cursor por software: una Image que sigue al mouse y reemplaza al cursor de Windows.
-// Va en el Canvas "RetroCursor". El punto de clic de cada cursor es el PIVOT de su sprite
+// Cursor por software: una Image que reemplaza al cursor de Windows.
+// - Menú (Follow Mouse ✔): sigue al mouse y oculta el cursor real.
+// - Juego (Follow Mouse ✘): queda fija en el centro como mira; los estados los pone Crosshair.
+// Default es siempre la flecha. En el juego, la mira usa Dot (el punto) y en la pausa vuelve la flecha.
+// El punto de clic de cada cursor es el PIVOT de su sprite
 // (flecha y mano que señala → donde apunta la punta, mano que agarra → Center). El cambio de cursor al pasar por un ícono lo hace DesktopIcon.
 
 using System.Collections.Generic;
@@ -7,8 +10,8 @@ using UnityEngine;
 using UnityEngine.UI;
 
 // Point: algo clickeable (íconos) | Grab: algo que se agarra (orbes) | Busy: cargando (lo pone el UIManager)
-// NotAllowed: algo interactuable pero bloqueado (no hace nada)
-public enum CursorState { Default, Grab, Busy, Point, NotAllowed }
+// NotAllowed: algo interactuable pero bloqueado (no hace nada) | ZoomIn/Zoom/ZoomOut/Dot: mira del juego
+public enum CursorState { Default, Grab, Busy, Point, NotAllowed, ZoomIn, Zoom, ZoomOut, Dot }
 
 [RequireComponent(typeof(Canvas))]
 public class RetroCursor : MonoBehaviour
@@ -23,6 +26,8 @@ public class RetroCursor : MonoBehaviour
     public static RetroCursor Instance { get; private set; }
 
     public Image cursorImage;
+    [Tooltip("Menú: sigue al mouse. Juego: queda fija en el centro como mira")]
+    public bool followMouse = true;
     public List<CursorStyle> styles = new List<CursorStyle>();
 
     private RectTransform rect;
@@ -37,13 +42,24 @@ public class RetroCursor : MonoBehaviour
         SetState(CursorState.Default);
     }
 
-    void OnEnable() { Cursor.visible = false; }
-    void OnApplicationFocus(bool focused) { if (focused) Cursor.visible = false; }   // Windows lo vuelve a mostrar al cambiar de ventana
-    void OnDisable() { Cursor.visible = true; }
+    // Solo en modo menú se oculta el cursor de Windows (en el juego lo maneja el bloqueo de cámara y la pausa)
+    void OnEnable() { if (followMouse) Cursor.visible = false; }
+    void OnApplicationFocus(bool focused) { if (focused && followMouse) Cursor.visible = false; }   // Windows lo vuelve a mostrar al cambiar de ventana
+    void OnDisable() { if (followMouse) Cursor.visible = true; }
 
     void LateUpdate()
     {
-        rect.position = Input.mousePosition;   // en un Canvas Overlay, pantalla = posición
+        // En un Canvas Overlay, pantalla = posición
+        rect.position = followMouse
+            ? Input.mousePosition
+            : new Vector3(Screen.width * 0.5f, Screen.height * 0.5f, 0f);
+    }
+
+    // Cambia entre mira fija (juego) y cursor libre (menú y pausa). Lo usa PauseMenu.
+    public void SetFollowMouse(bool value)
+    {
+        followMouse = value;
+        if (value) Cursor.visible = false;   // en la pausa se ve nuestra flecha, no la de Windows
     }
 
     // Cursor de carga: lo pone el UIManager y bloquea cualquier otro cambio hasta que se saque

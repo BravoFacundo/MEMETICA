@@ -15,7 +15,7 @@ public static class HierarchyValidator
     static readonly string[] RequiredNames =
     {
         // Jugador y UI
-        "Player", "Main Camera", "Canvas", "GrabPivot", "GrabIcon",
+        "Player", "Main Camera", "GrabPivot",
         // Sistemas y pivotes
         "Scene Manager", "Respawn Pivot", "LimiteCaida", "MasterPivot", "PivotPuenteZ",
         // Nivel

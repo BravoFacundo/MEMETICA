@@ -10,9 +10,14 @@ public class PauseMenu : MonoBehaviour
 
     [Header("References")]
     [SerializeField] private GameObject pauseMenuUI;
-    [SerializeField] private GameObject pointerUI;
+    [SerializeField] private GameObject frameUI;   // Canvas_Frame: el marco del monitor, solo en pausa
     [SerializeField] private AudioMixer audioMixer;
         
+    void Start()
+    {
+        if (frameUI != null) frameUI.SetActive(GameIsPaused);
+    }
+
     void Update()
     {
         if (Input.GetKeyDown(KeyCode.Escape) || Input.GetKeyDown(KeyCode.P))
@@ -34,7 +39,8 @@ public class PauseMenu : MonoBehaviour
         GameIsPaused = false;
 
         pauseMenuUI.SetActive(false);
-        pointerUI.SetActive(true);
+        if (frameUI != null) frameUI.SetActive(false);
+        if (RetroCursor.Instance != null) RetroCursor.Instance.SetFollowMouse(false);   // vuelve la mira fija (Crosshair pone el ícono)
 
         Time.timeScale = 1f;
         Camera.main.GetComponent<PlayerLook>().playerCanLook = true;
@@ -45,7 +51,12 @@ public class PauseMenu : MonoBehaviour
         GameIsPaused = true;
 
         pauseMenuUI.SetActive(true);
-        pointerUI.SetActive(false);
+        if (frameUI != null) frameUI.SetActive(true);
+        if (RetroCursor.Instance != null)
+        {
+            RetroCursor.Instance.SetFollowMouse(true);              // cursor libre, como en el menú
+            RetroCursor.Instance.SetState(CursorState.Default);     // la flecha
+        }
 
         Time.timeScale = 0f;
         Camera.main.GetComponent<PlayerLook>().playerCanLook = false;
