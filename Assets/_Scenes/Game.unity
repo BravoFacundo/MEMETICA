@@ -26020,8 +26020,11 @@ MonoBehaviour:
   isCrossing: 0
   Player: {fileID: 0}
   changeLock: 0
-  materials: []
-  cantidadMat: 0
+  materials:
+  - {fileID: 2100000, guid: fe6b3e0908a8a2e47bd12cb8ee4d78bf, type: 2}
+  - {fileID: 2100000, guid: 5a6a003d74d4a324489ce4ccafbbc454, type: 2}
+  - {fileID: 2100000, guid: 7c377d00fc2e61c49bf6851e226e6fad, type: 2}
+  - {fileID: 2100000, guid: 6f4d38918c379bc449859f013458c59d, type: 2}
   matCount: 0
   warnClip: {fileID: 8300000, guid: 1c7ed042ff75e17419921e1d0d6130e3, type: 3}
   changeClip: {fileID: 8300000, guid: db64e738f22ef4945834da5b19582892, type: 3}
@@ -26722,8 +26725,12 @@ MonoBehaviour:
   isCrossing: 0
   Player: {fileID: 0}
   changeLock: 0
-  materials: []
-  cantidadMat: 0
+  materials:
+  - {fileID: 2100000, guid: 082c5885416efec4084d933b134ee544, type: 2}
+  - {fileID: 2100000, guid: d864c61eb47db33458e784103e3fe3ea, type: 2}
+  - {fileID: 2100000, guid: 35edf902bf464364bb7460cdb85d28ac, type: 2}
+  - {fileID: 2100000, guid: 65c6c11ca18d1df40bc460b220cd9e84, type: 2}
+  - {fileID: 2100000, guid: 87f8f7adb3458cf46b18286743d3bd50, type: 2}
   matCount: 0
   warnClip: {fileID: 8300000, guid: 1c7ed042ff75e17419921e1d0d6130e3, type: 3}
   changeClip: {fileID: 8300000, guid: db64e738f22ef4945834da5b19582892, type: 3}
@@ -161862,8 +161869,11 @@ MonoBehaviour:
   isCrossing: 0
   Player: {fileID: 0}
   changeLock: 0
-  materials: []
-  cantidadMat: 0
+  materials:
+  - {fileID: 2100000, guid: 1bb30b9c00e06c449a9e097c8d52f599, type: 2}
+  - {fileID: 2100000, guid: 1471949b96c61494dadd8076b07faad2, type: 2}
+  - {fileID: 2100000, guid: 5087ca329f48b0b4aa93a1c59cfd99d3, type: 2}
+  - {fileID: 2100000, guid: 733df6b0b11099741a636438fcff6786, type: 2}
   matCount: 0
   warnClip: {fileID: 8300000, guid: 1c7ed042ff75e17419921e1d0d6130e3, type: 3}
   changeClip: {fileID: 8300000, guid: db64e738f22ef4945834da5b19582892, type: 3}
@@ -167910,8 +167920,13 @@ MonoBehaviour:
   isCrossing: 0
   Player: {fileID: 0}
   changeLock: 0
-  materials: []
-  cantidadMat: 0
+  materials:
+  - {fileID: 2100000, guid: d2a1ec7574154804791b1c26fcee5428, type: 2}
+  - {fileID: 2100000, guid: 3b3016e204d05174491f77721b8795cc, type: 2}
+  - {fileID: 2100000, guid: 09c0b62b926bfe249b93de12de25f975, type: 2}
+  - {fileID: 2100000, guid: 93fcf3f873685cb4da86e084f5412b88, type: 2}
+  - {fileID: 2100000, guid: aa86ba64f9895f64a9de83d92aa3f3e8, type: 2}
+  - {fileID: 2100000, guid: ecb2db835bd0a2c4bada7d7b9aff8d50, type: 2}
   matCount: 0
   warnClip: {fileID: 8300000, guid: 1c7ed042ff75e17419921e1d0d6130e3, type: 3}
   changeClip: {fileID: 8300000, guid: db64e738f22ef4945834da5b19582892, type: 3}
