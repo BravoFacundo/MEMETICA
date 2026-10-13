@@ -51943,7 +51943,7 @@ GameObject:
   - component: {fileID: 497282825}
   - component: {fileID: 497282824}
   m_Layer: 0
-  m_Name: Button_Cancel
+  m_Name: Button_Exit
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -64142,7 +64142,7 @@ GameObject:
   - component: {fileID: 598261532}
   - component: {fileID: 598261531}
   m_Layer: 0
-  m_Name: Button_TabDisplay
+  m_Name: Button_TabControls
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -134206,7 +134206,7 @@ GameObject:
   - component: {fileID: 1642100968}
   - component: {fileID: 1642100967}
   m_Layer: 0
-  m_Name: Button_Apply
+  m_Name: Button_Continue
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -168476,7 +168476,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 2c404e4cdab06964a9df5c4df45e7b55, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  mixer: {fileID: 0}
+  mixer: {fileID: 24100000, guid: edc7c8f8554cfad488b31b89d90046f7, type: 2}
   masterParam: volume
   musicParam: MusicVolume
   sfxParam: SfxVolume

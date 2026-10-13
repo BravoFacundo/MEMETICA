@@ -1,6 +1,7 @@
-// Sonido general. Va en Managers > AudioManager.
-// - Música del menú: suena al arrancar y se apaga con un fundido al entrar al juego (lo pide el UIManager).
-// - Volúmenes: pasan por el AudioMixer (para la ventana de configuración, más adelante).
+// General sound. Goes in Managers > AudioManager.
+// - Menu music: plays on start and fades out when entering the game (UIManager asks for it).
+// - Volumes: the settings window sliders drive the mixer's exposed parameters
+//   MasterVolume, MusicVolume and SfxVolume (names must match exactly in MainMixer).
 
 using System.Collections;
 using UnityEngine;
@@ -10,14 +11,14 @@ public class AudioManager : MonoBehaviour
 {
     [Header("Mixer")]
     public AudioMixer mixer;
-    [Tooltip("Exposed mixer parameters for the volume sliders (leave empty if not exposed yet)")]
-    public string masterParam = "volume";
-    public string musicParam = "MusicVolume";
-    public string sfxParam = "SfxVolume";
+
+    const string MasterParam = "MasterVolume";
+    const string MusicParam = "MusicVolume";
+    const string SfxParam = "SfxVolume";
 
     [Space(10)]
-    [Header("Música")]
-    [Tooltip("AudioSource con Output en el grupo Music del mixer")]
+    [Header("Music")]
+    [Tooltip("AudioSource with its Output on the mixer's Music group")]
     public AudioSource musicSource;
     public AudioClip menuMusic;
 
@@ -34,9 +35,9 @@ public class AudioManager : MonoBehaviour
     void ApplySettings()
     {
         if (mixer == null) return;
-        if (!string.IsNullOrEmpty(masterParam)) SetVolume(masterParam, GameSettings.MasterVolume);
-        if (!string.IsNullOrEmpty(musicParam)) SetVolume(musicParam, GameSettings.MusicVolume);
-        if (!string.IsNullOrEmpty(sfxParam)) SetVolume(sfxParam, GameSettings.SfxVolume);
+        SetVolume(MasterParam, GameSettings.MasterVolume);
+        SetVolume(MusicParam, GameSettings.MusicVolume);
+        SetVolume(SfxParam, GameSettings.SfxVolume);
     }
 
     public void PlayMusic(AudioClip clip)
@@ -56,9 +57,8 @@ public class AudioManager : MonoBehaviour
         StartCoroutine(FadeOut(duration));
     }
 
-    // Para la configuración: valor de 0 a 1 → decibeles del mixer.
-    // exposedParam es el nombre del parámetro expuesto en el mixer (por ejemplo "MusicVolume").
-    public void SetVolume(string exposedParam, float value01)
+    // 0..1 → mixer decibels
+    void SetVolume(string exposedParam, float value01)
     {
         mixer.SetFloat(exposedParam, Mathf.Log10(Mathf.Clamp(value01, 0.0001f, 1f)) * 20f);
     }
