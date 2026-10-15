@@ -32,15 +32,6 @@ public class OrbPosition : MonoBehaviour
         }
             
 
-        //Checkear si el orbe respawneo
-        //Emitir sonido de caida
-        //Emitir sonido de impacto
-        //Reproducir calling sound al azar
-        if (Input.GetKeyDown("m"))
-        {
-            Debug.Log("Activar sonido");
-            this.gameObject.GetComponent<OrbMemes>().StartCoroutine("Impact"); //falta hacer
-        }
     }
 
     public IEnumerator Parar()

@@ -11,6 +11,7 @@ public class Platform : MonoBehaviour
     public Transform pivotInferior;
     public bool onTop = false;
     private bool onTopLock = false;
+    private bool isReturning = false;
     public bool fall = false;
     public bool inferiorLock = false;
     public bool superiorLock = false;
@@ -60,8 +61,9 @@ public class Platform : MonoBehaviour
         }
 
         //si la plataforma toca abajo
-        if (gameObject.transform.position.y == pivotInferior.position.y )
+        if (gameObject.transform.position.y == pivotInferior.position.y && !isReturning)
         {
+            isReturning = true;   // once: before, a new coroutine started every frame while it was down
             StartCoroutine("ReturnTime", returnWait);
         }
         //si la plataforma toca arriba
@@ -88,6 +90,7 @@ public class Platform : MonoBehaviour
     {
         yield return new WaitForSeconds(waitTime);
         fall = false;
+        isReturning = false;
     }
     public void Up()
     {

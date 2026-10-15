@@ -27,7 +27,7 @@ public class PlayerHoldObjects : MonoBehaviour
 
     void Update()
     {
-        if (!PauseMenu.GameIsPaused || canHold)
+        if (!PauseMenu.GameIsPaused && canHold)   // before: || let you grab while paused (clicking the pause window) or riding an elevator
         {
             // ¿Está mirando un orbe? (antes prendía y apagaba GrabIcon; ahora la mira la maneja Crosshair)
             // Ignora triggers: si no, la zona del pedestal (que envuelve al orbe) tapa el rayo

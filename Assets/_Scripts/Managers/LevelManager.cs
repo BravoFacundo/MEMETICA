@@ -118,7 +118,11 @@ public class LevelManager : MonoBehaviour
         }
 
         yield return new WaitForSeconds(endingDuration);
-        FindObjectOfType<PauseMenu>().QuitGame();
+
+        // Back to the desktop (Menu) instead of closing the game: the next visitor can play right away
+        UIManager uiManager = FindObjectOfType<UIManager>();
+        if (uiManager != null) uiManager.GoToMenu();
+        else FindObjectOfType<PauseMenu>().QuitGame();
     }
 
     // "Island_02" → "Island_2": numbers without leading zeros, so 1 and 01 are the same ID
