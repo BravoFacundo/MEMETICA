@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using System.Text.RegularExpressions;
 using UnityEngine;
 
 // Todo lo general del nivel. Va en Managers > LevelManager.
@@ -10,6 +11,7 @@ using UnityEngine;
 // Los pedestales piden cosas por ID y acá se buscan por nombre, con la convención Tipo_ID:
 //   isla "3" → "Island_3"   |   puente "A" → "Bridge_A"   |   isla "0" → fin del juego
 //   elevators: "Tutorial_02" → "Elevator_Tutorial_02" (an island ID that matches an elevator starts its ride)
+// Leading zeros in numbers are ignored: "2", "02" and "002" all find Island_2 / Island_02 (no limit on how many islands).
 // Cada isla tiene un hijo "RespawnPoint" donde reaparece el jugador.
 // Para sumar una isla o un puente no hace falta tocar código: alcanza con respetar la convención.
 // Los prefijos se pueden cambiar en el Inspector (sección NOMBRES).
@@ -55,21 +57,21 @@ public class LevelManager : MonoBehaviour
     {
         Instance = this;   // antes de que las islas, puentes y pedestales lo usen en su Start
 
-        foreach (Island i in FindObjectsOfType<Island>()) islands[i.name] = i;
-        foreach (Bridge b in FindObjectsOfType<Bridge>()) bridges[b.name] = b;
-        foreach (Elevator e in FindObjectsOfType<Elevator>()) elevators[e.name] = e;
+        foreach (Island i in FindObjectsOfType<Island>()) islands[NormalizeName(i.name)] = i;
+        foreach (Bridge b in FindObjectsOfType<Bridge>()) bridges[NormalizeName(b.name)] = b;
+        foreach (Elevator e in FindObjectsOfType<Elevator>()) elevators[NormalizeName(e.name)] = e;
     }
 
     // ---------- Lo que piden los pedestales ----------
 
     public void SubirIsla(string id)
     {
-        switch (id)
+        switch (NormalizeName(id))
         {
             case "0": StartCoroutine(GameComplete()); break;
             default:
                 // Elevators share the pedestal IDs with islands: if one matches, it starts its ride
-                if (elevators.TryGetValue(elevatorPrefix + id, out Elevator elevator)) elevator.StartRide();
+                if (elevators.TryGetValue(NormalizeName(elevatorPrefix + id), out Elevator elevator)) elevator.StartRide();
                 else if (TryGet(islands, islandPrefix + id, out Island isla)) isla.islaSube = true;
                 break;
         }
@@ -93,10 +95,15 @@ public class LevelManager : MonoBehaviour
         return TryGet(islands, islandPrefix + id, out Island isla) ? isla.gameObject : null;
     }
 
-    // El punto de reaparición de una isla (su hijo RespawnPoint), o null
+    // The island's respawn point (any child named RespawnPoint, at any depth), or null
     public Transform RespawnPointOf(GameObject island)
     {
-        return island != null ? island.transform.Find(respawnPointName) : null;
+        if (island == null) return null;
+        Island root = island.GetComponentInParent<Island>();
+        Transform container = root != null ? root.transform : island.transform;
+        foreach (Transform child in container.GetComponentsInChildren<Transform>(true))
+            if (child.name == respawnPointName) return child;
+        return null;
     }
 
     IEnumerator GameComplete()
@@ -114,10 +121,20 @@ public class LevelManager : MonoBehaviour
         FindObjectOfType<PauseMenu>().QuitGame();
     }
 
+    // "Island_02" → "Island_2": numbers without leading zeros, so 1 and 01 are the same ID
+    public static string NormalizeName(string objectName)
+    {
+        return Regex.Replace(objectName, @"\d+", match =>
+        {
+            string number = match.Value.TrimStart('0');
+            return number.Length > 0 ? number : "0";
+        });
+    }
+
     // Busca y avisa en la consola si un pedestal pide algo que no existe
     bool TryGet<T>(Dictionary<string, T> table, string objectName, out T value)
     {
-        if (table.TryGetValue(objectName, out value)) return true;
+        if (table.TryGetValue(NormalizeName(objectName), out value)) return true;
         Debug.LogWarning("[LevelManager] No existe '" + objectName + "' en la escena (revisá el ID en el pedestal).", this);
         return false;
     }

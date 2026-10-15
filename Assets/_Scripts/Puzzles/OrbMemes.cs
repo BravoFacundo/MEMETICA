@@ -5,6 +5,11 @@ using UnityEngine.Video;
 
 public class OrbMemes: MonoBehaviour
 {
+    // Orb ID used by pedestals (Key ID) and effects: the name without the "Orb_" prefix ("Orb_3Aa" → "3Aa")
+    public const string NamePrefix = "Orb_";
+    public string OrbID => IDOf(gameObject);
+    public static string IDOf(GameObject orb) => orb.name.StartsWith(NamePrefix) ? orb.name.Substring(NamePrefix.Length) : orb.name;
+
     public bool isHolded = false;
     public bool isCrossing = false;
     public GameObject Player;
@@ -206,7 +211,7 @@ public class OrbMemes: MonoBehaviour
     public IEnumerator Holding()
     {
         //StopCoroutine("NotHolding");
-        switch (this.gameObject.transform.name) //Activar filtros, Modificar valores (Gravedad, bloom, reverb, etc)
+        switch (OrbID) //Activar filtros, Modificar valores (Gravedad, bloom, reverb, etc)
         {
             case "1Aa": //Dios
                 //Aumentar el bloom
@@ -231,7 +236,7 @@ public class OrbMemes: MonoBehaviour
         //Las modificaciones vuelven a la normalidad cuando ya no tenes el orbe
         //pero los sonidos se van cuando el pedestal termina de confirmar o denegar
 
-        switch (this.gameObject.transform.name)
+        switch (OrbID)
         {
             case "1Aa": //Dios
                 //Quitar el bloom

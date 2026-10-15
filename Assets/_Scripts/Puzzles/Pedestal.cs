@@ -91,7 +91,7 @@ public class Pedestal : MonoBehaviour
         if (!other.CompareTag("Meme") || other.gameObject != Orb) return; // solo importa el orbe encastrado
 
         if (evaluating != null) StopCoroutine(evaluating);
-        bool lowerBridges = KeylessPedestal || Orb.name.StartsWith(KeyID);
+        bool lowerBridges = KeylessPedestal || OrbMemes.IDOf(Orb).StartsWith(KeyID);
 
         Orb = null;
         IsCorrect = false;
@@ -122,7 +122,7 @@ public class Pedestal : MonoBehaviour
         if (orb.TryGetComponent(out OrbMemes memes)) memes.Sweep(Length(chargeClip));
         yield return new WaitForSeconds(Length(chargeClip));
 
-        if (orb.name.StartsWith(KeyID)) SetCorrect();
+        if (OrbMemes.IDOf(orb).StartsWith(KeyID)) SetCorrect();
         else { SetIncorrect(); Reject(); }
     }
 

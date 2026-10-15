@@ -31,6 +31,8 @@ Shader "Memetica/Grass"
 
         [Header(View From Above)]
         _TopViewTilt ("Tilt Away From Camera", Range(0, 1.5)) = 0.6
+        _TiltFromDistance ("Tilt Starts At Distance", Float) = 4
+        _TiltFullDistance ("Full Tilt At Distance", Float) = 15
 
         [Header(Interaction)]
         _InteractStrength ("Push Strength", Range(0, 2)) = 1
@@ -52,7 +54,7 @@ Shader "Memetica/Grass"
 
         sampler2D _MainTex;
         fixed4 _TipTint, _TipColor, _PatchColor;
-        float _RootBrightness, _TipColorMix, _TopViewTilt, _InteractStrength;
+        float _RootBrightness, _TipColorMix, _TopViewTilt, _TiltFromDistance, _TiltFullDistance, _InteractStrength;
         float _TipBrightness, _GradientStart, _GradientPower, _PatchScale, _PatchAmount, _TipGlow;
         float _WindMultiplier, _WaveScale, _WindFadeStart, _WindFadeEnd, _FadeStart, _FadeEnd;
 
@@ -111,9 +113,11 @@ Shader "Memetica/Grass"
 
             float cardHeight = length(unity_ObjectToWorld._m01_m11_m21);
 
-            // Seen from above, the tips lean away from the camera and cover the ground between cards
+            // Seen from above and far (the menu camera), the tips lean away from the camera and cover the ground between cards.
+            // Close to the camera (the player looking at their feet) there is no tilt, so the grass doesn't move when you look around.
             float3 toCamera = _WorldSpaceCameraPos - basePos;
-            float fromAbove = saturate(toCamera.y / max(length(toCamera), 1e-4));
+            float tiltByDistance = saturate((cameraDistance - _TiltFromDistance) / max(_TiltFullDistance - _TiltFromDistance, 0.01));
+            float fromAbove = saturate(toCamera.y / max(length(toCamera), 1e-4)) * tiltByDistance;
             float2 away = normalize(-toCamera.xz + float2(1e-4, 0));
             offset.xz += away * fromAbove * _TopViewTilt * cardHeight * h;
 

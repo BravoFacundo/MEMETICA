@@ -26,8 +26,10 @@ public class Platform : MonoBehaviour
     void Start()
     {
         platform = gameObject.transform;
-        pivotSuperior = gameObject.transform.parent.Find("PlatformPivotSuperior");
-        pivotInferior = gameObject.transform.parent.Find("PlatformPivotInferior");
+        Bridge bridge = GetComponentInParent<Bridge>();
+        Transform searchRoot = bridge != null ? bridge.transform : transform.parent;
+        pivotSuperior = FindChildByName(searchRoot, "PlatformPivotSuperior");
+        pivotInferior = FindChildByName(searchRoot, "PlatformPivotInferior");
 
         //platformAudio = gameObject.GetComponent<AudioSource>();
         //platformCrack = Resources.Load<AudioClip>("Sounds/platformCrack");
@@ -93,4 +95,11 @@ public class Platform : MonoBehaviour
         //Sonido de subida
     }
 
+    // Pivots can be anywhere inside the bridge, not only next to the platform
+    private static Transform FindChildByName(Transform root, string childName)
+    {
+        foreach (Transform child in root.GetComponentsInChildren<Transform>(true))
+            if (child.name == childName) return child;
+        return null;
+    }
 }

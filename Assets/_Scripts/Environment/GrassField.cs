@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 using UnityEngine.Rendering;
 #if UNITY_EDITOR
@@ -26,7 +27,9 @@ public class GrassField : MonoBehaviour
     [SerializeField] private float orbRadius = 0.5f;
 
     [Header("Paint")]
-    [SerializeField] private List<Collider> groundColliders = new();
+    [SerializeField] private bool useChildMeshes = true;              // every mesh under this object is ground
+    [SerializeField] private List<MeshFilter> extraGroundMeshes = new();
+    [SerializeField, HideInInspector] private List<Collider> groundColliders = new();    // old setup, still read
     [SerializeField] private float testDensity = 6f;    // cards per square meter
     [SerializeField, Range(0, 1)] private float minUpNormal = 0.7f;
     [SerializeField] private bool onlyTopSurface = true;    // skip ground covered by rocks, props or other meshes
@@ -242,7 +245,7 @@ public class GrassField : MonoBehaviour
     private int groundMisses;
 
     [ContextMenu("Test Fill")]
-    private void TestFill()
+    public void TestFill()
     {
         Undo.RecordObject(this, "Grass Test Fill");
         Physics.SyncTransforms();
@@ -251,31 +254,39 @@ public class GrassField : MonoBehaviour
         normals.Clear();
         groundMisses = 0;
         var clearings = CollectClearings();
+        CreateRaycastColliders();
+        int attemptsTotal = 0, missedMesh = 0, tooSteep = 0, covered = 0, cleared = 0;
 
-        foreach (Collider ground in groundColliders)
+        foreach (MeshCollider ground in raycastColliders.Keys)
         {
-            if (ground == null) continue;
             Bounds bounds = ground.bounds;
             int attempts = Mathf.RoundToInt(bounds.size.x * bounds.size.z * testDensity);
 
+            attemptsTotal += attempts;
             for (int i = 0; i < attempts; i++)
             {
                 Vector3 origin = new(UnityEngine.Random.Range(bounds.min.x, bounds.max.x), bounds.max.y + 1f, UnityEngine.Random.Range(bounds.min.z, bounds.max.z));
-                if (!ground.Raycast(new Ray(origin, Vector3.down), out RaycastHit hit, bounds.size.y + 2f)) continue;
-                if (hit.normal.y < minUpNormal) continue;
-                if (onlyTopSurface && !IsTopSurface(origin, ground, bounds.size.y + 2f)) continue;
-                if (UnityEngine.Random.value > ClearingDensity(hit.point, clearings)) continue;
+                if (!ground.Raycast(new Ray(origin, Vector3.down), out RaycastHit hit, bounds.size.y + 2f)) { missedMesh++; continue; }
+                if (hit.normal.y < minUpNormal) { tooSteep++; continue; }
+                if (onlyTopSurface && !IsTopSurface(origin, hit.distance, out string coveredBy)) { covered++; lastCoveredBy = coveredBy; continue; }
+                float clearingDensity = ClearingDensity(hit.point, clearings);
+                if (UnityEngine.Random.value > clearingDensity) { cleared++; continue; }
 
+                // Near a clearing the grass is also shorter, so it fades into it instead of ending in a wall
+                float scale = UnityEngine.Random.Range(scaleRange.x, scaleRange.y) * Mathf.Lerp(0.4f, 1f, clearingDensity);
                 Vector3 local = transform.InverseTransformPoint(hit.point);
-                points.Add(new Vector4(local.x, local.y, local.z, UnityEngine.Random.Range(scaleRange.x, scaleRange.y)));
+                points.Add(new Vector4(local.x, local.y, local.z, scale));
                 colors.Add(SampleGroundColor(hit));
                 normals.Add(transform.InverseTransformDirection(hit.normal));
             }
         }
 
+        int meshCount = raycastColliders.Count;
+        DestroyRaycastColliders();
         FinishEdit();
-        Debug.Log($"[Grass] {name}: {points.Count} cards", this);
-        if (groundMisses > 0) Debug.LogWarning($"[Grass] {name}: {groundMisses} cards could not read the ground color (the ground collider needs a non-convex MeshCollider on the same object as its MeshRenderer)", this);
+        Debug.Log($"[Grass] {PathOf(transform)}: {points.Count} cards from {meshCount} ground meshes " +
+                  $"({attemptsTotal} tries: {missedMesh} outside the mesh, {tooSteep} too steep, {covered} covered{(covered > 0 ? " by " + lastCoveredBy : "")}, {cleared} in clearings)", this);
+        if (groundMisses > 0) Debug.LogWarning($"[Grass] {name}: {groundMisses} cards could not read the ground color (the ground mesh needs a MeshRenderer with a material)", this);
     }
 
     // Bounds of everything the grass should avoid, each with its own clear radius and falloff
@@ -283,7 +294,8 @@ public class GrassField : MonoBehaviour
     {
         var clearings = new List<(Bounds, float, float)>();
         Bounds area = new(transform.position, Vector3.zero);
-        foreach (Collider ground in groundColliders) if (ground != null) area.Encapsulate(ground.bounds);
+        foreach (MeshFilter ground in GetGroundMeshes())
+            if (ground.TryGetComponent(out Renderer groundRenderer)) area.Encapsulate(groundRenderer.bounds);
         area.Expand(clearRadius + clearFalloff);
 
         if (clearAroundGameplay)
@@ -294,10 +306,12 @@ public class GrassField : MonoBehaviour
             targets.AddRange(FindObjectsOfType<Atril>());
             targets.AddRange(FindObjectsOfType<Elevator>());
 
+            // Each mesh piece clears its own spot, so a long or diagonal bridge clears only under its planks, not a whole box
             foreach (Component target in targets)
             {
-                Bounds bounds = GetObjectBounds(target.transform);
-                if (bounds.Intersects(area)) clearings.Add((bounds, clearRadius, clearFalloff));
+                if (transform.IsChildOf(target.transform)) continue;    // the grass grows on it (elevator, bridge): don't clear it
+                foreach (MeshRenderer piece in target.GetComponentsInChildren<MeshRenderer>())
+                    if (piece.bounds.Intersects(area)) clearings.Add((piece.bounds, clearRadius, clearFalloff));
             }
         }
 
@@ -338,10 +352,18 @@ public class GrassField : MonoBehaviour
         return bounds;
     }
 
-    private static bool IsTopSurface(Vector3 origin, Collider ground, float distance)
+    // Nothing but ground above this point: the first thing hit is one of the ground colliders, or at the same height
+    private string lastCoveredBy;
+
+    private static string PathOf(Transform t) => t.parent == null ? t.name : PathOf(t.parent) + "/" + t.name;
+
+    private bool IsTopSurface(Vector3 origin, float groundDistance, out string coveredBy)
     {
-        if (!Physics.Raycast(origin, Vector3.down, out RaycastHit firstHit, distance, ~0, QueryTriggerInteraction.Ignore)) return true;
-        return firstHit.collider == ground;
+        coveredBy = null;
+        if (!Physics.Raycast(origin, Vector3.down, out RaycastHit firstHit, groundDistance + 0.1f, ~0, QueryTriggerInteraction.Ignore)) return true;
+        coveredBy = PathOf(firstHit.transform);
+        if (firstHit.collider is MeshCollider meshCollider && raycastColliders.ContainsKey(meshCollider)) return true;
+        return firstHit.distance > groundDistance - 0.05f;
     }
 
     // After changing the island's material or atlas: grass takes the new ground colors, same positions
@@ -352,15 +374,15 @@ public class GrassField : MonoBehaviour
         Physics.SyncTransforms();
         colors.Clear();
         normals.Clear();
+        CreateRaycastColliders();
 
         foreach (Vector4 point in points)
         {
             Vector3 worldPos = transform.TransformPoint(point);
             Color color = Color.green;
             Vector3 normal = Vector3.up;
-            foreach (Collider ground in groundColliders)
+            foreach (MeshCollider ground in raycastColliders.Keys)
             {
-                if (ground == null) continue;
                 if (ground.Raycast(new Ray(worldPos + Vector3.up * 0.5f, Vector3.down), out RaycastHit hit, 1f))
                 {
                     color = SampleGroundColor(hit);
@@ -372,6 +394,7 @@ public class GrassField : MonoBehaviour
             normals.Add(transform.InverseTransformDirection(normal));
         }
 
+        DestroyRaycastColliders();
         FinishEdit();
     }
 
@@ -397,8 +420,9 @@ public class GrassField : MonoBehaviour
 
     private Color SampleGroundColor(RaycastHit hit)
     {
-        MeshRenderer renderer = hit.collider.GetComponent<MeshRenderer>();
-        if (renderer == null || !(hit.collider is MeshCollider meshCollider) || meshCollider.sharedMesh == null || meshCollider.convex)
+        MeshCollider meshCollider = hit.collider as MeshCollider;
+        MeshRenderer renderer = meshCollider != null && raycastColliders.TryGetValue(meshCollider, out MeshFilter ground) ? ground.GetComponent<MeshRenderer>() : null;
+        if (renderer == null)
         {
             groundMisses++;
             return Color.green;
@@ -412,6 +436,41 @@ public class GrassField : MonoBehaviour
 
         Vector2 uv = hit.textureCoord * material.mainTextureScale + material.mainTextureOffset;
         return GetReadableTexture(material.mainTexture).GetPixelBilinear(uv.x, uv.y) * color;
+    }
+
+    // The grass meshes don't need colliders of their own (the player and orbs can go through them):
+    // hidden temporary MeshColliders are created only while placing, then removed
+    private readonly Dictionary<MeshCollider, MeshFilter> raycastColliders = new();
+
+    private List<MeshFilter> GetGroundMeshes()
+    {
+        var meshes = new List<MeshFilter>();
+        if (useChildMeshes) meshes.AddRange(GetComponentsInChildren<MeshFilter>());
+        meshes.AddRange(extraGroundMeshes);
+        foreach (Collider oldCollider in groundColliders)
+            if (oldCollider != null && oldCollider.TryGetComponent(out MeshFilter filter)) meshes.Add(filter);
+        return meshes.Where(m => m != null && m.sharedMesh != null).Distinct().ToList();
+    }
+
+    private void CreateRaycastColliders()
+    {
+        DestroyRaycastColliders();
+        foreach (MeshFilter ground in GetGroundMeshes())
+        {
+            GameObject temporary = new("GrassRaycast") { hideFlags = HideFlags.HideAndDontSave };
+            temporary.transform.SetParent(ground.transform, false);
+            MeshCollider raycastCollider = temporary.AddComponent<MeshCollider>();
+            raycastCollider.sharedMesh = ground.sharedMesh;
+            raycastColliders[raycastCollider] = ground;
+        }
+        Physics.SyncTransforms();
+    }
+
+    private void DestroyRaycastColliders()
+    {
+        foreach (MeshCollider raycastCollider in raycastColliders.Keys)
+            if (raycastCollider != null) DestroyImmediate(raycastCollider.gameObject);
+        raycastColliders.Clear();
     }
 
     private static int GetSubMeshIndex(Mesh mesh, int triangleIndex)

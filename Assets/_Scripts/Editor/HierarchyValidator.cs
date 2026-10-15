@@ -16,8 +16,6 @@ public static class HierarchyValidator
     {
         // Jugador
         "Player", "Main Camera", "GrabPivot",
-        // Orbes (los pedestales leen su nombre)
-        "1Aa", "1Ba", "3Aa", "4Aa",
     };
 
     static readonly string[] RequiredTags = { "Isla", "Puente", "Pedestal", "Meme" };
@@ -52,7 +50,7 @@ public static class HierarchyValidator
             foreach (var isla in Object.FindObjectsOfType<Island>(true))
             {
                 if (!isla.name.StartsWith(level.islandPrefix)) Warn($"La isla '{isla.name}' no sigue la convención '{level.islandPrefix}ID'.", isla);
-                else if (isla.transform.Find(level.respawnPointName) == null) Error($"La isla '{isla.name}' no tiene hijo '{level.respawnPointName}'.", isla);
+                else if (level.RespawnPointOf(isla.gameObject) == null) Error($"Island '{isla.name}' has no '{level.respawnPointName}' inside it.", isla);
             }
             foreach (var puente in Object.FindObjectsOfType<Bridge>(true))
                 if (!puente.name.StartsWith(level.bridgePrefix)) Warn($"El puente '{puente.name}' no sigue la convención '{level.bridgePrefix}ID'.", puente);
@@ -81,17 +79,47 @@ public static class HierarchyValidator
             foreach (var p in group.pedestals)
                 if (p == null || p.group != group) Error($"El grupo '{group.name}' tiene un pedestal vacío o que no lo referencia.", group);
 
+        // 2b. Pedestal ↔ orb names and controlled IDs (renaming orbs, islands or bridges breaks these)
+        if (level != null)
+        {
+            var orbs = Object.FindObjectsOfType<OrbMemes>(true);
+            var pedestals = Object.FindObjectsOfType<Pedestal>(true);
+            var names = new HashSet<string>(all.Select(g => LevelManager.NormalizeName(g.name)));
+
+            foreach (var ped in pedestals)
+            {
+                if (!ped.KeylessPedestal)
+                {
+                    if (string.IsNullOrEmpty(ped.KeyID)) Error($"Keyed pedestal '{ped.name}' has no Key ID.", ped);
+                    else if (!orbs.Any(o => o.OrbID.StartsWith(ped.KeyID))) Error($"Pedestal '{ped.name}' expects an orb whose ID starts with '{ped.KeyID}' (name '{OrbMemes.NamePrefix}{ped.KeyID}...'), and there is none.", ped);
+                }
+                foreach (string id in ped.ControlledIslands)
+                    if (LevelManager.NormalizeName(id) != "0" && !names.Contains(LevelManager.NormalizeName(level.islandPrefix + id)) && !names.Contains(LevelManager.NormalizeName(level.elevatorPrefix + id)))
+                        Error($"Pedestal '{ped.name}' raises '{id}', but there is no '{level.islandPrefix}{id}' or '{level.elevatorPrefix}{id}'.", ped);
+                foreach (string id in ped.ControlledBridges)
+                    if (!names.Contains(LevelManager.NormalizeName(level.bridgePrefix + id)))
+                        Error($"Pedestal '{ped.name}' raises bridge '{id}', but there is no '{level.bridgePrefix}{id}'.", ped);
+            }
+
+            var keyIDs = pedestals.Where(p => !p.KeylessPedestal && !string.IsNullOrEmpty(p.KeyID)).Select(p => p.KeyID).ToList();
+            foreach (var orb in orbs)
+                if (!keyIDs.Any(k => orb.OrbID.StartsWith(k)))
+                    Warn($"Orb '{orb.name}' matches no pedestal Key ID: it only works on keyless (black) pedestals (fine if that's intended).", orb);
+        }
+
         // 3. Orbes: hijos "Meme" y "Audio"
         foreach (var orb in Object.FindObjectsOfType<OrbMemes>(true))
             foreach (var child in new[] { "Meme", "Audio" })
                 if (orb.transform.Find(child) == null) Error($"El orbe '{orb.name}' perdió su hijo directo '{child}'.", orb);
 
-        // 4. Plataformas que caen: pivotes como hermanos
+        // 4. Falling platforms: pivots anywhere inside their bridge
         foreach (var plat in Object.FindObjectsOfType<Platform>(true))
         {
-            var parent = plat.transform.parent;
-            if (parent == null || parent.Find("PlatformPivotSuperior") == null || parent.Find("PlatformPivotInferior") == null)
-                Error($"La plataforma '{plat.name}' perdió sus pivotes hermanos (PlatformPivotSuperior/Inferior).", plat);
+            var bridge = plat.GetComponentInParent<Bridge>(true);
+            var root = bridge != null ? bridge.transform : plat.transform.parent;
+            var inside = root != null ? root.GetComponentsInChildren<Transform>(true).Select(t => t.name).ToList() : new List<string>();
+            if (!inside.Contains("PlatformPivotSuperior") || !inside.Contains("PlatformPivotInferior"))
+                Error($"Platform '{plat.name}' lost its pivots (PlatformPivotSuperior/Inferior) inside its bridge.", plat);
         }
 
         // 5. Player: hijo "GroundCheck"
@@ -121,17 +149,6 @@ public static class HierarchyValidator
                 Error($"El grupo '{go.name}' está desactivado: todo lo de adentro deja de existir para GameObject.Find.", go);
         }
 
-        // 8b. Estructura estándar: en islas y puentes, los props van dentro de "Decor"
-        if (level != null)
-        {
-            var containers = Object.FindObjectsOfType<Island>(true).Select(c => c.transform)
-                .Concat(Object.FindObjectsOfType<Bridge>(true).Select(c => c.transform));
-            foreach (var c in containers)
-            {
-                int loose = c.Cast<Transform>().Count(ch => ch.gameObject.activeSelf && !LevelStructureTool.IsGameplay(ch, level));
-                if (loose > 0) Warn($"'{c.name}' tiene {loose} prop(s) fuera de '{LevelStructureTool.DecorName}' (Memetica > Ordenar estructura de niveles).", c);
-            }
-        }
 
         // 8. Scripts faltantes ("The referenced script on this Behaviour is missing")
         foreach (var go in all)

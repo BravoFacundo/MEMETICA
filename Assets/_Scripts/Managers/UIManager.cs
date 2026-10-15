@@ -25,6 +25,12 @@ public class UIManager : MonoBehaviour
 
     private bool loading;
 
+    // F9 switches English / Spanish anytime, also in the build (handy at the exhibition)
+    private void Update()
+    {
+        if (Input.GetKeyDown(KeyCode.F9)) GameSettings.ToggleLanguage();
+    }
+
     // ---------- Íconos ----------
 
     public void PlayGame()
