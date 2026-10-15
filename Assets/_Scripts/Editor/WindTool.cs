@@ -4,7 +4,7 @@
 //     La copia se crea una sola vez en la MISMA carpeta que el shader WindSway y se reutiliza (sirve para atlas).
 //     Así, si movés la carpeta, la herramienta la sigue sola.
 //     Copia color, textura, smoothness y metallic del original.
-//   - Destilda "Batching Static" (el shader lo necesita).
+//   - Unticks "Batching Static" and "Contribute GI": moving objects can't use static batching or baked lighting.
 //   - Si la escena no tiene WindController, lo crea.
 // Ctrl+Z deshace los cambios en la escena.
 //
@@ -51,13 +51,14 @@ public static class WindTool
                 renderers++;
             }
 
-            // Sin batching estático
+            // Moving objects: no static batching and no baked lighting (a baked shadow would stay at the original pose)
             GameObject go = r.gameObject;
             StaticEditorFlags flags = GameObjectUtility.GetStaticEditorFlags(go);
-            if ((flags & StaticEditorFlags.BatchingStatic) != 0)
+            StaticEditorFlags movingFlags = StaticEditorFlags.BatchingStatic | StaticEditorFlags.ContributeGI;
+            if ((flags & movingFlags) != 0)
             {
-                Undo.RecordObject(go, "Sacar Batching Static");
-                GameObjectUtility.SetStaticEditorFlags(go, flags & ~StaticEditorFlags.BatchingStatic);
+                Undo.RecordObject(go, "Remove Batching Static and Contribute GI");
+                GameObjectUtility.SetStaticEditorFlags(go, flags & ~movingFlags);
             }
         }
 
