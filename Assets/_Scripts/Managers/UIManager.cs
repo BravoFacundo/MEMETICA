@@ -15,6 +15,8 @@ public class UIManager : MonoBehaviour
     [Space(10)]
     [Header("Escenas")]
     public string gameScene = "Game";
+    [Tooltip("Original Memetica, opened from the Recycle Bin")]
+    public string oldGameScene = "Game_Old";
     public string menuScene = "Menu";
 
     [Header("Carga")]
@@ -37,6 +39,13 @@ public class UIManager : MonoBehaviour
     {
         if (loading) return;   // evita cargar dos veces si se hace doble clic de más
         StartCoroutine(LoadScene(gameScene));
+    }
+
+    // Button_Play inside the Recycle Bin window
+    public void PlayOldGame()
+    {
+        if (loading) return;
+        StartCoroutine(LoadScene(oldGameScene));
     }
 
     // Used by the pause window (Game → Menu)
