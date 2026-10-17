@@ -119,7 +119,7 @@ public static class HierarchyValidator
                 if (orb.transform.Find(child) == null) Error($"El orbe '{orb.name}' perdió su hijo directo '{child}'.", orb);
 
         // 4. Falling platforms: pivots anywhere inside their bridge
-        foreach (var plat in Object.FindObjectsOfType<Platform>(true))
+        foreach (var plat in Object.FindObjectsOfType<FallingPlatform>(true))
         {
             var bridge = plat.GetComponentInParent<Bridge>(true);
             var root = bridge != null ? bridge.transform : plat.transform.parent;

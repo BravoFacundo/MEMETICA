@@ -555,15 +555,17 @@ MonoBehaviour:
   m_GameObject: {fileID: 65703642}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 1e53261866e370b4395ab920d814b35b, type: 3}
+  m_Script: {fileID: 11500000, guid: ede337a3db383c24f82a62544d2e3bf9, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  range: 1.5
-  period: 60
-  followWind: 1
-  direction: {x: 1, y: 0, z: 0}
   bobAmplitude: 0.15
   bobPeriod: 20
+  driftRange: 1.5
+  driftPeriod: 60
+  followWind: 1
+  driftDirection: {x: 1, y: 0, z: 0}
+  tiltDegrees: 0
+  tiltPeriod: 22
   spinDegrees: 1
   spinPeriod: 80
 --- !u!1001 &67429182
@@ -19241,15 +19243,17 @@ MonoBehaviour:
   m_GameObject: {fileID: 490814649}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 1e53261866e370b4395ab920d814b35b, type: 3}
+  m_Script: {fileID: 11500000, guid: ede337a3db383c24f82a62544d2e3bf9, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  range: 1.5
-  period: 60
-  followWind: 1
-  direction: {x: 1, y: 0, z: 0}
   bobAmplitude: 0.15
   bobPeriod: 20
+  driftRange: 1.5
+  driftPeriod: 60
+  followWind: 1
+  driftDirection: {x: 1, y: 0, z: 0}
+  tiltDegrees: 0
+  tiltPeriod: 22
   spinDegrees: 1
   spinPeriod: 80
 --- !u!1 &492246106
@@ -19744,15 +19748,17 @@ MonoBehaviour:
   m_GameObject: {fileID: 158465405}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 1e53261866e370b4395ab920d814b35b, type: 3}
+  m_Script: {fileID: 11500000, guid: ede337a3db383c24f82a62544d2e3bf9, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  range: 1.5
-  period: 60
-  followWind: 1
-  direction: {x: 1, y: 0, z: 0}
   bobAmplitude: 0.15
   bobPeriod: 20
+  driftRange: 1.5
+  driftPeriod: 60
+  followWind: 1
+  driftDirection: {x: 1, y: 0, z: 0}
+  tiltDegrees: 0
+  tiltPeriod: 22
   spinDegrees: 1
   spinPeriod: 80
 --- !u!4 &523973387 stripped
@@ -20278,15 +20284,17 @@ MonoBehaviour:
   m_GameObject: {fileID: 480520736}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 1e53261866e370b4395ab920d814b35b, type: 3}
+  m_Script: {fileID: 11500000, guid: ede337a3db383c24f82a62544d2e3bf9, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  range: 1.5
-  period: 60
-  followWind: 1
-  direction: {x: 1, y: 0, z: 0}
   bobAmplitude: 0.15
   bobPeriod: 20
+  driftRange: 1.5
+  driftPeriod: 60
+  followWind: 1
+  driftDirection: {x: 1, y: 0, z: 0}
+  tiltDegrees: 0
+  tiltPeriod: 22
   spinDegrees: 1
   spinPeriod: 80
 --- !u!64 &563953718
@@ -20405,15 +20413,17 @@ MonoBehaviour:
   m_GameObject: {fileID: 565315727}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 1e53261866e370b4395ab920d814b35b, type: 3}
+  m_Script: {fileID: 11500000, guid: ede337a3db383c24f82a62544d2e3bf9, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  range: 1.5
-  period: 60
-  followWind: 1
-  direction: {x: 1, y: 0, z: 0}
   bobAmplitude: 0.15
   bobPeriod: 20
+  driftRange: 1.5
+  driftPeriod: 60
+  followWind: 1
+  driftDirection: {x: 1, y: 0, z: 0}
+  tiltDegrees: 0
+  tiltPeriod: 22
   spinDegrees: 1
   spinPeriod: 80
 --- !u!1001 &568588231
@@ -25577,15 +25587,17 @@ MonoBehaviour:
   m_GameObject: {fileID: 605738870}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 1e53261866e370b4395ab920d814b35b, type: 3}
+  m_Script: {fileID: 11500000, guid: ede337a3db383c24f82a62544d2e3bf9, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  range: 1.5
-  period: 60
-  followWind: 1
-  direction: {x: 1, y: 0, z: 0}
   bobAmplitude: 0.15
   bobPeriod: 20
+  driftRange: 1.5
+  driftPeriod: 60
+  followWind: 1
+  driftDirection: {x: 1, y: 0, z: 0}
+  tiltDegrees: 0
+  tiltPeriod: 22
   spinDegrees: 1
   spinPeriod: 80
 --- !u!1001 &610162333
@@ -36877,10 +36889,16 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ede337a3db383c24f82a62544d2e3bf9, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  amplitude: 0.8
-  period: 16
+  bobAmplitude: 0.8
+  bobPeriod: 16
+  driftRange: 0
+  driftPeriod: 60
+  followWind: 1
+  driftDirection: {x: 1, y: 0, z: 0}
   tiltDegrees: 1.2
   tiltPeriod: 22
+  spinDegrees: 0
+  spinPeriod: 80
 --- !u!1 &802322149
 GameObject:
   m_ObjectHideFlags: 0
@@ -42295,15 +42313,17 @@ MonoBehaviour:
   m_GameObject: {fileID: 826428963}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 1e53261866e370b4395ab920d814b35b, type: 3}
+  m_Script: {fileID: 11500000, guid: ede337a3db383c24f82a62544d2e3bf9, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  range: 1.5
-  period: 60
-  followWind: 1
-  direction: {x: 1, y: 0, z: 0}
   bobAmplitude: 0.15
   bobPeriod: 20
+  driftRange: 1.5
+  driftPeriod: 60
+  followWind: 1
+  driftDirection: {x: 1, y: 0, z: 0}
+  tiltDegrees: 0
+  tiltPeriod: 22
   spinDegrees: 1
   spinPeriod: 80
 --- !u!1 &828835696
@@ -48003,10 +48023,16 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ede337a3db383c24f82a62544d2e3bf9, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  amplitude: 1.32
-  period: 28.4
+  bobAmplitude: 1.32
+  bobPeriod: 28.4
+  driftRange: 0
+  driftPeriod: 60
+  followWind: 1
+  driftDirection: {x: 1, y: 0, z: 0}
   tiltDegrees: 1.2
   tiltPeriod: 23.2
+  spinDegrees: 0
+  spinPeriod: 80
 --- !u!1 &889813658
 GameObject:
   m_ObjectHideFlags: 0
@@ -48164,10 +48190,16 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ede337a3db383c24f82a62544d2e3bf9, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  amplitude: 1.25
-  period: 25
+  bobAmplitude: 1.25
+  bobPeriod: 25
+  driftRange: 0
+  driftPeriod: 60
+  followWind: 1
+  driftDirection: {x: 1, y: 0, z: 0}
   tiltDegrees: 2.2
   tiltPeriod: 22
+  spinDegrees: 0
+  spinPeriod: 80
 --- !u!1 &908206780
 GameObject:
   m_ObjectHideFlags: 0
@@ -65479,15 +65511,17 @@ MonoBehaviour:
   m_GameObject: {fileID: 735382353}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 1e53261866e370b4395ab920d814b35b, type: 3}
+  m_Script: {fileID: 11500000, guid: ede337a3db383c24f82a62544d2e3bf9, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  range: 1.5
-  period: 60
-  followWind: 1
-  direction: {x: 1, y: 0, z: 0}
   bobAmplitude: 0.15
   bobPeriod: 20
+  driftRange: 1.5
+  driftPeriod: 60
+  followWind: 1
+  driftDirection: {x: 1, y: 0, z: 0}
+  tiltDegrees: 0
+  tiltPeriod: 22
   spinDegrees: 1
   spinPeriod: 80
 --- !u!1 &1184045148
@@ -65992,15 +66026,17 @@ MonoBehaviour:
   m_GameObject: {fileID: 1232290911}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 1e53261866e370b4395ab920d814b35b, type: 3}
+  m_Script: {fileID: 11500000, guid: ede337a3db383c24f82a62544d2e3bf9, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  range: 1.5
-  period: 60
-  followWind: 1
-  direction: {x: 1, y: 0, z: 0}
   bobAmplitude: 0.15
   bobPeriod: 20
+  driftRange: 1.5
+  driftPeriod: 60
+  followWind: 1
+  driftDirection: {x: 1, y: 0, z: 0}
+  tiltDegrees: 0
+  tiltPeriod: 22
   spinDegrees: 1
   spinPeriod: 80
 --- !u!1001 &1239449464
@@ -71895,15 +71931,17 @@ MonoBehaviour:
   m_GameObject: {fileID: 1283792105}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 1e53261866e370b4395ab920d814b35b, type: 3}
+  m_Script: {fileID: 11500000, guid: ede337a3db383c24f82a62544d2e3bf9, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  range: 1.5
-  period: 60
-  followWind: 1
-  direction: {x: 1, y: 0, z: 0}
   bobAmplitude: 0.15
   bobPeriod: 20
+  driftRange: 1.5
+  driftPeriod: 60
+  followWind: 1
+  driftDirection: {x: 1, y: 0, z: 0}
+  tiltDegrees: 0
+  tiltPeriod: 22
   spinDegrees: 1
   spinPeriod: 80
 --- !u!1001 &1292295421
@@ -72815,15 +72853,17 @@ MonoBehaviour:
   m_GameObject: {fileID: 1388362356}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 1e53261866e370b4395ab920d814b35b, type: 3}
+  m_Script: {fileID: 11500000, guid: ede337a3db383c24f82a62544d2e3bf9, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  range: 1.5
-  period: 60
-  followWind: 1
-  direction: {x: 1, y: 0, z: 0}
   bobAmplitude: 0.15
   bobPeriod: 20
+  driftRange: 1.5
+  driftPeriod: 60
+  followWind: 1
+  driftDirection: {x: 1, y: 0, z: 0}
+  tiltDegrees: 0
+  tiltPeriod: 22
   spinDegrees: 1
   spinPeriod: 80
 --- !u!1001 &1395791906
@@ -73084,15 +73124,17 @@ MonoBehaviour:
   m_GameObject: {fileID: 1400477073}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 1e53261866e370b4395ab920d814b35b, type: 3}
+  m_Script: {fileID: 11500000, guid: ede337a3db383c24f82a62544d2e3bf9, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  range: 1.5
-  period: 60
-  followWind: 1
-  direction: {x: 1, y: 0, z: 0}
   bobAmplitude: 0.15
   bobPeriod: 20
+  driftRange: 1.5
+  driftPeriod: 60
+  followWind: 1
+  driftDirection: {x: 1, y: 0, z: 0}
+  tiltDegrees: 0
+  tiltPeriod: 22
   spinDegrees: 1
   spinPeriod: 80
 --- !u!1001 &1410567000
@@ -73634,15 +73676,17 @@ MonoBehaviour:
   m_GameObject: {fileID: 1038510476}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 1e53261866e370b4395ab920d814b35b, type: 3}
+  m_Script: {fileID: 11500000, guid: ede337a3db383c24f82a62544d2e3bf9, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  range: 1.5
-  period: 60
-  followWind: 1
-  direction: {x: 1, y: 0, z: 0}
   bobAmplitude: 0.15
   bobPeriod: 20
+  driftRange: 1.5
+  driftPeriod: 60
+  followWind: 1
+  driftDirection: {x: 1, y: 0, z: 0}
+  tiltDegrees: 0
+  tiltPeriod: 22
   spinDegrees: 1
   spinPeriod: 80
 --- !u!1001 &1478133170
@@ -79099,15 +79143,17 @@ MonoBehaviour:
   m_GameObject: {fileID: 1529492925}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 1e53261866e370b4395ab920d814b35b, type: 3}
+  m_Script: {fileID: 11500000, guid: ede337a3db383c24f82a62544d2e3bf9, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  range: 1.5
-  period: 60
-  followWind: 1
-  direction: {x: 1, y: 0, z: 0}
   bobAmplitude: 0.15
   bobPeriod: 20
+  driftRange: 1.5
+  driftPeriod: 60
+  followWind: 1
+  driftDirection: {x: 1, y: 0, z: 0}
+  tiltDegrees: 0
+  tiltPeriod: 22
   spinDegrees: 1
   spinPeriod: 80
 --- !u!1 &1540167859
@@ -79288,15 +79334,17 @@ MonoBehaviour:
   m_GameObject: {fileID: 1368839134}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 1e53261866e370b4395ab920d814b35b, type: 3}
+  m_Script: {fileID: 11500000, guid: ede337a3db383c24f82a62544d2e3bf9, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  range: 1.5
-  period: 60
-  followWind: 1
-  direction: {x: 1, y: 0, z: 0}
   bobAmplitude: 0.15
   bobPeriod: 20
+  driftRange: 1.5
+  driftPeriod: 60
+  followWind: 1
+  driftDirection: {x: 1, y: 0, z: 0}
+  tiltDegrees: 0
+  tiltPeriod: 22
   spinDegrees: 1
   spinPeriod: 80
 --- !u!4 &1555705974 stripped
@@ -79567,15 +79615,17 @@ MonoBehaviour:
   m_GameObject: {fileID: 1613892711}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 1e53261866e370b4395ab920d814b35b, type: 3}
+  m_Script: {fileID: 11500000, guid: ede337a3db383c24f82a62544d2e3bf9, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  range: 1.5
-  period: 60
-  followWind: 1
-  direction: {x: 1, y: 0, z: 0}
   bobAmplitude: 0.15
   bobPeriod: 20
+  driftRange: 1.5
+  driftPeriod: 60
+  followWind: 1
+  driftDirection: {x: 1, y: 0, z: 0}
+  tiltDegrees: 0
+  tiltPeriod: 22
   spinDegrees: 1
   spinPeriod: 80
 --- !u!1001 &1614098997
@@ -81531,15 +81581,17 @@ MonoBehaviour:
   m_GameObject: {fileID: 1271515182}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 1e53261866e370b4395ab920d814b35b, type: 3}
+  m_Script: {fileID: 11500000, guid: ede337a3db383c24f82a62544d2e3bf9, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  range: 1.5
-  period: 60
-  followWind: 1
-  direction: {x: 1, y: 0, z: 0}
   bobAmplitude: 0.15
   bobPeriod: 20
+  driftRange: 1.5
+  driftPeriod: 60
+  followWind: 1
+  driftDirection: {x: 1, y: 0, z: 0}
+  tiltDegrees: 0
+  tiltPeriod: 22
   spinDegrees: 1
   spinPeriod: 80
 --- !u!64 &1659622105
@@ -81738,15 +81790,17 @@ MonoBehaviour:
   m_GameObject: {fileID: 1742462906}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 1e53261866e370b4395ab920d814b35b, type: 3}
+  m_Script: {fileID: 11500000, guid: ede337a3db383c24f82a62544d2e3bf9, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  range: 1.5
-  period: 60
-  followWind: 1
-  direction: {x: 1, y: 0, z: 0}
   bobAmplitude: 0.15
   bobPeriod: 20
+  driftRange: 1.5
+  driftPeriod: 60
+  followWind: 1
+  driftDirection: {x: 1, y: 0, z: 0}
+  tiltDegrees: 0
+  tiltPeriod: 22
   spinDegrees: 1
   spinPeriod: 80
 --- !u!1001 &1745460490
@@ -81929,15 +81983,17 @@ MonoBehaviour:
   m_GameObject: {fileID: 1746957624}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 1e53261866e370b4395ab920d814b35b, type: 3}
+  m_Script: {fileID: 11500000, guid: ede337a3db383c24f82a62544d2e3bf9, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  range: 1.5
-  period: 60
-  followWind: 1
-  direction: {x: 1, y: 0, z: 0}
   bobAmplitude: 0.15
   bobPeriod: 20
+  driftRange: 1.5
+  driftPeriod: 60
+  followWind: 1
+  driftDirection: {x: 1, y: 0, z: 0}
+  tiltDegrees: 0
+  tiltPeriod: 22
   spinDegrees: 1
   spinPeriod: 80
 --- !u!1 &1769274728
@@ -104131,15 +104187,17 @@ MonoBehaviour:
   m_GameObject: {fileID: 1861565471}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 1e53261866e370b4395ab920d814b35b, type: 3}
+  m_Script: {fileID: 11500000, guid: ede337a3db383c24f82a62544d2e3bf9, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  range: 1.5
-  period: 60
-  followWind: 1
-  direction: {x: 1, y: 0, z: 0}
   bobAmplitude: 0.15
   bobPeriod: 20
+  driftRange: 1.5
+  driftPeriod: 60
+  followWind: 1
+  driftDirection: {x: 1, y: 0, z: 0}
+  tiltDegrees: 0
+  tiltPeriod: 22
   spinDegrees: 1
   spinPeriod: 80
 --- !u!64 &2038151054
@@ -109511,15 +109569,17 @@ MonoBehaviour:
   m_GameObject: {fileID: 1888340979}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 1e53261866e370b4395ab920d814b35b, type: 3}
+  m_Script: {fileID: 11500000, guid: ede337a3db383c24f82a62544d2e3bf9, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  range: 1.5
-  period: 60
-  followWind: 1
-  direction: {x: 1, y: 0, z: 0}
   bobAmplitude: 0.15
   bobPeriod: 20
+  driftRange: 1.5
+  driftPeriod: 60
+  followWind: 1
+  driftDirection: {x: 1, y: 0, z: 0}
+  tiltDegrees: 0
+  tiltPeriod: 22
   spinDegrees: 1
   spinPeriod: 80
 --- !u!1 &2078284025
@@ -110393,15 +110453,17 @@ MonoBehaviour:
   m_GameObject: {fileID: 2132684505}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 1e53261866e370b4395ab920d814b35b, type: 3}
+  m_Script: {fileID: 11500000, guid: ede337a3db383c24f82a62544d2e3bf9, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  range: 1.5
-  period: 60
-  followWind: 1
-  direction: {x: 1, y: 0, z: 0}
   bobAmplitude: 0.15
   bobPeriod: 20
+  driftRange: 1.5
+  driftPeriod: 60
+  followWind: 1
+  driftDirection: {x: 1, y: 0, z: 0}
+  tiltDegrees: 0
+  tiltPeriod: 22
   spinDegrees: 1
   spinPeriod: 80
 --- !u!4 &2136313590 stripped
@@ -110418,15 +110480,17 @@ MonoBehaviour:
   m_GameObject: {fileID: 568588232}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 1e53261866e370b4395ab920d814b35b, type: 3}
+  m_Script: {fileID: 11500000, guid: ede337a3db383c24f82a62544d2e3bf9, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  range: 1.5
-  period: 60
-  followWind: 1
-  direction: {x: 1, y: 0, z: 0}
   bobAmplitude: 0.15
   bobPeriod: 20
+  driftRange: 1.5
+  driftPeriod: 60
+  followWind: 1
+  driftDirection: {x: 1, y: 0, z: 0}
+  tiltDegrees: 0
+  tiltPeriod: 22
   spinDegrees: 1
   spinPeriod: 80
 --- !u!1001 &2141655565
@@ -122454,7 +122518,8 @@ PrefabInstance:
       propertyPath: m_Name
       value: Canvas_Cursor
       objectReference: {fileID: 0}
-    m_RemovedComponents: []
+    m_RemovedComponents:
+    - {fileID: 4407830667909406476, guid: 15db11ad97b8df047977b7e859b93f38, type: 3}
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
     m_AddedComponents: []

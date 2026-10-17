@@ -4,7 +4,7 @@ using UnityEngine;
 
 // Shows and hides the tutorial popups. Goes in Managers > TutorialManager.
 // Popups are the children of Canvas_Tutorial, placed freely (an aesthetic decision per popup).
-// TutorialTriggers say which popup to show; this manager does the fading and the pause hiding.
+// PopupTriggers say which popup to show; this manager does the fading and the pause hiding.
 //   - All popups start hidden.
 //   - Several popups can be visible at once (each one in its own place).
 //   - If two triggers ask for the same popup, it stays visible until both release it.

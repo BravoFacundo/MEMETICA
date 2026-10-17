@@ -216,7 +216,7 @@ public static class LevelStructureTool
         return moved;
     }
 
-    // Gameplay = looked up by code, tagged, has sound, or has one of our scripts (except FloatBob)
+    // Gameplay = looked up by code, tagged, has sound, or has one of our scripts (except FloatMotion)
     public static bool IsGameplay(Transform t, LevelManager level)
     {
         string n = t.name;
@@ -225,7 +225,7 @@ public static class LevelStructureTool
         if (!t.CompareTag("Untagged")) return true;
         if (t.GetComponentInChildren<AudioSource>(true) != null) return true;
         return t.GetComponentsInChildren<MonoBehaviour>(true)
-            .Any(m => m != null && !(m is FloatBob) && !(m is GrassField) && m.GetType().Assembly.GetName().Name == "Assembly-CSharp");
+            .Any(m => m != null && !(m is FloatMotion) && !(m is GrassField) && m.GetType().Assembly.GetName().Name == "Assembly-CSharp");
     }
 
     //-------------------------------------------------------------------------------------------------------------------

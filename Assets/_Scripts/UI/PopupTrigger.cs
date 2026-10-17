@@ -1,10 +1,10 @@
 using UnityEngine;
 
-// Tutorial zone: while the player is inside, its popup is shown (TutorialManager does the fading).
+// Popup zone (before: TutorialTrigger): while the player is inside, its popup is shown (TutorialManager does the fading).
 // Needs a collider marked as Trigger. Any mesh on it is hidden when the game starts,
 // so the zone can stay visible in the editor while you place it.
 [RequireComponent(typeof(Collider))]
-public class TutorialTrigger : MonoBehaviour
+public class PopupTrigger : MonoBehaviour
 {
     [Tooltip("Popup (child of Canvas_Tutorial) to show while the player is inside")]
     public GameObject popup;
@@ -20,7 +20,7 @@ public class TutorialTrigger : MonoBehaviour
     {
         if (TryGetComponent(out Renderer r)) r.enabled = false;
         if (!GetComponent<Collider>().isTrigger)
-            Debug.LogWarning("[TutorialTrigger] '" + name + "' collider is not a Trigger: it will block the player.", this);
+            Debug.LogWarning("[PopupTrigger] '" + name + "' collider is not a Trigger: it will block the player.", this);
     }
 
     void OnTriggerEnter(Collider other)

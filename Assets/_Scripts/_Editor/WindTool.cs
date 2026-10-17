@@ -9,7 +9,7 @@
 // Ctrl+Z deshace los cambios en la escena.
 //
 // Menú: Memetica > Viento > Partículas siguen el viento
-//   Agrega ParticleWind a las partículas de hojas (material con "Lea"/"Leaf") y de ráfagas (objetos "WindParticles").
+//   Agrega WindParticles a las partículas de hojas (material con "Lea"/"Leaf") y de ráfagas (objetos "WindParticles").
 
 using System.Linq;
 using UnityEditor;
@@ -76,7 +76,7 @@ public static class WindTool
     }
 
     [MenuItem("Memetica/Viento/Partículas siguen el viento")]
-    static void AddParticleWind()
+    static void AddWindParticles()
     {
         Undo.SetCurrentGroupName("Partículas siguen el viento");
         int undoGroup = Undo.GetCurrentGroup();
@@ -84,15 +84,15 @@ public static class WindTool
 
         foreach (ParticleSystem ps in Object.FindObjectsOfType<ParticleSystem>(true))
         {
-            if (ps.GetComponent<ParticleWind>() != null) continue;
+            if (ps.GetComponent<WindParticles>() != null) continue;
             Material mat = ps.GetComponent<ParticleSystemRenderer>()?.sharedMaterial;
             bool leaves = mat != null && (mat.name.Contains("Lea") || mat.name.Contains("Leaf"));
             bool gusts = ps.name.StartsWith("WindParticles");
             if (!leaves && !gusts) continue;
 
-            Undo.AddComponent<ParticleWind>(ps.gameObject);
+            Undo.AddComponent<WindParticles>(ps.gameObject);
             added++;
-            Debug.Log("[Viento] ParticleWind → " + ps.transform.parent?.name + "/" + ps.name, ps);
+            Debug.Log("[Viento] WindParticles → " + ps.transform.parent?.name + "/" + ps.name, ps);
         }
 
         Undo.CollapseUndoOperations(undoGroup);

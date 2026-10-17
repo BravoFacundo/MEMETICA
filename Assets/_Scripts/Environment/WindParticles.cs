@@ -7,7 +7,7 @@ using UnityEngine;
 //   - Random values (Random Between Two Constants) in Local space: the whole emitter is rotated
 //     around Y instead, so the randomness and the emitter shape stay as designed.
 [RequireComponent(typeof(ParticleSystem))]
-public class ParticleWind : MonoBehaviour
+public class WindParticles : MonoBehaviour
 {
     [Tooltip("Multiplies the system's original strength (fixed values only)")]
     public float strengthMultiplier = 1f;
@@ -30,7 +30,7 @@ public class ParticleWind : MonoBehaviour
 
         if (force.enabled) Read(force.x, force.y, force.z, force.space, Mode.SetForce);
         else if (velocity.enabled) Read(velocity.x, velocity.y, velocity.z, velocity.space, Mode.SetVelocity);
-        else Debug.LogWarning("[ParticleWind] '" + name + "' uses neither Force nor Velocity over Lifetime: nothing to orient.", this);
+        else Debug.LogWarning("[WindParticles] '" + name + "' uses neither Force nor Velocity over Lifetime: nothing to orient.", this);
     }
 
     void Update()
@@ -97,5 +97,5 @@ public class ParticleWind : MonoBehaviour
         c.mode == ParticleSystemCurveMode.TwoConstants ? (c.constantMin + c.constantMax) * 0.5f : c.constant;
 
     void Warn(string reason) =>
-        Debug.LogWarning("[ParticleWind] '" + name + "' " + reason + ": left as is.", this);
+        Debug.LogWarning("[WindParticles] '" + name + "' " + reason + ": left as is.", this);
 }

@@ -52,7 +52,6 @@ public class Pedestal : MonoBehaviour
     public GameObject MemeObject { get; private set; }
     public Meme CurrentMeme { get; private set; }   // null if the object has no Meme component
     public bool HasMeme => MemeObject != null;
-    public bool HasOrb => HasMeme;   // TEMP: used by PedestalGroup until the migration, then delete
     public bool IsCorrect { get; private set; }
     public bool IsGrouped => !string.IsNullOrEmpty(groupID);
 
@@ -66,7 +65,7 @@ public class Pedestal : MonoBehaviour
     bool broken;
     bool groupCompleted;
 
-    static PlayerHoldObjects hold;
+    static PlayerLook look;
 
     void Awake()
     {
@@ -82,7 +81,7 @@ public class Pedestal : MonoBehaviour
 
     void Start()
     {
-        if (hold == null) hold = Camera.main.GetComponent<PlayerHoldObjects>();
+        if (look == null) look = Camera.main.GetComponent<PlayerLook>();
     }
 
     // The pedestal whose clue is this painting (or one of its parents), or null
@@ -99,7 +98,7 @@ public class Pedestal : MonoBehaviour
         if (broken || HasMeme || !other.CompareTag("Meme")) return;
 
         GameObject memeObject = other.gameObject;
-        hold.SnapObject(memeObject);
+        look.SnapObject(memeObject);
         memeObject.transform.position = socket.position;
         if (particles != null) particles.Play();
 
@@ -196,8 +195,6 @@ public class Pedestal : MonoBehaviour
         rb.isKinematic = false;
         rb.AddForce(transform.forward * 100f + transform.up * 300f);
     }
-
-    public void PlayCorrect() => Play(correctClip);   // TEMP: used by PedestalGroup until the migration, then delete
 
     void Play(AudioClip clip, bool loop = false)
     {

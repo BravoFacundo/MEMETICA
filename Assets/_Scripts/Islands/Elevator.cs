@@ -72,7 +72,7 @@ public class Elevator : MonoBehaviour
     {
         IsRiding = true;
         PlayerMove player = FindObjectOfType<PlayerMove>();
-        PlayerHoldObjects hold = Camera.main != null ? Camera.main.GetComponent<PlayerHoldObjects>() : null;
+        PlayerLook hold = Camera.main != null ? Camera.main.GetComponent<PlayerLook>() : null;
         GameObject pedestalMeme = pedestal != null ? pedestal.MemeObject : null;   // read before the pedestal stops working
 
         // Board: player can look and zoom but not move or grab; everything rides parented to the elevator
@@ -106,10 +106,10 @@ public class Elevator : MonoBehaviour
         {
             player.transform.SetParent(null);
             player.playerCanMove = true;
-            if (respawn != null && player.TryGetComponent(out PlayerRespawn playerRespawn)) playerRespawn.SetRespawn(respawn);
+            if (respawn != null) player.SetRespawn(respawn);
         }
         foreach (Transform p in passengers)
-            if (p != null && respawn != null && p.TryGetComponent(out PlayerRespawn r)) r.SetRespawn(respawn);
+            if (p != null && respawn != null && p.TryGetComponent(out Meme meme)) meme.SetRespawn(respawn);
         if (hold != null) hold.canHold = true;
         if (locks != null) locks.SetActive(false);
         for (int i = 0; i < ridePopups.Length; i++) if (shown[i]) SetPopup(ridePopups[i].popup, false);

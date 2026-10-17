@@ -16,7 +16,7 @@ public class Island : MonoBehaviour
     private Vector3 upperpivot;
     private Vector3 lowerpivot;
 
-    private CameraShake camShake;
+    private PlayerLook camShake;
     private Coroutine shakeRoutine;
 
     void Start()
@@ -31,7 +31,7 @@ public class Island : MonoBehaviour
         upperpivot = new Vector3(islaPos.position.x, level.topY, islaPos.position.z);
         lowerpivot = new Vector3(islaPos.position.x, level.bottomY, islaPos.position.z);
 
-        camShake = Camera.main.GetComponent<CameraShake>();
+        camShake = Camera.main.GetComponent<PlayerLook>();
     }
 
 

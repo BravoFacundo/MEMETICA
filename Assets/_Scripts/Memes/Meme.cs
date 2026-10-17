@@ -4,6 +4,8 @@ using UnityEngine;
 // The environment (hold, pedestals, respawn, bridges and islands) only talks to this class,
 // so it works the same with both. Each representation decides what to do in the On... methods.
 // On its own (no MemeOrb / MemeWindow) it is a plain carryable meme with no visual logic, e.g. the tutorial orb.
+// Falling into the void: it reappears on the last island it touched (before: PlayerRespawn on the orbs).
+// While held it doesn't check: it travels with the player, and PlayerMove tells it when the player falls.
 // Object name: Meme_<ID> (e.g. Meme_3Aa). Pedestals compare their Key ID with that ID.
 [RequireComponent(typeof(Rigidbody))]
 public class Meme : MonoBehaviour
@@ -23,6 +25,11 @@ public class Meme : MonoBehaviour
     private LayerMask groundMask;
     private float groundedTime;
 
+    private Transform respawnPoint;
+    private Transform lastGroundHit;
+    private GameObject lastIsland;
+    private float lastGroundY;
+
     // "Meme_3Aa" → "3Aa". Everything after the first "_", so old names ("Orb_3Aa") still work
     public static string IDOf(GameObject meme)
     {
@@ -34,11 +41,13 @@ public class Meme : MonoBehaviour
     {
         body = GetComponent<Rigidbody>();
         groundMask = LayerMask.GetMask("Ground");
+        lastGroundY = transform.position.y;
     }
 
     protected virtual void Update()
     {
         FreezeWhenRestingOnGround();
+        CheckFallAndRespawn();
     }
 
     //---- Called by the environment
@@ -84,6 +93,55 @@ public class Meme : MonoBehaviour
     protected virtual void OnDropped() { }
     protected virtual void OnPlaced(Pedestal pedestal) { }
     protected virtual void OnRemovedFromPedestal(Pedestal pedestal) { }
+
+    // Fija el respawn a mano. Lo usa el ascensor con los memes que viajan en él.
+    public void SetRespawn(Transform point)
+    {
+        respawnPoint = point;
+        lastGroundHit = null;
+    }
+
+    //---- Respawn
+
+    private void CheckFallAndRespawn()
+    {
+        if (IsHeld || LevelManager.Instance == null) return;
+        if (respawnPoint == null) respawnPoint = LevelManager.Instance.startRespawnPoint;
+
+        if (transform.position.y < lastGroundY - LevelManager.Instance.fallDistance)
+        {
+            Respawn();
+            return;
+        }
+
+        if (!Physics.Raycast(transform.position, Vector3.down, out RaycastHit hit, 5f)) return;
+        lastGroundY = hit.point.y;
+        if (hit.transform == lastGroundHit) return;
+        lastGroundHit = hit.transform;
+
+        GameObject island = FindParentWithTag(hit.transform, "Isla");
+        if (island == null || island == lastIsland) return;   // un puente, o la misma isla
+        lastIsland = island;
+
+        Transform point = LevelManager.Instance.RespawnPointOf(lastIsland);
+        if (point != null) respawnPoint = point;
+    }
+
+    private void Respawn()
+    {
+        if (respawnPoint == null) return;
+        transform.position = respawnPoint.position;
+        body.velocity = Vector3.zero;
+        body.angularVelocity = Vector3.zero;
+        OnRespawned();
+    }
+
+    private static GameObject FindParentWithTag(Transform child, string tag)
+    {
+        for (Transform t = child.parent; t != null; t = t.parent)
+            if (t.CompareTag(tag)) return t.gameObject;
+        return null;
+    }
 
     //---- Rest (before: OrbPosition)
 

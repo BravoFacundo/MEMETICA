@@ -2,7 +2,8 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class Platform : MonoBehaviour
+// Falling platform: drops a moment after the player steps on it and comes back up after a while.
+public class FallingPlatform : MonoBehaviour
 {
     private float waitTime;
 

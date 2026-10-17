@@ -1,4 +1,5 @@
-//Simple script for First Person Player Movement
+//Simple script for First Person Player Movement.
+//Also respawns the player on the last island stepped on after falling into the void (before: PlayerRespawn).
 
 using System.Collections;
 using System.Collections.Generic;
@@ -7,7 +8,7 @@ using UnityEngine;
 public class PlayerMove : MonoBehaviour
 {
     private CharacterController characterController;
-    private PlayerHoldObjects hold;   // está en la Main Camera; se guarda una vez
+    private PlayerLook look;   // está en la Main Camera; se guarda una vez
 
     [Header("Player Move")]
     public bool playerCanMove = true;
@@ -34,16 +35,27 @@ public class PlayerMove : MonoBehaviour
     [Header("Final")]
     public bool ascend = false;   // lo prende el LevelManager al terminar el juego
 
+    private Transform respawnPoint;
+    private Transform lastGroundHit;
+    private GameObject lastIsland;
+    private float lastGroundY;   // altura del último piso pisado: caer muy por debajo = cayó al vacío
+
     private void Start()
     {
         characterController = GetComponent<CharacterController>();
         groundCheck = transform.Find("GroundCheck").GetComponent<Transform>();
-        hold = Camera.main.GetComponent<PlayerHoldObjects>();
+        look = Camera.main.GetComponent<PlayerLook>();
         currentSpeed = walkSpeed;
+
+        // El juego arranca en el tutorial (la isla del tutorial no tiene el tag "Isla", así que se fija acá)
+        respawnPoint = LevelManager.Instance.startRespawnPoint;
+        lastGroundY = transform.position.y;
     }
 
     void Update()
     {
+        if (CheckFallAndRespawn()) return;
+
         if (playerCanMove)
         {
             isGrounded = Physics.CheckSphere(groundCheck.position, groundDistance, groundMask);
@@ -79,18 +91,18 @@ public class PlayerMove : MonoBehaviour
         if (!Physics.Raycast(transform.position, Vector3.down, out RaycastHit hit)) return;
 
         // Plataformas que caen
-        if (isGrounded && hit.transform.TryGetComponent(out Platform platform))
+        if (isGrounded && hit.transform.TryGetComponent(out FallingPlatform platform))
         {
             platform.onTop = true;
         }
 
         // Cruzar un puente y llegar a una isla nueva con el meme en la mano
-        if (!hold.FueAgarrada) return;
+        if (!look.FueAgarrada) return;
 
         GameObject bridge = FindParentWithTag(hit.transform.gameObject, "Puente");
         if (bridge != null && !hit1Lock && prevBridge != bridge)
         {
-            if (hold.heldObject != null && hold.heldObject.TryGetComponent(out Meme crossingMeme)) crossingMeme.OnBridgeCrossed();
+            if (look.heldObject != null && look.heldObject.TryGetComponent(out Meme crossingMeme)) crossingMeme.OnBridgeCrossed();
             hit2Lock = false;
             hit1Lock = true;
             prevBridge = bridge;
@@ -104,8 +116,51 @@ public class PlayerMove : MonoBehaviour
             prevIsland = island;
 
             // Llevar el meme a una isla nueva (MemeOrb: desbloquea una versión más; MemeWindow: trigger Mover)
-            if (hold.heldObject != null && hold.heldObject.TryGetComponent(out Meme heldMeme)) heldMeme.OnIslandVisited(island);
+            if (look.heldObject != null && look.heldObject.TryGetComponent(out Meme heldMeme)) heldMeme.OnIslandVisited(island);
         }
+    }
+
+    //---- Respawn (before: PlayerRespawn)
+
+    // ¿Cayó al vacío? Si no, actualiza el punto de respawn según la isla que pisa
+    private bool CheckFallAndRespawn()
+    {
+        if (LevelManager.Instance != null && transform.position.y < lastGroundY - LevelManager.Instance.fallDistance)
+        {
+            Respawn();
+            return true;
+        }
+
+        if (!Physics.Raycast(transform.position, Vector3.down, out RaycastHit hit, 5f)) return false;
+        lastGroundY = hit.point.y;                           // el piso de abajo (sigue a islas y ascensores que se mueven)
+        if (hit.transform == lastGroundHit) return false;   // sigue parado sobre lo mismo
+        lastGroundHit = hit.transform;
+
+        GameObject island = FindParentWithTag(hit.transform.gameObject, "Isla");
+        if (island == null || island == lastIsland) return false;   // un puente, o la misma isla
+        lastIsland = island;
+
+        Transform point = LevelManager.Instance.RespawnPointOf(island);
+        if (point != null) respawnPoint = point;
+        return false;
+    }
+
+    // Fija el respawn a mano. Lo usa el ascensor: el jugador llega al Área 1 sin haberla pisado.
+    public void SetRespawn(Transform point)
+    {
+        respawnPoint = point;
+        lastGroundHit = null;   // obliga a volver a revisar el piso en el próximo frame
+    }
+
+    private void Respawn()
+    {
+        // El CharacterController ignora el cambio de posición si está prendido
+        characterController.enabled = false;
+        transform.position = respawnPoint.position;
+        characterController.enabled = true;
+
+        // El meme en la mano viaja con el jugador y también cuenta como caída (MemeWindow: trigger Caer)
+        if (look.heldObject != null && look.heldObject.TryGetComponent(out Meme heldMeme)) heldMeme.OnRespawned();
     }
 
     //In the project, the objects tagged "island" may be too far up the hierarchy from the object the raycast hits.

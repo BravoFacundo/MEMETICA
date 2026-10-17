@@ -43,9 +43,6 @@ GameObject:
   - component: {fileID: 93914746732543162}
   - component: {fileID: 5428460627732643920}
   - component: {fileID: 7900629407848026548}
-  - component: {fileID: 2979299066308984204}
-  - component: {fileID: 8572363133211217218}
-  - component: {fileID: 2109143417099891578}
   - component: {fileID: 1376298146507446115}
   m_Layer: 0
   m_Name: Main Camera
@@ -147,51 +144,13 @@ MonoBehaviour:
   zoomingSpeed: 5
   defaultFOV: 90
   zoomFOV: 20
---- !u!114 &2979299066308984204
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 2459455686321529124}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: d942b7d12614a23459ec446a8d1b1c14, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  orbIsCorrect: 0
-  lookingRange: 10
---- !u!114 &8572363133211217218
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 2459455686321529124}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 60c8fbbea68761b4f9985835786ebdfc, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
+  canHold: 1
   pickUpRange: 2.5
   moveForce: 250
-  holdParent: {fileID: 0}
   heldObject: {fileID: 0}
   FueAgarrada: 0
-  canHold: 1
-  UltimoAgarrado: {fileID: 0}
---- !u!114 &2109143417099891578
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 2459455686321529124}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 5e8dc2d2f0f42964c9ca4daf348689e8, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
+  paintingLookRange: 10
+  clueSolved: 0
 --- !u!114 &1376298146507446115
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -248,7 +207,6 @@ GameObject:
   - component: {fileID: 825100422987090370}
   - component: {fileID: 4757622590827061417}
   - component: {fileID: 342197174011319880}
-  - component: {fileID: 4153926243044852189}
   m_Layer: 2
   m_Name: Player
   m_TagString: Player
@@ -327,18 +285,6 @@ MonoBehaviour:
   prevIsland: {fileID: 0}
   prevBridge: {fileID: 0}
   ascend: 0
---- !u!114 &4153926243044852189
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 4493911082594123580}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: a33c54e69ceded64c8dac77eb94e750f, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
 --- !u!1 &8871488068279905055
 GameObject:
   m_ObjectHideFlags: 0

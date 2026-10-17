@@ -6425,7 +6425,7 @@ PrefabInstance:
     m_AddedComponents:
     - targetCorrespondingSourceObject: {fileID: 1199571229238484, guid: f661498175107c749a33d97304c423eb, type: 3}
       insertIndex: -1
-      addedObject: {fileID: 735601553}
+      addedObject: {fileID: 735601551}
   m_SourcePrefab: {fileID: 100100000, guid: f661498175107c749a33d97304c423eb, type: 3}
 --- !u!4 &65703641 stripped
 Transform:
@@ -13542,7 +13542,7 @@ PrefabInstance:
     m_AddedComponents:
     - targetCorrespondingSourceObject: {fileID: 2544436480761032049, guid: 58a04ed3b9a72fe4eb0b19e2cba9eba5, type: 3}
       insertIndex: -1
-      addedObject: {fileID: 1881438303}
+      addedObject: {fileID: 1881438301}
   m_SourcePrefab: {fileID: 100100000, guid: 58a04ed3b9a72fe4eb0b19e2cba9eba5, type: 3}
 --- !u!1 &159480275
 GameObject:
@@ -26285,10 +26285,16 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ede337a3db383c24f82a62544d2e3bf9, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  amplitude: 1.25
-  period: 25
+  bobAmplitude: 1.25
+  bobPeriod: 25
+  driftRange: 0
+  driftPeriod: 60
+  followWind: 1
+  driftDirection: {x: 1, y: 0, z: 0}
   tiltDegrees: 2.2
   tiltPeriod: 22
+  spinDegrees: 0
+  spinPeriod: 80
 --- !u!1 &251786689
 GameObject:
   m_ObjectHideFlags: 0
@@ -26628,7 +26634,6 @@ GameObject:
   - component: {fileID: 270262299}
   - component: {fileID: 270262298}
   - component: {fileID: 270262297}
-  - component: {fileID: 270262295}
   - component: {fileID: 270262294}
   - component: {fileID: 270262293}
   - component: {fileID: 270262292}
@@ -26771,18 +26776,6 @@ AudioSource:
     m_PreInfinity: 2
     m_PostInfinity: 2
     m_RotationOrder: 4
---- !u!114 &270262295
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 270262291}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: a33c54e69ceded64c8dac77eb94e750f, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
 --- !u!114 &270262297
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -27383,7 +27376,6 @@ GameObject:
   - component: {fileID: 306690108}
   - component: {fileID: 306690107}
   - component: {fileID: 306690106}
-  - component: {fileID: 306690104}
   - component: {fileID: 306690103}
   - component: {fileID: 306690102}
   - component: {fileID: 306690101}
@@ -27526,18 +27518,6 @@ AudioSource:
     m_PreInfinity: 2
     m_PostInfinity: 2
     m_RotationOrder: 4
---- !u!114 &306690104
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 306690100}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: a33c54e69ceded64c8dac77eb94e750f, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
 --- !u!114 &306690106
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -46251,7 +46231,6 @@ GameObject:
   m_Component:
   - component: {fileID: 396937337}
   - component: {fileID: 396937338}
-  - component: {fileID: 396937339}
   m_Layer: 0
   m_Name: UIManager
   m_TagString: Untagged
@@ -46292,24 +46271,6 @@ MonoBehaviour:
   menuScene: Menu
   minLoadingTime: 1.5
   quitDelay: 2
---- !u!114 &396937339
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 396937336}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 5ab6ae1ce73551b409e8ecee52f3972a, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  targetCamera: {fileID: 1775379617}
-  frameCanvas: {fileID: 7337648753711511837}
-  frame: {fileID: 1476540065}
-  marginPixels: 10
-  hiddenScale: 1.06
-  duration: 0.15
 --- !u!1 &400044549
 GameObject:
   m_ObjectHideFlags: 0
@@ -54413,7 +54374,7 @@ PrefabInstance:
     m_AddedComponents:
     - targetCorrespondingSourceObject: {fileID: 2544436480761032049, guid: 58a04ed3b9a72fe4eb0b19e2cba9eba5, type: 3}
       insertIndex: -1
-      addedObject: {fileID: 1357627390}
+      addedObject: {fileID: 1357627388}
   m_SourcePrefab: {fileID: 100100000, guid: 58a04ed3b9a72fe4eb0b19e2cba9eba5, type: 3}
 --- !u!1 &481230914
 GameObject:
@@ -54778,7 +54739,7 @@ PrefabInstance:
     m_AddedComponents:
     - targetCorrespondingSourceObject: {fileID: 1805616374771646444, guid: 94c51fd839663604fa1027f8f1329fe2, type: 3}
       insertIndex: -1
-      addedObject: {fileID: 1088808428}
+      addedObject: {fileID: 1088808426}
   m_SourcePrefab: {fileID: 100100000, guid: 94c51fd839663604fa1027f8f1329fe2, type: 3}
 --- !u!4 &497153926 stripped
 Transform:
@@ -63192,7 +63153,7 @@ PrefabInstance:
     m_AddedComponents:
     - targetCorrespondingSourceObject: {fileID: 1805616374771646444, guid: 94c51fd839663604fa1027f8f1329fe2, type: 3}
       insertIndex: -1
-      addedObject: {fileID: 608007501}
+      addedObject: {fileID: 608007499}
   m_SourcePrefab: {fileID: 100100000, guid: 94c51fd839663604fa1027f8f1329fe2, type: 3}
 --- !u!1001 &568588231
 PrefabInstance:
@@ -63260,7 +63221,7 @@ PrefabInstance:
     m_AddedComponents:
     - targetCorrespondingSourceObject: {fileID: 1643322372839788, guid: 6fdeb1faa1b42904e9210dd047b256ba, type: 3}
       insertIndex: -1
-      addedObject: {fileID: 2136313593}
+      addedObject: {fileID: 2136313591}
   m_SourcePrefab: {fileID: 100100000, guid: 6fdeb1faa1b42904e9210dd047b256ba, type: 3}
 --- !u!1 &568968341
 GameObject:
@@ -68763,14 +68724,14 @@ PrefabInstance:
     m_AddedComponents:
     - targetCorrespondingSourceObject: {fileID: 1805616374771646444, guid: 94c51fd839663604fa1027f8f1329fe2, type: 3}
       insertIndex: -1
-      addedObject: {fileID: 605738872}
+      addedObject: {fileID: 605738870}
   m_SourcePrefab: {fileID: 100100000, guid: 94c51fd839663604fa1027f8f1329fe2, type: 3}
 --- !u!4 &605738869 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 1805616374771606476, guid: 94c51fd839663604fa1027f8f1329fe2, type: 3}
   m_PrefabInstance: {fileID: 605738868}
   m_PrefabAsset: {fileID: 0}
---- !u!114 &605738872
+--- !u!114 &605738870
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -68779,15 +68740,17 @@ MonoBehaviour:
   m_GameObject: {fileID: 278061740}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 1e53261866e370b4395ab920d814b35b, type: 3}
+  m_Script: {fileID: 11500000, guid: ede337a3db383c24f82a62544d2e3bf9, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  range: 6
-  period: 40
-  followWind: 1
-  direction: {x: 1, y: 0, z: 0}
   bobAmplitude: 0.5
   bobPeriod: 14
+  driftRange: 6
+  driftPeriod: 40
+  followWind: 1
+  driftDirection: {x: 1, y: 0, z: 0}
+  tiltDegrees: 0
+  tiltPeriod: 22
   spinDegrees: 3
   spinPeriod: 50
 --- !u!1 &608007498 stripped
@@ -68795,7 +68758,7 @@ GameObject:
   m_CorrespondingSourceObject: {fileID: 1805616374771646444, guid: 94c51fd839663604fa1027f8f1329fe2, type: 3}
   m_PrefabInstance: {fileID: 565315726}
   m_PrefabAsset: {fileID: 0}
---- !u!114 &608007501
+--- !u!114 &608007499
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -68804,15 +68767,17 @@ MonoBehaviour:
   m_GameObject: {fileID: 608007498}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 1e53261866e370b4395ab920d814b35b, type: 3}
+  m_Script: {fileID: 11500000, guid: ede337a3db383c24f82a62544d2e3bf9, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  range: 6
-  period: 40
-  followWind: 1
-  direction: {x: 1, y: 0, z: 0}
   bobAmplitude: 0.5
   bobPeriod: 14
+  driftRange: 6
+  driftPeriod: 40
+  followWind: 1
+  driftDirection: {x: 1, y: 0, z: 0}
+  tiltDegrees: 0
+  tiltPeriod: 22
   spinDegrees: 3
   spinPeriod: 50
 --- !u!1001 &610162333
@@ -71419,7 +71384,7 @@ Transform:
   m_CorrespondingSourceObject: {fileID: 4675105466496168, guid: 6fdeb1faa1b42904e9210dd047b256ba, type: 3}
   m_PrefabInstance: {fileID: 1247126349}
   m_PrefabAsset: {fileID: 0}
---- !u!114 &703914955
+--- !u!114 &703914953
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -71428,15 +71393,17 @@ MonoBehaviour:
   m_GameObject: {fileID: 559512732}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 1e53261866e370b4395ab920d814b35b, type: 3}
+  m_Script: {fileID: 11500000, guid: ede337a3db383c24f82a62544d2e3bf9, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  range: 6
-  period: 40
-  followWind: 1
-  direction: {x: 1, y: 0, z: 0}
   bobAmplitude: 0.5
   bobPeriod: 14
+  driftRange: 6
+  driftPeriod: 40
+  followWind: 1
+  driftDirection: {x: 1, y: 0, z: 0}
+  tiltDegrees: 0
+  tiltPeriod: 22
   spinDegrees: 3
   spinPeriod: 50
 --- !u!64 &713501557
@@ -72668,14 +72635,14 @@ PrefabInstance:
     m_AddedComponents:
     - targetCorrespondingSourceObject: {fileID: 1643322372839788, guid: 6fdeb1faa1b42904e9210dd047b256ba, type: 3}
       insertIndex: -1
-      addedObject: {fileID: 1170082841}
+      addedObject: {fileID: 1170082839}
   m_SourcePrefab: {fileID: 100100000, guid: 6fdeb1faa1b42904e9210dd047b256ba, type: 3}
 --- !u!1 &735601550 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 1199571229238484, guid: f661498175107c749a33d97304c423eb, type: 3}
   m_PrefabInstance: {fileID: 65703640}
   m_PrefabAsset: {fileID: 0}
---- !u!114 &735601553
+--- !u!114 &735601551
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -72684,15 +72651,17 @@ MonoBehaviour:
   m_GameObject: {fileID: 735601550}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 1e53261866e370b4395ab920d814b35b, type: 3}
+  m_Script: {fileID: 11500000, guid: ede337a3db383c24f82a62544d2e3bf9, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  range: 6
-  period: 40
-  followWind: 1
-  direction: {x: 1, y: 0, z: 0}
   bobAmplitude: 0.5
   bobPeriod: 14
+  driftRange: 6
+  driftPeriod: 40
+  followWind: 1
+  driftDirection: {x: 1, y: 0, z: 0}
+  tiltDegrees: 0
+  tiltPeriod: 22
   spinDegrees: 3
   spinPeriod: 50
 --- !u!1 &735913144 stripped
@@ -73231,7 +73200,7 @@ GameObject:
   m_CorrespondingSourceObject: {fileID: 1199571229238484, guid: f661498175107c749a33d97304c423eb, type: 3}
   m_PrefabInstance: {fileID: 1400477072}
   m_PrefabAsset: {fileID: 0}
---- !u!114 &752382942
+--- !u!114 &752382940
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -73240,15 +73209,17 @@ MonoBehaviour:
   m_GameObject: {fileID: 752382939}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 1e53261866e370b4395ab920d814b35b, type: 3}
+  m_Script: {fileID: 11500000, guid: ede337a3db383c24f82a62544d2e3bf9, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  range: 6
-  period: 40
-  followWind: 1
-  direction: {x: 1, y: 0, z: 0}
   bobAmplitude: 0.5
   bobPeriod: 14
+  driftRange: 6
+  driftPeriod: 40
+  followWind: 1
+  driftDirection: {x: 1, y: 0, z: 0}
+  tiltDegrees: 0
+  tiltPeriod: 22
   spinDegrees: 3
   spinPeriod: 50
 --- !u!1001 &753513079
@@ -79908,7 +79879,7 @@ PrefabInstance:
     m_AddedComponents:
     - targetCorrespondingSourceObject: {fileID: 1643322372839788, guid: 6fdeb1faa1b42904e9210dd047b256ba, type: 3}
       insertIndex: -1
-      addedObject: {fileID: 2133734118}
+      addedObject: {fileID: 2133734116}
   m_SourcePrefab: {fileID: 100100000, guid: 6fdeb1faa1b42904e9210dd047b256ba, type: 3}
 --- !u!4 &826428962 stripped
 Transform:
@@ -91718,10 +91689,16 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ede337a3db383c24f82a62544d2e3bf9, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  amplitude: 1.25
-  period: 25
+  bobAmplitude: 1.25
+  bobPeriod: 25
+  driftRange: 0
+  driftPeriod: 60
+  followWind: 1
+  driftDirection: {x: 1, y: 0, z: 0}
   tiltDegrees: 2.2
   tiltPeriod: 22
+  spinDegrees: 0
+  spinPeriod: 80
 --- !u!1 &907837357
 GameObject:
   m_ObjectHideFlags: 0
@@ -91770,10 +91747,16 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ede337a3db383c24f82a62544d2e3bf9, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  amplitude: 1.25
-  period: 25
+  bobAmplitude: 1.25
+  bobPeriod: 25
+  driftRange: 0
+  driftPeriod: 60
+  followWind: 1
+  driftDirection: {x: 1, y: 0, z: 0}
   tiltDegrees: 2.2
   tiltPeriod: 22
+  spinDegrees: 0
+  spinPeriod: 80
 --- !u!1 &907909345
 GameObject:
   m_ObjectHideFlags: 0
@@ -112473,7 +112456,7 @@ PrefabInstance:
     m_AddedComponents:
     - targetCorrespondingSourceObject: {fileID: 5070447678188584016, guid: fb72e3a55f4f3f844858ec5895b57046, type: 3}
       insertIndex: -1
-      addedObject: {fileID: 1476428072}
+      addedObject: {fileID: 1476428070}
   m_SourcePrefab: {fileID: 100100000, guid: fb72e3a55f4f3f844858ec5895b57046, type: 3}
 --- !u!1001 &1041203089
 PrefabInstance:
@@ -118947,7 +118930,7 @@ GameObject:
   m_CorrespondingSourceObject: {fileID: 1805616374771646444, guid: 94c51fd839663604fa1027f8f1329fe2, type: 3}
   m_PrefabInstance: {fileID: 490814648}
   m_PrefabAsset: {fileID: 0}
---- !u!114 &1088808428
+--- !u!114 &1088808426
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -118956,15 +118939,17 @@ MonoBehaviour:
   m_GameObject: {fileID: 1088808425}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 1e53261866e370b4395ab920d814b35b, type: 3}
+  m_Script: {fileID: 11500000, guid: ede337a3db383c24f82a62544d2e3bf9, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  range: 6
-  period: 40
-  followWind: 1
-  direction: {x: 1, y: 0, z: 0}
   bobAmplitude: 0.5
   bobPeriod: 14
+  driftRange: 6
+  driftPeriod: 40
+  followWind: 1
+  driftDirection: {x: 1, y: 0, z: 0}
+  tiltDegrees: 0
+  tiltPeriod: 22
   spinDegrees: 3
   spinPeriod: 50
 --- !u!1001 &1091408353
@@ -134317,7 +134302,7 @@ Transform:
   m_CorrespondingSourceObject: {fileID: 4675105466496168, guid: 6fdeb1faa1b42904e9210dd047b256ba, type: 3}
   m_PrefabInstance: {fileID: 735382352}
   m_PrefabAsset: {fileID: 0}
---- !u!114 &1170082841
+--- !u!114 &1170082839
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -134326,15 +134311,17 @@ MonoBehaviour:
   m_GameObject: {fileID: 949976293}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 1e53261866e370b4395ab920d814b35b, type: 3}
+  m_Script: {fileID: 11500000, guid: ede337a3db383c24f82a62544d2e3bf9, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  range: 6
-  period: 40
-  followWind: 1
-  direction: {x: 1, y: 0, z: 0}
   bobAmplitude: 0.5
   bobPeriod: 14
+  driftRange: 6
+  driftPeriod: 40
+  followWind: 1
+  driftDirection: {x: 1, y: 0, z: 0}
+  tiltDegrees: 0
+  tiltPeriod: 22
   spinDegrees: 3
   spinPeriod: 50
 --- !u!1 &1172866212 stripped
@@ -142380,14 +142367,14 @@ PrefabInstance:
     m_AddedComponents:
     - targetCorrespondingSourceObject: {fileID: 1805616374771646444, guid: 94c51fd839663604fa1027f8f1329fe2, type: 3}
       insertIndex: -1
-      addedObject: {fileID: 1232290913}
+      addedObject: {fileID: 1232290911}
   m_SourcePrefab: {fileID: 100100000, guid: 94c51fd839663604fa1027f8f1329fe2, type: 3}
 --- !u!4 &1232290910 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 1805616374771606476, guid: 94c51fd839663604fa1027f8f1329fe2, type: 3}
   m_PrefabInstance: {fileID: 1232290909}
   m_PrefabAsset: {fileID: 0}
---- !u!114 &1232290913
+--- !u!114 &1232290911
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -142396,15 +142383,17 @@ MonoBehaviour:
   m_GameObject: {fileID: 1107781551}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 1e53261866e370b4395ab920d814b35b, type: 3}
+  m_Script: {fileID: 11500000, guid: ede337a3db383c24f82a62544d2e3bf9, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  range: 6
-  period: 40
-  followWind: 1
-  direction: {x: 1, y: 0, z: 0}
   bobAmplitude: 0.5
   bobPeriod: 14
+  driftRange: 6
+  driftPeriod: 40
+  followWind: 1
+  driftDirection: {x: 1, y: 0, z: 0}
+  tiltDegrees: 0
+  tiltPeriod: 22
   spinDegrees: 3
   spinPeriod: 50
 --- !u!1 &1236809508
@@ -142851,8 +142840,14 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ae081e2bcf8a921479f3c751059d8293, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  marginPixels: 10
+  hiddenScale: 1.06
+  duration: 0.15
   pauseMenuUI: {fileID: 1433697215}
   uiManager: {fileID: 396937338}
+  targetCamera: {fileID: 1775379617}
+  frameCanvas: {fileID: 7337648753711511837}
+  frame: {fileID: 1476540065}
 --- !u!1001 &1243944968
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -143052,7 +143047,7 @@ PrefabInstance:
     m_AddedComponents:
     - targetCorrespondingSourceObject: {fileID: 1643322372839788, guid: 6fdeb1faa1b42904e9210dd047b256ba, type: 3}
       insertIndex: -1
-      addedObject: {fileID: 703914955}
+      addedObject: {fileID: 703914953}
   m_SourcePrefab: {fileID: 100100000, guid: 6fdeb1faa1b42904e9210dd047b256ba, type: 3}
 --- !u!1001 &1248612547
 PrefabInstance:
@@ -143619,7 +143614,7 @@ GameObject:
   m_CorrespondingSourceObject: {fileID: 1643322372839788, guid: 6fdeb1faa1b42904e9210dd047b256ba, type: 3}
   m_PrefabInstance: {fileID: 1529492924}
   m_PrefabAsset: {fileID: 0}
---- !u!114 &1271282430
+--- !u!114 &1271282428
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -143628,15 +143623,17 @@ MonoBehaviour:
   m_GameObject: {fileID: 1271282427}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 1e53261866e370b4395ab920d814b35b, type: 3}
+  m_Script: {fileID: 11500000, guid: ede337a3db383c24f82a62544d2e3bf9, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  range: 6
-  period: 40
-  followWind: 1
-  direction: {x: 1, y: 0, z: 0}
   bobAmplitude: 0.5
   bobPeriod: 14
+  driftRange: 6
+  driftPeriod: 40
+  followWind: 1
+  driftDirection: {x: 1, y: 0, z: 0}
+  tiltDegrees: 0
+  tiltPeriod: 22
   spinDegrees: 3
   spinPeriod: 50
 --- !u!1001 &1271515181
@@ -143717,7 +143714,7 @@ PrefabInstance:
     m_AddedComponents:
     - targetCorrespondingSourceObject: {fileID: 1199571229238484, guid: f661498175107c749a33d97304c423eb, type: 3}
       insertIndex: -1
-      addedObject: {fileID: 1656044436}
+      addedObject: {fileID: 1656044434}
   m_SourcePrefab: {fileID: 100100000, guid: f661498175107c749a33d97304c423eb, type: 3}
 --- !u!1001 &1272318639
 PrefabInstance:
@@ -144209,14 +144206,14 @@ PrefabInstance:
     m_AddedComponents:
     - targetCorrespondingSourceObject: {fileID: 1643322372839788, guid: 6fdeb1faa1b42904e9210dd047b256ba, type: 3}
       insertIndex: -1
-      addedObject: {fileID: 1283792107}
+      addedObject: {fileID: 1283792105}
   m_SourcePrefab: {fileID: 100100000, guid: 6fdeb1faa1b42904e9210dd047b256ba, type: 3}
 --- !u!4 &1283792104 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 4675105466496168, guid: 6fdeb1faa1b42904e9210dd047b256ba, type: 3}
   m_PrefabInstance: {fileID: 1283792103}
   m_PrefabAsset: {fileID: 0}
---- !u!114 &1283792107
+--- !u!114 &1283792105
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -144225,15 +144222,17 @@ MonoBehaviour:
   m_GameObject: {fileID: 796341188}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 1e53261866e370b4395ab920d814b35b, type: 3}
+  m_Script: {fileID: 11500000, guid: ede337a3db383c24f82a62544d2e3bf9, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  range: 6
-  period: 40
-  followWind: 1
-  direction: {x: 1, y: 0, z: 0}
   bobAmplitude: 0.5
   bobPeriod: 14
+  driftRange: 6
+  driftPeriod: 40
+  followWind: 1
+  driftDirection: {x: 1, y: 0, z: 0}
+  tiltDegrees: 0
+  tiltPeriod: 22
   spinDegrees: 3
   spinPeriod: 50
 --- !u!1 &1291253757 stripped
@@ -144351,7 +144350,7 @@ Transform:
   m_CorrespondingSourceObject: {fileID: 4457848601906800, guid: f661498175107c749a33d97304c423eb, type: 3}
   m_PrefabInstance: {fileID: 1746957623}
   m_PrefabAsset: {fileID: 0}
---- !u!114 &1292326487
+--- !u!114 &1292326485
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -144360,15 +144359,17 @@ MonoBehaviour:
   m_GameObject: {fileID: 769490809}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 1e53261866e370b4395ab920d814b35b, type: 3}
+  m_Script: {fileID: 11500000, guid: ede337a3db383c24f82a62544d2e3bf9, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  range: 6
-  period: 40
-  followWind: 1
-  direction: {x: 1, y: 0, z: 0}
   bobAmplitude: 0.5
   bobPeriod: 14
+  driftRange: 6
+  driftPeriod: 40
+  followWind: 1
+  driftDirection: {x: 1, y: 0, z: 0}
+  tiltDegrees: 0
+  tiltPeriod: 22
   spinDegrees: 3
   spinPeriod: 50
 --- !u!1 &1293565183
@@ -145799,7 +145800,7 @@ Transform:
   m_CorrespondingSourceObject: {fileID: 1805616374771606476, guid: 94c51fd839663604fa1027f8f1329fe2, type: 3}
   m_PrefabInstance: {fileID: 2132684504}
   m_PrefabAsset: {fileID: 0}
---- !u!114 &1324286137
+--- !u!114 &1324286135
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -145808,15 +145809,17 @@ MonoBehaviour:
   m_GameObject: {fileID: 332437847}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 1e53261866e370b4395ab920d814b35b, type: 3}
+  m_Script: {fileID: 11500000, guid: ede337a3db383c24f82a62544d2e3bf9, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  range: 6
-  period: 40
-  followWind: 1
-  direction: {x: 1, y: 0, z: 0}
   bobAmplitude: 0.5
   bobPeriod: 14
+  driftRange: 6
+  driftPeriod: 40
+  followWind: 1
+  driftDirection: {x: 1, y: 0, z: 0}
+  tiltDegrees: 0
+  tiltPeriod: 22
   spinDegrees: 3
   spinPeriod: 50
 --- !u!1 &1326467804
@@ -146579,7 +146582,7 @@ GameObject:
   m_CorrespondingSourceObject: {fileID: 2544436480761032049, guid: 58a04ed3b9a72fe4eb0b19e2cba9eba5, type: 3}
   m_PrefabInstance: {fileID: 480520735}
   m_PrefabAsset: {fileID: 0}
---- !u!114 &1357627390
+--- !u!114 &1357627388
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -146588,15 +146591,17 @@ MonoBehaviour:
   m_GameObject: {fileID: 1357627387}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 1e53261866e370b4395ab920d814b35b, type: 3}
+  m_Script: {fileID: 11500000, guid: ede337a3db383c24f82a62544d2e3bf9, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  range: 6
-  period: 40
-  followWind: 1
-  direction: {x: 1, y: 0, z: 0}
   bobAmplitude: 0.5
   bobPeriod: 14
+  driftRange: 6
+  driftPeriod: 40
+  followWind: 1
+  driftDirection: {x: 1, y: 0, z: 0}
+  tiltDegrees: 0
+  tiltPeriod: 22
   spinDegrees: 3
   spinPeriod: 50
 --- !u!1001 &1361441472
@@ -147032,7 +147037,7 @@ PrefabInstance:
     m_AddedComponents:
     - targetCorrespondingSourceObject: {fileID: 1805616374771646444, guid: 94c51fd839663604fa1027f8f1329fe2, type: 3}
       insertIndex: -1
-      addedObject: {fileID: 1553283980}
+      addedObject: {fileID: 1553283978}
   m_SourcePrefab: {fileID: 100100000, guid: 94c51fd839663604fa1027f8f1329fe2, type: 3}
 --- !u!1001 &1369779792
 PrefabInstance:
@@ -147570,7 +147575,7 @@ PrefabInstance:
     m_AddedComponents:
     - targetCorrespondingSourceObject: {fileID: 1643322372839788, guid: 6fdeb1faa1b42904e9210dd047b256ba, type: 3}
       insertIndex: -1
-      addedObject: {fileID: 2059787511}
+      addedObject: {fileID: 2059787509}
   m_SourcePrefab: {fileID: 100100000, guid: 6fdeb1faa1b42904e9210dd047b256ba, type: 3}
 --- !u!4 &1388362355 stripped
 Transform:
@@ -148070,7 +148075,7 @@ PrefabInstance:
     m_AddedComponents:
     - targetCorrespondingSourceObject: {fileID: 1199571229238484, guid: f661498175107c749a33d97304c423eb, type: 3}
       insertIndex: -1
-      addedObject: {fileID: 752382942}
+      addedObject: {fileID: 752382940}
   m_SourcePrefab: {fileID: 100100000, guid: f661498175107c749a33d97304c423eb, type: 3}
 --- !u!1001 &1407012291
 PrefabInstance:
@@ -156558,7 +156563,7 @@ Transform:
   m_CorrespondingSourceObject: {fileID: 5070447678188806256, guid: fb72e3a55f4f3f844858ec5895b57046, type: 3}
   m_PrefabInstance: {fileID: 1038510475}
   m_PrefabAsset: {fileID: 0}
---- !u!114 &1476428072
+--- !u!114 &1476428070
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -156567,15 +156572,17 @@ MonoBehaviour:
   m_GameObject: {fileID: 1259866989}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 1e53261866e370b4395ab920d814b35b, type: 3}
+  m_Script: {fileID: 11500000, guid: ede337a3db383c24f82a62544d2e3bf9, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  range: 6
-  period: 40
-  followWind: 1
-  direction: {x: 1, y: 0, z: 0}
   bobAmplitude: 0.5
   bobPeriod: 14
+  driftRange: 6
+  driftPeriod: 40
+  followWind: 1
+  driftDirection: {x: 1, y: 0, z: 0}
+  tiltDegrees: 0
+  tiltPeriod: 22
   spinDegrees: 3
   spinPeriod: 50
 --- !u!224 &1476540065 stripped
@@ -157634,7 +157641,7 @@ PrefabInstance:
     m_AddedComponents:
     - targetCorrespondingSourceObject: {fileID: 1643322372839788, guid: 6fdeb1faa1b42904e9210dd047b256ba, type: 3}
       insertIndex: -1
-      addedObject: {fileID: 1271282430}
+      addedObject: {fileID: 1271282428}
   m_SourcePrefab: {fileID: 100100000, guid: 6fdeb1faa1b42904e9210dd047b256ba, type: 3}
 --- !u!1001 &1532964081
 PrefabInstance:
@@ -158178,7 +158185,7 @@ GameObject:
   m_CorrespondingSourceObject: {fileID: 1805616374771646444, guid: 94c51fd839663604fa1027f8f1329fe2, type: 3}
   m_PrefabInstance: {fileID: 1368839133}
   m_PrefabAsset: {fileID: 0}
---- !u!114 &1553283980
+--- !u!114 &1553283978
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -158187,15 +158194,17 @@ MonoBehaviour:
   m_GameObject: {fileID: 1553283977}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 1e53261866e370b4395ab920d814b35b, type: 3}
+  m_Script: {fileID: 11500000, guid: ede337a3db383c24f82a62544d2e3bf9, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  range: 6
-  period: 40
-  followWind: 1
-  direction: {x: 1, y: 0, z: 0}
   bobAmplitude: 0.5
   bobPeriod: 14
+  driftRange: 6
+  driftPeriod: 40
+  followWind: 1
+  driftDirection: {x: 1, y: 0, z: 0}
+  tiltDegrees: 0
+  tiltPeriod: 22
   spinDegrees: 3
   spinPeriod: 50
 --- !u!1001 &1553301677
@@ -158319,7 +158328,7 @@ Transform:
   m_CorrespondingSourceObject: {fileID: 5070447678188806256, guid: fb72e3a55f4f3f844858ec5895b57046, type: 3}
   m_PrefabInstance: {fileID: 1742462905}
   m_PrefabAsset: {fileID: 0}
---- !u!114 &1555705977
+--- !u!114 &1555705975
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -158328,15 +158337,17 @@ MonoBehaviour:
   m_GameObject: {fileID: 1368146468}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 1e53261866e370b4395ab920d814b35b, type: 3}
+  m_Script: {fileID: 11500000, guid: ede337a3db383c24f82a62544d2e3bf9, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  range: 6
-  period: 40
-  followWind: 1
-  direction: {x: 1, y: 0, z: 0}
   bobAmplitude: 0.5
   bobPeriod: 14
+  driftRange: 6
+  driftPeriod: 40
+  followWind: 1
+  driftDirection: {x: 1, y: 0, z: 0}
+  tiltDegrees: 0
+  tiltPeriod: 22
   spinDegrees: 3
   spinPeriod: 50
 --- !u!64 &1560579551
@@ -160039,7 +160050,7 @@ PrefabInstance:
     m_AddedComponents:
     - targetCorrespondingSourceObject: {fileID: 1199571229238484, guid: f661498175107c749a33d97304c423eb, type: 3}
       insertIndex: -1
-      addedObject: {fileID: 1775355153}
+      addedObject: {fileID: 1775355151}
   m_SourcePrefab: {fileID: 100100000, guid: f661498175107c749a33d97304c423eb, type: 3}
 --- !u!4 &1613892710 stripped
 Transform:
@@ -165655,7 +165666,7 @@ Transform:
   m_CorrespondingSourceObject: {fileID: 4457848601906800, guid: f661498175107c749a33d97304c423eb, type: 3}
   m_PrefabInstance: {fileID: 1271515181}
   m_PrefabAsset: {fileID: 0}
---- !u!114 &1656044436
+--- !u!114 &1656044434
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -165664,15 +165675,17 @@ MonoBehaviour:
   m_GameObject: {fileID: 1114933170}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 1e53261866e370b4395ab920d814b35b, type: 3}
+  m_Script: {fileID: 11500000, guid: ede337a3db383c24f82a62544d2e3bf9, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  range: 6
-  period: 40
-  followWind: 1
-  direction: {x: 1, y: 0, z: 0}
   bobAmplitude: 0.5
   bobPeriod: 14
+  driftRange: 6
+  driftPeriod: 40
+  followWind: 1
+  driftDirection: {x: 1, y: 0, z: 0}
+  tiltDegrees: 0
+  tiltPeriod: 22
   spinDegrees: 3
   spinPeriod: 50
 --- !u!1001 &1656358188
@@ -167176,10 +167189,16 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ede337a3db383c24f82a62544d2e3bf9, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  amplitude: 1.25
-  period: 25
+  bobAmplitude: 1.25
+  bobPeriod: 25
+  driftRange: 0
+  driftPeriod: 60
+  followWind: 1
+  driftDirection: {x: 1, y: 0, z: 0}
   tiltDegrees: 2.2
   tiltPeriod: 22
+  spinDegrees: 0
+  spinPeriod: 80
 --- !u!43 &1730549613
 Mesh:
   m_ObjectHideFlags: 0
@@ -167592,7 +167611,7 @@ PrefabInstance:
     m_AddedComponents:
     - targetCorrespondingSourceObject: {fileID: 5070447678188584016, guid: fb72e3a55f4f3f844858ec5895b57046, type: 3}
       insertIndex: -1
-      addedObject: {fileID: 1555705977}
+      addedObject: {fileID: 1555705975}
   m_SourcePrefab: {fileID: 100100000, guid: fb72e3a55f4f3f844858ec5895b57046, type: 3}
 --- !u!1001 &1745460490
 PrefabInstance:
@@ -167754,7 +167773,7 @@ PrefabInstance:
     m_AddedComponents:
     - targetCorrespondingSourceObject: {fileID: 1199571229238484, guid: f661498175107c749a33d97304c423eb, type: 3}
       insertIndex: -1
-      addedObject: {fileID: 1292326487}
+      addedObject: {fileID: 1292326485}
   m_SourcePrefab: {fileID: 100100000, guid: f661498175107c749a33d97304c423eb, type: 3}
 --- !u!1 &1754818540
 GameObject:
@@ -173434,7 +173453,7 @@ GameObject:
   m_CorrespondingSourceObject: {fileID: 1199571229238484, guid: f661498175107c749a33d97304c423eb, type: 3}
   m_PrefabInstance: {fileID: 1613892709}
   m_PrefabAsset: {fileID: 0}
---- !u!114 &1775355153
+--- !u!114 &1775355151
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -173443,28 +173462,19 @@ MonoBehaviour:
   m_GameObject: {fileID: 1775355150}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 1e53261866e370b4395ab920d814b35b, type: 3}
+  m_Script: {fileID: 11500000, guid: ede337a3db383c24f82a62544d2e3bf9, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  range: 6
-  period: 40
-  followWind: 1
-  direction: {x: 1, y: 0, z: 0}
   bobAmplitude: 0.5
   bobPeriod: 14
+  driftRange: 6
+  driftPeriod: 40
+  followWind: 1
+  driftDirection: {x: 1, y: 0, z: 0}
+  tiltDegrees: 0
+  tiltPeriod: 22
   spinDegrees: 3
   spinPeriod: 50
---- !u!114 &1775379610 stripped
-MonoBehaviour:
-  m_CorrespondingSourceObject: {fileID: 8572363133211217218, guid: 81c824780e128854c923f8ee6345bfd1, type: 3}
-  m_PrefabInstance: {fileID: 6761749513445923785}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 0}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 60c8fbbea68761b4f9985835786ebdfc, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
 --- !u!114 &1775379611 stripped
 MonoBehaviour:
   m_CorrespondingSourceObject: {fileID: 7900629407848026548, guid: 81c824780e128854c923f8ee6345bfd1, type: 3}
@@ -179678,7 +179688,7 @@ PrefabInstance:
     m_AddedComponents:
     - targetCorrespondingSourceObject: {fileID: 2544436480761032049, guid: 58a04ed3b9a72fe4eb0b19e2cba9eba5, type: 3}
       insertIndex: -1
-      addedObject: {fileID: 2029452774}
+      addedObject: {fileID: 2029452772}
   m_SourcePrefab: {fileID: 100100000, guid: 58a04ed3b9a72fe4eb0b19e2cba9eba5, type: 3}
 --- !u!1001 &1861719322
 PrefabInstance:
@@ -185038,7 +185048,7 @@ GameObject:
   m_CorrespondingSourceObject: {fileID: 2544436480761032049, guid: 58a04ed3b9a72fe4eb0b19e2cba9eba5, type: 3}
   m_PrefabInstance: {fileID: 158465404}
   m_PrefabAsset: {fileID: 0}
---- !u!114 &1881438303
+--- !u!114 &1881438301
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -185047,15 +185057,17 @@ MonoBehaviour:
   m_GameObject: {fileID: 1881438300}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 1e53261866e370b4395ab920d814b35b, type: 3}
+  m_Script: {fileID: 11500000, guid: ede337a3db383c24f82a62544d2e3bf9, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  range: 6
-  period: 40
-  followWind: 1
-  direction: {x: 1, y: 0, z: 0}
   bobAmplitude: 0.5
   bobPeriod: 14
+  driftRange: 6
+  driftPeriod: 40
+  followWind: 1
+  driftDirection: {x: 1, y: 0, z: 0}
+  tiltDegrees: 0
+  tiltPeriod: 22
   spinDegrees: 3
   spinPeriod: 50
 --- !u!1001 &1884695491
@@ -185354,7 +185366,7 @@ PrefabInstance:
     m_AddedComponents:
     - targetCorrespondingSourceObject: {fileID: 1805616374771646444, guid: 94c51fd839663604fa1027f8f1329fe2, type: 3}
       insertIndex: -1
-      addedObject: {fileID: 2076928178}
+      addedObject: {fileID: 2076928176}
   m_SourcePrefab: {fileID: 100100000, guid: 94c51fd839663604fa1027f8f1329fe2, type: 3}
 --- !u!1 &1889686995
 GameObject:
@@ -190446,7 +190458,6 @@ GameObject:
   - component: {fileID: 1893306333}
   - component: {fileID: 1893306332}
   - component: {fileID: 1893306331}
-  - component: {fileID: 1893306329}
   - component: {fileID: 1893306328}
   - component: {fileID: 1893306327}
   - component: {fileID: 1893306326}
@@ -190589,18 +190600,6 @@ AudioSource:
     m_PreInfinity: 2
     m_PostInfinity: 2
     m_RotationOrder: 4
---- !u!114 &1893306329
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1893306325}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: a33c54e69ceded64c8dac77eb94e750f, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
 --- !u!114 &1893306331
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -193692,7 +193691,7 @@ Transform:
   m_CorrespondingSourceObject: {fileID: 2544436480760738129, guid: 58a04ed3b9a72fe4eb0b19e2cba9eba5, type: 3}
   m_PrefabInstance: {fileID: 1861565470}
   m_PrefabAsset: {fileID: 0}
---- !u!114 &2029452774
+--- !u!114 &2029452772
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -193701,15 +193700,17 @@ MonoBehaviour:
   m_GameObject: {fileID: 395546251}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 1e53261866e370b4395ab920d814b35b, type: 3}
+  m_Script: {fileID: 11500000, guid: ede337a3db383c24f82a62544d2e3bf9, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  range: 6
-  period: 40
-  followWind: 1
-  direction: {x: 1, y: 0, z: 0}
   bobAmplitude: 0.5
   bobPeriod: 14
+  driftRange: 6
+  driftPeriod: 40
+  followWind: 1
+  driftDirection: {x: 1, y: 0, z: 0}
+  tiltDegrees: 0
+  tiltPeriod: 22
   spinDegrees: 3
   spinPeriod: 50
 --- !u!1001 &2030820083
@@ -194653,7 +194654,7 @@ GameObject:
   m_CorrespondingSourceObject: {fileID: 1643322372839788, guid: 6fdeb1faa1b42904e9210dd047b256ba, type: 3}
   m_PrefabInstance: {fileID: 1388362354}
   m_PrefabAsset: {fileID: 0}
---- !u!114 &2059787511
+--- !u!114 &2059787509
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -194662,15 +194663,17 @@ MonoBehaviour:
   m_GameObject: {fileID: 2059787508}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 1e53261866e370b4395ab920d814b35b, type: 3}
+  m_Script: {fileID: 11500000, guid: ede337a3db383c24f82a62544d2e3bf9, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  range: 6
-  period: 40
-  followWind: 1
-  direction: {x: 1, y: 0, z: 0}
   bobAmplitude: 0.5
   bobPeriod: 14
+  driftRange: 6
+  driftPeriod: 40
+  followWind: 1
+  driftDirection: {x: 1, y: 0, z: 0}
+  tiltDegrees: 0
+  tiltPeriod: 22
   spinDegrees: 3
   spinPeriod: 50
 --- !u!1 &2063972082
@@ -195194,7 +195197,7 @@ Transform:
   m_CorrespondingSourceObject: {fileID: 1805616374771606476, guid: 94c51fd839663604fa1027f8f1329fe2, type: 3}
   m_PrefabInstance: {fileID: 1888340978}
   m_PrefabAsset: {fileID: 0}
---- !u!114 &2076928178
+--- !u!114 &2076928176
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -195203,15 +195206,17 @@ MonoBehaviour:
   m_GameObject: {fileID: 910489494}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 1e53261866e370b4395ab920d814b35b, type: 3}
+  m_Script: {fileID: 11500000, guid: ede337a3db383c24f82a62544d2e3bf9, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  range: 6
-  period: 40
-  followWind: 1
-  direction: {x: 1, y: 0, z: 0}
   bobAmplitude: 0.5
   bobPeriod: 14
+  driftRange: 6
+  driftPeriod: 40
+  followWind: 1
+  driftDirection: {x: 1, y: 0, z: 0}
+  tiltDegrees: 0
+  tiltPeriod: 22
   spinDegrees: 3
   spinPeriod: 50
 --- !u!1 &2077361058 stripped
@@ -196800,7 +196805,6 @@ GameObject:
   - component: {fileID: 2121772784}
   - component: {fileID: 2121772788}
   - component: {fileID: 2121772792}
-  - component: {fileID: 2121772789}
   - component: {fileID: 2121772791}
   - component: {fileID: 2121772790}
   - component: {fileID: 2121772794}
@@ -196927,18 +196931,6 @@ Rigidbody:
   m_Interpolate: 0
   m_Constraints: 0
   m_CollisionDetection: 0
---- !u!114 &2121772789
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 2121772783}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: a33c54e69ceded64c8dac77eb94e750f, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
 --- !u!167 &2121772790
 AudioReverbZone:
   m_ObjectHideFlags: 0
@@ -197326,7 +197318,7 @@ PrefabInstance:
     m_AddedComponents:
     - targetCorrespondingSourceObject: {fileID: 1805616374771646444, guid: 94c51fd839663604fa1027f8f1329fe2, type: 3}
       insertIndex: -1
-      addedObject: {fileID: 1324286137}
+      addedObject: {fileID: 1324286135}
   m_SourcePrefab: {fileID: 100100000, guid: 94c51fd839663604fa1027f8f1329fe2, type: 3}
 --- !u!1001 &2133534897
 PrefabInstance:
@@ -197398,7 +197390,7 @@ GameObject:
   m_CorrespondingSourceObject: {fileID: 1643322372839788, guid: 6fdeb1faa1b42904e9210dd047b256ba, type: 3}
   m_PrefabInstance: {fileID: 826428961}
   m_PrefabAsset: {fileID: 0}
---- !u!114 &2133734118
+--- !u!114 &2133734116
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -197407,15 +197399,17 @@ MonoBehaviour:
   m_GameObject: {fileID: 2133734115}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 1e53261866e370b4395ab920d814b35b, type: 3}
+  m_Script: {fileID: 11500000, guid: ede337a3db383c24f82a62544d2e3bf9, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  range: 6
-  period: 40
-  followWind: 1
-  direction: {x: 1, y: 0, z: 0}
   bobAmplitude: 0.5
   bobPeriod: 14
+  driftRange: 6
+  driftPeriod: 40
+  followWind: 1
+  driftDirection: {x: 1, y: 0, z: 0}
+  tiltDegrees: 0
+  tiltPeriod: 22
   spinDegrees: 3
   spinPeriod: 50
 --- !u!4 &2136313590 stripped
@@ -197423,7 +197417,7 @@ Transform:
   m_CorrespondingSourceObject: {fileID: 4675105466496168, guid: 6fdeb1faa1b42904e9210dd047b256ba, type: 3}
   m_PrefabInstance: {fileID: 568588231}
   m_PrefabAsset: {fileID: 0}
---- !u!114 &2136313593
+--- !u!114 &2136313591
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -197432,15 +197426,17 @@ MonoBehaviour:
   m_GameObject: {fileID: 1165078602}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 1e53261866e370b4395ab920d814b35b, type: 3}
+  m_Script: {fileID: 11500000, guid: ede337a3db383c24f82a62544d2e3bf9, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  range: 6
-  period: 40
-  followWind: 1
-  direction: {x: 1, y: 0, z: 0}
   bobAmplitude: 0.5
   bobPeriod: 14
+  driftRange: 6
+  driftPeriod: 40
+  followWind: 1
+  driftDirection: {x: 1, y: 0, z: 0}
+  tiltDegrees: 0
+  tiltPeriod: 22
   spinDegrees: 3
   spinPeriod: 50
 --- !u!1 &2138919171
@@ -203735,7 +203731,7 @@ PrefabInstance:
     - target: {fileID: 4407830667909406476, guid: 15db11ad97b8df047977b7e859b93f38, type: 3}
       propertyPath: playerHold
       value: 
-      objectReference: {fileID: 1775379610}
+      objectReference: {fileID: 0}
     - target: {fileID: 4407830667909406476, guid: 15db11ad97b8df047977b7e859b93f38, type: 3}
       propertyPath: playerLook
       value: 
@@ -203824,7 +203820,12 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
-    m_RemovedComponents: []
+    - target: {fileID: 8133932693444212763, guid: 15db11ad97b8df047977b7e859b93f38, type: 3}
+      propertyPath: playerLook
+      value: 
+      objectReference: {fileID: 1775379611}
+    m_RemovedComponents:
+    - {fileID: 4407830667909406476, guid: 15db11ad97b8df047977b7e859b93f38, type: 3}
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
     m_AddedComponents: []
@@ -210816,7 +210817,11 @@ PrefabInstance:
       propertyPath: m_Name
       value: Player
       objectReference: {fileID: 0}
-    m_RemovedComponents: []
+    m_RemovedComponents:
+    - {fileID: 8572363133211217218, guid: 81c824780e128854c923f8ee6345bfd1, type: 3}
+    - {fileID: 2979299066308984204, guid: 81c824780e128854c923f8ee6345bfd1, type: 3}
+    - {fileID: 2109143417099891578, guid: 81c824780e128854c923f8ee6345bfd1, type: 3}
+    - {fileID: 4153926243044852189, guid: 81c824780e128854c923f8ee6345bfd1, type: 3}
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
     m_AddedComponents: []
