@@ -19529,13 +19529,19 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d9d712727810b73498a8f46e5078ead9, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  platform: {fileID: 0}
+  warningTime: 0.6
+  shakeAmount: 0.03
+  cameraShakeAmount: 0.03
+  fallAcceleration: 18
+  maxFallSpeed: 20
+  returnDelay: 2.5
+  riseSpeed: 3
+  crackClip: {fileID: 0}
+  fallClip: {fileID: 0}
+  riseClip: {fileID: 0}
+  state: 0
   pivotSuperior: {fileID: 0}
   pivotInferior: {fileID: 0}
-  onTop: 0
-  fall: 0
-  inferiorLock: 0
-  superiorLock: 0
 --- !u!1001 &179372512
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -54885,13 +54891,19 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d9d712727810b73498a8f46e5078ead9, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  platform: {fileID: 0}
+  warningTime: 0.25
+  shakeAmount: 0.03
+  cameraShakeAmount: 0.03
+  fallAcceleration: 18
+  maxFallSpeed: 20
+  returnDelay: 2.5
+  riseSpeed: 3
+  crackClip: {fileID: 0}
+  fallClip: {fileID: 0}
+  riseClip: {fileID: 0}
+  state: 0
   pivotSuperior: {fileID: 0}
   pivotInferior: {fileID: 0}
-  onTop: 0
-  fall: 0
-  inferiorLock: 0
-  superiorLock: 0
 --- !u!64 &503640871
 MeshCollider:
   m_ObjectHideFlags: 0
@@ -62724,13 +62736,19 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d9d712727810b73498a8f46e5078ead9, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  platform: {fileID: 0}
+  warningTime: 0.25
+  shakeAmount: 0.03
+  cameraShakeAmount: 0.03
+  fallAcceleration: 18
+  maxFallSpeed: 20
+  returnDelay: 2.5
+  riseSpeed: 3
+  crackClip: {fileID: 0}
+  fallClip: {fileID: 0}
+  riseClip: {fileID: 0}
+  state: 0
   pivotSuperior: {fileID: 0}
   pivotInferior: {fileID: 0}
-  onTop: 0
-  fall: 0
-  inferiorLock: 0
-  superiorLock: 0
 --- !u!1 &552933808
 GameObject:
   m_ObjectHideFlags: 0
@@ -69209,13 +69227,19 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d9d712727810b73498a8f46e5078ead9, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  platform: {fileID: 0}
+  warningTime: 0.15
+  shakeAmount: 0.03
+  cameraShakeAmount: 0.03
+  fallAcceleration: 18
+  maxFallSpeed: 20
+  returnDelay: 2.5
+  riseSpeed: 3
+  crackClip: {fileID: 0}
+  fallClip: {fileID: 0}
+  riseClip: {fileID: 0}
+  state: 0
   pivotSuperior: {fileID: 0}
   pivotInferior: {fileID: 0}
-  onTop: 0
-  fall: 0
-  inferiorLock: 0
-  superiorLock: 0
 --- !u!1 &620167526
 GameObject:
   m_ObjectHideFlags: 0
@@ -70785,13 +70809,19 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d9d712727810b73498a8f46e5078ead9, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  platform: {fileID: 0}
+  warningTime: 0.15
+  shakeAmount: 0.03
+  cameraShakeAmount: 0.03
+  fallAcceleration: 18
+  maxFallSpeed: 20
+  returnDelay: 2.5
+  riseSpeed: 3
+  crackClip: {fileID: 0}
+  fallClip: {fileID: 0}
+  riseClip: {fileID: 0}
+  state: 0
   pivotSuperior: {fileID: 0}
   pivotInferior: {fileID: 0}
-  onTop: 0
-  fall: 0
-  inferiorLock: 0
-  superiorLock: 0
 --- !u!4 &671992608 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 468818, guid: bd75143237aca994fa425659fddaffd4, type: 3}
@@ -73817,13 +73847,19 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d9d712727810b73498a8f46e5078ead9, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  platform: {fileID: 0}
+  warningTime: 0.6
+  shakeAmount: 0.03
+  cameraShakeAmount: 0.03
+  fallAcceleration: 18
+  maxFallSpeed: 20
+  returnDelay: 2.5
+  riseSpeed: 3
+  crackClip: {fileID: 0}
+  fallClip: {fileID: 0}
+  riseClip: {fileID: 0}
+  state: 0
   pivotSuperior: {fileID: 0}
   pivotInferior: {fileID: 0}
-  onTop: 0
-  fall: 0
-  inferiorLock: 0
-  superiorLock: 0
 --- !u!1001 &782396141
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -73959,13 +73995,19 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d9d712727810b73498a8f46e5078ead9, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  platform: {fileID: 0}
+  warningTime: 0.15
+  shakeAmount: 0.03
+  cameraShakeAmount: 0.03
+  fallAcceleration: 18
+  maxFallSpeed: 20
+  returnDelay: 2.5
+  riseSpeed: 3
+  crackClip: {fileID: 0}
+  fallClip: {fileID: 0}
+  riseClip: {fileID: 0}
+  state: 0
   pivotSuperior: {fileID: 0}
   pivotInferior: {fileID: 0}
-  onTop: 0
-  fall: 0
-  inferiorLock: 0
-  superiorLock: 0
 --- !u!1 &785762879
 GameObject:
   m_ObjectHideFlags: 0
@@ -90890,13 +90932,19 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d9d712727810b73498a8f46e5078ead9, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  platform: {fileID: 0}
+  warningTime: 0.25
+  shakeAmount: 0.03
+  cameraShakeAmount: 0.03
+  fallAcceleration: 18
+  maxFallSpeed: 20
+  returnDelay: 2.5
+  riseSpeed: 3
+  crackClip: {fileID: 0}
+  fallClip: {fileID: 0}
+  riseClip: {fileID: 0}
+  state: 0
   pivotSuperior: {fileID: 0}
   pivotInferior: {fileID: 0}
-  onTop: 0
-  fall: 0
-  inferiorLock: 0
-  superiorLock: 0
 --- !u!1 &879871131
 GameObject:
   m_ObjectHideFlags: 0
@@ -100402,13 +100450,19 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d9d712727810b73498a8f46e5078ead9, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  platform: {fileID: 0}
+  warningTime: 0.25
+  shakeAmount: 0.03
+  cameraShakeAmount: 0.03
+  fallAcceleration: 18
+  maxFallSpeed: 20
+  returnDelay: 2.5
+  riseSpeed: 3
+  crackClip: {fileID: 0}
+  fallClip: {fileID: 0}
+  riseClip: {fileID: 0}
+  state: 0
   pivotSuperior: {fileID: 0}
   pivotInferior: {fileID: 0}
-  onTop: 0
-  fall: 0
-  inferiorLock: 0
-  superiorLock: 0
 --- !u!64 &963106373
 MeshCollider:
   m_ObjectHideFlags: 0
@@ -134368,13 +134422,19 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d9d712727810b73498a8f46e5078ead9, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  platform: {fileID: 0}
+  warningTime: 0.6
+  shakeAmount: 0.03
+  cameraShakeAmount: 0.03
+  fallAcceleration: 18
+  maxFallSpeed: 20
+  returnDelay: 2.5
+  riseSpeed: 3
+  crackClip: {fileID: 0}
+  fallClip: {fileID: 0}
+  riseClip: {fileID: 0}
+  state: 0
   pivotSuperior: {fileID: 0}
   pivotInferior: {fileID: 0}
-  onTop: 0
-  fall: 0
-  inferiorLock: 0
-  superiorLock: 0
 --- !u!1001 &1177803691
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -144850,13 +144910,19 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d9d712727810b73498a8f46e5078ead9, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  platform: {fileID: 0}
+  warningTime: 0.15
+  shakeAmount: 0.03
+  cameraShakeAmount: 0.03
+  fallAcceleration: 18
+  maxFallSpeed: 20
+  returnDelay: 2.5
+  riseSpeed: 3
+  crackClip: {fileID: 0}
+  fallClip: {fileID: 0}
+  riseClip: {fileID: 0}
+  state: 0
   pivotSuperior: {fileID: 0}
   pivotInferior: {fileID: 0}
-  onTop: 0
-  fall: 0
-  inferiorLock: 0
-  superiorLock: 0
 --- !u!1001 &1297685461
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -156551,13 +156617,19 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d9d712727810b73498a8f46e5078ead9, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  platform: {fileID: 0}
+  warningTime: 0.25
+  shakeAmount: 0.03
+  cameraShakeAmount: 0.03
+  fallAcceleration: 18
+  maxFallSpeed: 20
+  returnDelay: 2.5
+  riseSpeed: 3
+  crackClip: {fileID: 0}
+  fallClip: {fileID: 0}
+  riseClip: {fileID: 0}
+  state: 0
   pivotSuperior: {fileID: 0}
   pivotInferior: {fileID: 0}
-  onTop: 0
-  fall: 0
-  inferiorLock: 0
-  superiorLock: 0
 --- !u!4 &1476428069 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 5070447678188806256, guid: fb72e3a55f4f3f844858ec5895b57046, type: 3}
@@ -157406,13 +157478,19 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d9d712727810b73498a8f46e5078ead9, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  platform: {fileID: 0}
+  warningTime: 0.15
+  shakeAmount: 0.03
+  cameraShakeAmount: 0.03
+  fallAcceleration: 18
+  maxFallSpeed: 20
+  returnDelay: 2.5
+  riseSpeed: 3
+  crackClip: {fileID: 0}
+  fallClip: {fileID: 0}
+  riseClip: {fileID: 0}
+  state: 0
   pivotSuperior: {fileID: 0}
   pivotInferior: {fileID: 0}
-  onTop: 0
-  fall: 0
-  inferiorLock: 0
-  superiorLock: 0
 --- !u!1 &1525185689
 GameObject:
   m_ObjectHideFlags: 0
@@ -157891,13 +157969,19 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d9d712727810b73498a8f46e5078ead9, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  platform: {fileID: 0}
+  warningTime: 0.25
+  shakeAmount: 0.03
+  cameraShakeAmount: 0.03
+  fallAcceleration: 18
+  maxFallSpeed: 20
+  returnDelay: 2.5
+  riseSpeed: 3
+  crackClip: {fileID: 0}
+  fallClip: {fileID: 0}
+  riseClip: {fileID: 0}
+  state: 0
   pivotSuperior: {fileID: 0}
   pivotInferior: {fileID: 0}
-  onTop: 0
-  fall: 0
-  inferiorLock: 0
-  superiorLock: 0
 --- !u!1 &1540167859
 GameObject:
   m_ObjectHideFlags: 0
@@ -166577,13 +166661,19 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d9d712727810b73498a8f46e5078ead9, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  platform: {fileID: 0}
+  warningTime: 0.15
+  shakeAmount: 0.03
+  cameraShakeAmount: 0.03
+  fallAcceleration: 18
+  maxFallSpeed: 20
+  returnDelay: 2.5
+  riseSpeed: 3
+  crackClip: {fileID: 0}
+  fallClip: {fileID: 0}
+  riseClip: {fileID: 0}
+  state: 0
   pivotSuperior: {fileID: 0}
   pivotInferior: {fileID: 0}
-  onTop: 0
-  fall: 0
-  inferiorLock: 0
-  superiorLock: 0
 --- !u!4 &1690424139 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 424140, guid: 491333d4c0bd88148813a9dde7fe955b, type: 3}
@@ -166776,13 +166866,19 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d9d712727810b73498a8f46e5078ead9, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  platform: {fileID: 0}
+  warningTime: 0.25
+  shakeAmount: 0.03
+  cameraShakeAmount: 0.03
+  fallAcceleration: 18
+  maxFallSpeed: 20
+  returnDelay: 2.5
+  riseSpeed: 3
+  crackClip: {fileID: 0}
+  fallClip: {fileID: 0}
+  riseClip: {fileID: 0}
+  state: 0
   pivotSuperior: {fileID: 0}
   pivotInferior: {fileID: 0}
-  onTop: 0
-  fall: 0
-  inferiorLock: 0
-  superiorLock: 0
 --- !u!1 &1706156662
 GameObject:
   m_ObjectHideFlags: 0
@@ -191970,13 +192066,19 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d9d712727810b73498a8f46e5078ead9, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  platform: {fileID: 0}
+  warningTime: 0.25
+  shakeAmount: 0.03
+  cameraShakeAmount: 0.03
+  fallAcceleration: 18
+  maxFallSpeed: 20
+  returnDelay: 2.5
+  riseSpeed: 3
+  crackClip: {fileID: 0}
+  fallClip: {fileID: 0}
+  riseClip: {fileID: 0}
+  state: 0
   pivotSuperior: {fileID: 0}
   pivotInferior: {fileID: 0}
-  onTop: 0
-  fall: 0
-  inferiorLock: 0
-  superiorLock: 0
 --- !u!1 &1941621600
 GameObject:
   m_ObjectHideFlags: 0
@@ -192846,13 +192948,19 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d9d712727810b73498a8f46e5078ead9, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  platform: {fileID: 0}
+  warningTime: 0.6
+  shakeAmount: 0.03
+  cameraShakeAmount: 0.03
+  fallAcceleration: 18
+  maxFallSpeed: 20
+  returnDelay: 2.5
+  riseSpeed: 3
+  crackClip: {fileID: 0}
+  fallClip: {fileID: 0}
+  riseClip: {fileID: 0}
+  state: 0
   pivotSuperior: {fileID: 0}
   pivotInferior: {fileID: 0}
-  onTop: 0
-  fall: 0
-  inferiorLock: 0
-  superiorLock: 0
 --- !u!1001 &1987012689
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -196022,13 +196130,19 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d9d712727810b73498a8f46e5078ead9, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  platform: {fileID: 0}
+  warningTime: 0.6
+  shakeAmount: 0.03
+  cameraShakeAmount: 0.03
+  fallAcceleration: 18
+  maxFallSpeed: 20
+  returnDelay: 2.5
+  riseSpeed: 3
+  crackClip: {fileID: 0}
+  fallClip: {fileID: 0}
+  riseClip: {fileID: 0}
+  state: 0
   pivotSuperior: {fileID: 0}
   pivotInferior: {fileID: 0}
-  onTop: 0
-  fall: 0
-  inferiorLock: 0
-  superiorLock: 0
 --- !u!1 &2098463500
 GameObject:
   m_ObjectHideFlags: 0
@@ -197755,13 +197869,19 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d9d712727810b73498a8f46e5078ead9, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  platform: {fileID: 0}
+  warningTime: 0.25
+  shakeAmount: 0.03
+  cameraShakeAmount: 0.03
+  fallAcceleration: 18
+  maxFallSpeed: 20
+  returnDelay: 2.5
+  riseSpeed: 3
+  crackClip: {fileID: 0}
+  fallClip: {fileID: 0}
+  riseClip: {fileID: 0}
+  state: 0
   pivotSuperior: {fileID: 0}
   pivotInferior: {fileID: 0}
-  onTop: 0
-  fall: 0
-  inferiorLock: 0
-  superiorLock: 0
 --- !u!1 &2144775186
 GameObject:
   m_ObjectHideFlags: 0
@@ -202242,13 +202362,19 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d9d712727810b73498a8f46e5078ead9, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  platform: {fileID: 0}
+  warningTime: 0.2
+  shakeAmount: 0.03
+  cameraShakeAmount: 0.03
+  fallAcceleration: 18
+  maxFallSpeed: 20
+  returnDelay: 2.5
+  riseSpeed: 3
+  crackClip: {fileID: 0}
+  fallClip: {fileID: 0}
+  riseClip: {fileID: 0}
+  state: 0
   pivotSuperior: {fileID: 0}
   pivotInferior: {fileID: 0}
-  onTop: 0
-  fall: 0
-  inferiorLock: 0
-  superiorLock: 0
 --- !u!114 &3924657054630763288
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -202261,13 +202387,19 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d9d712727810b73498a8f46e5078ead9, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  platform: {fileID: 0}
+  warningTime: 0.2
+  shakeAmount: 0.03
+  cameraShakeAmount: 0.03
+  fallAcceleration: 18
+  maxFallSpeed: 20
+  returnDelay: 2.5
+  riseSpeed: 3
+  crackClip: {fileID: 0}
+  fallClip: {fileID: 0}
+  riseClip: {fileID: 0}
+  state: 0
   pivotSuperior: {fileID: 0}
   pivotInferior: {fileID: 0}
-  onTop: 0
-  fall: 0
-  inferiorLock: 0
-  superiorLock: 0
 --- !u!64 &3924657054630763292
 MeshCollider:
   m_ObjectHideFlags: 0
@@ -202411,13 +202543,19 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d9d712727810b73498a8f46e5078ead9, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  platform: {fileID: 0}
+  warningTime: 0.2
+  shakeAmount: 0.03
+  cameraShakeAmount: 0.03
+  fallAcceleration: 18
+  maxFallSpeed: 20
+  returnDelay: 2.5
+  riseSpeed: 3
+  crackClip: {fileID: 0}
+  fallClip: {fileID: 0}
+  riseClip: {fileID: 0}
+  state: 0
   pivotSuperior: {fileID: 0}
   pivotInferior: {fileID: 0}
-  onTop: 0
-  fall: 0
-  inferiorLock: 0
-  superiorLock: 0
 --- !u!114 &3924657055830139157
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -202430,13 +202568,19 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d9d712727810b73498a8f46e5078ead9, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  platform: {fileID: 0}
+  warningTime: 0.2
+  shakeAmount: 0.03
+  cameraShakeAmount: 0.03
+  fallAcceleration: 18
+  maxFallSpeed: 20
+  returnDelay: 2.5
+  riseSpeed: 3
+  crackClip: {fileID: 0}
+  fallClip: {fileID: 0}
+  riseClip: {fileID: 0}
+  state: 0
   pivotSuperior: {fileID: 0}
   pivotInferior: {fileID: 0}
-  onTop: 0
-  fall: 0
-  inferiorLock: 0
-  superiorLock: 0
 --- !u!64 &3924657055830139161
 MeshCollider:
   m_ObjectHideFlags: 0
@@ -202471,13 +202615,19 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d9d712727810b73498a8f46e5078ead9, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  platform: {fileID: 0}
+  warningTime: 0.2
+  shakeAmount: 0.03
+  cameraShakeAmount: 0.03
+  fallAcceleration: 18
+  maxFallSpeed: 20
+  returnDelay: 2.5
+  riseSpeed: 3
+  crackClip: {fileID: 0}
+  fallClip: {fileID: 0}
+  riseClip: {fileID: 0}
+  state: 0
   pivotSuperior: {fileID: 0}
   pivotInferior: {fileID: 0}
-  onTop: 0
-  fall: 0
-  inferiorLock: 0
-  superiorLock: 0
 --- !u!64 &3924657055997478022
 MeshCollider:
   m_ObjectHideFlags: 0

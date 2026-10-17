@@ -147,6 +147,7 @@ MonoBehaviour:
   canHold: 1
   pickUpRange: 2.5
   moveForce: 250
+  minHoldDistance: 0.6
   heldObject: {fileID: 0}
   FueAgarrada: 0
   paintingLookRange: 10
@@ -253,7 +254,7 @@ CharacterController:
   m_Height: 1.8
   m_Radius: 0.5
   m_SlopeLimit: 60
-  m_StepOffset: 0.35
+  m_StepOffset: 0.45
   m_SkinWidth: 0.08
   m_MinMoveDistance: 0.001
   m_Center: {x: 0, y: 0, z: 0}
@@ -270,15 +271,23 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   playerCanMove: 1
-  walkSpeed: 5
-  runSpeed: 10
-  jumpHeight: 3
+  walkSpeed: 3
+  runSpeed: 7
+  airAcceleration: 13
+  jumpHeight: 2
   gravity: -20
-  groundCheck: {fileID: 0}
+  maxFallSpeed: 25
+  coyoteTime: 0.2
+  jumpBuffer: 0.2
+  groundCheck: {fileID: 7196435289276824733}
   groundDistance: 0.4
+  onlyGroundLayer: 0
   groundMask:
     serializedVersion: 2
     m_Bits: 64
+  groundSnapDistance: 0.3
+  followMovingGround: 1
+  maxGroundFollowDownSpeed: 6
   isGrounded: 0
   hit1Lock: 0
   hit2Lock: 0

@@ -32,9 +32,14 @@ public class PlayerLook : MonoBehaviour
     public bool canHold = true;
     public float pickUpRange = 2.5f;
     public float moveForce = 250;
+    [Tooltip("The held meme never gets closer to the camera than this (meters), so it doesn't hit your face or cross the near clip plane")]
+    public float minHoldDistance = 0.6f;
     public GameObject heldObject;
     public bool FueAgarrada = false;   // stays on after snapping to a pedestal (PlayerMove keeps tracking bridges and islands)
     private Transform holdParent;
+    private Rigidbody heldBody;
+    private Collider[] heldColliders;
+    private Collider playerCollider;
 
     [Header("Paintings")]
     [SerializeField] private float paintingLookRange = 10f;
@@ -57,6 +62,7 @@ public class PlayerLook : MonoBehaviour
         playerTransform = transform.parent.parent.GetComponent<Transform>();
         playerCamera = GetComponent<Camera>();
         holdParent = GameObject.Find("GrabPivot").transform;
+        playerCollider = playerTransform.GetComponent<CharacterController>();
         Cursor.lockState = CursorLockMode.Locked;
 
         // Sensitivity comes from the saved settings and follows the settings window
@@ -65,6 +71,14 @@ public class PlayerLook : MonoBehaviour
     }
 
     void OnDestroy() => GameSettings.Changed -= ApplySettings;
+
+    // Physics forces go in FixedUpdate: same pull at any frame rate (before: Update, stronger at high FPS)
+    void FixedUpdate()
+    {
+        if (heldObject == null || PauseMenu.GameIsPaused || !canHold) return;
+        PullHeldObject();
+        KeepHeldObjectOffFace();
+    }
     void ApplySettings() => sensitivityMultiplier = GameSettings.MouseSensitivityMultiplier;
     
     void Update()
@@ -121,17 +135,37 @@ public class PlayerLook : MonoBehaviour
             if (heldObject == null) { if (LookingAtMeme) PickUpObject(hit.transform.gameObject); }
             else DropObject();
         }
-
-        if (heldObject != null) MoveHeldObject();
     }
 
-    private void MoveHeldObject()
+    // Same pull as always: a force toward the grab point, so it still feels physical
+    private void PullHeldObject()
     {
         if (Vector3.Distance(heldObject.transform.position, holdParent.position) > 0.1f)
         {
             Vector3 moveDirection = holdParent.position - heldObject.transform.position;
-            heldObject.GetComponent<Rigidbody>().AddForce(moveDirection * moveForce);
+            heldBody.AddForce(moveDirection * moveForce);
         }
+    }
+
+    // If it lags behind (walking backwards, turning fast) it is pushed out to the minimum distance,
+    // and only its speed toward the camera is cancelled: the rest of the physics stays
+    private void KeepHeldObjectOffFace()
+    {
+        Vector3 forward = transform.forward;
+        float distance = Vector3.Dot(heldBody.position - transform.position, forward);
+        if (distance >= minHoldDistance) return;
+
+        heldBody.position += forward * (minHoldDistance - distance);
+        float towardCamera = Vector3.Dot(heldBody.velocity, forward);
+        if (towardCamera < 0f) heldBody.velocity -= forward * towardCamera;
+    }
+
+    // While held it passes through the player's body (before: it bumped into the capsule and got pushed to the face)
+    private void IgnorePlayerCollision(bool ignore)
+    {
+        if (playerCollider == null || heldColliders == null) return;
+        foreach (Collider c in heldColliders)
+            if (c != null && !c.isTrigger) Physics.IgnoreCollision(c, playerCollider, ignore);
     }
 
     private void PickUpObject(GameObject pickObject)
@@ -146,6 +180,9 @@ public class PlayerLook : MonoBehaviour
 
         objectRb.transform.parent = holdParent;
         heldObject = pickObject;
+        heldBody = objectRb;
+        heldColliders = pickObject.GetComponentsInChildren<Collider>();
+        IgnorePlayerCollision(true);
         FueAgarrada = true;
 
         if (heldObject.TryGetComponent(out Meme meme)) meme.PickUp();
@@ -160,8 +197,10 @@ public class PlayerLook : MonoBehaviour
 
         if (heldObject.TryGetComponent(out Meme meme)) meme.Drop();
 
+        IgnorePlayerCollision(false);
         heldObject.transform.parent = null;
         heldObject = null;
+        heldBody = null;
         FueAgarrada = false;
     }
 
@@ -176,8 +215,10 @@ public class PlayerLook : MonoBehaviour
 
         if (heldObject != null && heldObject == memeObject)
         {
+            IgnorePlayerCollision(false);
             if (heldObject.transform.parent != null) heldObject.transform.parent = null;
             heldObject = null;
+            heldBody = null;
         }
     }
 
