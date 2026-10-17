@@ -8,6 +8,8 @@ using UnityEditor;
 #endif
 
 // Dense grass painted on an island's ground. Positions are stored local to this object, so the grass rises with the island.
+// Moving it (rising, FloatMotion) doesn't rebuild anything: the shader gets how much it moved since it was built (_FieldToWorld).
+// It only rebuilds when painted again or when its scale changes.
 // Each card takes the ground color (texture/atlas x material color) and normal under it, so it always matches the island.
 // Drawn with GPU instancing (no GameObjects), split in cells that are skipped when far or off screen.
 [ExecuteAlways]
@@ -67,6 +69,7 @@ public class GrassField : MonoBehaviour
     private static readonly int GroundNormalID = Shader.PropertyToID("_GroundNormal");
     private static readonly int FadeStartID = Shader.PropertyToID("_FadeStart");
     private static readonly int FadeEndID = Shader.PropertyToID("_FadeEnd");
+    private static readonly int FieldToWorldID = Shader.PropertyToID("_FieldToWorld");
     private static Mesh cardMesh;
 
     private const int MaxInteractors = 16;
@@ -76,6 +79,8 @@ public class GrassField : MonoBehaviour
     private static int lastInteractorFrame = -1;
     private readonly List<Cell> cells = new();
     private bool isDirty = true;
+    private Matrix4x4 builtWorldToField;   // inverse of where the field was when the cards were built
+    private Vector3 builtScale;
 
     private void OnEnable()
     {
@@ -90,25 +95,43 @@ public class GrassField : MonoBehaviour
     private void DrawForCamera(Camera cam)
     {
         if (grassMaterial == null || points.Count == 0 || cam.cameraType == CameraType.Preview) return;
-        if (isDirty || transform.hasChanged) RebuildCells();
+        if (isDirty || transform.lossyScale != builtScale) RebuildCells();
         if (cardMesh == null) cardMesh = CreateCardMesh();
         UpdateInteractors();
+
+        // How much the field moved since the cards were built (identity if it didn't)
+        Matrix4x4 moved = Matrix4x4.TRS(transform.position, transform.rotation, Vector3.one) * builtWorldToField;
+        bool hasMoved = moved != Matrix4x4.identity;
 
         Plane[] frustumPlanes = GeometryUtility.CalculateFrustumPlanes(cam);
         Vector3 camPos = cam.transform.position;
 
         foreach (Cell cell in cells)
         {
-            float sqrDistance = cell.bounds.SqrDistance(camPos);
+            Bounds bounds = hasMoved ? TransformBounds(moved, cell.bounds) : cell.bounds;
+            float sqrDistance = bounds.SqrDistance(camPos);
             if (sqrDistance > shrinkEnd * shrinkEnd) continue;
-            if (!GeometryUtility.TestPlanesAABB(frustumPlanes, cell.bounds)) continue;
+            if (!GeometryUtility.TestPlanesAABB(frustumPlanes, bounds)) continue;
+            foreach (MaterialPropertyBlock block in cell.blocks) block.SetMatrix(FieldToWorldID, moved);
+
+            // Unity culls an instanced draw by its instance positions, which are where the field was when built.
+            // Giving it the moved bounds keeps it from vanishing when the island has moved (before: flickering grass)
+            RenderParams renderParams = new(grassMaterial)
+            {
+                camera = cam,
+                layer = gameObject.layer,
+                worldBounds = bounds,
+                shadowCastingMode = ShadowCastingMode.Off,
+                receiveShadows = true,
+            };
 
             // Cards were placed in random order, so drawing only the first part thins the cell evenly
             float density = sqrDistance > thinDistance * thinDistance ? farDensity : 1f;
             for (int i = 0; i < cell.batches.Count; i++)
             {
                 int count = Mathf.CeilToInt(cell.batches[i].Length * density);
-                Graphics.DrawMeshInstanced(cardMesh, 0, grassMaterial, cell.batches[i], count, cell.blocks[i], ShadowCastingMode.Off, true, gameObject.layer, cam);
+                renderParams.matProps = cell.blocks[i];
+                Graphics.RenderMeshInstanced(renderParams, cardMesh, 0, cell.batches[i], count);
             }
         }
     }
@@ -116,7 +139,8 @@ public class GrassField : MonoBehaviour
     private void RebuildCells()
     {
         isDirty = false;
-        transform.hasChanged = false;
+        builtScale = transform.lossyScale;
+        builtWorldToField = Matrix4x4.TRS(transform.position, transform.rotation, Vector3.one).inverse;
         cells.Clear();
         if (!grassMaterial.enableInstancing) grassMaterial.enableInstancing = true;
 
@@ -171,6 +195,21 @@ public class GrassField : MonoBehaviour
             cells.Add(newCell);
         }
         instanceCount = points.Count;
+    }
+
+    // World box of a box moved by a matrix (the 8 corners)
+    private static Bounds TransformBounds(Matrix4x4 matrix, Bounds bounds)
+    {
+        Vector3 center = matrix.MultiplyPoint3x4(bounds.center);
+        Vector3 extents = bounds.extents;
+        Vector3 axisX = matrix.MultiplyVector(new Vector3(extents.x, 0, 0));
+        Vector3 axisY = matrix.MultiplyVector(new Vector3(0, extents.y, 0));
+        Vector3 axisZ = matrix.MultiplyVector(new Vector3(0, 0, extents.z));
+        Vector3 size = new(
+            Mathf.Abs(axisX.x) + Mathf.Abs(axisY.x) + Mathf.Abs(axisZ.x),
+            Mathf.Abs(axisX.y) + Mathf.Abs(axisY.y) + Mathf.Abs(axisZ.y),
+            Mathf.Abs(axisX.z) + Mathf.Abs(axisY.z) + Mathf.Abs(axisZ.z));
+        return new Bounds(center, size * 2f);
     }
 
     // Player and orbs, sent once per frame to every grass material

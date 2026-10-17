@@ -4,6 +4,7 @@
 //  Hold          grab, carry and drop memes (before: PlayerHoldObjects)
 //  Paintings     play a painting's video while looking at it (before: PlayerLookAtVideo)
 //  Shake         camera shake when islands move (before: CameraShake)
+//  Smoothing     the camera absorbs small pops of the body in height (PlayerMove tells it what the ground carried)
 //Goes on the Main Camera.
 
 using System.Collections;
@@ -51,6 +52,20 @@ public class PlayerLook : MonoBehaviour
 
     private Camera playerCamera;
 
+    [Header("Camera Smoothing")]
+    [Tooltip("Seconds the camera takes to catch up when the body pops in height (bumps riding rising islands, steps, rough ground). 0 = off. What the ground carries is never smoothed")]
+    public float cameraSmoothTime = 0.08f;
+    [Tooltip("Max meters the camera can lag behind the body")]
+    public float cameraMaxLag = 0.25f;
+    private float cameraLag;   // meters the camera is behind the body (vertical)
+    private float lastBodyHeight;
+
+    [Header("Camera Shake")]
+    [Tooltip("How fast the shake wobbles. Lower = slow rumble, higher = buzz")]
+    public float shakeFrequency = 18f;
+    private Vector3 cameraRestPosition;
+    private Vector3 shakeOffset;
+
     // Read by RetroCursor to show the zoom and hand icons
     public bool IsZooming => isZooming;
     public float DefaultFOV => defaultFOV;
@@ -61,6 +76,8 @@ public class PlayerLook : MonoBehaviour
     {
         playerTransform = transform.parent.parent.GetComponent<Transform>();
         playerCamera = GetComponent<Camera>();
+        cameraRestPosition = transform.localPosition;
+        lastBodyHeight = playerTransform.position.y;
         holdParent = GameObject.Find("GrabPivot").transform;
         playerCollider = playerTransform.GetComponent<CharacterController>();
         Cursor.lockState = CursorLockMode.Locked;
@@ -287,22 +304,57 @@ public class PlayerLook : MonoBehaviour
     //---- Shake
 
     //Simulates in the camera the shaking of a large moving object (the islands), as feedback of something the player can't see yet.
+    // Smooth rumble (noise, not a random jump every frame) that comes in fast and dies out.
+    // Always around the camera's rest place, so two shakes at once never leave it displaced
     public IEnumerator ShakeTheCamera(float duration, float magnitude)
     {
-        Vector3 originalPosition = transform.localPosition;
-        float elapsedTime = 0.0f;
+        float seed = Random.value * 100f;
+        duration = Mathf.Max(duration, 0.01f);
 
-        while (elapsedTime < duration)
+        for (float elapsed = 0f; elapsed < duration; )
         {
-            float x = Random.Range(-1f, 1f) * magnitude;
-            float y = Random.Range(-1f, 1f) * magnitude;
-
-            transform.localPosition = new Vector3(x, y, originalPosition.z);
-            elapsedTime += Time.deltaTime;
-
+            if (!PauseMenu.GameIsPaused)   // paused: still camera until the game resumes
+            {
+                elapsed += Time.deltaTime;
+                float strength = magnitude * Mathf.Clamp01(elapsed / 0.1f) * Mathf.Clamp01((duration - elapsed) / (duration * 0.4f));
+                float x = Mathf.PerlinNoise(seed, elapsed * shakeFrequency) * 2f - 1f;
+                float y = Mathf.PerlinNoise(seed + 37f, elapsed * shakeFrequency) * 2f - 1f;
+                shakeOffset = new Vector3(x, y, 0f) * strength;
+            }
+            else shakeOffset = Vector3.zero;
+            ApplyCameraOffset();
             yield return null;
         }
 
-        transform.localPosition = originalPosition;
+        shakeOffset = Vector3.zero;
+        ApplyCameraOffset();
     }
+
+    //---- Smoothing
+
+    // Called by PlayerMove every frame, after it followed the ground. The body can pop up a few centimeters in one frame;
+    // the camera absorbs that and catches up. What the ground carried (rising, floating) moves it exactly, so it never lags behind
+    public void FollowBody(float carriedHeight, bool onGround)
+    {
+        float ownMove = playerTransform.position.y - lastBodyHeight - carriedHeight;
+        lastBodyHeight = playerTransform.position.y;
+
+        if (cameraSmoothTime <= 0f) cameraLag = 0f;
+        else
+        {
+            if (onGround) cameraLag = Mathf.Clamp(cameraLag - ownMove, -cameraMaxLag, cameraMaxLag);   // jumps and falls: exact
+            cameraLag *= Mathf.Exp(-Time.deltaTime / (onGround ? cameraSmoothTime : cameraSmoothTime * 0.3f));
+        }
+        ApplyCameraOffset();
+    }
+
+    // After a teleport or a respawn: no catching up from the old place
+    public void ResetSmoothing()
+    {
+        lastBodyHeight = playerTransform.position.y;
+        cameraLag = 0f;
+        ApplyCameraOffset();
+    }
+
+    void ApplyCameraOffset() => transform.localPosition = cameraRestPosition + Vector3.up * cameraLag + shakeOffset;
 }

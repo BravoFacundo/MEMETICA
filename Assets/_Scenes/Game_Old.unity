@@ -181,13 +181,14 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 10021314}
   serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 177172959}
-  m_Father: {fileID: 799670870}
+  - {fileID: 729340759}
+  m_Father: {fileID: 251786690}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &10316942
 GameObject:
@@ -7128,7 +7129,7 @@ PrefabInstance:
   serializedVersion: 2
   m_Modification:
     serializedVersion: 3
-    m_TransformParent: {fileID: 799670870}
+    m_TransformParent: {fileID: 251786690}
     m_Modifications:
     - target: {fileID: 2023253672444881256, guid: f089c2499c1cbb0498c51e07e1b33566, type: 3}
       propertyPath: m_IsActive
@@ -7164,15 +7165,15 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 3226923575914045669, guid: f089c2499c1cbb0498c51e07e1b33566, type: 3}
       propertyPath: m_LocalPosition.x
-      value: 4.638
+      value: 4.637999
       objectReference: {fileID: 0}
     - target: {fileID: 3226923575914045669, guid: f089c2499c1cbb0498c51e07e1b33566, type: 3}
       propertyPath: m_LocalPosition.y
-      value: 0.861
+      value: 0.8609998
       objectReference: {fileID: 0}
     - target: {fileID: 3226923575914045669, guid: f089c2499c1cbb0498c51e07e1b33566, type: 3}
       propertyPath: m_LocalPosition.z
-      value: 3.838
+      value: 3.8379996
       objectReference: {fileID: 0}
     - target: {fileID: 3226923575914045669, guid: f089c2499c1cbb0498c51e07e1b33566, type: 3}
       propertyPath: m_LocalRotation.w
@@ -7456,6 +7457,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 91296458}
+  - component: {fileID: 91296460}
   - component: {fileID: 91296459}
   m_Layer: 0
   m_Name: Bridge_04
@@ -7492,10 +7494,52 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c8bc3b95aa2d83343b253697b97765de, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  bridgeGoUp: 0
+  overrideTiming: 0
+  riseDuration: 3
+  lowerDuration: 2.5
+  overshoot: 0.4
+  riseClip: {fileID: 0}
+  arriveClip: {fileID: 0}
+  appearance: 1
+  waitForIslands: 1
+  delayAfterIslands: 0.3
   topOverride: {fileID: 0}
-  lowerpivot: {x: 0, y: 0, z: 0}
-  offset: 0
+  lowerOffset: 0
+  startPoint: {fileID: 0}
+  moveDuration: 1.2
+  swingAngle: 100
+  slamBounce: 3
+  slamShake: 0.05
+  landingParticles: {fileID: 0}
+  landClip: {fileID: 0}
+  anchorA: {fileID: 0}
+  anchorB: {fileID: 0}
+  platformSettings:
+    warningTime: 0.2
+    shakeAmount: 0.03
+    cameraShakeAmount: 0.03
+    fallAcceleration: 25
+    maxFallSpeed: 20
+    returnDelay: 2.5
+    riseSpeed: 3
+    crackClip: {fileID: 0}
+    fallClip: {fileID: 0}
+    riseClip: {fileID: 0}
+--- !u!114 &91296460
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 91296457}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 28bc0d934505a36409b28f0f7632c75e, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  blendTime: 0.5
+  colliderChunks: 8
+  weight: 0
 --- !u!1001 &91633937
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -13335,6 +13379,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 156427163}
+  - component: {fileID: 156427165}
   - component: {fileID: 156427164}
   m_Layer: 0
   m_Name: Bridge_05
@@ -13371,10 +13416,52 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c8bc3b95aa2d83343b253697b97765de, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  bridgeGoUp: 0
+  overrideTiming: 0
+  riseDuration: 3
+  lowerDuration: 2.5
+  overshoot: 0.4
+  riseClip: {fileID: 0}
+  arriveClip: {fileID: 0}
+  appearance: 1
+  waitForIslands: 1
+  delayAfterIslands: 0.3
   topOverride: {fileID: 0}
-  lowerpivot: {x: 0, y: 0, z: 0}
-  offset: 0
+  lowerOffset: 0
+  startPoint: {fileID: 0}
+  moveDuration: 1.2
+  swingAngle: 100
+  slamBounce: 3
+  slamShake: 0.05
+  landingParticles: {fileID: 0}
+  landClip: {fileID: 0}
+  anchorA: {fileID: 0}
+  anchorB: {fileID: 0}
+  platformSettings:
+    warningTime: 0.2
+    shakeAmount: 0.03
+    cameraShakeAmount: 0.03
+    fallAcceleration: 25
+    maxFallSpeed: 20
+    returnDelay: 2.5
+    riseSpeed: 3
+    crackClip: {fileID: 0}
+    fallClip: {fileID: 0}
+    riseClip: {fileID: 0}
+--- !u!114 &156427165
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 156427162}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 28bc0d934505a36409b28f0f7632c75e, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  blendTime: 0.5
+  colliderChunks: 8
+  weight: 0
 --- !u!1001 &158059253
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -18782,9 +18869,14 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 46d218679344bd24487076f52df48fc7, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  islaSube: 0
-  islasBajan: 0
-  islaIsMoving: 0
+  overrideTiming: 0
+  riseDuration: 3
+  lowerDuration: 2.5
+  overshoot: 0.4
+  riseClip: {fileID: 0}
+  arriveClip: {fileID: 0}
+  cameraShakeAmount: 0.1
+  fallAwaySpeed: 6
 --- !u!1001 &165162620
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -19529,16 +19621,18 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d9d712727810b73498a8f46e5078ead9, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  warningTime: 0.6
-  shakeAmount: 0.03
-  cameraShakeAmount: 0.03
-  fallAcceleration: 18
-  maxFallSpeed: 20
-  returnDelay: 2.5
-  riseSpeed: 3
-  crackClip: {fileID: 0}
-  fallClip: {fileID: 0}
-  riseClip: {fileID: 0}
+  overrideBridge: 0
+  settings:
+    warningTime: 0.2
+    shakeAmount: 0.03
+    cameraShakeAmount: 0.03
+    fallAcceleration: 25
+    maxFallSpeed: 20
+    returnDelay: 2.5
+    riseSpeed: 3
+    crackClip: {fileID: 0}
+    fallClip: {fileID: 0}
+    riseClip: {fileID: 0}
   state: 0
   pivotSuperior: {fileID: 0}
   pivotInferior: {fileID: 0}
@@ -26124,6 +26218,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 231693236}
+  - component: {fileID: 231693238}
   - component: {fileID: 231693237}
   m_Layer: 0
   m_Name: Bridge_01
@@ -26160,10 +26255,52 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c8bc3b95aa2d83343b253697b97765de, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  bridgeGoUp: 0
+  overrideTiming: 0
+  riseDuration: 3
+  lowerDuration: 2.5
+  overshoot: 0.4
+  riseClip: {fileID: 0}
+  arriveClip: {fileID: 0}
+  appearance: 1
+  waitForIslands: 1
+  delayAfterIslands: 0.3
   topOverride: {fileID: 0}
-  lowerpivot: {x: 0, y: 0, z: 0}
-  offset: 0
+  lowerOffset: 0
+  startPoint: {fileID: 0}
+  moveDuration: 1.2
+  swingAngle: 100
+  slamBounce: 3
+  slamShake: 0.05
+  landingParticles: {fileID: 0}
+  landClip: {fileID: 0}
+  anchorA: {fileID: 508992318}
+  anchorB: {fileID: 729340759}
+  platformSettings:
+    warningTime: 0.2
+    shakeAmount: 0.03
+    cameraShakeAmount: 0.03
+    fallAcceleration: 25
+    maxFallSpeed: 20
+    returnDelay: 2.5
+    riseSpeed: 3
+    crackClip: {fileID: 0}
+    fallClip: {fileID: 0}
+    riseClip: {fileID: 0}
+--- !u!114 &231693238
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 231693235}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 28bc0d934505a36409b28f0f7632c75e, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  blendTime: 0.5
+  colliderChunks: 8
+  weight: 0
 --- !u!1 &237435417 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 5941325095857925921, guid: 6a99f89c0d0ecb34e9de0640eed4b4ab, type: 3}
@@ -26310,6 +26447,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 251786690}
+  - component: {fileID: 251786691}
   m_Layer: 0
   m_Name: Island
   m_TagString: Untagged
@@ -26330,6 +26468,8 @@ Transform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
+  - {fileID: 10021315}
+  - {fileID: 83117476}
   - {fileID: 1468560185}
   - {fileID: 1316116714}
   - {fileID: 819028818}
@@ -26338,6 +26478,28 @@ Transform:
   - {fileID: 1769274729}
   m_Father: {fileID: 799670870}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &251786691
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 251786689}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ede337a3db383c24f82a62544d2e3bf9, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  bobAmplitude: 0.8
+  bobPeriod: 16
+  driftRange: 0
+  driftPeriod: 60
+  followWind: 1
+  driftDirection: {x: 1, y: 0, z: 0}
+  tiltDegrees: 1.2
+  tiltPeriod: 22
+  spinDegrees: 0
+  spinPeriod: 80
 --- !u!1001 &254286708
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -54891,16 +55053,18 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d9d712727810b73498a8f46e5078ead9, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  warningTime: 0.25
-  shakeAmount: 0.03
-  cameraShakeAmount: 0.03
-  fallAcceleration: 18
-  maxFallSpeed: 20
-  returnDelay: 2.5
-  riseSpeed: 3
-  crackClip: {fileID: 0}
-  fallClip: {fileID: 0}
-  riseClip: {fileID: 0}
+  overrideBridge: 0
+  settings:
+    warningTime: 0.2
+    shakeAmount: 0.03
+    cameraShakeAmount: 0.03
+    fallAcceleration: 25
+    maxFallSpeed: 20
+    returnDelay: 2.5
+    riseSpeed: 3
+    crackClip: {fileID: 0}
+    fallClip: {fileID: 0}
+    riseClip: {fileID: 0}
   state: 0
   pivotSuperior: {fileID: 0}
   pivotInferior: {fileID: 0}
@@ -60223,6 +60387,37 @@ Transform:
   m_CorrespondingSourceObject: {fileID: 4538438218131234, guid: f31c6bb6e68212e41b0bcae74612a240, type: 3}
   m_PrefabInstance: {fileID: 158059253}
   m_PrefabAsset: {fileID: 0}
+--- !u!1 &508992317
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 508992318}
+  m_Layer: 0
+  m_Name: BridgeAnchor_Bridge_01_A
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &508992318
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 508992317}
+  serializedVersion: 2
+  m_LocalRotation: {x: -0, y: -0.29417768, z: -0, w: 0.95575076}
+  m_LocalPosition: {x: -1.332, y: 0.256, z: 3.265}
+  m_LocalScale: {x: 0.6114322, y: 0.6114323, z: 0.6114322}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 1828347861}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1001 &509180357
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -62736,16 +62931,18 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d9d712727810b73498a8f46e5078ead9, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  warningTime: 0.25
-  shakeAmount: 0.03
-  cameraShakeAmount: 0.03
-  fallAcceleration: 18
-  maxFallSpeed: 20
-  returnDelay: 2.5
-  riseSpeed: 3
-  crackClip: {fileID: 0}
-  fallClip: {fileID: 0}
-  riseClip: {fileID: 0}
+  overrideBridge: 0
+  settings:
+    warningTime: 0.2
+    shakeAmount: 0.03
+    cameraShakeAmount: 0.03
+    fallAcceleration: 25
+    maxFallSpeed: 20
+    returnDelay: 2.5
+    riseSpeed: 3
+    crackClip: {fileID: 0}
+    fallClip: {fileID: 0}
+    riseClip: {fileID: 0}
   state: 0
   pivotSuperior: {fileID: 0}
   pivotInferior: {fileID: 0}
@@ -63296,10 +63493,37 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c8bc3b95aa2d83343b253697b97765de, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  bridgeGoUp: 0
+  overrideTiming: 0
+  riseDuration: 3
+  lowerDuration: 2.5
+  overshoot: 0.4
+  riseClip: {fileID: 0}
+  arriveClip: {fileID: 0}
+  appearance: 0
+  waitForIslands: 1
+  delayAfterIslands: 0.3
   topOverride: {fileID: 0}
-  lowerpivot: {x: 0, y: 0, z: 0}
-  offset: 0
+  lowerOffset: 0
+  startPoint: {fileID: 0}
+  moveDuration: 1.2
+  swingAngle: 100
+  slamBounce: 3
+  slamShake: 0.05
+  landingParticles: {fileID: 0}
+  landClip: {fileID: 0}
+  anchorA: {fileID: 0}
+  anchorB: {fileID: 0}
+  platformSettings:
+    warningTime: 0.2
+    shakeAmount: 0.03
+    cameraShakeAmount: 0.03
+    fallAcceleration: 25
+    maxFallSpeed: 20
+    returnDelay: 2.5
+    riseSpeed: 3
+    crackClip: {fileID: 0}
+    fallClip: {fileID: 0}
+    riseClip: {fileID: 0}
 --- !u!1001 &570421879
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -69227,16 +69451,18 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d9d712727810b73498a8f46e5078ead9, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  warningTime: 0.15
-  shakeAmount: 0.03
-  cameraShakeAmount: 0.03
-  fallAcceleration: 18
-  maxFallSpeed: 20
-  returnDelay: 2.5
-  riseSpeed: 3
-  crackClip: {fileID: 0}
-  fallClip: {fileID: 0}
-  riseClip: {fileID: 0}
+  overrideBridge: 0
+  settings:
+    warningTime: 0.2
+    shakeAmount: 0.03
+    cameraShakeAmount: 0.03
+    fallAcceleration: 25
+    maxFallSpeed: 20
+    returnDelay: 2.5
+    riseSpeed: 3
+    crackClip: {fileID: 0}
+    fallClip: {fileID: 0}
+    riseClip: {fileID: 0}
   state: 0
   pivotSuperior: {fileID: 0}
   pivotInferior: {fileID: 0}
@@ -69336,10 +69562,37 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c8bc3b95aa2d83343b253697b97765de, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  bridgeGoUp: 0
+  overrideTiming: 0
+  riseDuration: 3
+  lowerDuration: 2.5
+  overshoot: 0.4
+  riseClip: {fileID: 0}
+  arriveClip: {fileID: 0}
+  appearance: 0
+  waitForIslands: 1
+  delayAfterIslands: 0.3
   topOverride: {fileID: 0}
-  lowerpivot: {x: 0, y: 0, z: 0}
-  offset: 0
+  lowerOffset: 0
+  startPoint: {fileID: 0}
+  moveDuration: 1.2
+  swingAngle: 100
+  slamBounce: 3
+  slamShake: 0.05
+  landingParticles: {fileID: 0}
+  landClip: {fileID: 0}
+  anchorA: {fileID: 0}
+  anchorB: {fileID: 0}
+  platformSettings:
+    warningTime: 0.2
+    shakeAmount: 0.03
+    cameraShakeAmount: 0.03
+    fallAcceleration: 25
+    maxFallSpeed: 20
+    returnDelay: 2.5
+    riseSpeed: 3
+    crackClip: {fileID: 0}
+    fallClip: {fileID: 0}
+    riseClip: {fileID: 0}
 --- !u!1001 &631987388
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -70809,16 +71062,18 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d9d712727810b73498a8f46e5078ead9, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  warningTime: 0.15
-  shakeAmount: 0.03
-  cameraShakeAmount: 0.03
-  fallAcceleration: 18
-  maxFallSpeed: 20
-  returnDelay: 2.5
-  riseSpeed: 3
-  crackClip: {fileID: 0}
-  fallClip: {fileID: 0}
-  riseClip: {fileID: 0}
+  overrideBridge: 0
+  settings:
+    warningTime: 0.2
+    shakeAmount: 0.03
+    cameraShakeAmount: 0.03
+    fallAcceleration: 25
+    maxFallSpeed: 20
+    returnDelay: 2.5
+    riseSpeed: 3
+    crackClip: {fileID: 0}
+    fallClip: {fileID: 0}
+    riseClip: {fileID: 0}
   state: 0
   pivotSuperior: {fileID: 0}
   pivotInferior: {fileID: 0}
@@ -72170,6 +72425,37 @@ MeshCollider:
   m_Convex: 0
   m_CookingOptions: 30
   m_Mesh: {fileID: 4300000, guid: 7aac06128c1d4f543914f69ebbdf7307, type: 3}
+--- !u!1 &729340758
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 729340759}
+  m_Layer: 0
+  m_Name: BridgeAnchor_Bridge_01_B
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &729340759
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 729340758}
+  serializedVersion: 2
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalPosition: {x: 0.333, y: 0.108, z: -1.155}
+  m_LocalScale: {x: 0.60233706, y: 0.60233706, z: 0.60233706}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 10021315}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &730945069
 GameObject:
   m_ObjectHideFlags: 0
@@ -72179,6 +72465,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 730945070}
+  - component: {fileID: 730945072}
   - component: {fileID: 730945071}
   m_Layer: 0
   m_Name: Bridge_03
@@ -72215,10 +72502,52 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c8bc3b95aa2d83343b253697b97765de, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  bridgeGoUp: 0
+  overrideTiming: 0
+  riseDuration: 3
+  lowerDuration: 2.5
+  overshoot: 0.4
+  riseClip: {fileID: 0}
+  arriveClip: {fileID: 0}
+  appearance: 1
+  waitForIslands: 1
+  delayAfterIslands: 0.3
   topOverride: {fileID: 0}
-  lowerpivot: {x: 0, y: 0, z: 0}
-  offset: 0
+  lowerOffset: 0
+  startPoint: {fileID: 0}
+  moveDuration: 1.2
+  swingAngle: 100
+  slamBounce: 3
+  slamShake: 0.05
+  landingParticles: {fileID: 0}
+  landClip: {fileID: 0}
+  anchorA: {fileID: 0}
+  anchorB: {fileID: 0}
+  platformSettings:
+    warningTime: 0.2
+    shakeAmount: 0.03
+    cameraShakeAmount: 0.03
+    fallAcceleration: 25
+    maxFallSpeed: 20
+    returnDelay: 2.5
+    riseSpeed: 3
+    crackClip: {fileID: 0}
+    fallClip: {fileID: 0}
+    riseClip: {fileID: 0}
+--- !u!114 &730945072
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 730945069}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 28bc0d934505a36409b28f0f7632c75e, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  blendTime: 0.5
+  colliderChunks: 8
+  weight: 0
 --- !u!1001 &731053884
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -73847,16 +74176,18 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d9d712727810b73498a8f46e5078ead9, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  warningTime: 0.6
-  shakeAmount: 0.03
-  cameraShakeAmount: 0.03
-  fallAcceleration: 18
-  maxFallSpeed: 20
-  returnDelay: 2.5
-  riseSpeed: 3
-  crackClip: {fileID: 0}
-  fallClip: {fileID: 0}
-  riseClip: {fileID: 0}
+  overrideBridge: 0
+  settings:
+    warningTime: 0.2
+    shakeAmount: 0.03
+    cameraShakeAmount: 0.03
+    fallAcceleration: 25
+    maxFallSpeed: 20
+    returnDelay: 2.5
+    riseSpeed: 3
+    crackClip: {fileID: 0}
+    fallClip: {fileID: 0}
+    riseClip: {fileID: 0}
   state: 0
   pivotSuperior: {fileID: 0}
   pivotInferior: {fileID: 0}
@@ -73995,16 +74326,18 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d9d712727810b73498a8f46e5078ead9, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  warningTime: 0.15
-  shakeAmount: 0.03
-  cameraShakeAmount: 0.03
-  fallAcceleration: 18
-  maxFallSpeed: 20
-  returnDelay: 2.5
-  riseSpeed: 3
-  crackClip: {fileID: 0}
-  fallClip: {fileID: 0}
-  riseClip: {fileID: 0}
+  overrideBridge: 0
+  settings:
+    warningTime: 0.2
+    shakeAmount: 0.03
+    cameraShakeAmount: 0.03
+    fallAcceleration: 25
+    maxFallSpeed: 20
+    returnDelay: 2.5
+    riseSpeed: 3
+    crackClip: {fileID: 0}
+    fallClip: {fileID: 0}
+    riseClip: {fileID: 0}
   state: 0
   pivotSuperior: {fileID: 0}
   pivotInferior: {fileID: 0}
@@ -79099,8 +79432,6 @@ Transform:
   m_LocalScale: {x: 1.6602, y: 1.6602, z: 1.6602}
   m_ConstrainProportionsScale: 0
   m_Children:
-  - {fileID: 83117476}
-  - {fileID: 10021315}
   - {fileID: 251786690}
   m_Father: {fileID: 1124934381}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
@@ -79116,9 +79447,14 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 46d218679344bd24487076f52df48fc7, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  islaSube: 0
-  islasBajan: 0
-  islaIsMoving: 0
+  overrideTiming: 0
+  riseDuration: 3
+  lowerDuration: 2.5
+  overshoot: 0.4
+  riseClip: {fileID: 0}
+  arriveClip: {fileID: 0}
+  cameraShakeAmount: 0.1
+  fallAwaySpeed: 6
 --- !u!1001 &802921988
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -90651,13 +90987,13 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 863037261}
   serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 2107861278}
-  m_Father: {fileID: 888874331}
+  m_Father: {fileID: 1842445307}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!64 &867473162
 MeshCollider:
@@ -90932,16 +91268,18 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d9d712727810b73498a8f46e5078ead9, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  warningTime: 0.25
-  shakeAmount: 0.03
-  cameraShakeAmount: 0.03
-  fallAcceleration: 18
-  maxFallSpeed: 20
-  returnDelay: 2.5
-  riseSpeed: 3
-  crackClip: {fileID: 0}
-  fallClip: {fileID: 0}
-  riseClip: {fileID: 0}
+  overrideBridge: 0
+  settings:
+    warningTime: 0.2
+    shakeAmount: 0.03
+    cameraShakeAmount: 0.03
+    fallAcceleration: 25
+    maxFallSpeed: 20
+    returnDelay: 2.5
+    riseSpeed: 3
+    crackClip: {fileID: 0}
+    fallClip: {fileID: 0}
+    riseClip: {fileID: 0}
   state: 0
   pivotSuperior: {fileID: 0}
   pivotInferior: {fileID: 0}
@@ -91115,11 +91453,6 @@ Transform:
   m_LocalScale: {x: 1.6355041, y: 1.635504, z: 1.6355041}
   m_ConstrainProportionsScale: 0
   m_Children:
-  - {fileID: 863037262}
-  - {fileID: 1367615644}
-  - {fileID: 1770942441}
-  - {fileID: 2121772787}
-  - {fileID: 1828347861}
   - {fileID: 1842445307}
   m_Father: {fileID: 1124934381}
   m_LocalEulerAnglesHint: {x: 0, y: 34.216, z: 0}
@@ -91135,9 +91468,14 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 46d218679344bd24487076f52df48fc7, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  islaSube: 0
-  islasBajan: 0
-  islaIsMoving: 0
+  overrideTiming: 0
+  riseDuration: 3
+  lowerDuration: 2.5
+  overshoot: 0.4
+  riseClip: {fileID: 0}
+  arriveClip: {fileID: 0}
+  cameraShakeAmount: 0.1
+  fallAwaySpeed: 6
 --- !u!1001 &894147241
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -98269,9 +98607,14 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 46d218679344bd24487076f52df48fc7, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  islaSube: 0
-  islasBajan: 0
-  islaIsMoving: 0
+  overrideTiming: 0
+  riseDuration: 3
+  lowerDuration: 2.5
+  overshoot: 0.4
+  riseClip: {fileID: 0}
+  arriveClip: {fileID: 0}
+  cameraShakeAmount: 0.1
+  fallAwaySpeed: 6
 --- !u!1001 &922439227
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -100450,16 +100793,18 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d9d712727810b73498a8f46e5078ead9, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  warningTime: 0.25
-  shakeAmount: 0.03
-  cameraShakeAmount: 0.03
-  fallAcceleration: 18
-  maxFallSpeed: 20
-  returnDelay: 2.5
-  riseSpeed: 3
-  crackClip: {fileID: 0}
-  fallClip: {fileID: 0}
-  riseClip: {fileID: 0}
+  overrideBridge: 0
+  settings:
+    warningTime: 0.2
+    shakeAmount: 0.03
+    cameraShakeAmount: 0.03
+    fallAcceleration: 25
+    maxFallSpeed: 20
+    returnDelay: 2.5
+    riseSpeed: 3
+    crackClip: {fileID: 0}
+    fallClip: {fileID: 0}
+    riseClip: {fileID: 0}
   state: 0
   pivotSuperior: {fileID: 0}
   pivotInferior: {fileID: 0}
@@ -118790,9 +119135,14 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 46d218679344bd24487076f52df48fc7, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  islaSube: 0
-  islasBajan: 0
-  islaIsMoving: 0
+  overrideTiming: 0
+  riseDuration: 3
+  lowerDuration: 2.5
+  overshoot: 0.4
+  riseClip: {fileID: 0}
+  arriveClip: {fileID: 0}
+  cameraShakeAmount: 0.1
+  fallAwaySpeed: 6
 --- !u!1001 &1078533003
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -133814,9 +134164,14 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 46d218679344bd24487076f52df48fc7, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  islaSube: 0
-  islasBajan: 0
-  islaIsMoving: 0
+  overrideTiming: 0
+  riseDuration: 3
+  lowerDuration: 2.5
+  overshoot: 0.4
+  riseClip: {fileID: 0}
+  arriveClip: {fileID: 0}
+  cameraShakeAmount: 0.1
+  fallAwaySpeed: 6
 --- !u!1 &1147243868
 GameObject:
   m_ObjectHideFlags: 0
@@ -134422,16 +134777,18 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d9d712727810b73498a8f46e5078ead9, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  warningTime: 0.6
-  shakeAmount: 0.03
-  cameraShakeAmount: 0.03
-  fallAcceleration: 18
-  maxFallSpeed: 20
-  returnDelay: 2.5
-  riseSpeed: 3
-  crackClip: {fileID: 0}
-  fallClip: {fileID: 0}
-  riseClip: {fileID: 0}
+  overrideBridge: 0
+  settings:
+    warningTime: 0.2
+    shakeAmount: 0.03
+    cameraShakeAmount: 0.03
+    fallAcceleration: 25
+    maxFallSpeed: 20
+    returnDelay: 2.5
+    riseSpeed: 3
+    crackClip: {fileID: 0}
+    fallClip: {fileID: 0}
+    riseClip: {fileID: 0}
   state: 0
   pivotSuperior: {fileID: 0}
   pivotInferior: {fileID: 0}
@@ -144910,16 +145267,18 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d9d712727810b73498a8f46e5078ead9, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  warningTime: 0.15
-  shakeAmount: 0.03
-  cameraShakeAmount: 0.03
-  fallAcceleration: 18
-  maxFallSpeed: 20
-  returnDelay: 2.5
-  riseSpeed: 3
-  crackClip: {fileID: 0}
-  fallClip: {fileID: 0}
-  riseClip: {fileID: 0}
+  overrideBridge: 0
+  settings:
+    warningTime: 0.2
+    shakeAmount: 0.03
+    cameraShakeAmount: 0.03
+    fallAcceleration: 25
+    maxFallSpeed: 20
+    returnDelay: 2.5
+    riseSpeed: 3
+    crackClip: {fileID: 0}
+    fallClip: {fileID: 0}
+    riseClip: {fileID: 0}
   state: 0
   pivotSuperior: {fileID: 0}
   pivotInferior: {fileID: 0}
@@ -147010,7 +147369,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1367615643}
   serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
@@ -147018,7 +147377,7 @@ Transform:
   - {fileID: 9003376781458937736}
   - {fileID: 1830216720287693719}
   - {fileID: 225840116}
-  m_Father: {fileID: 888874331}
+  m_Father: {fileID: 1842445307}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1368146468 stripped
 GameObject:
@@ -156553,10 +156912,37 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c8bc3b95aa2d83343b253697b97765de, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  bridgeGoUp: 0
+  overrideTiming: 0
+  riseDuration: 3
+  lowerDuration: 2.5
+  overshoot: 0.4
+  riseClip: {fileID: 0}
+  arriveClip: {fileID: 0}
+  appearance: 0
+  waitForIslands: 1
+  delayAfterIslands: 0.3
   topOverride: {fileID: 0}
-  lowerpivot: {x: 0, y: 0, z: 0}
-  offset: 0
+  lowerOffset: 0
+  startPoint: {fileID: 0}
+  moveDuration: 1.2
+  swingAngle: 100
+  slamBounce: 3
+  slamShake: 0.05
+  landingParticles: {fileID: 0}
+  landClip: {fileID: 0}
+  anchorA: {fileID: 0}
+  anchorB: {fileID: 0}
+  platformSettings:
+    warningTime: 0.2
+    shakeAmount: 0.03
+    cameraShakeAmount: 0.03
+    fallAcceleration: 25
+    maxFallSpeed: 20
+    returnDelay: 2.5
+    riseSpeed: 3
+    crackClip: {fileID: 0}
+    fallClip: {fileID: 0}
+    riseClip: {fileID: 0}
 --- !u!4 &1471182050
 Transform:
   m_ObjectHideFlags: 0
@@ -156617,16 +157003,18 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d9d712727810b73498a8f46e5078ead9, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  warningTime: 0.25
-  shakeAmount: 0.03
-  cameraShakeAmount: 0.03
-  fallAcceleration: 18
-  maxFallSpeed: 20
-  returnDelay: 2.5
-  riseSpeed: 3
-  crackClip: {fileID: 0}
-  fallClip: {fileID: 0}
-  riseClip: {fileID: 0}
+  overrideBridge: 0
+  settings:
+    warningTime: 0.2
+    shakeAmount: 0.03
+    cameraShakeAmount: 0.03
+    fallAcceleration: 25
+    maxFallSpeed: 20
+    returnDelay: 2.5
+    riseSpeed: 3
+    crackClip: {fileID: 0}
+    fallClip: {fileID: 0}
+    riseClip: {fileID: 0}
   state: 0
   pivotSuperior: {fileID: 0}
   pivotInferior: {fileID: 0}
@@ -157478,16 +157866,18 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d9d712727810b73498a8f46e5078ead9, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  warningTime: 0.15
-  shakeAmount: 0.03
-  cameraShakeAmount: 0.03
-  fallAcceleration: 18
-  maxFallSpeed: 20
-  returnDelay: 2.5
-  riseSpeed: 3
-  crackClip: {fileID: 0}
-  fallClip: {fileID: 0}
-  riseClip: {fileID: 0}
+  overrideBridge: 0
+  settings:
+    warningTime: 0.2
+    shakeAmount: 0.03
+    cameraShakeAmount: 0.03
+    fallAcceleration: 25
+    maxFallSpeed: 20
+    returnDelay: 2.5
+    riseSpeed: 3
+    crackClip: {fileID: 0}
+    fallClip: {fileID: 0}
+    riseClip: {fileID: 0}
   state: 0
   pivotSuperior: {fileID: 0}
   pivotInferior: {fileID: 0}
@@ -157969,16 +158359,18 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d9d712727810b73498a8f46e5078ead9, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  warningTime: 0.25
-  shakeAmount: 0.03
-  cameraShakeAmount: 0.03
-  fallAcceleration: 18
-  maxFallSpeed: 20
-  returnDelay: 2.5
-  riseSpeed: 3
-  crackClip: {fileID: 0}
-  fallClip: {fileID: 0}
-  riseClip: {fileID: 0}
+  overrideBridge: 0
+  settings:
+    warningTime: 0.2
+    shakeAmount: 0.03
+    cameraShakeAmount: 0.03
+    fallAcceleration: 25
+    maxFallSpeed: 20
+    returnDelay: 2.5
+    riseSpeed: 3
+    crackClip: {fileID: 0}
+    fallClip: {fileID: 0}
+    riseClip: {fileID: 0}
   state: 0
   pivotSuperior: {fileID: 0}
   pivotInferior: {fileID: 0}
@@ -160510,9 +160902,14 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 46d218679344bd24487076f52df48fc7, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  islaSube: 0
-  islasBajan: 0
-  islaIsMoving: 0
+  overrideTiming: 0
+  riseDuration: 3
+  lowerDuration: 2.5
+  overshoot: 0.4
+  riseClip: {fileID: 0}
+  arriveClip: {fileID: 0}
+  cameraShakeAmount: 0.1
+  fallAwaySpeed: 6
 --- !u!114 &1639568607
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -166187,6 +166584,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 1682492656}
+  - component: {fileID: 1682492658}
   - component: {fileID: 1682492657}
   m_Layer: 0
   m_Name: Bridge_06
@@ -166223,10 +166621,52 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c8bc3b95aa2d83343b253697b97765de, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  bridgeGoUp: 0
+  overrideTiming: 0
+  riseDuration: 3
+  lowerDuration: 2.5
+  overshoot: 0.4
+  riseClip: {fileID: 0}
+  arriveClip: {fileID: 0}
+  appearance: 1
+  waitForIslands: 1
+  delayAfterIslands: 0.3
   topOverride: {fileID: 0}
-  lowerpivot: {x: 0, y: 0, z: 0}
-  offset: -10
+  lowerOffset: -10
+  startPoint: {fileID: 0}
+  moveDuration: 1.2
+  swingAngle: 100
+  slamBounce: 3
+  slamShake: 0.05
+  landingParticles: {fileID: 0}
+  landClip: {fileID: 0}
+  anchorA: {fileID: 0}
+  anchorB: {fileID: 0}
+  platformSettings:
+    warningTime: 0.2
+    shakeAmount: 0.03
+    cameraShakeAmount: 0.03
+    fallAcceleration: 25
+    maxFallSpeed: 20
+    returnDelay: 2.5
+    riseSpeed: 3
+    crackClip: {fileID: 0}
+    fallClip: {fileID: 0}
+    riseClip: {fileID: 0}
+--- !u!114 &1682492658
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1682492655}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 28bc0d934505a36409b28f0f7632c75e, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  blendTime: 0.5
+  colliderChunks: 8
+  weight: 0
 --- !u!1 &1684440674
 GameObject:
   m_ObjectHideFlags: 0
@@ -166661,16 +167101,18 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d9d712727810b73498a8f46e5078ead9, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  warningTime: 0.15
-  shakeAmount: 0.03
-  cameraShakeAmount: 0.03
-  fallAcceleration: 18
-  maxFallSpeed: 20
-  returnDelay: 2.5
-  riseSpeed: 3
-  crackClip: {fileID: 0}
-  fallClip: {fileID: 0}
-  riseClip: {fileID: 0}
+  overrideBridge: 0
+  settings:
+    warningTime: 0.2
+    shakeAmount: 0.03
+    cameraShakeAmount: 0.03
+    fallAcceleration: 25
+    maxFallSpeed: 20
+    returnDelay: 2.5
+    riseSpeed: 3
+    crackClip: {fileID: 0}
+    fallClip: {fileID: 0}
+    riseClip: {fileID: 0}
   state: 0
   pivotSuperior: {fileID: 0}
   pivotInferior: {fileID: 0}
@@ -166800,6 +167242,17 @@ Transform:
   m_CorrespondingSourceObject: {fileID: 7584257638246274648, guid: 39d8f1b5f315fc14d9af9c90f66cd3c9, type: 3}
   m_PrefabInstance: {fileID: 1177803691}
   m_PrefabAsset: {fileID: 0}
+--- !u!114 &1697897195 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 3392008267583998772, guid: 39d8f1b5f315fc14d9af9c90f66cd3c9, type: 3}
+  m_PrefabInstance: {fileID: 1177803691}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 2b884b27b9a9f354fa2cb02ff6abe75b, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!4 &1698196080 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 7590256825491148333, guid: 7669eb9ed2d05c9498179584afaabb12, type: 3}
@@ -166866,16 +167319,18 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d9d712727810b73498a8f46e5078ead9, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  warningTime: 0.25
-  shakeAmount: 0.03
-  cameraShakeAmount: 0.03
-  fallAcceleration: 18
-  maxFallSpeed: 20
-  returnDelay: 2.5
-  riseSpeed: 3
-  crackClip: {fileID: 0}
-  fallClip: {fileID: 0}
-  riseClip: {fileID: 0}
+  overrideBridge: 0
+  settings:
+    warningTime: 0.2
+    shakeAmount: 0.03
+    cameraShakeAmount: 0.03
+    fallAcceleration: 25
+    maxFallSpeed: 20
+    returnDelay: 2.5
+    riseSpeed: 3
+    crackClip: {fileID: 0}
+    fallClip: {fileID: 0}
+    riseClip: {fileID: 0}
   state: 0
   pivotSuperior: {fileID: 0}
   pivotInferior: {fileID: 0}
@@ -173312,7 +173767,7 @@ PrefabInstance:
   serializedVersion: 2
   m_Modification:
     serializedVersion: 3
-    m_TransformParent: {fileID: 888874331}
+    m_TransformParent: {fileID: 1842445307}
     m_Modifications:
     - target: {fileID: 2023253672444881256, guid: f089c2499c1cbb0498c51e07e1b33566, type: 3}
       propertyPath: m_IsActive
@@ -173331,6 +173786,14 @@ PrefabInstance:
       value: 8
       objectReference: {fileID: 0}
     - target: {fileID: 3226923575914045669, guid: f089c2499c1cbb0498c51e07e1b33566, type: 3}
+      propertyPath: m_LocalScale.x
+      value: 0.59999996
+      objectReference: {fileID: 0}
+    - target: {fileID: 3226923575914045669, guid: f089c2499c1cbb0498c51e07e1b33566, type: 3}
+      propertyPath: m_LocalScale.z
+      value: 0.59999996
+      objectReference: {fileID: 0}
+    - target: {fileID: 3226923575914045669, guid: f089c2499c1cbb0498c51e07e1b33566, type: 3}
       propertyPath: m_LocalPosition.x
       value: 0
       objectReference: {fileID: 0}
@@ -173344,7 +173807,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 3226923575914045669, guid: f089c2499c1cbb0498c51e07e1b33566, type: 3}
       propertyPath: m_LocalRotation.w
-      value: 0.9807853
+      value: 0.98078537
       objectReference: {fileID: 0}
     - target: {fileID: 3226923575914045669, guid: f089c2499c1cbb0498c51e07e1b33566, type: 3}
       propertyPath: m_LocalRotation.x
@@ -173352,11 +173815,11 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 3226923575914045669, guid: f089c2499c1cbb0498c51e07e1b33566, type: 3}
       propertyPath: m_LocalRotation.y
-      value: -0.1950903
+      value: -0.19509031
       objectReference: {fileID: 0}
     - target: {fileID: 3226923575914045669, guid: f089c2499c1cbb0498c51e07e1b33566, type: 3}
       propertyPath: m_LocalRotation.z
-      value: 0
+      value: -0
       objectReference: {fileID: 0}
     - target: {fileID: 3226923575914045669, guid: f089c2499c1cbb0498c51e07e1b33566, type: 3}
       propertyPath: m_LocalEulerAnglesHint.x
@@ -174181,6 +174644,71 @@ MeshCollider:
   m_Convex: 0
   m_CookingOptions: 30
   m_Mesh: {fileID: 4300000, guid: b85a4aa4114e25644b990d2e21232a9a, type: 3}
+--- !u!1 &1823429780
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1823429781}
+  - component: {fileID: 1823429782}
+  m_Layer: 0
+  m_Name: DebugManager
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &1823429781
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1823429780}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 1914313587}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1823429782
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1823429780}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 758dceda4b54661439ff348710e60f03, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  enabledInBuild: 0
+  startAt: 1
+  flySpeed: 10
+  flyFastSpeed: 30
+  starts:
+  - name: 
+    spawnPoint: {fileID: 902804681}
+    islands: []
+    bridges: []
+    dockedElevators: []
+    memes: []
+  - name: Skip tutorial
+    spawnPoint: {fileID: 902804681}
+    islands: []
+    bridges: []
+    dockedElevators:
+    - {fileID: 1697897195}
+    - {fileID: 1639568607}
+    memes:
+    - meme: {fileID: 306690106}
+      pedestal: {fileID: 8877038125313853306}
 --- !u!1 &1824925155
 GameObject:
   m_ObjectHideFlags: 0
@@ -174238,14 +174766,15 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1828347860}
   serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 902804681}
   - {fileID: 1801827242}
-  m_Father: {fileID: 888874331}
+  - {fileID: 508992318}
+  m_Father: {fileID: 1842445307}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1829328395
 GameObject:
@@ -179303,6 +179832,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 1842445307}
+  - component: {fileID: 1842445308}
   m_Layer: 0
   m_Name: Island
   m_TagString: Untagged
@@ -179323,6 +179853,11 @@ Transform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
+  - {fileID: 1828347861}
+  - {fileID: 2121772787}
+  - {fileID: 1770942441}
+  - {fileID: 1367615644}
+  - {fileID: 863037262}
   - {fileID: 1188938699}
   - {fileID: 2083685836}
   - {fileID: 2082326645}
@@ -179331,6 +179866,28 @@ Transform:
   - {fileID: 507731338}
   m_Father: {fileID: 888874331}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1842445308
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1842445306}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ede337a3db383c24f82a62544d2e3bf9, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  bobAmplitude: 0.8
+  bobPeriod: 16
+  driftRange: 0
+  driftPeriod: 60
+  followWind: 1
+  driftDirection: {x: 1, y: 0, z: 0}
+  tiltDegrees: 1.2
+  tiltPeriod: 22
+  spinDegrees: 0
+  spinPeriod: 80
 --- !u!1 &1846965211
 GameObject:
   m_ObjectHideFlags: 0
@@ -191201,6 +191758,7 @@ Transform:
   - {fileID: 2071885305}
   - {fileID: 396937337}
   - {fileID: 1241319220}
+  - {fileID: 1823429781}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1922644735
@@ -192066,16 +192624,18 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d9d712727810b73498a8f46e5078ead9, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  warningTime: 0.25
-  shakeAmount: 0.03
-  cameraShakeAmount: 0.03
-  fallAcceleration: 18
-  maxFallSpeed: 20
-  returnDelay: 2.5
-  riseSpeed: 3
-  crackClip: {fileID: 0}
-  fallClip: {fileID: 0}
-  riseClip: {fileID: 0}
+  overrideBridge: 0
+  settings:
+    warningTime: 0.2
+    shakeAmount: 0.03
+    cameraShakeAmount: 0.03
+    fallAcceleration: 25
+    maxFallSpeed: 20
+    returnDelay: 2.5
+    riseSpeed: 3
+    crackClip: {fileID: 0}
+    fallClip: {fileID: 0}
+    riseClip: {fileID: 0}
   state: 0
   pivotSuperior: {fileID: 0}
   pivotInferior: {fileID: 0}
@@ -192948,16 +193508,18 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d9d712727810b73498a8f46e5078ead9, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  warningTime: 0.6
-  shakeAmount: 0.03
-  cameraShakeAmount: 0.03
-  fallAcceleration: 18
-  maxFallSpeed: 20
-  returnDelay: 2.5
-  riseSpeed: 3
-  crackClip: {fileID: 0}
-  fallClip: {fileID: 0}
-  riseClip: {fileID: 0}
+  overrideBridge: 0
+  settings:
+    warningTime: 0.2
+    shakeAmount: 0.03
+    cameraShakeAmount: 0.03
+    fallAcceleration: 25
+    maxFallSpeed: 20
+    returnDelay: 2.5
+    riseSpeed: 3
+    crackClip: {fileID: 0}
+    fallClip: {fileID: 0}
+    riseClip: {fileID: 0}
   state: 0
   pivotSuperior: {fileID: 0}
   pivotInferior: {fileID: 0}
@@ -193329,9 +193891,14 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 46d218679344bd24487076f52df48fc7, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  islaSube: 0
-  islasBajan: 0
-  islaIsMoving: 0
+  overrideTiming: 0
+  riseDuration: 3
+  lowerDuration: 2.5
+  overshoot: 0.4
+  riseClip: {fileID: 0}
+  arriveClip: {fileID: 0}
+  cameraShakeAmount: 0.1
+  fallAwaySpeed: 6
 --- !u!1001 &2005273716
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -196130,16 +196697,18 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d9d712727810b73498a8f46e5078ead9, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  warningTime: 0.6
-  shakeAmount: 0.03
-  cameraShakeAmount: 0.03
-  fallAcceleration: 18
-  maxFallSpeed: 20
-  returnDelay: 2.5
-  riseSpeed: 3
-  crackClip: {fileID: 0}
-  fallClip: {fileID: 0}
-  riseClip: {fileID: 0}
+  overrideBridge: 0
+  settings:
+    warningTime: 0.2
+    shakeAmount: 0.03
+    cameraShakeAmount: 0.03
+    fallAcceleration: 25
+    maxFallSpeed: 20
+    returnDelay: 2.5
+    riseSpeed: 3
+    crackClip: {fileID: 0}
+    fallClip: {fileID: 0}
+    riseClip: {fileID: 0}
   state: 0
   pivotSuperior: {fileID: 0}
   pivotInferior: {fileID: 0}
@@ -197008,15 +197577,15 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 2121772783}
   serializedVersion: 2
-  m_LocalRotation: {x: -0, y: 0.44015115, z: -0, w: 0.89792365}
-  m_LocalPosition: {x: -4.04701, y: 1.4918948, z: -1.7375277}
-  m_LocalScale: {x: 0.30571616, y: 0.30571616, z: 0.30571616}
+  m_LocalRotation: {x: -0, y: 0.44015118, z: -0, w: 0.8979237}
+  m_LocalPosition: {x: -4.04701, y: 1.4918948, z: -1.7375276}
+  m_LocalScale: {x: 0.30571613, y: 0.30571616, z: 0.30571613}
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 557788626}
   - {fileID: 41079579}
   - {fileID: 1236809509}
-  m_Father: {fileID: 888874331}
+  m_Father: {fileID: 1842445307}
   m_LocalEulerAnglesHint: {x: 0, y: 86.444, z: 0}
 --- !u!54 &2121772788
 Rigidbody:
@@ -197827,8 +198396,9 @@ MonoBehaviour:
   topY: 0
   bottomY: -30
   fallDistance: 20
-  speed: 5
-  fallSpeed: 6
+  liftRiseDuration: 3
+  liftLowerDuration: 2.5
+  liftOvershoot: 0.4
   islandPrefix: Island_
   bridgePrefix: Bridge_
   elevatorPrefix: Elevator_
@@ -197869,16 +198439,18 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d9d712727810b73498a8f46e5078ead9, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  warningTime: 0.25
-  shakeAmount: 0.03
-  cameraShakeAmount: 0.03
-  fallAcceleration: 18
-  maxFallSpeed: 20
-  returnDelay: 2.5
-  riseSpeed: 3
-  crackClip: {fileID: 0}
-  fallClip: {fileID: 0}
-  riseClip: {fileID: 0}
+  overrideBridge: 0
+  settings:
+    warningTime: 0.2
+    shakeAmount: 0.03
+    cameraShakeAmount: 0.03
+    fallAcceleration: 25
+    maxFallSpeed: 20
+    returnDelay: 2.5
+    riseSpeed: 3
+    crackClip: {fileID: 0}
+    fallClip: {fileID: 0}
+    riseClip: {fileID: 0}
   state: 0
   pivotSuperior: {fileID: 0}
   pivotInferior: {fileID: 0}
@@ -202362,16 +202934,18 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d9d712727810b73498a8f46e5078ead9, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  warningTime: 0.2
-  shakeAmount: 0.03
-  cameraShakeAmount: 0.03
-  fallAcceleration: 18
-  maxFallSpeed: 20
-  returnDelay: 2.5
-  riseSpeed: 3
-  crackClip: {fileID: 0}
-  fallClip: {fileID: 0}
-  riseClip: {fileID: 0}
+  overrideBridge: 0
+  settings:
+    warningTime: 0.2
+    shakeAmount: 0.03
+    cameraShakeAmount: 0.03
+    fallAcceleration: 25
+    maxFallSpeed: 20
+    returnDelay: 2.5
+    riseSpeed: 3
+    crackClip: {fileID: 0}
+    fallClip: {fileID: 0}
+    riseClip: {fileID: 0}
   state: 0
   pivotSuperior: {fileID: 0}
   pivotInferior: {fileID: 0}
@@ -202387,16 +202961,18 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d9d712727810b73498a8f46e5078ead9, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  warningTime: 0.2
-  shakeAmount: 0.03
-  cameraShakeAmount: 0.03
-  fallAcceleration: 18
-  maxFallSpeed: 20
-  returnDelay: 2.5
-  riseSpeed: 3
-  crackClip: {fileID: 0}
-  fallClip: {fileID: 0}
-  riseClip: {fileID: 0}
+  overrideBridge: 0
+  settings:
+    warningTime: 0.2
+    shakeAmount: 0.03
+    cameraShakeAmount: 0.03
+    fallAcceleration: 25
+    maxFallSpeed: 20
+    returnDelay: 2.5
+    riseSpeed: 3
+    crackClip: {fileID: 0}
+    fallClip: {fileID: 0}
+    riseClip: {fileID: 0}
   state: 0
   pivotSuperior: {fileID: 0}
   pivotInferior: {fileID: 0}
@@ -202474,10 +203050,37 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c8bc3b95aa2d83343b253697b97765de, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  bridgeGoUp: 0
+  overrideTiming: 0
+  riseDuration: 3
+  lowerDuration: 2.5
+  overshoot: 0.4
+  riseClip: {fileID: 0}
+  arriveClip: {fileID: 0}
+  appearance: 0
+  waitForIslands: 1
+  delayAfterIslands: 0.3
   topOverride: {fileID: 457766846}
-  lowerpivot: {x: 0, y: 0, z: 0}
-  offset: -73
+  lowerOffset: -73
+  startPoint: {fileID: 0}
+  moveDuration: 1.2
+  swingAngle: 100
+  slamBounce: 3
+  slamShake: 0.05
+  landingParticles: {fileID: 0}
+  landClip: {fileID: 0}
+  anchorA: {fileID: 0}
+  anchorB: {fileID: 0}
+  platformSettings:
+    warningTime: 0.2
+    shakeAmount: 0.03
+    cameraShakeAmount: 0.03
+    fallAcceleration: 25
+    maxFallSpeed: 20
+    returnDelay: 2.5
+    riseSpeed: 3
+    crackClip: {fileID: 0}
+    fallClip: {fileID: 0}
+    riseClip: {fileID: 0}
 --- !u!1 &3924657055092474348
 GameObject:
   m_ObjectHideFlags: 0
@@ -202543,16 +203146,18 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d9d712727810b73498a8f46e5078ead9, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  warningTime: 0.2
-  shakeAmount: 0.03
-  cameraShakeAmount: 0.03
-  fallAcceleration: 18
-  maxFallSpeed: 20
-  returnDelay: 2.5
-  riseSpeed: 3
-  crackClip: {fileID: 0}
-  fallClip: {fileID: 0}
-  riseClip: {fileID: 0}
+  overrideBridge: 0
+  settings:
+    warningTime: 0.2
+    shakeAmount: 0.03
+    cameraShakeAmount: 0.03
+    fallAcceleration: 25
+    maxFallSpeed: 20
+    returnDelay: 2.5
+    riseSpeed: 3
+    crackClip: {fileID: 0}
+    fallClip: {fileID: 0}
+    riseClip: {fileID: 0}
   state: 0
   pivotSuperior: {fileID: 0}
   pivotInferior: {fileID: 0}
@@ -202568,16 +203173,18 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d9d712727810b73498a8f46e5078ead9, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  warningTime: 0.2
-  shakeAmount: 0.03
-  cameraShakeAmount: 0.03
-  fallAcceleration: 18
-  maxFallSpeed: 20
-  returnDelay: 2.5
-  riseSpeed: 3
-  crackClip: {fileID: 0}
-  fallClip: {fileID: 0}
-  riseClip: {fileID: 0}
+  overrideBridge: 0
+  settings:
+    warningTime: 0.2
+    shakeAmount: 0.03
+    cameraShakeAmount: 0.03
+    fallAcceleration: 25
+    maxFallSpeed: 20
+    returnDelay: 2.5
+    riseSpeed: 3
+    crackClip: {fileID: 0}
+    fallClip: {fileID: 0}
+    riseClip: {fileID: 0}
   state: 0
   pivotSuperior: {fileID: 0}
   pivotInferior: {fileID: 0}
@@ -202615,16 +203222,18 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d9d712727810b73498a8f46e5078ead9, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  warningTime: 0.2
-  shakeAmount: 0.03
-  cameraShakeAmount: 0.03
-  fallAcceleration: 18
-  maxFallSpeed: 20
-  returnDelay: 2.5
-  riseSpeed: 3
-  crackClip: {fileID: 0}
-  fallClip: {fileID: 0}
-  riseClip: {fileID: 0}
+  overrideBridge: 0
+  settings:
+    warningTime: 0.2
+    shakeAmount: 0.03
+    cameraShakeAmount: 0.03
+    fallAcceleration: 25
+    maxFallSpeed: 20
+    returnDelay: 2.5
+    riseSpeed: 3
+    crackClip: {fileID: 0}
+    fallClip: {fileID: 0}
+    riseClip: {fileID: 0}
   state: 0
   pivotSuperior: {fileID: 0}
   pivotInferior: {fileID: 0}
@@ -204909,9 +205518,14 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 46d218679344bd24487076f52df48fc7, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  islaSube: 0
-  islasBajan: 0
-  islaIsMoving: 0
+  overrideTiming: 0
+  riseDuration: 3
+  lowerDuration: 2.5
+  overshoot: 0.4
+  riseClip: {fileID: 0}
+  arriveClip: {fileID: 0}
+  cameraShakeAmount: 0.1
+  fallAwaySpeed: 6
 --- !u!23 &5846015730405830154
 MeshRenderer:
   m_ObjectHideFlags: 0

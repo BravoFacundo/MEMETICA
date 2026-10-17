@@ -64,6 +64,7 @@ public class Pedestal : MonoBehaviour
     bool rejecting;
     bool broken;
     bool groupCompleted;
+    GameObject releasedMeme;   // just taken off: not snapped again until it leaves the trigger
 
     static PlayerLook look;
 
@@ -95,11 +96,13 @@ public class Pedestal : MonoBehaviour
     // ---------- Meme entra / sale ----------
     void OnTriggerEnter(Collider other)
     {
-        if (broken || HasMeme || !other.CompareTag("Meme")) return;
+        if (broken || HasMeme || !other.CompareTag("Meme") || other.gameObject == releasedMeme) return;
 
         GameObject memeObject = other.gameObject;
         look.SnapObject(memeObject);
         memeObject.transform.position = socket.position;
+        memeObject.transform.SetParent(socket);   // moves with the pedestal (floating islands, elevators)
+        if (memeObject.TryGetComponent(out Rigidbody body)) body.isKinematic = true;
         if (particles != null) particles.Play();
 
         MemeObject = memeObject;
@@ -109,10 +112,22 @@ public class Pedestal : MonoBehaviour
         evaluating = StartCoroutine(Evaluate());
     }
 
-    void OnTriggerExit(Collider other)
+    // Taken off (picked up, pushed out by a rejection) is checked here, not with OnTriggerExit:
+    // turning a meme's physics on or off makes Unity report a fake exit and entry at once
+    // (placing it made a fake exit, picking it up made a fake entry that snapped it back)
+    void Update()
     {
-        if (!other.CompareTag("Meme") || other.gameObject != MemeObject) return; // solo importa el meme encastrado
+        if (releasedMeme != null && !InsideZone(releasedMeme)) releasedMeme = null;   // it really left: it can be placed again
+        if (!HasMeme) return;
 
+        bool held = CurrentMeme != null && CurrentMeme.IsHeld;
+        bool movedAway = Vector3.Distance(MemeObject.transform.position, socket.position) > 0.5f;
+        if (held || movedAway) Release();
+    }
+
+    void Release()
+    {
+        releasedMeme = MemeObject;   // not snapped again until it leaves the zone
         if (evaluating != null) StopCoroutine(evaluating);
         bool lowerBridges = KeylessPedestal || Meme.IDOf(MemeObject).StartsWith(KeyID);
 
@@ -120,10 +135,16 @@ public class Pedestal : MonoBehaviour
         MemeObject = null;
         CurrentMeme = null;
         IsCorrect = false;
-        if (!rejecting) Play(incorrectClip);   // si lo expulsamos nosotros, el "incorrecto" ya sonó
+        if (!rejecting && !broken) Play(incorrectClip);   // si lo expulsamos nosotros, el "incorrecto" ya sonó
         rejecting = false;
 
-        if (lowerBridges) LowerBridges();
+        if (lowerBridges && !broken) LowerBridges();
+    }
+
+    bool InsideZone(GameObject meme)
+    {
+        float radius = trigger.radius * Mathf.Max(transform.lossyScale.x, transform.lossyScale.y, transform.lossyScale.z);
+        return Vector3.Distance(meme.transform.position, transform.TransformPoint(trigger.center)) < radius + 0.2f;
     }
 
     IEnumerator Evaluate()
@@ -170,7 +191,7 @@ public class Pedestal : MonoBehaviour
         IsCorrect = true;
         Play(correctClip);
         foreach (string id in ControlledIslands) LevelManager.Instance.SubirIsla(id);
-        foreach (string id in ControlledBridges) LevelManager.Instance.SubirPuente(id);
+        foreach (string id in ControlledBridges) LevelManager.Instance.SubirPuente(id, socket.position);
         if (CurrentMeme != null) CurrentMeme.OnPedestalResult(this, true);
     }
 
@@ -190,6 +211,7 @@ public class Pedestal : MonoBehaviour
     {
         if (MemeObject == null) return;
         rejecting = true;
+        MemeObject.transform.SetParent(null);
         Rigidbody rb = MemeObject.GetComponent<Rigidbody>();
         rb.constraints = RigidbodyConstraints.None;
         rb.isKinematic = false;

@@ -29,9 +29,13 @@ public class LevelManager : MonoBehaviour
     [Tooltip("Metros por debajo del último piso pisado para considerar que cayó al vacío (antes: Cage)")]
     public float fallDistance = 20f;
 
-    [Header("VELOCIDADES")]
-    public float speed = 5;
-    public float fallSpeed = 6;
+    [Header("LIFT (islas y puentes)")]
+    [Tooltip("Seconds an island or bridge takes to rise, however far it travels")]
+    public float liftRiseDuration = 3f;
+    [Tooltip("Seconds a bridge takes to go back down")]
+    public float liftLowerDuration = 2.5f;
+    [Tooltip("Meters it passes the top before settling")]
+    public float liftOvershoot = 0.4f;
 
     [Header("NOMBRES (convención Tipo_ID)")]
     public string islandPrefix = "Island_";
@@ -72,22 +76,44 @@ public class LevelManager : MonoBehaviour
             default:
                 // Elevators share the pedestal IDs with islands: if one matches, it starts its ride
                 if (elevators.TryGetValue(NormalizeName(elevatorPrefix + id), out Elevator elevator)) elevator.StartRide();
-                else if (TryGet(islands, islandPrefix + id, out Island isla)) isla.islaSube = true;
+                else if (TryGet(islands, islandPrefix + id, out Island isla)) isla.Raise();
                 break;
         }
     }
 
-    public void SubirPuente(string id)
+    // origin: where the activation came from (the pedestal), so an assembling bridge builds from that end
+    public void SubirPuente(string id, Vector3 origin)
     {
-        if (TryGet(bridges, bridgePrefix + id, out Bridge puente)) puente.bridgeGoUp = true;
+        if (TryGet(bridges, bridgePrefix + id, out Bridge puente)) puente.Raise(origin);
     }
 
     public void BajarPuente(string id)
     {
-        if (TryGet(bridges, bridgePrefix + id, out Bridge puente)) puente.bridgeGoUp = false;
+        if (TryGet(bridges, bridgePrefix + id, out Bridge puente)) puente.Lower();
+    }
+
+    // Debug: up right away, no animation (DebugTools starts)
+    public void SnapIslandUp(string id)
+    {
+        if (TryGet(islands, islandPrefix + id, out Island isla)) isla.SnapUp();
+    }
+
+    public void SnapBridgeUp(string id)
+    {
+        if (TryGet(bridges, bridgePrefix + id, out Bridge puente)) puente.SnapUp();
     }
 
     // ---------- Consultas ----------
+
+    // Bridges wait for this before appearing, so they connect to islands that are already there
+    public bool AnyIslandMoving
+    {
+        get
+        {
+            foreach (Island isla in islands.Values) if (isla.IsMoving) return true;
+            return false;
+        }
+    }
 
     // La isla con ese ID (por ejemplo "1" → Island_1), o null
     public GameObject GetIsland(string id)
@@ -111,11 +137,7 @@ public class LevelManager : MonoBehaviour
         GameObject.Find("Player").GetComponent<PlayerMove>().ascend = true;
 
         // Todas las islas caen (más adelante: primero los puentes, al azar, y que se desvanezcan)
-        foreach (Island isla in islands.Values)
-        {
-            isla.islasBajan = true;
-            isla.islaSube = false;
-        }
+        foreach (Island isla in islands.Values) isla.FallAway();
 
         yield return new WaitForSeconds(endingDuration);
 

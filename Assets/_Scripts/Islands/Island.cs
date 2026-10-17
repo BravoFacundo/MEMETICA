@@ -1,67 +1,44 @@
 using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 
-public class Island : MonoBehaviour
+// Island: rises from the void when its pedestal is solved (see Lift). The camera shakes while it moves.
+// At the end of the game every island falls away (FallAway).
+public class Island : Lift
 {
-    private LevelManager level;
-    private GameObject estaIsla;
-    private float upSpeed;
-    private float fallSpeed;
-    public bool islaSube;
-    public bool islasBajan;
-    public bool islaIsMoving;
+    [Header("Island")]
+    [Tooltip("Camera shake while it moves. 0 = off")]
+    public float cameraShakeAmount = 0.1f;
+    [Tooltip("Speeds up to this when falling away at the end (m/s)")]
+    public float fallAwaySpeed = 6f;
 
-    private Transform islaPos;
-    private Vector3 upperpivot;
-    private Vector3 lowerpivot;
+    private PlayerLook look;
 
-    private PlayerLook camShake;
-    private Coroutine shakeRoutine;
-
-    void Start()
+    protected override void Start()
     {
-        level = LevelManager.Instance;
-        estaIsla = gameObject;
-        upSpeed = level.speed;
-        fallSpeed = level.fallSpeed;
-
-        islaPos = estaIsla.transform;
-        // Alturas desde el LevelManager (antes: objetos MasterPivot y LimiteCaida)
-        upperpivot = new Vector3(islaPos.position.x, level.topY, islaPos.position.z);
-        lowerpivot = new Vector3(islaPos.position.x, level.bottomY, islaPos.position.z);
-
-        camShake = Camera.main.GetComponent<PlayerLook>();
+        base.Start();
+        if (Camera.main != null) look = Camera.main.GetComponent<PlayerLook>();
     }
 
-
-    void Update()
+    // One rumble for the whole move (before: many 0.1 s shakes in a row, felt like hits)
+    protected override void OnMoveStarted(bool rising)
     {
-        if (islaSube)
-        {
-            if (islaPos.position != upperpivot)
-            {
-                islaPos.position = Vector3.MoveTowards(islaPos.position, upperpivot, Time.deltaTime * upSpeed);
-                islaIsMoving = true;
-            }
-            else islaIsMoving = false;
-        }
-        if (!islaSube && islasBajan)
-        {
-            islaPos.position = Vector3.MoveTowards(islaPos.position, new Vector3(islaPos.position.x, islaPos.position.y -1, islaPos.position.z), Time.deltaTime * fallSpeed);
-        }
-        
-        // Un solo temblor por movimiento: arranca cuando la isla empieza a moverse y se apaga solo al llegar.
-        if (islaIsMoving && shakeRoutine == null)
-            shakeRoutine = StartCoroutine(ShakeCamera());
-
+        if (cameraShakeAmount > 0f && look != null)
+            look.StartCoroutine(look.ShakeTheCamera(rising ? RiseDuration : LowerDuration, cameraShakeAmount));
     }
 
-    public IEnumerator ShakeCamera()
+    // End of the game: falls forever, speeding up
+    public void FallAway()
     {
-        yield return new WaitForSeconds(0.2f);
-        while (islaIsMoving)
-            yield return camShake.ShakeTheCamera(0.1f, 0.1f);   // temblores en fila, nunca superpuestos
-        shakeRoutine = null;
+        StopAllCoroutines();
+        StartCoroutine(FallAwayRoutine());
+    }
+
+    IEnumerator FallAwayRoutine()
+    {
+        for (float speed = 0f; ; speed = Mathf.Min(speed + fallAwaySpeed * Time.deltaTime, fallAwaySpeed))
+        {
+            SetHeight(transform.position.y - speed * Time.deltaTime);
+            yield return null;
+        }
     }
 }

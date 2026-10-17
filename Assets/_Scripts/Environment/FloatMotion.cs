@@ -8,6 +8,7 @@ using UnityEngine.Serialization;
 //   Tilt   sway on X and Z, two rhythms so it is organic and not a pendulum
 //   Spin   turn a little to each side on Y
 // Every object starts at a different moment with a slightly different rhythm.
+[DefaultExecutionOrder(-10)]   // moves before bridges bend to it and the player follows it
 public class FloatMotion : MonoBehaviour
 {
     [Header("Bob")]

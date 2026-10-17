@@ -150,6 +150,19 @@ public class Meme : MonoBehaviour
         bool isResting = !IsHeld && CurrentPedestal == null && Physics.CheckSphere(transform.position, groundCheckRadius, groundMask);
         groundedTime = isResting ? groundedTime + Time.deltaTime : 0f;
         if (groundedTime >= restDelay && body.constraints != RigidbodyConstraints.FreezeAll)
+        {
             body.constraints = RigidbodyConstraints.FreezeAll;
+            StickToFloatingGround();
+        }
+    }
+
+    // Resting on a floating island (FloatMotion): it becomes part of it, so it bobs with the ground instead of hovering
+    private void StickToFloatingGround()
+    {
+        if (!Physics.Raycast(transform.position, Vector3.down, out RaycastHit ground, groundCheckRadius + 1f, ~0, QueryTriggerInteraction.Ignore)) return;
+        FloatMotion floating = ground.transform.GetComponentInParent<FloatMotion>();
+        if (floating == null) return;
+        transform.SetParent(floating.transform);
+        body.isKinematic = true;   // PlayerLook turns it back to physics when picked up
     }
 }

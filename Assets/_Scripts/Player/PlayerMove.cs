@@ -41,6 +41,10 @@ public class PlayerMove : MonoBehaviour
     public float maxGroundFollowDownSpeed = 6f;
     public bool isGrounded;
 
+    [Header("Debug")]
+    [Tooltip("Logs each frame the body moves more than 5 mm up or down in one step, with every step of that frame (to find the bumps). Slows the game while on")]
+    public bool logBumps = false;
+
     [Header("Cruces con meme (puente → isla)")]
     public bool hit1Lock = false;
     public bool hit2Lock = false;
@@ -63,6 +67,11 @@ public class PlayerMove : MonoBehaviour
     private Transform movingGround;
     private Vector3 movingGroundLocalPoint;
 
+    private float carriedHeight;   // how much the ground lifted or lowered the player this frame (PlayerLook smooths the rest)
+    private float debugHeight;
+    private string debugSteps = "";
+    private bool debugJump;
+
     private Transform respawnPoint;
     private Transform lastGroundHit;
     private GameObject lastIsland;
@@ -74,6 +83,7 @@ public class PlayerMove : MonoBehaviour
         groundCheck = transform.Find("GroundCheck").GetComponent<Transform>();
         look = Camera.main.GetComponent<PlayerLook>();
         airSpeed = walkSpeed;
+        debugHeight = transform.position.y;
 
         // El juego arranca en el tutorial (la isla del tutorial no tiene el tag "Isla", así que se fija acá)
         respawnPoint = LevelManager.Instance.startRespawnPoint;
@@ -82,26 +92,69 @@ public class PlayerMove : MonoBehaviour
 
     void Update()
     {
+        LogStep("between frames");
         if (CheckFallAndRespawn()) return;
 
         if (playerCanMove)
         {
+            // The ground may have moved before this script ran (FloatMotion runs first): follow it now,
+            // before measuring the ground again. LateUpdate follows what moves after (lifts, bridges)
             FollowMovingGround();
+            LogStep("FollowMovingGround (early)");
+
             UpdateGrounded();
             UpdateHorizontalVelocity();
             UpdateVerticalVelocity();
 
             CollisionFlags flags = characterController.Move((horizontalVelocity + Vector3.up * verticalVelocity) * Time.deltaTime);
             if ((flags & CollisionFlags.Above) != 0 && verticalVelocity > 0f) verticalVelocity = 0f;   // bumped the ceiling
+            LogStep("Move");
 
             SnapToGround();
-            RememberMovingGround();
+            LogStep("SnapToGround");
+            FindGroundBelow();
         }
 
         if (ascend) verticalVelocity += 25f * Time.deltaTime;
 
         UpdateGroundInteractions();
     }
+
+    // After what moves the ground later in the frame (lifts and bridges in coroutines, platforms): follow it in the same frame
+    void LateUpdate()
+    {
+        if (playerCanMove) FollowMovingGround();
+        LogStep("FollowMovingGround");
+        LogFrame();
+
+        look.FollowBody(carriedHeight, isGrounded && playerCanMove);   // the camera smooths what the ground didn't carry
+        carriedHeight = 0f;
+    }
+
+    // Debug: every step that moved the body more than 3 cm up or down this frame, in one line per frame
+    private void LogStep(string step)
+    {
+        float change = transform.position.y - debugHeight;
+        debugHeight = transform.position.y;
+        if (!logBumps) return;
+        debugSteps += $"{step} {change:+0.0000;-0.0000}  ";
+        if (Mathf.Abs(change) > 0.005f) debugJump = true;   // small too: the sinking between bumps
+    }
+
+    private void LogFrame()
+    {
+        if (debugJump)
+        {
+            Vector3 flat = horizontalVelocity; flat.y = 0f;
+            string ground = movingGround != null ? PathOf(movingGround) : "none";
+            Debug.Log($"[PlayerMove] Frame {Time.frameCount}: {debugSteps}| ground carried {carriedHeight:+0.000;-0.000}, walking {flat.magnitude:F1} m/s, grounded {isGrounded}, " +
+                      $"controller grounded {characterController.isGrounded}, vertical speed {verticalVelocity:F2}, ground: {ground}", this);
+        }
+        debugSteps = "";
+        debugJump = false;
+    }
+
+    static string PathOf(Transform t) => t.parent == null ? t.name : PathOf(t.parent) + "/" + t.name;
 
     //---- Ground
 
@@ -113,23 +166,27 @@ public class PlayerMove : MonoBehaviour
         isGrounded &= verticalVelocity <= 0.01f;   // going up after a jump is never grounded
 
         if (isGrounded) lastGroundedTime = Time.time;
-        if (!isGrounded) movingGround = null;
         wasGrounded = isGrounded;
     }
 
-    // Walking off a slope or a small step: stick to the ground instead of flying off for a frame
+    // Holds the player on the ground at resting distance every grounded frame (also down slopes and small steps)
     private void SnapToGround()
     {
-        if (groundSnapDistance <= 0f || !wasGrounded || verticalVelocity > 0f || characterController.isGrounded) return;
+        if (groundSnapDistance <= 0f || !wasGrounded || verticalVelocity > 0f) return;   // every grounded frame: it is what holds the player on the ground
 
-        float castRadius = characterController.radius * 0.9f;
-        float toFeet = characterController.height * 0.5f - castRadius;   // from the sphere's bottom to the feet
-        Vector3 origin = transform.position + characterController.center;
-        if (!Physics.SphereCast(origin, castRadius, Vector3.down, out RaycastHit hit, toFeet + groundSnapDistance + characterController.skinWidth, ~(1 << gameObject.layer), QueryTriggerInteraction.Ignore)) return;
+        // Same sphere as the bottom of the capsule, starting a bit higher so it never starts inside the ground.
+        // Before: a smaller sphere from the middle of the body, which on slopes measured the ground lower than it is
+        // and pulled the player a few mm into it every frame, until Unity popped it out half a meter
+        float radius = characterController.radius;
+        float lift = 0.1f;
+        Vector3 bottomSphere = transform.position + characterController.center + Vector3.down * (characterController.height * 0.5f - radius);
+        float reach = lift + characterController.skinWidth + groundSnapDistance;
+        if (!Physics.SphereCast(bottomSphere + Vector3.up * lift, radius, Vector3.down, out RaycastHit hit, reach, ~(1 << gameObject.layer), QueryTriggerInteraction.Ignore)) return;
         if (Vector3.Angle(hit.normal, Vector3.up) > characterController.slopeLimit) return;
 
-        float gap = hit.distance - toFeet;
-        if (gap > 0.01f) characterController.Move(Vector3.down * gap);
+        // Down to resting distance: the controller keeps Skin Width from the ground, measured along the slope
+        float gap = (hit.distance - lift) - characterController.skinWidth / Mathf.Max(hit.normal.y, 0.5f);
+        if (gap > 0.002f) characterController.Move(Vector3.down * gap);
     }
 
     // The ground under the player moved since last frame: move the same amount
@@ -139,21 +196,31 @@ public class PlayerMove : MonoBehaviour
 
         Vector3 delta = movingGround.TransformPoint(movingGroundLocalPoint) - transform.position;
         if (delta.y < -maxGroundFollowDownSpeed * Time.deltaTime) { movingGround = null; return; }   // it drops too fast: let go
-        if (delta.sqrMagnitude > 0.0000001f) characterController.Move(delta);
+
+        // Moved by hand, not with Move: the ground already went up into the feet, and Move would first push the
+        // player out of it and then add the delta on top (twice the rise = the snap)
+        transform.position += delta;
+        carriedHeight += delta.y;
+        Physics.SyncTransforms();   // player and ground colliders where they are now, together
+        FindGroundBelow();
     }
 
-    private void RememberMovingGround()
+    // What the player stands on, and where on it, for next frame. Looked for with a cast from the body's middle
+    // (before: collision callbacks, which skip frames while the ground pushes up into the feet, so the player
+    // stopped following for a frame and got bumped up)
+    private void FindGroundBelow()
     {
-        if (movingGround != null) movingGroundLocalPoint = movingGround.InverseTransformPoint(transform.position);
-    }
+        movingGround = null;
+        if (!followMovingGround || verticalVelocity > 0f) return;   // jumping: on its own
 
-    void OnControllerColliderHit(ControllerColliderHit hit)
-    {
-        if (hit.normal.y > 0.7f && movingGround != hit.transform)
-        {
-            movingGround = hit.transform;
-            movingGroundLocalPoint = movingGround.InverseTransformPoint(transform.position);
-        }
+        float castRadius = characterController.radius * 0.9f;
+        float toFeet = characterController.height * 0.5f - castRadius;
+        Vector3 origin = transform.position + characterController.center;
+        if (!Physics.SphereCast(origin, castRadius, Vector3.down, out RaycastHit hit, toFeet + 0.3f + characterController.skinWidth, ~(1 << gameObject.layer), QueryTriggerInteraction.Ignore)) return;
+        if (hit.normal.y < 0.7f) return;
+
+        movingGround = hit.transform;
+        movingGroundLocalPoint = movingGround.InverseTransformPoint(transform.position);
     }
 
     //---- Move & Jump
@@ -179,7 +246,9 @@ public class PlayerMove : MonoBehaviour
     {
         if (Input.GetKeyDown(KeyCode.Space)) lastJumpPressedTime = Time.time;
 
-        if (isGrounded && verticalVelocity < 0f) verticalVelocity = -2f;   // keeps it pressed to the ground
+        // Standing: no push into the ground (SnapToGround keeps it on it). Before: pressed down at 2 m/s every frame,
+        // the controller crept a few mm per frame into the ground and got popped out 8 cm every ~10 frames
+        if (isGrounded && verticalVelocity < 0f) verticalVelocity = 0f;
 
         bool jumpBuffered = Time.time - lastJumpPressedTime <= jumpBuffer;
         bool canJump = Time.time - lastGroundedTime <= coyoteTime;
@@ -192,7 +261,7 @@ public class PlayerMove : MonoBehaviour
             wasGrounded = false;
         }
 
-        verticalVelocity = Mathf.Max(verticalVelocity + gravity * Time.deltaTime, -maxFallSpeed);
+        if (!isGrounded || verticalVelocity > 0f) verticalVelocity = Mathf.Max(verticalVelocity + gravity * Time.deltaTime, -maxFallSpeed);
     }
 
     //---- What is under the player
@@ -227,6 +296,35 @@ public class PlayerMove : MonoBehaviour
             // Llevar el meme a una isla nueva (MemeOrb: desbloquea una versión más; MemeWindow: trigger Mover)
             if (look.heldObject != null && look.heldObject.TryGetComponent(out Meme heldMeme)) heldMeme.OnIslandVisited(island);
         }
+    }
+
+    //---- Teleport (DebugTools)
+
+    // Moves the player there and makes it its respawn, with no leftover speed
+    public void TeleportTo(Transform point)
+    {
+        transform.SetParent(null);   // off any elevator that had boarded it
+        playerCanMove = true;
+        characterController.enabled = false;
+        transform.position = point.position;
+        characterController.enabled = true;
+        SetRespawn(point);
+        ResetMotion();
+    }
+
+    // Clears speed, moving ground and the fall reference (after a teleport or the noclip)
+    public void ResetMotion()
+    {
+        horizontalVelocity = Vector3.zero;
+        verticalVelocity = 0f;
+        movingGround = null;
+        lastGroundHit = null;
+
+        // Fall reference = the ground below, however far (a spawn point high in the air must not count as falling into the void)
+        bool groundBelow = Physics.Raycast(transform.position, Vector3.down, out RaycastHit ground, 500f, ~(1 << gameObject.layer), QueryTriggerInteraction.Ignore);
+        lastGroundY = groundBelow ? ground.point.y : transform.position.y;
+        look.ResetSmoothing();
+        debugHeight = transform.position.y;
     }
 
     //---- Respawn (before: PlayerRespawn)
@@ -270,6 +368,8 @@ public class PlayerMove : MonoBehaviour
         horizontalVelocity = Vector3.zero;
         verticalVelocity = 0f;
         movingGround = null;
+        look.ResetSmoothing();
+        debugHeight = transform.position.y;
 
         // El meme en la mano viaja con el jugador y también cuenta como caída (MemeWindow: trigger Caer)
         if (look.heldObject != null && look.heldObject.TryGetComponent(out Meme heldMeme)) heldMeme.OnRespawned();

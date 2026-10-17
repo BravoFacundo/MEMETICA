@@ -61,6 +61,15 @@ Shader "Memetica/Grass"
         float4 _MW_Direction;
         float _MW_Strength, _MW_Speed, _MW_Lean, _MW_FlutterStrength, _MW_FlutterSpeed;
 
+        // Set by GrassField: how much the field moved since its cards were built (floating islands)
+        float4x4 _FieldToWorld;
+
+        float4x4 FieldMatrix()
+        {
+            if (_FieldToWorld._m33 < 0.5) return float4x4(1,0,0,0, 0,1,0,0, 0,0,1,0, 0,0,0,1);   // never set
+            return _FieldToWorld;
+        }
+
         // Set by GrassField: player and orbs (xyz position, w radius)
         float4 _GrassInteractors[16];
         float _GrassInteractorCount;
@@ -91,7 +100,9 @@ Shader "Memetica/Grass"
         {
             UNITY_INITIALIZE_OUTPUT(Input, o);
             float h = v.texcoord.y;
-            float3 basePos = unity_ObjectToWorld._m03_m13_m23;
+            float4x4 field = FieldMatrix();
+            float4x4 objectToWorld = mul(field, unity_ObjectToWorld);   // the card where the field is now
+            float3 basePos = objectToWorld._m03_m13_m23;
 
             float cameraDistance = distance(_WorldSpaceCameraPos, basePos);
             float distanceFade = 1 - saturate((cameraDistance - _FadeStart) / max(_FadeEnd - _FadeStart, 0.01));
@@ -105,13 +116,13 @@ Shader "Memetica/Grass"
             float gust = sin(t * 0.4 - along * 0.27) * 0.5 + 0.5;
             float bend = (_MW_Lean + wave * _MW_Strength * (0.5 + gust) * windFade) * _WindMultiplier;
 
-            float3 worldPos = mul(unity_ObjectToWorld, v.vertex).xyz;
+            float3 worldPos = mul(objectToWorld, v.vertex).xyz;
             float flutter = sin(_Time.y * _MW_FlutterSpeed + worldPos.x * 3.1 + worldPos.z * 2.3) * _MW_FlutterStrength * windFade;
 
             float3 offset = dir * (bend + flutter) * h * h;
             offset.y -= bend * bend * h * h * 0.5;
 
-            float cardHeight = length(unity_ObjectToWorld._m01_m11_m21);
+            float cardHeight = length(objectToWorld._m01_m11_m21);
 
             // Seen from above and far (the menu camera), the tips lean away from the camera and cover the ground between cards.
             // Close to the camera (the player looking at their feet) there is no tilt, so the grass doesn't move when you look around.
@@ -132,8 +143,8 @@ Shader "Memetica/Grass"
                 offset.xz += pushDir * push * _InteractStrength * cardHeight * h;
                 offset.y -= push * _InteractStrength * cardHeight * h * 0.5;
             }
-            v.vertex.xyz += mul((float3x3)unity_WorldToObject, offset);
-            float3 groundNormal = normalize(UNITY_ACCESS_INSTANCED_PROP(Props, _GroundNormal).xyz + float3(0, 1e-4, 0));
+            v.vertex = mul(unity_WorldToObject, float4(worldPos + offset, 1));   // back to the space Unity draws the card in
+            float3 groundNormal = normalize(mul((float3x3)field, UNITY_ACCESS_INSTANCED_PROP(Props, _GroundNormal).xyz) + float3(0, 1e-4, 0));
             float gradient = saturate((h - _GradientStart) / (1 - _GradientStart));
             float3 worldNormal = normalize(lerp(groundNormal, float3(0, 1, 0), gradient));
             v.normal = normalize(mul(worldNormal, (float3x3)unity_ObjectToWorld));

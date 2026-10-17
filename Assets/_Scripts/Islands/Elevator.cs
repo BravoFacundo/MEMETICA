@@ -100,7 +100,7 @@ public class Elevator : MonoBehaviour
         // Arrive: the elevator becomes part of the destination island
         Island island = dockPoint.GetComponentInParent<Island>();
         Transform respawn = island != null ? LevelManager.Instance.RespawnPointOf(island.gameObject) : null;
-        if (island != null) transform.SetParent(island.transform);
+        if (island != null) transform.SetParent(DockParent(island));
 
         if (player != null)
         {
@@ -116,6 +116,33 @@ public class Elevator : MonoBehaviour
 
         IsRiding = false;
         if (pedestal != null && pedestalMeme != null) StartCoroutine(BreakPedestalWhenMemeTaken(pedestalMeme));
+    }
+
+    // Debug: as if it had already arrived, without the player (DebugTools starts)
+    public void DockInstantly()
+    {
+        if (used || dockPoint == null) return;
+        used = true;
+
+        foreach (Transform p in passengers) if (p != null) p.SetParent(transform);
+        transform.position = dockPoint.position;
+        Island island = dockPoint.GetComponentInParent<Island>();
+        Transform respawn = island != null ? LevelManager.Instance.RespawnPointOf(island.gameObject) : null;
+        if (island != null) transform.SetParent(DockParent(island));
+        foreach (Transform p in passengers)
+            if (p != null && respawn != null && p.TryGetComponent(out Meme meme)) meme.SetRespawn(respawn);
+        if (locks != null) locks.SetActive(false);
+        if (pedestal != null) StartCoroutine(BreakPedestalOnceMemeIsTaken());
+    }
+
+    // Docked, it becomes part of whatever holds its Dock Point (a floating part of the island bobs it along)
+    Transform DockParent(Island island) => dockPoint.parent != null ? dockPoint.parent : island.transform;
+
+    // The meme may be placed on its pedestal a moment later (DebugTools): wait for it, then break when taken
+    IEnumerator BreakPedestalOnceMemeIsTaken()
+    {
+        while (!pedestal.HasMeme) yield return null;
+        yield return BreakPedestalWhenMemeTaken(pedestal.MemeObject);
     }
 
     // Shows each popup between its showAt and hideAt (only on changes, so the fades work)
