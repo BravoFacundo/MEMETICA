@@ -73,7 +73,7 @@ public class Elevator : MonoBehaviour
         IsRiding = true;
         PlayerMove player = FindObjectOfType<PlayerMove>();
         PlayerHoldObjects hold = Camera.main != null ? Camera.main.GetComponent<PlayerHoldObjects>() : null;
-        GameObject pedestalOrb = pedestal != null ? pedestal.Orb : null;   // read before the pedestal stops working
+        GameObject pedestalMeme = pedestal != null ? pedestal.MemeObject : null;   // read before the pedestal stops working
 
         // Board: player can look and zoom but not move or grab; everything rides parented to the elevator
         if (player != null) { player.playerCanMove = false; player.transform.SetParent(transform); }
@@ -115,7 +115,7 @@ public class Elevator : MonoBehaviour
         for (int i = 0; i < ridePopups.Length; i++) if (shown[i]) SetPopup(ridePopups[i].popup, false);
 
         IsRiding = false;
-        if (pedestal != null && pedestalOrb != null) StartCoroutine(BreakPedestalWhenOrbTaken(pedestalOrb));
+        if (pedestal != null && pedestalMeme != null) StartCoroutine(BreakPedestalWhenMemeTaken(pedestalMeme));
     }
 
     // Shows each popup between its showAt and hideAt (only on changes, so the fades work)
@@ -176,14 +176,14 @@ public class Elevator : MonoBehaviour
     }
 #endif
 
-    // Already docked: when the player takes the orb off the elevator pedestal, the pedestal topples and stays broken
-    IEnumerator BreakPedestalWhenOrbTaken(GameObject orb)
+    // Already docked: when the player takes the meme off the elevator pedestal, the pedestal topples and stays broken
+    IEnumerator BreakPedestalWhenMemeTaken(GameObject memeObject)
     {
-        OrbMemes memes = orb.GetComponent<OrbMemes>();
-        Vector3 startPos = orb.transform.position;
+        Meme meme = memeObject.GetComponent<Meme>();
+        Vector3 startPos = memeObject.transform.position;
 
         // Wait until it is grabbed or moved from its place
-        while ((memes == null || !memes.isHolded) && Vector3.Distance(orb.transform.position, startPos) < 1f)
+        while ((meme == null || !meme.IsHeld) && Vector3.Distance(memeObject.transform.position, startPos) < 1f)
             yield return null;
 
         PlayerMove player = FindObjectOfType<PlayerMove>();

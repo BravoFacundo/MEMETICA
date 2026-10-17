@@ -205,7 +205,7 @@ public class GrassField : MonoBehaviour
         player = playerMove != null ? playerMove.transform : null;
 
         orbs.Clear();
-        foreach (OrbMemes orb in FindObjectsOfType<OrbMemes>()) orbs.Add(orb.transform);
+        foreach (Meme meme in FindObjectsOfType<Meme>()) orbs.Add(meme.transform);
     }
 
     // Three quads crossed like a star; base at y = 0, tip at y = 1, normals up for soft even lighting
@@ -303,7 +303,8 @@ public class GrassField : MonoBehaviour
             var targets = new List<Component>();
             targets.AddRange(FindObjectsOfType<Pedestal>());
             targets.AddRange(FindObjectsOfType<Bridge>());
-            targets.AddRange(FindObjectsOfType<Atril>());
+            foreach (Pedestal pedestal in FindObjectsOfType<Pedestal>())
+                if (pedestal.cluePainting != null) targets.Add(pedestal.cluePainting);
             targets.AddRange(FindObjectsOfType<Elevator>());
 
             // Each mesh piece clears its own spot, so a long or diagonal bridge clears only under its planks, not a whole box

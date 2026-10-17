@@ -3,21 +3,11 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Video;
 
-public class OrbMemes: MonoBehaviour
+// Meme as an orb (Game_Old). Before: OrbMemes. Same behavior as always:
+// the image mutates over time while you carry it and move, and returns to the original.
+public class MemeOrb : Meme
 {
-    // Orb ID used by pedestals (Key ID) and effects: the name without the "Orb_" prefix ("Orb_3Aa" → "3Aa")
-    public const string NamePrefix = "Orb_";
-    public string OrbID => IDOf(gameObject);
-    public static string IDOf(GameObject orb) => orb.name.StartsWith(NamePrefix) ? orb.name.Substring(NamePrefix.Length) : orb.name;
-
-    public bool isHolded = false;
-    public bool isCrossing = false;
     public GameObject Player;
-
-    public bool changeLock = false;
-
-    private bool canDo1 = true;
-    private bool canDo2 = true;
 
     [Header("Imágenes (la 0 es la original)")]
     public List<Material> materials = new List<Material>();
@@ -55,7 +45,7 @@ public class OrbMemes: MonoBehaviour
         Player = GameObject.Find("Player");
 
         // Las imágenes se asignan en el Inspector (antes se cargaban de Resources según el nombre del orbe)
-        if (materials.Count == 0) { Debug.LogError("[OrbMemes] '" + name + "' no tiene imágenes asignadas.", this); enabled = false; return; }
+        if (materials.Count == 0) { Debug.LogError("[MemeOrb] '" + name + "' no tiene imágenes asignadas.", this); enabled = false; return; }
         matCount = 0;
         memeRenderer = gameObject.transform.Find("Meme").GetComponent<MeshRenderer>();
         memeRenderer.sharedMaterial = materials[matCount];
@@ -66,25 +56,27 @@ public class OrbMemes: MonoBehaviour
         mpb = new MaterialPropertyBlock();
         playerMove = Player.GetComponent<PlayerMove>();
         lastPlayerPos = Player.transform.position;
+
+        ApplyRestingEffects();   // before: the Update polling did it on the first frame
     }
 
-    void Update()
+    protected override void Update()
     {
-        //Imagen: muta con el tiempo mientras lo llevás y te movés
-        UpdateMutation();
+        base.Update();
+        UpdateMutation();   //Imagen: muta con el tiempo mientras lo llevás y te movés
+    }
 
+    //---- Meme events
 
-        //Audio
-        if (isHolded && canDo1)
-        {
-            StartCoroutine("Holding");
-            canDo1 = false;
-        }
-        if (!isHolded && canDo2)
-        {
-            StartCoroutine("NotHolding");
-            canDo2 = false;
-        }
+    protected override void OnPickedUp() => ApplyHoldingEffects();
+    protected override void OnDropped() => ApplyRestingEffects();
+    public override void OnBridgeCrossed() => MarkEvent();   // pisaste un puente nuevo: no mutar justo ahí
+
+    // Lo llama PlayerMove al pisar una isla nueva con el orbe en la mano
+    public override void OnIslandVisited(GameObject island)
+    {
+        visitedIslands.Add(island);
+        MarkEvent();
     }
 
     // ---------- MUTACIÓN ----------
@@ -103,20 +95,19 @@ public class OrbMemes: MonoBehaviour
         // Momentos que el jugador podría confundir con la causa del cambio: no mutar cerca de ellos
         if (delta.magnitude > 3f) MarkEvent();                          // respawn / teletransporte
         if (playerMove != null && !playerMove.isGrounded) MarkEvent();  // saltando o cayendo
-        if (!changeLock) { changeLock = true; MarkEvent(); }           // PlayerMove avisa que pisaste un puente nuevo
 
-        if (isHolded && !wasHolded) OnPickUp();
-        if (!isHolded && wasHolded) OnDrop();
-        wasHolded = isHolded;
+        if (IsHeld && !wasHolded) StartMutationTimer();
+        if (!IsHeld && wasHolded) StopMutationAndRestore();
+        wasHolded = IsHeld;
 
-        if (!isHolded || mutationRoutine != null) return;
+        if (!IsHeld || mutationRoutine != null) return;
 
         if (delta.magnitude / Mathf.Max(Time.deltaTime, 0.0001f) > 0.5f) movingTime += Time.deltaTime; // solo cuenta si te movés
         if (movingTime >= nextChangeAt && !InGrace())
             mutationRoutine = StartCoroutine(Mutate());
     }
 
-    void OnPickUp()
+    void StartMutationTimer()
     {
         // Si lo sacás del pedestal a mitad del barrido, el barrido se corta y vuelve al original
         if (sweepRoutine != null) { StopCoroutine(sweepRoutine); sweepRoutine = null; SetImage(0); }
@@ -124,7 +115,7 @@ public class OrbMemes: MonoBehaviour
         nextChangeAt = firstChangeAfter;
     }
 
-    void OnDrop()
+    void StopMutationAndRestore()
     {
         if (mutationRoutine != null) { StopCoroutine(mutationRoutine); mutationRoutine = null; }
         if (matCount != 0) { SetImage(0); Play(returnClip); StartCoroutine(Flash(0.6f)); }
@@ -132,13 +123,6 @@ public class OrbMemes: MonoBehaviour
 
     void MarkEvent() { lastEventTime = Time.time; }
     bool InGrace() { return Time.time - lastEventTime < graceAfterEvent; }
-
-    // Lo llama PlayerMove al pisar una isla nueva con el orbe en la mano
-    public void IslandVisited(GameObject island)
-    {
-        visitedIslands.Add(island);
-        MarkEvent();
-    }
 
     int UnlockedVariants() { return Mathf.Clamp(1 + visitedIslands.Count, 1, materials.Count - 1); }
 
@@ -162,7 +146,7 @@ public class OrbMemes: MonoBehaviour
     }
 
     // Lo llama el pedestal mientras carga: muestra todas las versiones rápido y termina en el original
-    public void Sweep(float duration)
+    public override void Sweep(float duration)
     {
         if (mutationRoutine != null) { StopCoroutine(mutationRoutine); mutationRoutine = null; }
         if (sweepRoutine != null) StopCoroutine(sweepRoutine);
@@ -208,66 +192,30 @@ public class OrbMemes: MonoBehaviour
         memeRenderer.SetPropertyBlock(null);
     }
 
-    public IEnumerator Holding()
+    //---- Effects while held / resting (before: Holding / NotHolding coroutines polled every second)
+
+    void ApplyHoldingEffects()
     {
-        //StopCoroutine("NotHolding");
-        switch (OrbID) //Activar filtros, Modificar valores (Gravedad, bloom, reverb, etc)
-        {
-            case "1Aa": //Dios
-                //Aumentar el bloom
-                this.gameObject.GetComponent<AudioReverbZone>().enabled = true; //efecto reverb
+        if (ID == "1Aa") GetComponent<AudioReverbZone>().enabled = true;   //Dios: efecto reverb
 
-                break;
-
-            case "1Ba": //Luna
-                //Baja la gravedad
-                
-                break;
-        }
         //Desmutear el loop de sonidos de holding
-        gameObject.transform.Find("Audio").GetComponent<AudioSource>().mute = false;
-        gameObject.GetComponent<AudioSource>().mute = true;      
+        transform.Find("Audio").GetComponent<AudioSource>().mute = false;
+        GetComponent<AudioSource>().mute = true;
+    }
 
-        yield return new WaitForSeconds(1f);
-        canDo1 = true;
-    }    
-    public IEnumerator NotHolding()
+    void ApplyRestingEffects()
     {
         //Las modificaciones vuelven a la normalidad cuando ya no tenes el orbe
-        //pero los sonidos se van cuando el pedestal termina de confirmar o denegar
+        if (ID == "1Aa") GetComponent<AudioReverbZone>().enabled = false;   //Dios: se va el efecto reverb
 
-        switch (OrbID)
+        transform.Find("Audio").GetComponent<AudioSource>().mute = true;
+        GetComponent<AudioSource>().mute = false;
+
+        VideoPlayer video = GetComponentInChildren<VideoPlayer>();
+        if (video != null)
         {
-            case "1Aa": //Dios
-                //Quitar el bloom
-                this.gameObject.GetComponent<AudioReverbZone>().enabled = false; //se va el efecto reverb
-
-                break;
-
-            case "1Ba": //Luna
-                        //Baja la gravedad
-
-                break;
-            case "3Aa": //Internet
-                        //Baja la gravedad
-
-                break;
-            case "4Aa": //conspiraciones
-                        //Baja la gravedad
-
-                break;
+            video.frame = 0;
+            video.Pause();
         }
-        
-        gameObject.transform.Find("Audio").GetComponent<AudioSource>().mute = true;
-        gameObject.GetComponent<AudioSource>().mute = false;
-
-        if (gameObject.GetComponentInChildren<VideoPlayer>() != null) 
-        {
-            gameObject.GetComponentInChildren<VideoPlayer>().frame = 0;
-            gameObject.GetComponentInChildren<VideoPlayer>().Pause();
-        }
-
-        yield return new WaitForSeconds(1f);
-        canDo2 = true;
     }
 }

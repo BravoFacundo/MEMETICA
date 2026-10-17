@@ -18410,7 +18410,6 @@ GameObject:
   - component: {fileID: 163665293}
   - component: {fileID: 163665292}
   - component: {fileID: 163665298}
-  - component: {fileID: 163665297}
   - component: {fileID: 163665296}
   - component: {fileID: 163665295}
   m_Layer: 2
@@ -18639,19 +18638,6 @@ VideoPlayer:
   m_WaitForFirstFrame: 1
   m_FrameReadyEventEnabled: 0
   m_VideoShaders: []
---- !u!114 &163665297
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 163665290}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 90fe6085e61207a4ba5d96c989d93d94, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  pedestal: {fileID: 1487052723}
 --- !u!114 &163665298
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -26642,13 +26628,12 @@ GameObject:
   - component: {fileID: 270262299}
   - component: {fileID: 270262298}
   - component: {fileID: 270262297}
-  - component: {fileID: 270262296}
   - component: {fileID: 270262295}
   - component: {fileID: 270262294}
   - component: {fileID: 270262293}
   - component: {fileID: 270262292}
   m_Layer: 0
-  m_Name: Orb_3Aa
+  m_Name: Meme_3Aa
   m_TagString: Meme
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -26798,26 +26783,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a33c54e69ceded64c8dac77eb94e750f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
---- !u!114 &270262296
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 270262291}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 03f2247c65408f84dacca4c143da0f15, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  isGrounded: 0
-  isGroundedLock: 0
-  isHolded: 0
-  isHoldedLock: 0
-  groundMask:
-    serializedVersion: 2
-    m_Bits: 64
-  rb: {fileID: 0}
 --- !u!114 &270262297
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -26830,10 +26795,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b0f4871ca7d54fc4f947f36942d7a16a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  isHolded: 0
-  isCrossing: 0
+  restDelay: 3
+  groundCheckRadius: 0.6
   Player: {fileID: 0}
-  changeLock: 0
   materials:
   - {fileID: 2100000, guid: fe6b3e0908a8a2e47bd12cb8ee4d78bf, type: 2}
   - {fileID: 2100000, guid: 5a6a003d74d4a324489ce4ccafbbc454, type: 2}
@@ -27419,13 +27383,12 @@ GameObject:
   - component: {fileID: 306690108}
   - component: {fileID: 306690107}
   - component: {fileID: 306690106}
-  - component: {fileID: 306690105}
   - component: {fileID: 306690104}
   - component: {fileID: 306690103}
   - component: {fileID: 306690102}
   - component: {fileID: 306690101}
   m_Layer: 0
-  m_Name: Orb_1Ba
+  m_Name: Meme_1Ba
   m_TagString: Meme
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -27575,26 +27538,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a33c54e69ceded64c8dac77eb94e750f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
---- !u!114 &306690105
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 306690100}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 03f2247c65408f84dacca4c143da0f15, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  isGrounded: 0
-  isGroundedLock: 0
-  isHolded: 0
-  isHoldedLock: 0
-  groundMask:
-    serializedVersion: 2
-    m_Bits: 64
-  rb: {fileID: 0}
 --- !u!114 &306690106
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -27607,10 +27550,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b0f4871ca7d54fc4f947f36942d7a16a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  isHolded: 0
-  isCrossing: 0
+  restDelay: 3
+  groundCheckRadius: 0.6
   Player: {fileID: 0}
-  changeLock: 0
   materials:
   - {fileID: 2100000, guid: 082c5885416efec4084d933b134ee544, type: 2}
   - {fileID: 2100000, guid: d864c61eb47db33458e784103e3fe3ea, type: 2}
@@ -28153,6 +28095,10 @@ PrefabInstance:
       propertyPath: KeyID
       value: 1A
       objectReference: {fileID: 0}
+    - target: {fileID: 3226923575914045670, guid: f089c2499c1cbb0498c51e07e1b33566, type: 3}
+      propertyPath: cluePainting
+      value: 
+      objectReference: {fileID: 1075741892}
     - target: {fileID: 3226923575914045670, guid: f089c2499c1cbb0498c51e07e1b33566, type: 3}
       propertyPath: ControlledBridges.Array.size
       value: 1
@@ -41048,7 +40994,11 @@ PrefabInstance:
     - target: {fileID: 3226923575914045670, guid: f089c2499c1cbb0498c51e07e1b33566, type: 3}
       propertyPath: group
       value: 
-      objectReference: {fileID: 1264697075}
+      objectReference: {fileID: 0}
+    - target: {fileID: 3226923575914045670, guid: f089c2499c1cbb0498c51e07e1b33566, type: 3}
+      propertyPath: groupID
+      value: Final
+      objectReference: {fileID: 0}
     - target: {fileID: 3226923575914045670, guid: f089c2499c1cbb0498c51e07e1b33566, type: 3}
       propertyPath: pedestalID
       value: 53
@@ -41099,17 +41049,6 @@ Transform:
   m_CorrespondingSourceObject: {fileID: 3226923575914045669, guid: f089c2499c1cbb0498c51e07e1b33566, type: 3}
   m_PrefabInstance: {fileID: 387220545}
   m_PrefabAsset: {fileID: 0}
---- !u!114 &387220547 stripped
-MonoBehaviour:
-  m_CorrespondingSourceObject: {fileID: 3226923575914045670, guid: f089c2499c1cbb0498c51e07e1b33566, type: 3}
-  m_PrefabInstance: {fileID: 387220545}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 223735138}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 788f41b11a66e334899b27db2d428ca2, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
 --- !u!1001 &391049275
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -46349,6 +46288,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   audioManager: {fileID: 2071885306}
   gameScene: Game
+  oldGameScene: Game_Old
   menuScene: Menu
   minLoadingTime: 1.5
   quitDelay: 2
@@ -91260,6 +91200,10 @@ PrefabInstance:
       value: 1B
       objectReference: {fileID: 0}
     - target: {fileID: 3226923575914045670, guid: f089c2499c1cbb0498c51e07e1b33566, type: 3}
+      propertyPath: cluePainting
+      value: 
+      objectReference: {fileID: 163665291}
+    - target: {fileID: 3226923575914045670, guid: f089c2499c1cbb0498c51e07e1b33566, type: 3}
       propertyPath: ControlledBridges.Array.size
       value: 2
       objectReference: {fileID: 0}
@@ -100183,7 +100127,6 @@ GameObject:
   - component: {fileID: 961894816}
   - component: {fileID: 961894815}
   - component: {fileID: 961894820}
-  - component: {fileID: 961894821}
   - component: {fileID: 961894819}
   - component: {fileID: 961894822}
   m_Layer: 2
@@ -100328,19 +100271,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 4da444e548476444d82e82bdd7fd434f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
---- !u!114 &961894821
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 961894814}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 90fe6085e61207a4ba5d96c989d93d94, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  pedestal: {fileID: 1770942442}
 --- !u!82 &961894822
 AudioSource:
   m_ObjectHideFlags: 0
@@ -118454,7 +118384,6 @@ GameObject:
   - component: {fileID: 1075741894}
   - component: {fileID: 1075741893}
   - component: {fileID: 1075741899}
-  - component: {fileID: 1075741898}
   - component: {fileID: 1075741897}
   - component: {fileID: 1075741896}
   m_Layer: 2
@@ -118683,19 +118612,6 @@ VideoPlayer:
   m_WaitForFirstFrame: 1
   m_FrameReadyEventEnabled: 0
   m_VideoShaders: []
---- !u!114 &1075741898
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1075741891}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 90fe6085e61207a4ba5d96c989d93d94, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  pedestal: {fileID: 1906302077}
 --- !u!114 &1075741899
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -133230,7 +133146,11 @@ PrefabInstance:
     - target: {fileID: 3226923575914045670, guid: f089c2499c1cbb0498c51e07e1b33566, type: 3}
       propertyPath: group
       value: 
-      objectReference: {fileID: 1264697075}
+      objectReference: {fileID: 0}
+    - target: {fileID: 3226923575914045670, guid: f089c2499c1cbb0498c51e07e1b33566, type: 3}
+      propertyPath: groupID
+      value: Final
+      objectReference: {fileID: 0}
     - target: {fileID: 3226923575914045670, guid: f089c2499c1cbb0498c51e07e1b33566, type: 3}
       propertyPath: pedestalID
       value: 51
@@ -133248,6 +133168,10 @@ PrefabInstance:
       value: 3
       objectReference: {fileID: 0}
     - target: {fileID: 3226923575914045670, guid: f089c2499c1cbb0498c51e07e1b33566, type: 3}
+      propertyPath: ControlledIslands.Array.size
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 3226923575914045670, guid: f089c2499c1cbb0498c51e07e1b33566, type: 3}
       propertyPath: LinkedPedestals.Array.data[0]
       value: 
       objectReference: {fileID: 2077361058}
@@ -133259,6 +133183,10 @@ PrefabInstance:
       propertyPath: LinkedPedestals.Array.data[2]
       value: 
       objectReference: {fileID: 223735138}
+    - target: {fileID: 3226923575914045670, guid: f089c2499c1cbb0498c51e07e1b33566, type: 3}
+      propertyPath: ControlledIslands.Array.data[0]
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 3226923575914045671, guid: f089c2499c1cbb0498c51e07e1b33566, type: 3}
       propertyPath: m_Mesh
       value: 
@@ -134468,6 +134396,22 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 620167527}
     m_Modifications:
+    - target: {fileID: 1452676173297073131, guid: 39d8f1b5f315fc14d9af9c90f66cd3c9, type: 3}
+      propertyPath: m_LocalPosition.x
+      value: -2.56
+      objectReference: {fileID: 0}
+    - target: {fileID: 1452676173297073131, guid: 39d8f1b5f315fc14d9af9c90f66cd3c9, type: 3}
+      propertyPath: m_LocalPosition.z
+      value: 1.32
+      objectReference: {fileID: 0}
+    - target: {fileID: 3265235231701668397, guid: 39d8f1b5f315fc14d9af9c90f66cd3c9, type: 3}
+      propertyPath: m_LocalPosition.x
+      value: -3.05
+      objectReference: {fileID: 0}
+    - target: {fileID: 3265235231701668397, guid: 39d8f1b5f315fc14d9af9c90f66cd3c9, type: 3}
+      propertyPath: m_LocalPosition.z
+      value: 0.47
+      objectReference: {fileID: 0}
     - target: {fileID: 3392008267583998772, guid: 39d8f1b5f315fc14d9af9c90f66cd3c9, type: 3}
       propertyPath: leaveVia
       value: 
@@ -143406,69 +143350,6 @@ Transform:
   m_CorrespondingSourceObject: {fileID: 2298437533747602340, guid: 553508c5407274c46949f3b4793a7d31, type: 3}
   m_PrefabInstance: {fileID: 1262835331}
   m_PrefabAsset: {fileID: 0}
---- !u!1 &1264697073
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 1264697074}
-  - component: {fileID: 1264697075}
-  m_Layer: 0
-  m_Name: PedestalGroup_Final
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 1
---- !u!4 &1264697074
-Transform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1264697073}
-  serializedVersion: 2
-  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
-  m_Children: []
-  m_Father: {fileID: 1941621601}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &1264697075
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1264697073}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 32d3dc3cf612f0049af48a081d14588f, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  pedestals:
-  - {fileID: 2077361059}
-  - {fileID: 1861719324}
-  - {fileID: 387220547}
-  onComplete:
-    m_PersistentCalls:
-      m_Calls:
-      - m_Target: {fileID: 2142502827}
-        m_TargetAssemblyTypeName: LevelManager, Assembly-CSharp
-        m_MethodName: SubirIsla
-        m_Mode: 5
-        m_Arguments:
-          m_ObjectArgument: {fileID: 0}
-          m_ObjectArgumentAssemblyTypeName: 
-          m_IntArgument: 0
-          m_FloatArgument: 0
-          m_StringArgument: 0
-          m_BoolArgument: 0
-        m_CallState: 2
 --- !u!1001 &1264883385
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -156882,17 +156763,6 @@ Transform:
   - {fileID: 1690424139}
   m_Father: {fileID: 1525933645}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &1487052723 stripped
-MonoBehaviour:
-  m_CorrespondingSourceObject: {fileID: 3226923575914045670, guid: f089c2499c1cbb0498c51e07e1b33566, type: 3}
-  m_PrefabInstance: {fileID: 894147241}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 0}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 788f41b11a66e334899b27db2d428ca2, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
 --- !u!1001 &1492654193
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -173402,6 +173272,10 @@ PrefabInstance:
       value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 3226923575914045670, guid: f089c2499c1cbb0498c51e07e1b33566, type: 3}
+      propertyPath: cluePainting
+      value: 
+      objectReference: {fileID: 961894818}
+    - target: {fileID: 3226923575914045670, guid: f089c2499c1cbb0498c51e07e1b33566, type: 3}
       propertyPath: LinkedPedestal
       value: 0
       objectReference: {fileID: 0}
@@ -173523,17 +173397,6 @@ Transform:
   m_CorrespondingSourceObject: {fileID: 3226923575914045669, guid: f089c2499c1cbb0498c51e07e1b33566, type: 3}
   m_PrefabInstance: {fileID: 1770942440}
   m_PrefabAsset: {fileID: 0}
---- !u!114 &1770942442 stripped
-MonoBehaviour:
-  m_CorrespondingSourceObject: {fileID: 3226923575914045670, guid: f089c2499c1cbb0498c51e07e1b33566, type: 3}
-  m_PrefabInstance: {fileID: 1770942440}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 0}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 788f41b11a66e334899b27db2d428ca2, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
 --- !u!1 &1774388257 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 3121228643547276916, guid: 52be1848cebbbfc409887785e7be958e, type: 3}
@@ -179896,7 +179759,11 @@ PrefabInstance:
     - target: {fileID: 3226923575914045670, guid: f089c2499c1cbb0498c51e07e1b33566, type: 3}
       propertyPath: group
       value: 
-      objectReference: {fileID: 1264697075}
+      objectReference: {fileID: 0}
+    - target: {fileID: 3226923575914045670, guid: f089c2499c1cbb0498c51e07e1b33566, type: 3}
+      propertyPath: groupID
+      value: Final
+      objectReference: {fileID: 0}
     - target: {fileID: 3226923575914045670, guid: f089c2499c1cbb0498c51e07e1b33566, type: 3}
       propertyPath: pedestalID
       value: 52
@@ -179947,17 +179814,6 @@ Transform:
   m_CorrespondingSourceObject: {fileID: 3226923575914045669, guid: f089c2499c1cbb0498c51e07e1b33566, type: 3}
   m_PrefabInstance: {fileID: 1861719322}
   m_PrefabAsset: {fileID: 0}
---- !u!114 &1861719324 stripped
-MonoBehaviour:
-  m_CorrespondingSourceObject: {fileID: 3226923575914045670, guid: f089c2499c1cbb0498c51e07e1b33566, type: 3}
-  m_PrefabInstance: {fileID: 1861719322}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 259507893}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 788f41b11a66e334899b27db2d428ca2, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
 --- !u!1 &1866690997
 GameObject:
   m_ObjectHideFlags: 0
@@ -190590,13 +190446,12 @@ GameObject:
   - component: {fileID: 1893306333}
   - component: {fileID: 1893306332}
   - component: {fileID: 1893306331}
-  - component: {fileID: 1893306330}
   - component: {fileID: 1893306329}
   - component: {fileID: 1893306328}
   - component: {fileID: 1893306327}
   - component: {fileID: 1893306326}
   m_Layer: 0
-  m_Name: 4Aa
+  m_Name: Meme_4Aa
   m_TagString: Meme
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -190746,26 +190601,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a33c54e69ceded64c8dac77eb94e750f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
---- !u!114 &1893306330
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1893306325}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 03f2247c65408f84dacca4c143da0f15, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  isGrounded: 0
-  isGroundedLock: 0
-  isHolded: 0
-  isHoldedLock: 0
-  groundMask:
-    serializedVersion: 2
-    m_Bits: 64
-  rb: {fileID: 0}
 --- !u!114 &1893306331
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -190778,10 +190613,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b0f4871ca7d54fc4f947f36942d7a16a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  isHolded: 0
-  isCrossing: 0
+  restDelay: 3
+  groundCheckRadius: 0.6
   Player: {fileID: 0}
-  changeLock: 0
   materials:
   - {fileID: 2100000, guid: 1bb30b9c00e06c449a9e097c8d52f599, type: 2}
   - {fileID: 2100000, guid: 1471949b96c61494dadd8076b07faad2, type: 2}
@@ -191139,17 +190973,6 @@ PrefabInstance:
     m_AddedGameObjects: []
     m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 94c51fd839663604fa1027f8f1329fe2, type: 3}
---- !u!114 &1906302077 stripped
-MonoBehaviour:
-  m_CorrespondingSourceObject: {fileID: 3226923575914045670, guid: f089c2499c1cbb0498c51e07e1b33566, type: 3}
-  m_PrefabInstance: {fileID: 324164722}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 0}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 788f41b11a66e334899b27db2d428ca2, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
 --- !u!64 &1907417627
 MeshCollider:
   m_ObjectHideFlags: 0
@@ -191791,7 +191614,6 @@ GameObject:
   - component: {fileID: 1935266563}
   - component: {fileID: 1935266562}
   - component: {fileID: 1935266568}
-  - component: {fileID: 1935266567}
   - component: {fileID: 1935266566}
   - component: {fileID: 1935266565}
   m_Layer: 2
@@ -192020,19 +191842,6 @@ VideoPlayer:
   m_WaitForFirstFrame: 1
   m_FrameReadyEventEnabled: 0
   m_VideoShaders: []
---- !u!114 &1935266567
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1935266560}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 90fe6085e61207a4ba5d96c989d93d94, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  pedestal: {fileID: 2038577810}
 --- !u!114 &1935266568
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -192205,7 +192014,6 @@ Transform:
   - {fileID: 2004233576}
   - {fileID: 629050627}
   - {fileID: 920681408}
-  - {fileID: 1264697074}
   m_Father: {fileID: 2125168367}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1001 &1942119860
@@ -194296,6 +194104,10 @@ PrefabInstance:
       value: 3
       objectReference: {fileID: 0}
     - target: {fileID: 3226923575914045670, guid: f089c2499c1cbb0498c51e07e1b33566, type: 3}
+      propertyPath: cluePainting
+      value: 
+      objectReference: {fileID: 1935266561}
+    - target: {fileID: 3226923575914045670, guid: f089c2499c1cbb0498c51e07e1b33566, type: 3}
       propertyPath: ControlledBridge
       value: 3
       objectReference: {fileID: 0}
@@ -194357,17 +194169,6 @@ Transform:
   m_CorrespondingSourceObject: {fileID: 3226923575914045669, guid: f089c2499c1cbb0498c51e07e1b33566, type: 3}
   m_PrefabInstance: {fileID: 2038577808}
   m_PrefabAsset: {fileID: 0}
---- !u!114 &2038577810 stripped
-MonoBehaviour:
-  m_CorrespondingSourceObject: {fileID: 3226923575914045670, guid: f089c2499c1cbb0498c51e07e1b33566, type: 3}
-  m_PrefabInstance: {fileID: 2038577808}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 0}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 788f41b11a66e334899b27db2d428ca2, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
 --- !u!1001 &2039588543
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -195418,17 +195219,6 @@ GameObject:
   m_CorrespondingSourceObject: {fileID: 3226923575914045668, guid: f089c2499c1cbb0498c51e07e1b33566, type: 3}
   m_PrefabInstance: {fileID: 1121862298}
   m_PrefabAsset: {fileID: 0}
---- !u!114 &2077361059 stripped
-MonoBehaviour:
-  m_CorrespondingSourceObject: {fileID: 3226923575914045670, guid: f089c2499c1cbb0498c51e07e1b33566, type: 3}
-  m_PrefabInstance: {fileID: 1121862298}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 2077361058}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 788f41b11a66e334899b27db2d428ca2, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
 --- !u!1 &2078284025
 GameObject:
   m_ObjectHideFlags: 0
@@ -197010,13 +196800,12 @@ GameObject:
   - component: {fileID: 2121772784}
   - component: {fileID: 2121772788}
   - component: {fileID: 2121772792}
-  - component: {fileID: 2121772793}
   - component: {fileID: 2121772789}
   - component: {fileID: 2121772791}
   - component: {fileID: 2121772790}
   - component: {fileID: 2121772794}
   m_Layer: 0
-  m_Name: Orb_1Aa
+  m_Name: Meme_1Aa
   m_TagString: Meme
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -197282,10 +197071,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b0f4871ca7d54fc4f947f36942d7a16a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  isHolded: 0
-  isCrossing: 0
+  restDelay: 3
+  groundCheckRadius: 0.6
   Player: {fileID: 0}
-  changeLock: 0
   materials:
   - {fileID: 2100000, guid: d2a1ec7574154804791b1c26fcee5428, type: 2}
   - {fileID: 2100000, guid: 3b3016e204d05174491f77721b8795cc, type: 2}
@@ -197305,26 +197093,6 @@ MonoBehaviour:
   graceAfterEvent: 1
   flashIntensity: 2
   sweepPortion: 0.75
---- !u!114 &2121772793
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 2121772783}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 03f2247c65408f84dacca4c143da0f15, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  isGrounded: 0
-  isGroundedLock: 0
-  isHolded: 0
-  isHoldedLock: 0
-  groundMask:
-    serializedVersion: 2
-    m_Bits: 64
-  rb: {fileID: 0}
 --- !u!114 &2121772794
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -210599,7 +210367,8 @@ MonoBehaviour:
   ControlledIslands: []
   ControlledBridges:
   - Tutorial
-  group: {fileID: 0}
+  groupID: 
+  cluePainting: {fileID: 0}
   socket: {fileID: 6550854910321787551}
   visualKeyed: {fileID: 7653041071600983024}
   visualKeyless: {fileID: 5875341168680392436}
@@ -210609,7 +210378,6 @@ MonoBehaviour:
   snapClip: {fileID: 8300000, guid: 8069a62e7b897a14393029d89482ec73, type: 3}
   breakClip: {fileID: 0}
   toppleTime: 0.7
-  LinkedPedestals: []
 --- !u!135 &6550854911303881343
 SphereCollider:
   m_ObjectHideFlags: 0

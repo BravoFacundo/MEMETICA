@@ -25,7 +25,7 @@ public class PlayerMove : MonoBehaviour
     public LayerMask groundMask;
     public bool isGrounded;
 
-    [Header("Cruces con orbe (puente → isla)")]
+    [Header("Cruces con meme (puente → isla)")]
     public bool hit1Lock = false;
     public bool hit2Lock = false;
     public GameObject prevIsland;
@@ -84,17 +84,13 @@ public class PlayerMove : MonoBehaviour
             platform.onTop = true;
         }
 
-        // Orbes que cambian: cruzar un puente y llegar a una isla nueva con el orbe en la mano
+        // Cruzar un puente y llegar a una isla nueva con el meme en la mano
         if (!hold.FueAgarrada) return;
 
         GameObject bridge = FindParentWithTag(hit.transform.gameObject, "Puente");
         if (bridge != null && !hit1Lock && prevBridge != bridge)
         {
-            if (hold.heldObject != null && hold.heldObject.TryGetComponent(out OrbMemes crossingMemes))
-            {
-                crossingMemes.isCrossing = true;
-                crossingMemes.changeLock = false;
-            }
+            if (hold.heldObject != null && hold.heldObject.TryGetComponent(out Meme crossingMeme)) crossingMeme.OnBridgeCrossed();
             hit2Lock = false;
             hit1Lock = true;
             prevBridge = bridge;
@@ -107,8 +103,8 @@ public class PlayerMove : MonoBehaviour
             hit2Lock = true;
             prevIsland = island;
 
-            // Cada isla nueva a la que llevás el orbe desbloquea una versión más de su imagen
-            if (hold.heldObject != null && hold.heldObject.TryGetComponent(out OrbMemes heldMemes)) heldMemes.IslandVisited(island);
+            // Llevar el meme a una isla nueva (MemeOrb: desbloquea una versión más; MemeWindow: trigger Mover)
+            if (hold.heldObject != null && hold.heldObject.TryGetComponent(out Meme heldMeme)) heldMeme.OnIslandVisited(island);
         }
     }
 

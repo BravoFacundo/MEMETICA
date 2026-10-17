@@ -10,7 +10,7 @@ public class PlayerLookAtVideo : MonoBehaviour
     [SerializeField] private float lookingRange = 10f;
 
     [Header("Debug")]
-    [SerializeField] private bool orbIsCorrect;
+    [SerializeField] private bool clueSolved;
 
     private Transform currentPainting;
     private VideoPlayer paintingVideo;
@@ -53,8 +53,8 @@ public class PlayerLookAtVideo : MonoBehaviour
         currentPainting = painting;
         paintingVideo = painting.GetComponentInChildren<VideoPlayer>();
         audioSource = painting.GetComponentInChildren<AudioSource>();
-        Atril atril = painting.GetComponentInChildren<Atril>();
-        orbIsCorrect = atril != null && atril.IsCorrect;
+        Pedestal pedestal = Pedestal.WithClue(painting);
+        clueSolved = pedestal != null && pedestal.IsCorrect;
 
         paintingVideo.Play();
         if (audioSource != null) audioSource.Play();
@@ -65,12 +65,12 @@ public class PlayerLookAtVideo : MonoBehaviour
     {
         if (paintingVideo != null)
         {
-            if (!orbIsCorrect) paintingVideo.frame = 0;
+            if (!clueSolved) paintingVideo.frame = 0;
             paintingVideo.Pause();
         }
         if (audioSource != null)
         {
-            if (!orbIsCorrect) audioSource.time = 0;
+            if (!clueSolved) audioSource.time = 0;
             audioSource.Pause();
         }
         currentPainting = null;

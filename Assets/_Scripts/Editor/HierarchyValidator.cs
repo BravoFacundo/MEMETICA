@@ -73,16 +73,17 @@ public static class HierarchyValidator
             if (ped.chargeClip == null || ped.correctClip == null || ped.incorrectClip == null || ped.snapClip == null)
                 Warn($"El pedestal '{ped.name}' tiene sonidos sin asignar.", ped);
         }
-        foreach (var atril in Object.FindObjectsOfType<Atril>(true))
-            if (atril.pedestal == null) Warn($"La pintura '{atril.name}' (en {atril.transform.parent?.parent?.name}) no tiene pedestal asignado.", atril);
-        foreach (var group in Object.FindObjectsOfType<PedestalGroup>(true))
-            foreach (var p in group.pedestals)
-                if (p == null || p.group != group) Error($"El grupo '{group.name}' tiene un pedestal vacío o que no lo referencia.", group);
+        var allPedestals = Object.FindObjectsOfType<Pedestal>(true);
+        foreach (var ped in allPedestals)
+        {
+            if (!ped.KeylessPedestal && !ped.IsGrouped && ped.cluePainting == null) Warn($"Keyed pedestal '{ped.name}' has no Clue Painting (the easel with its clue).", ped);
+            if (ped.IsGrouped && allPedestals.Count(p => p.groupID == ped.groupID) < 2) Warn($"Pedestal '{ped.name}' is the only one in group '{ped.groupID}': it will complete alone.", ped);
+        }
 
         // 2b. Pedestal ↔ orb names and controlled IDs (renaming orbs, islands or bridges breaks these)
         if (level != null)
         {
-            var orbs = Object.FindObjectsOfType<OrbMemes>(true);
+            var memes = Object.FindObjectsOfType<Meme>(true);
             var pedestals = Object.FindObjectsOfType<Pedestal>(true);
             var names = new HashSet<string>(all.Select(g => LevelManager.NormalizeName(g.name)));
 
@@ -91,7 +92,7 @@ public static class HierarchyValidator
                 if (!ped.KeylessPedestal)
                 {
                     if (string.IsNullOrEmpty(ped.KeyID)) Error($"Keyed pedestal '{ped.name}' has no Key ID.", ped);
-                    else if (!orbs.Any(o => o.OrbID.StartsWith(ped.KeyID))) Error($"Pedestal '{ped.name}' expects an orb whose ID starts with '{ped.KeyID}' (name '{OrbMemes.NamePrefix}{ped.KeyID}...'), and there is none.", ped);
+                    else if (!memes.Any(m => m.ID.StartsWith(ped.KeyID))) Error($"Pedestal '{ped.name}' expects a meme whose ID starts with '{ped.KeyID}' (name '{Meme.NamePrefix}{ped.KeyID}...'), and there is none.", ped);
                 }
                 foreach (string id in ped.ControlledIslands)
                     if (LevelManager.NormalizeName(id) != "0" && !names.Contains(LevelManager.NormalizeName(level.islandPrefix + id)) && !names.Contains(LevelManager.NormalizeName(level.elevatorPrefix + id)))
@@ -102,13 +103,18 @@ public static class HierarchyValidator
             }
 
             var keyIDs = pedestals.Where(p => !p.KeylessPedestal && !string.IsNullOrEmpty(p.KeyID)).Select(p => p.KeyID).ToList();
-            foreach (var orb in orbs)
-                if (!keyIDs.Any(k => orb.OrbID.StartsWith(k)))
-                    Warn($"Orb '{orb.name}' matches no pedestal Key ID: it only works on keyless (black) pedestals (fine if that's intended).", orb);
+            foreach (var meme in memes)
+            {
+                if (!meme.name.StartsWith(Meme.NamePrefix)) Warn($"Meme '{meme.name}' should be named '{Meme.NamePrefix}<ID>' (e.g. {Meme.NamePrefix}3Aa).", meme);
+                if (!keyIDs.Any(k => meme.ID.StartsWith(k)))
+                    Warn($"Meme '{meme.name}' matches no pedestal Key ID: it only works on keyless (black) pedestals (fine if that's intended).", meme);
+            }
+            foreach (var go in all.Where(g => g.CompareTag("Meme") && g.GetComponentInParent<Meme>(true) == null))
+                Error($"'{go.name}' is tagged Meme but has no Meme component (Memetica > Migrar a Meme).", go);
         }
 
         // 3. Orbes: hijos "Meme" y "Audio"
-        foreach (var orb in Object.FindObjectsOfType<OrbMemes>(true))
+        foreach (var orb in Object.FindObjectsOfType<MemeOrb>(true))
             foreach (var child in new[] { "Meme", "Audio" })
                 if (orb.transform.Find(child) == null) Error($"El orbe '{orb.name}' perdió su hijo directo '{child}'.", orb);
 

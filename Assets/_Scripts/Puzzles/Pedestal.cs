@@ -1,19 +1,23 @@
 using System.Collections;
+using System.Collections.Generic;
 using UnityEngine;
 
-// Pedestal: detecta el orbe, lo encastra en el Socket, evalúa la llave y sube/baja islas y puentes.
+// Pedestal: detecta el meme, lo encastra en el Socket, evalúa la llave y sube/baja islas y puentes.
+// Works with any Meme (MemeOrb in Game_Old, MemeWindow in Game): it only talks to the Meme base class.
 // Estructura del prefab:
 //   Pedestal       :: Pedestal + AudioSource + SphereCollider (trigger, centrado en el Socket)
 //   ├── Visual_Keyed     pedestal blanco (mármol, con llave)
 //   ├── Visual_Keyless   pedestal negro (piedra, sin llave)
-//   └── Socket           punto de encastre del orbe + partículas
+//   └── Socket           punto de encastre del meme + partículas
+// Group: pedestals with the same Group ID don't evaluate alone; the group completes when all of them
+// have a meme, and then each one raises what it controls (before: PedestalGroup).
 [RequireComponent(typeof(AudioSource), typeof(SphereCollider))]
 public class Pedestal : MonoBehaviour
 {
     [Header("Tipo")]
-    [Tooltip("Negro (piedra): acepta cualquier orbe. Blanco (mármol): necesita la llave.")]
+    [Tooltip("Negro (piedra): acepta cualquier meme. Blanco (mármol): necesita la llave.")]
     public bool KeylessPedestal = false;
-    [Tooltip("El orbe es correcto si su nombre empieza con esto")]
+    [Tooltip("El meme es correcto si su ID empieza con esto (Meme_3Aa → ID 3Aa)")]
     public string KeyID;
     public string pedestalID;
 
@@ -22,8 +26,12 @@ public class Pedestal : MonoBehaviour
     public string[] ControlledBridges;
 
     [Header("Grupo enlazado (opcional)")]
-    [Tooltip("Si pertenece a un grupo, no evalúa solo: el grupo se completa cuando todos tienen orbe")]
-    public PedestalGroup group;
+    [Tooltip("Pedestals with the same Group ID complete together when all of them have a meme. Empty = no group")]
+    public string groupID;
+
+    [Header("Pista")]
+    [Tooltip("The painting (easel) that gives the clue for this pedestal (before: Atril)")]
+    public Transform cluePainting;
 
     [Header("Partes")]
     public Transform socket;
@@ -40,13 +48,15 @@ public class Pedestal : MonoBehaviour
     public AudioClip breakClip;       // golpe al tocar el piso
     public float toppleTime = 0.7f;   // cuánto tarda en volcarse
 
-    // TEMPORAL: datos viejos del pedestal 51, los lee "Memetica > Migrar pedestales" para armar el PedestalGroup
-    [SerializeField, HideInInspector] GameObject[] LinkedPedestals;
-
     // Estado (solo lectura desde afuera)
-    public GameObject Orb { get; private set; }
-    public bool HasOrb => Orb != null;
+    public GameObject MemeObject { get; private set; }
+    public Meme CurrentMeme { get; private set; }   // null if the object has no Meme component
+    public bool HasMeme => MemeObject != null;
+    public bool HasOrb => HasMeme;   // TEMP: used by PedestalGroup until the migration, then delete
     public bool IsCorrect { get; private set; }
+    public bool IsGrouped => !string.IsNullOrEmpty(groupID);
+
+    static readonly List<Pedestal> all = new List<Pedestal>();
 
     AudioSource audioSource;
     SphereCollider trigger;
@@ -54,6 +64,7 @@ public class Pedestal : MonoBehaviour
     Coroutine evaluating;
     bool rejecting;
     bool broken;
+    bool groupCompleted;
 
     static PlayerHoldObjects hold;
 
@@ -66,52 +77,66 @@ public class Pedestal : MonoBehaviour
         SyncTrigger();
     }
 
+    void OnEnable() => all.Add(this);
+    void OnDisable() => all.Remove(this);
+
     void Start()
     {
         if (hold == null) hold = Camera.main.GetComponent<PlayerHoldObjects>();
     }
 
-    // ---------- Orbe entra / sale ----------
+    // The pedestal whose clue is this painting (or one of its parents), or null
+    public static Pedestal WithClue(Transform painting)
+    {
+        foreach (Pedestal p in all)
+            if (p.cluePainting != null && (p.cluePainting == painting || p.cluePainting.IsChildOf(painting))) return p;
+        return null;
+    }
+
+    // ---------- Meme entra / sale ----------
     void OnTriggerEnter(Collider other)
     {
-        if (broken || HasOrb || !other.CompareTag("Meme")) return;
+        if (broken || HasMeme || !other.CompareTag("Meme")) return;
 
-        GameObject orb = other.gameObject;
-        hold.SnapObject(orb);
-        orb.transform.position = socket.position;
+        GameObject memeObject = other.gameObject;
+        hold.SnapObject(memeObject);
+        memeObject.transform.position = socket.position;
         if (particles != null) particles.Play();
 
-        Orb = orb;
+        MemeObject = memeObject;
+        CurrentMeme = memeObject.GetComponent<Meme>();
+        if (CurrentMeme != null) CurrentMeme.PlaceOnPedestal(this);
         Play(snapClip);
-        evaluating = StartCoroutine(Evaluate(orb));
+        evaluating = StartCoroutine(Evaluate());
     }
 
     void OnTriggerExit(Collider other)
     {
-        if (!other.CompareTag("Meme") || other.gameObject != Orb) return; // solo importa el orbe encastrado
+        if (!other.CompareTag("Meme") || other.gameObject != MemeObject) return; // solo importa el meme encastrado
 
         if (evaluating != null) StopCoroutine(evaluating);
-        bool lowerBridges = KeylessPedestal || OrbMemes.IDOf(Orb).StartsWith(KeyID);
+        bool lowerBridges = KeylessPedestal || Meme.IDOf(MemeObject).StartsWith(KeyID);
 
-        Orb = null;
+        if (CurrentMeme != null) CurrentMeme.RemoveFromPedestal(this);
+        MemeObject = null;
+        CurrentMeme = null;
         IsCorrect = false;
         if (!rejecting) Play(incorrectClip);   // si lo expulsamos nosotros, el "incorrecto" ya sonó
         rejecting = false;
 
         if (lowerBridges) LowerBridges();
-        if (group != null) group.Refresh();
     }
 
-    IEnumerator Evaluate(GameObject orb)
+    IEnumerator Evaluate()
     {
         yield return new WaitForSeconds(Length(snapClip));
 
         // Enlazado: carga en loop hasta que el grupo se complete
-        if (group != null)
+        if (IsGrouped)
         {
             Play(chargeClip, true);
             yield return new WaitForSeconds(Length(chargeClip));
-            group.Refresh();
+            CompleteGroupIfFull();
             yield break;
         }
 
@@ -119,11 +144,25 @@ public class Pedestal : MonoBehaviour
         if (KeylessPedestal) { SetCorrect(); yield break; }
 
         // Blanco: barrido de imágenes mientras carga, después decide
-        if (orb.TryGetComponent(out OrbMemes memes)) memes.Sweep(Length(chargeClip));
+        if (CurrentMeme != null) CurrentMeme.Sweep(Length(chargeClip));
         yield return new WaitForSeconds(Length(chargeClip));
 
-        if (OrbMemes.IDOf(orb).StartsWith(KeyID)) SetCorrect();
+        if (Meme.IDOf(MemeObject).StartsWith(KeyID)) SetCorrect();
         else { SetIncorrect(); Reject(); }
+    }
+
+    // ---------- Grupo ----------
+    void CompleteGroupIfFull()
+    {
+        if (groupCompleted) return;
+        List<Pedestal> members = all.FindAll(p => p.groupID == groupID);
+        if (members.Exists(p => !p.HasMeme)) return;
+
+        foreach (Pedestal member in members)
+        {
+            member.groupCompleted = true;
+            member.SetCorrect();
+        }
     }
 
     // ---------- Resultados ----------
@@ -133,12 +172,14 @@ public class Pedestal : MonoBehaviour
         Play(correctClip);
         foreach (string id in ControlledIslands) LevelManager.Instance.SubirIsla(id);
         foreach (string id in ControlledBridges) LevelManager.Instance.SubirPuente(id);
+        if (CurrentMeme != null) CurrentMeme.OnPedestalResult(this, true);
     }
 
     void SetIncorrect()
     {
         Play(incorrectClip);
         LowerBridges();
+        if (CurrentMeme != null) CurrentMeme.OnPedestalResult(this, false);
     }
 
     void LowerBridges()
@@ -148,15 +189,15 @@ public class Pedestal : MonoBehaviour
 
     void Reject()
     {
-        if (Orb == null) return;
+        if (MemeObject == null) return;
         rejecting = true;
-        Rigidbody rb = Orb.GetComponent<Rigidbody>();
+        Rigidbody rb = MemeObject.GetComponent<Rigidbody>();
         rb.constraints = RigidbodyConstraints.None;
         rb.isKinematic = false;
         rb.AddForce(transform.forward * 100f + transform.up * 300f);
     }
 
-    public void PlayCorrect() => Play(correctClip);   // lo usa el PedestalGroup al completarse
+    public void PlayCorrect() => Play(correctClip);   // TEMP: used by PedestalGroup until the migration, then delete
 
     void Play(AudioClip clip, bool loop = false)
     {

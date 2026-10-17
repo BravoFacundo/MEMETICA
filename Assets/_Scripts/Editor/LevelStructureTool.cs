@@ -68,7 +68,7 @@ public static class LevelStructureTool
     private static void MoveLooseOrbs(Transform levels)
     {
         Physics.SyncTransforms();
-        foreach (OrbMemes orb in levels.GetComponentsInChildren<OrbMemes>(true))
+        foreach (Meme orb in levels.GetComponentsInChildren<Meme>(true))
         {
             if (orb.GetComponentInParent<Island>(true) != null) continue;
 

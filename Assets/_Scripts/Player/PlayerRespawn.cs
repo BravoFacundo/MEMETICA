@@ -1,6 +1,6 @@
 //In the project, the player moves on floating islands and bridges.
 //This Script is used to relocate the Player to the last island they stepped on if they fall into the void.
-//Since the need to relocate an Orb when it falls is no different from the player's, this script is reused on Orbs as well.
+//Since the need to relocate a Meme when it falls is no different from the player's, this script is reused on Memes as well.
 
 using System.Collections;
 using System.Collections.Generic;
@@ -57,9 +57,10 @@ public class PlayerRespawn : MonoBehaviour
         transform.position = respawnPosition.position;
         if (cc != null) cc.enabled = true;
 
-        // Los orbes reaparecen quietos
+        // Los memes reaparecen quietos y se enteran de que cayeron (MemeWindow: trigger Caer)
         Rigidbody rb = GetComponent<Rigidbody>();
         if (rb != null) { rb.velocity = Vector3.zero; rb.angularVelocity = Vector3.zero; }
+        if (TryGetComponent(out Meme meme)) meme.OnRespawned();
     }
 
     //In the project, the objects tagged "island" may be too far up the hierarchy from the object the raycast hits.

@@ -14,11 +14,10 @@ public class PlayerHoldObjects : MonoBehaviour
     public GameObject heldObject;
 
     // Lo lee Crosshair para mostrar la mano
-    public bool LookingAtOrb { get; private set; }
+    public bool LookingAtMeme { get; private set; }
 
     public bool FueAgarrada = false;
     public bool canHold = true;
-    public GameObject UltimoAgarrado;
 
     void Start()
     {
@@ -31,7 +30,7 @@ public class PlayerHoldObjects : MonoBehaviour
         {
             // ¿Está mirando un orbe? (antes prendía y apagaba GrabIcon; ahora la mira la maneja Crosshair)
             // Ignora triggers: si no, la zona del pedestal (que envuelve al orbe) tapa el rayo
-            LookingAtOrb = Physics.Raycast(transform.position, transform.forward, out RaycastHit hit2, pickUpRange, ~0, QueryTriggerInteraction.Ignore)
+            LookingAtMeme = Physics.Raycast(transform.position, transform.forward, out RaycastHit hit2, pickUpRange, ~0, QueryTriggerInteraction.Ignore)
                            && hit2.transform.CompareTag("Meme");
 
             if (Input.GetMouseButtonDown(0))
@@ -50,10 +49,6 @@ public class PlayerHoldObjects : MonoBehaviour
                 }
                 else
                 {
-                    // FIX: usar el objeto agarrado directamente (GameObject.Find por nombre podia devolver otro objeto)
-                    OrbMemes memes = heldObject.GetComponent<OrbMemes>();
-                    if (memes != null) memes.StartCoroutine("NotHolding"); //no funciono para detener el reverb
-
                     DropObject();
                 }
             }
@@ -86,15 +81,9 @@ public class PlayerHoldObjects : MonoBehaviour
 
             objectRb.transform.parent = holdParent;
             heldObject = pickObject;
-
-            UltimoAgarrado = objectRb.gameObject;
             FueAgarrada = true;
 
-            // FIX: componentes del objeto agarrado, con chequeo por si el orbe no los tiene (ej: orbe del tutorial)
-            OrbMemes memes = heldObject.GetComponent<OrbMemes>();
-            if (memes != null) memes.isHolded = true;
-            OrbPosition orbPos = heldObject.GetComponent<OrbPosition>();
-            if (orbPos != null) orbPos.isHolded = true;
+            if (heldObject.TryGetComponent(out Meme meme)) meme.PickUp();
         }
     }
     public void DropObject()
@@ -105,15 +94,7 @@ public class PlayerHoldObjects : MonoBehaviour
         heldRig.freezeRotation = false;
         heldRig.drag = 1;
 
-        // FIX: componentes del objeto agarrado, con chequeo por si el orbe no los tiene
-        OrbMemes memes = heldObject.GetComponent<OrbMemes>();
-        if (memes != null) memes.isHolded = false;
-        OrbPosition orbPos = heldObject.GetComponent<OrbPosition>();
-        if (orbPos != null)
-        {
-            orbPos.isHolded = false;
-            orbPos.isGroundedLock = false;
-        }
+        if (heldObject.TryGetComponent(out Meme meme)) meme.Drop();
 
         heldObject.transform.parent = null;
         heldObject = null;
@@ -122,24 +103,17 @@ public class PlayerHoldObjects : MonoBehaviour
     }
 
 
-    //To avoid bugs or cheating, when the orb gets close enough to the pedestal it relocates until it is grabbed again.
-    public void SnapObject(GameObject orbe) //Solo se usa al ser llamado por el pedestal
+    //To avoid bugs or cheating, when the meme gets close enough to the pedestal it relocates until it is grabbed again.
+    //The pedestal tells the Meme itself (Meme.PlaceOnPedestal); here only the physics and the hand are released.
+    public void SnapObject(GameObject memeObject) //Solo se usa al ser llamado por el pedestal
     {        
-        Rigidbody snapRig = orbe.GetComponent<Rigidbody>();
+        Rigidbody snapRig = memeObject.GetComponent<Rigidbody>();
         snapRig.useGravity = true;
         snapRig.drag = 1;
         snapRig.constraints = RigidbodyConstraints.FreezeAll;
 
-        if (heldObject != null && heldObject == orbe) //si tenes un objeto agarrado y si es el mismo que entro al trigger
+        if (heldObject != null && heldObject == memeObject) //si tenes un objeto agarrado y si es el mismo que entro al trigger
         {
-            // FIX: componentes del objeto agarrado, con chequeo
-            OrbMemes memes = heldObject.GetComponent<OrbMemes>();
-            if (memes != null)
-            {
-                memes.isHolded = false;
-                memes.StartCoroutine("NotHolding");
-            }
-
             if (heldObject.transform.parent != null) heldObject.transform.parent = null; //si tiene padre entonces lo sacas del padre
             heldObject = null; //ya no hay mas objeto agarrado
         }

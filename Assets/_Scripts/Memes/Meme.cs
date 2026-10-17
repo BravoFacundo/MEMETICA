@@ -1,0 +1,97 @@
+using UnityEngine;
+
+// Anything the player carries that holds a meme: MemeOrb (Game_Old) or MemeWindow (Game).
+// The environment (hold, pedestals, respawn, bridges and islands) only talks to this class,
+// so it works the same with both. Each representation decides what to do in the On... methods.
+// On its own (no MemeOrb / MemeWindow) it is a plain carryable meme with no visual logic, e.g. the tutorial orb.
+// Object name: Meme_<ID> (e.g. Meme_3Aa). Pedestals compare their Key ID with that ID.
+[RequireComponent(typeof(Rigidbody))]
+public class Meme : MonoBehaviour
+{
+    public const string NamePrefix = "Meme_";
+
+    [Header("Rest")]
+    [Tooltip("Seconds on the ground before it freezes in place, so it doesn't roll away")]
+    public float restDelay = 3f;
+    public float groundCheckRadius = 0.6f;
+
+    public string ID => IDOf(gameObject);
+    public bool IsHeld { get; private set; }
+    public Pedestal CurrentPedestal { get; private set; }
+
+    protected Rigidbody body;
+    private LayerMask groundMask;
+    private float groundedTime;
+
+    // "Meme_3Aa" → "3Aa". Everything after the first "_", so old names ("Orb_3Aa") still work
+    public static string IDOf(GameObject meme)
+    {
+        int separator = meme.name.IndexOf('_');
+        return separator >= 0 ? meme.name.Substring(separator + 1) : meme.name;
+    }
+
+    protected virtual void Awake()
+    {
+        body = GetComponent<Rigidbody>();
+        groundMask = LayerMask.GetMask("Ground");
+    }
+
+    protected virtual void Update()
+    {
+        FreezeWhenRestingOnGround();
+    }
+
+    //---- Called by the environment
+
+    public void PickUp()
+    {
+        IsHeld = true;
+        groundedTime = 0f;
+        OnPickedUp();
+    }
+
+    public void Drop()
+    {
+        if (!IsHeld) return;
+        IsHeld = false;
+        OnDropped();
+    }
+
+    // Pedestal: the meme snaps in (if it was in the hand, it counts as dropped first)
+    public void PlaceOnPedestal(Pedestal pedestal)
+    {
+        Drop();
+        CurrentPedestal = pedestal;
+        OnPlaced(pedestal);
+    }
+
+    public void RemoveFromPedestal(Pedestal pedestal)
+    {
+        if (CurrentPedestal != pedestal) return;
+        CurrentPedestal = null;
+        OnRemovedFromPedestal(pedestal);
+    }
+
+    public virtual void OnPedestalResult(Pedestal pedestal, bool isCorrect) { }
+    public virtual void Sweep(float duration) { }
+    public virtual void OnBridgeCrossed() { }
+    public virtual void OnIslandVisited(GameObject island) { }
+    public virtual void OnRespawned() { }
+
+    //---- Overridden by each representation
+
+    protected virtual void OnPickedUp() { }
+    protected virtual void OnDropped() { }
+    protected virtual void OnPlaced(Pedestal pedestal) { }
+    protected virtual void OnRemovedFromPedestal(Pedestal pedestal) { }
+
+    //---- Rest (before: OrbPosition)
+
+    private void FreezeWhenRestingOnGround()
+    {
+        bool isResting = !IsHeld && CurrentPedestal == null && Physics.CheckSphere(transform.position, groundCheckRadius, groundMask);
+        groundedTime = isResting ? groundedTime + Time.deltaTime : 0f;
+        if (groundedTime >= restDelay && body.constraints != RigidbodyConstraints.FreezeAll)
+            body.constraints = RigidbodyConstraints.FreezeAll;
+    }
+}

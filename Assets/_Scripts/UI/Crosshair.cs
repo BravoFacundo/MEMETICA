@@ -55,7 +55,7 @@ public class Crosshair : MonoBehaviour
             return CursorState.ZoomOut;
 
         if (playerHold.heldObject != null) return whileHolding;
-        if (playerHold.LookingAtOrb) return CursorState.Grab;
+        if (playerHold.LookingAtMeme) return CursorState.Grab;
         return CursorState.Dot;
     }
 }
