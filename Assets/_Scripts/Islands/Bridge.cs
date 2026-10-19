@@ -74,7 +74,6 @@ public class Bridge : Lift
     private Quaternion finalRotation;
     private Vector3 lastOrigin;
     private Vector3 endA, endB;   // the two far ends in its final place, measured once at Start
-    private bool animating;
 
     // Waiting for its islands before appearing
     public bool IsWaiting { get; private set; }
@@ -115,7 +114,6 @@ public class Bridge : Lift
         if (IsUp) return;
         SetUp(true);
         StopAllCoroutines();
-        animating = true;   // until it is in place (waiting for islands, swinging); Rise From Below uses IsMoving
         StartCoroutine(AppearRoutine());
     }
 
@@ -124,7 +122,6 @@ public class Bridge : Lift
         if (!IsUp) return;
         SetUp(false);
         StopAllCoroutines();
-        animating = false;
         IsWaiting = false;
         if (appearance == Appearance.RiseFromBelow) StartMove(BottomY, LowerDuration, false);
         else if (appearance == Appearance.SwingUp) StartCoroutine(SwingRoutine(false));
@@ -136,7 +133,6 @@ public class Bridge : Lift
     {
         if (appearance == Appearance.RiseFromBelow) { base.SnapUp(); return; }
         StopAllCoroutines();
-        animating = false;
         SetUp(true);
         ResetPose();
         SetVisible(true);
@@ -193,7 +189,7 @@ public class Bridge : Lift
             IsWaiting = false;
         }
 
-        if (appearance == Appearance.RiseFromBelow) { StartMove(TopY, RiseDuration, true); animating = false; }
+        if (appearance == Appearance.RiseFromBelow) StartMove(TopY, RiseDuration, true);
         else if (appearance == Appearance.SwingUp) yield return SwingRoutine(true);
         else yield return ExtendRoutine(true);
     }
@@ -203,12 +199,10 @@ public class Bridge : Lift
     // The bridge sits on the part [tail, head] of its curve (0 = anchor A, 1 = anchor B); below 0 it is hidden in island A
     IEnumerator ExtendRoutine(bool appearing)
     {
-        animating = true;
         if (!TryGetComponent(out BridgeBend bend))
         {
             Debug.LogWarning($"[Bridge] '{name}': Extend From A needs a BridgeBend.", this);
             SetVisible(appearing);
-            animating = false;
             yield break;
         }
 
@@ -273,14 +267,12 @@ public class Bridge : Lift
             SetVisible(false);
             bend.SetReveal(0f, 1f);
         }
-        animating = false;
     }
 
     //---- Swing Up
 
     IEnumerator SwingRoutine(bool appearing)
     {
-        animating = true;
         GetEnds(out Vector3 start, out Vector3 end);
         Vector3 axis = HingeAxis(start, end);
         if (appearing) SetVisible(true, false);
@@ -295,7 +287,7 @@ public class Bridge : Lift
             yield return null;
         }
 
-        if (!appearing) { SetVisible(false); ResetPose(); animating = false; yield break; }
+        if (!appearing) { SetVisible(false); ResetPose(); yield break; }
 
         ResetPose();
         SetSolid(true);
@@ -311,7 +303,6 @@ public class Bridge : Lift
             }
             ResetPose();
         }
-        animating = false;
     }
 
     // Axis of the hinge at the start end: horizontal, across the bridge. Positive angles hang it down

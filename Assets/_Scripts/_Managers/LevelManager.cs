@@ -48,6 +48,10 @@ public class LevelManager : MonoBehaviour
     [Tooltip("Donde reaparece todo al empezar: el RespawnPoint de la isla del tutorial")]
     public Transform startRespawnPoint;
 
+    [Header("ON IN THE GAME")]
+    [Tooltip("Objects you can turn off in the editor to see better (e.g. Clouds_HideIslands): they are turned on when the game starts")]
+    public GameObject[] activateOnPlay;
+
     [Header("FIN DEL JUEGO")]
     [Tooltip("Segundos que caen las islas antes de cerrar el juego")]
     public float endingDuration = 10f;
@@ -60,6 +64,7 @@ public class LevelManager : MonoBehaviour
     void Awake()
     {
         Instance = this;   // antes de que las islas, puentes y pedestales lo usen en su Start
+        foreach (GameObject o in activateOnPlay) if (o != null) o.SetActive(true);
 
         foreach (Island i in FindObjectsOfType<Island>()) islands[NormalizeName(i.name)] = i;
         foreach (Bridge b in FindObjectsOfType<Bridge>()) bridges[NormalizeName(b.name)] = b;

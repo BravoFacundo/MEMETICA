@@ -24,6 +24,7 @@ public class Meme : MonoBehaviour
     protected Rigidbody body;
     private LayerMask groundMask;
     private float groundedTime;
+    private Island startIsland;   // held still on it until it is up and still
 
     private Transform respawnPoint;
     private Transform lastGroundHit;
@@ -42,28 +43,67 @@ public class Meme : MonoBehaviour
         body = GetComponent<Rigidbody>();
         groundMask = LayerMask.GetMask("Ground");
         lastGroundY = transform.position.y;
-        AttachToIslandBelow();
+        HoldOnStartIsland();
     }
 
-    // Placed on an island in the scene: it becomes part of it before the islands move (Awake runs before their Start),
-    // so it goes down and comes up with its island. Before: islands that start below left it hanging in the sky,
-    // it fell into the void and reappeared in the tutorial
-    private void AttachToIslandBelow()
+    // On an island in the scene (its child, or resting on it): put down on its ground and held still, part of the island,
+    // before the islands move (Awake runs before their Start). It goes down and comes up with its island, and once the
+    // island has arrived it is let go with physics. Before: the island dropping 30 m at start counted as a fall into the void
+    private void HoldOnStartIsland()
     {
-        if (transform.parent != null && transform.parent.GetComponentInParent<Island>() != null) return;   // already inside one
-        if (!Physics.Raycast(transform.position + Vector3.up * 0.5f, Vector3.down, out RaycastHit ground, 5f, ~0, QueryTriggerInteraction.Ignore)) return;
-        Island island = ground.transform.GetComponentInParent<Island>();
+        if (!FindGroundBelow(20f, out RaycastHit ground)) return;
+        Island island = transform.parent != null ? transform.parent.GetComponentInParent<Island>() : null;
+        if (island == null) island = ground.transform.GetComponentInParent<Island>();
         if (island == null) return;
 
-        FloatMotion floating = ground.transform.GetComponentInParent<FloatMotion>();
-        transform.SetParent(floating != null ? floating.transform : island.transform, true);
-        body.isKinematic = true;   // PlayerLook turns it back to physics when picked up
+        // On the ground, not floating above it
+        Collider shape = GetComponentInChildren<Collider>();
+        float pivotToBottom = shape != null ? transform.position.y - shape.bounds.min.y : 0f;
+        transform.position = ground.point + Vector3.up * (pivotToBottom + 0.02f);
+
+        if (transform.parent == null || transform.parent.GetComponentInParent<Island>() != island)
+        {
+            FloatMotion floating = ground.transform.GetComponentInParent<FloatMotion>();
+            transform.SetParent(floating != null ? floating.transform : island.transform, true);
+        }
+
+        body.isKinematic = true;
         body.constraints = RigidbodyConstraints.FreezeAll;
-        lastIsland = FindParentWithTag(ground.transform, "Isla") ?? island.gameObject;
+        startIsland = island;
+        lastIsland = FindParentWithTag(transform, "Isla") ?? island.gameObject;
+    }
+
+    // Its island is up and still: physics again (it settles on the ground and freezes there as usual)
+    private void ReleaseWhenIslandArrives()
+    {
+        if (startIsland == null) return;
+        if (IsHeld || CurrentPedestal != null) { startIsland = null; return; }   // someone else took over
+        if (!startIsland.IsUp || startIsland.IsMoving) return;
+
+        startIsland = null;
+        transform.SetParent(null, true);
+        body.isKinematic = false;
+        body.constraints = RigidbodyConstraints.None;
+        groundedTime = 0f;
+    }
+
+    // The nearest solid thing below that is not this meme
+    private bool FindGroundBelow(float distance, out RaycastHit ground)
+    {
+        ground = default;
+        float nearest = float.MaxValue;
+        foreach (RaycastHit hit in Physics.RaycastAll(transform.position + Vector3.up * 0.5f, Vector3.down, distance, ~0, QueryTriggerInteraction.Ignore))
+        {
+            if (hit.transform.IsChildOf(transform) || hit.distance >= nearest) continue;
+            nearest = hit.distance;
+            ground = hit;
+        }
+        return nearest < float.MaxValue;
     }
 
     protected virtual void Update()
     {
+        ReleaseWhenIslandArrives();
         FreezeWhenRestingOnGround();
         CheckFallAndRespawn();
     }
