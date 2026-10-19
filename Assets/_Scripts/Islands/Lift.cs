@@ -5,6 +5,8 @@ using UnityEngine;
 // Moves by duration, not speed: it takes the same time no matter how far it travels.
 // Rising: starts slow, passes the top a little (Overshoot) and settles back. Lowering: speeds up as it sinks.
 // Timing comes from the LevelManager (Lift section) unless Override Timing is on.
+// Place it in the scene where it ends up (its final place): that is its top, and it waits the LevelManager's
+// fall height (Top Y - Bottom Y) below it. So islands and bridges can be designed and tested all up.
 public abstract class Lift : MonoBehaviour
 {
     [Header("Lift Timing")]
@@ -25,6 +27,10 @@ public abstract class Lift : MonoBehaviour
     protected LevelManager level;
     protected AudioSource audioSource;
     private Coroutine moving;
+
+    protected float designedY;   // where it was placed in the scene = where it ends up
+
+    protected virtual void Awake() => designedY = transform.position.y;
 
     protected virtual void Start()
     {
@@ -66,8 +72,8 @@ public abstract class Lift : MonoBehaviour
 
     //---- Heights and timing
 
-    protected virtual float TopY => level.topY;
-    protected virtual float BottomY => level.bottomY;
+    protected virtual float TopY => designedY;
+    protected virtual float BottomY => designedY - (level.topY - level.bottomY);
     protected float RiseDuration => overrideTiming ? riseDuration : level.liftRiseDuration;
     protected float LowerDuration => overrideTiming ? lowerDuration : level.liftLowerDuration;
     protected float Overshoot => overrideTiming ? overshoot : level.liftOvershoot;

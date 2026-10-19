@@ -6,6 +6,8 @@ using UnityEngine;
 //   Elevator_Tutorial_01  intro: starts riding as soon as the game starts (look + zoom popups on the way)
 //   Elevator_Tutorial_02  tutorial → Island_1: started by its pedestal (LevelManager.SubirIsla("Tutorial_02"))
 // It starts where it is placed in the scene and ends at Dock Point, an empty child of the destination island.
+// Dock Point, Leave Via and Arrive Via go inside the floating part of their island (e.g. Island_01/Island/Pivots),
+// so the path follows the island while it floats.
 // On arrival: the player can move again, respawns on that island, and the elevator becomes part of it.
 public class Elevator : MonoBehaviour
 {
@@ -85,19 +87,25 @@ public class Elevator : MonoBehaviour
         // Ride along an S curve (scaled time: it stops while the game is paused).
         // It moves away from the island it leaves, rises, and comes in to the destination from outside,
         // so it never cuts through either island. Starts slow and docks slow (smoothstep).
-        Vector3 from = transform.position, to = dockPoint.position;
-        ControlPoints(from, to, out Vector3 p1, out Vector3 p2);
+        // The curve is worked out again every frame: the start, the Dock Point and the Via points follow
+        // their floating islands, so it lands exactly on the Dock Point wherever the island floated to
+        Transform startParent = transform.parent;
+        Vector3 startLocal = startParent != null ? startParent.InverseTransformPoint(transform.position) : transform.position;
         bool[] shown = new bool[ridePopups.Length];
 
         for (float t = 0f; t < 1f; )
         {
             t = Mathf.Min(1f, t + Time.deltaTime / Mathf.Max(rideDuration, 0.01f));
+            Vector3 from = startParent != null ? startParent.TransformPoint(startLocal) : startLocal;
+            Vector3 to = dockPoint.position;
+            ControlPoints(from, to, out Vector3 p1, out Vector3 p2);
             transform.position = Bezier(from, p1, p2, to, t * t * (3f - 2f * t));
             UpdatePopups(t, shown);
             yield return null;
         }
 
-        // Arrive: the elevator becomes part of the destination island
+        // Arrive: exactly on the Dock Point, and part of the destination island (its floating part) from now on
+        transform.position = dockPoint.position;
         Island island = dockPoint.GetComponentInParent<Island>();
         Transform respawn = island != null ? LevelManager.Instance.RespawnPointOf(island.gameObject) : null;
         if (island != null) transform.SetParent(DockParent(island));

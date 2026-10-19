@@ -5,11 +5,12 @@ using UnityEngine.Rendering;
 // Bends the bridge between its two anchors (Bridge > Anchors) so each end stays on its island while they float and tilt.
 // The bridge's two ends are pinned to the anchors (their world position, every frame) and a curve joins them,
 // leaving each island the way that island is tilted right now. If an anchor isn't exactly at the end, the bridge stretches to it.
-// It is always a single arch that bulges up (never an S, never sagging below the straight line).
+// Its shape: Arch (up or down in the middle) and S Curve (up then down), seen with the gizmo when it is selected.
 // Every part of the bridge follows its point of that curve:
 //   Meshes     every vertex bends (planks, ropes, railings together). The model needs Read/Write on in its import settings
 //   Colliders  mesh colliders are cut into chunks along the bridge that move with the curve (what the player walks on)
-//   Platforms  falling platforms follow it whole, as pieces (FallingPlatform asks for its place)
+//   Platforms  falling platforms are laid out evenly along the curve, first next to anchor A, last next to anchor B
+//              (or, with Lay Out Platforms off, each keeps its designed place and bends with the bridge)
 // The bend is worked out from where the bridge ends (its final place), so it rises or swings already bent
 // and every animation lands right on the curve. It fades in as the animation starts, out as it goes away.
 // Goes on the Bridge object. Anchors: at the bridge ends, inside each island's floating part (right click on Bridge > Create Anchors).
@@ -22,6 +23,24 @@ public class BridgeBend : MonoBehaviour
     public float blendTime = 0.5f;
     [Tooltip("Pieces the collision is cut into along the bridge. More = follows the bend closer")]
     public int colliderChunks = 8;
+
+    [Header("Curve")]
+    [Tooltip("Meters the middle rises above the straight line between the anchors. Negative = it sags")]
+    public float arch = 0.3f;
+    [Tooltip("S shape: meters the first half goes up and the second half down (negative = the other way). 0 = a single curve")]
+    public float sCurve = 0f;
+
+    [Header("Falling Platforms")]
+    [Tooltip("On: laid out evenly along the curve, the first next to anchor A and the last next to anchor B. Off: each keeps its designed place, bent with the bridge")]
+    public bool layOutPlatforms = true;
+    [Tooltip("Meters along the curve from each anchor to the first and the last platform")]
+    public float platformEndGap = 0.6f;
+    [Tooltip("Height of each platform's center over the curve (negative = under it)")]
+    public float platformHeight = 0f;
+
+    [Header("Appearing (Bridge: Extend From A)")]
+    [Tooltip("Degrees below the horizontal the hidden part goes down into island A: the bridge comes out of (and goes back into) one spot, like a hole")]
+    public float diveAngle = 55f;
 
     [Header("Debug")]
     [SerializeField] private float weight;
@@ -53,10 +72,16 @@ public class BridgeBend : MonoBehaviour
     private Quaternion restRotationA, restRotationB;     // anchors' world rotation as designed
     private Vector3 targetA, targetB;                    // anchors now (frozen while it leaves)
     private Quaternion targetTurnA = Quaternion.identity, targetTurnB = Quaternion.identity;
-    private Vector3 endA, endB, control;                 // curve this frame (one control point = one arch)
+    private Vector3 endA, endB, handleA, handleB;        // curve this frame (cubic: two handles = arch and S)
     private Quaternion turnA = Quaternion.identity, turnB = Quaternion.identity;
     private Vector3 appliedA, appliedB;
     private Quaternion appliedTurnA, appliedTurnB;
+    private float appliedArch, appliedS;
+    private float revealTail = 0f, revealHead = 1f;   // part of the curve the bridge sits on (Bridge: Extend From A)
+    private float revealLift;                          // meters the arc it flies along rises in the middle
+
+    private readonly Dictionary<FallingPlatform, int> platformOrder = new Dictionary<FallingPlatform, int>();
+    private readonly float[] arcLengths = new float[33];   // length of the curve up to each of 32 steps
 
     public bool IsBending => ready && weight > 0f;
 
@@ -84,7 +109,12 @@ public class BridgeBend : MonoBehaviour
         targetA = appliedA = endA = restA;
         targetB = appliedB = endB = restB;
         appliedTurnA = appliedTurnB = Quaternion.identity;
-        control = (restA + restB) * 0.5f;   // straight until it is in place
+        BuildCurve(0f, 0f);   // straight until it appears
+
+        // Falling platforms in the order they go along the bridge
+        var platforms = new List<FallingPlatform>(GetComponentsInChildren<FallingPlatform>(true));
+        platforms.Sort((x, y) => ParamOf(transform.InverseTransformPoint(x.transform.position)).CompareTo(ParamOf(transform.InverseTransformPoint(y.transform.position))));
+        for (int i = 0; i < platforms.Count; i++) platformOrder[platforms[i]] = i;
 
         foreach (MeshFilter filter in GetComponentsInChildren<MeshFilter>(true))
             if (!IsPlatform(filter.transform)) PrepareMesh(filter);
@@ -106,11 +136,13 @@ public class BridgeBend : MonoBehaviour
         Vector3 b = Vector3.Lerp(restB, targetB, weight);
         Quaternion qa = Quaternion.Slerp(Quaternion.identity, targetTurnA, weight);
         Quaternion qb = Quaternion.Slerp(Quaternion.identity, targetTurnB, weight);
-        if (!Changed(a, b, qa, qb)) return;
+        float archNow = arch * weight, sNow = sCurve * weight;
+        if (!Changed(a, b, qa, qb) && archNow == appliedArch && sNow == appliedS) return;
 
         endA = a; endB = b; turnA = qa; turnB = qb;
-        control = ArchControl();
+        BuildCurve(archNow, sNow);
         appliedA = a; appliedB = b; appliedTurnA = qa; appliedTurnB = qb;
+        appliedArch = archNow; appliedS = sNow;
 
         foreach (BentMesh bent in meshes) ApplyMesh(bent);
         foreach (Chunk chunk in chunks) ApplyChunk(chunk);
@@ -122,9 +154,66 @@ public class BridgeBend : MonoBehaviour
     public void Deform(ref Vector3 position, ref Quaternion rotation)
     {
         float t = ParamOf(position);
-        Quaternion turn = FrameAt(t);
-        position = PointAt(t) + turn * (position - StraightAt(t));
+        float on = Reveal(t);
+        Quaternion turn = CurveFrame(on);
+        position = CurvePoint(on) + turn * (position - StraightAt(t));
         rotation = turn * rotation;
+    }
+
+    // Bridge's Extend From A: the bridge sits on [tail, head] of the curve (0 = anchor A, 1 = anchor B).
+    // Below 0 the curve goes back and down into island A, where the rest of the bridge hides
+    public void SetReveal(float tail, float head, float lift = 0f)
+    {
+        revealTail = tail;
+        revealHead = head;
+        revealLift = lift;
+        if (!ready) return;
+        foreach (BentMesh bent in meshes) ApplyMesh(bent);
+        foreach (Chunk chunk in chunks) ApplyChunk(chunk);
+    }
+
+    float Reveal(float t) => revealTail + t * (revealHead - revealTail);
+
+    bool Revealing => revealTail != 0f || revealHead != 1f || revealLift != 0f;
+
+    // The path while it appears: its curve raised into an arc, and before anchor A a straight dive down into island A.
+    // Everything goes in and out through the same spot (anchor A), like a hole in the ground
+    Vector3 CurvePoint(float t)
+    {
+        if (t >= 0f) return PointAt(Mathf.Min(t, 1f)) + Vector3.up * (revealLift * Mathf.Sin(Mathf.PI * Mathf.Min(t, 1f)));
+
+        Vector3 forward = handleA - endA; forward.y = 0f;
+        forward = forward.sqrMagnitude > 0.0001f ? forward.normalized : axis;
+        float angle = diveAngle * Mathf.Deg2Rad;
+        Vector3 down = -forward * Mathf.Cos(angle) + Vector3.down * Mathf.Sin(angle);
+        return endA + down * (-t * length);
+    }
+
+    // While it appears the slices follow the path (they pitch along the arc and the dive); otherwise the curve
+    Quaternion CurveFrame(float t)
+    {
+        if (!Revealing) return FrameAt(Mathf.Clamp01(t));
+        Vector3 direction = CurvePoint(t + 0.01f) - CurvePoint(t - 0.01f);
+        Quaternion roll = Quaternion.Slerp(turnA, turnB, Mathf.Clamp01(t));
+        if (direction.sqrMagnitude < 0.0000001f) return roll;
+        return Quaternion.FromToRotation(roll * axis, direction) * roll;
+    }
+
+    // Where a falling platform goes on the curve (bridge space): its turn in the line, spread evenly by length.
+    // False when platforms keep their designed place (Lay Out Platforms off)
+    public bool PlatformSlot(FallingPlatform platform, out Vector3 position, out Quaternion frame)
+    {
+        position = Vector3.zero; frame = Quaternion.identity;
+        if (!ready || !layOutPlatforms || !platformOrder.TryGetValue(platform, out int index)) return false;
+
+        int count = platformOrder.Count;
+        float total = arcLengths[arcLengths.Length - 1];
+        float gap = Mathf.Min(platformEndGap, total * 0.45f);
+        float distance = count == 1 ? total * 0.5f : gap + index * (total - 2f * gap) / (count - 1);
+        float t = Reveal(ParamAtLength(distance));
+        frame = CurveFrame(t);
+        position = CurvePoint(t) + frame * Vector3.up * platformHeight;
+        return true;
     }
 
     //---- Curve
@@ -153,28 +242,51 @@ public class BridgeBend : MonoBehaviour
     Quaternion FrameAt(float t)
     {
         Quaternion roll = Quaternion.Slerp(turnA, turnB, t);
-        Vector3 tangent = 2f * (1f - t) * (control - endA) + 2f * t * (endB - control);
+        float u = 1f - t;
+        Vector3 tangent = 3f * u * u * (handleA - endA) + 6f * u * t * (handleB - handleA) + 3f * t * t * (endB - handleB);
         if (tangent.sqrMagnitude < 0.000001f) return roll;
         return Quaternion.FromToRotation(roll * axis, tangent) * roll;
     }
 
-    Vector3 PointAt(float t)
+    Vector3 PointAt(float t) => Bezier(endA, handleA, handleB, endB, t);
+
+    static Vector3 Bezier(Vector3 a, Vector3 b, Vector3 c, Vector3 d, float t)
     {
         float u = 1f - t;
-        return u * u * endA + 2f * u * t * control + t * t * endB;
+        return u * u * u * a + 3f * u * u * t * b + 3f * u * t * t * c + t * t * t * d;
     }
 
-    // Where each island points the bridge, averaged, but never below the straight line between the ends:
-    // one control point can't make an S, and keeping it up means the arch never sags
-    Vector3 ArchControl()
+    // Each handle leaves its island the way that island is tilted, a third of the way, raised by the arch
+    // (the middle of a cubic rises 3/4 of what both handles rise) and up/down by the S (its bumps are about 0.29 of it)
+    void BuildCurve(float archMeters, float sMeters)
     {
-        float half = Vector3.Distance(endA, endB) * 0.5f;
-        Vector3 fromA = endA + turnA * axis * half;
-        Vector3 fromB = endB - turnB * axis * half;
-        Vector3 point = (fromA + fromB) * 0.5f;
-        float middleHeight = (endA.y + endB.y) * 0.5f;
-        if (point.y < middleHeight) point.y = middleHeight;
-        return point;
+        float third = Vector3.Distance(endA, endB) / 3f;
+        float lift = archMeters / 0.75f, twist = sMeters / 0.29f;
+        handleA = endA + turnA * axis * third + Vector3.up * (lift + twist);
+        handleB = endB - turnB * axis * third + Vector3.up * (lift - twist);
+
+        arcLengths[0] = 0f;
+        Vector3 previous = endA;
+        for (int i = 1; i < arcLengths.Length; i++)
+        {
+            Vector3 next = PointAt(i / (float)(arcLengths.Length - 1));
+            arcLengths[i] = arcLengths[i - 1] + Vector3.Distance(previous, next);
+            previous = next;
+        }
+    }
+
+    // The t at that many meters along the curve
+    float ParamAtLength(float distance)
+    {
+        int steps = arcLengths.Length - 1;
+        for (int i = 1; i <= steps; i++)
+        {
+            if (arcLengths[i] < distance) continue;
+            float segment = arcLengths[i] - arcLengths[i - 1];
+            float part = segment > 0f ? (distance - arcLengths[i - 1]) / segment : 0f;
+            return (i - 1 + part) / steps;
+        }
+        return 1f;
     }
 
     //---- Meshes: every vertex
@@ -233,9 +345,9 @@ public class BridgeBend : MonoBehaviour
     {
         for (int i = 0; i < bent.t.Length; i++)
         {
-            float t = bent.t[i];
-            Quaternion turn = FrameAt(t);
-            bent.vertices[i] = bent.fromBridge.MultiplyPoint3x4(PointAt(t) + turn * bent.offsets[i]);
+            float t = Reveal(bent.t[i]);
+            Quaternion turn = CurveFrame(t);
+            bent.vertices[i] = bent.fromBridge.MultiplyPoint3x4(CurvePoint(t) + turn * bent.offsets[i]);
             if (i < bent.normals.Length) bent.outNormals[i] = bent.fromBridgeRotation * (turn * bent.normals[i]);
             if (i < bent.tangents.Length)
             {
@@ -330,25 +442,45 @@ public class BridgeBend : MonoBehaviour
     bool IsPlatform(Transform part) => part.GetComponentInParent<FallingPlatform>(true) != null;
 
 #if UNITY_EDITOR
-    // Selected: the line between the anchors
+    // Selected: the curve (in edit mode with the anchors where they are now) and where each falling platform goes
     void OnDrawGizmosSelected()
     {
         Bridge b = GetComponent<Bridge>();
         if (b == null || b.anchorA == null || b.anchorB == null) return;
         Gizmos.color = new Color(1f, 0.6f, 0.2f);
-        if (Application.isPlaying && ready)
-        {
-            Vector3 previous = transform.TransformPoint(PointAt(0f));   // the curve it is following now
-            for (int i = 1; i <= 16; i++)
-            {
-                Vector3 next = transform.TransformPoint(PointAt(i / 16f));
-                Gizmos.DrawLine(previous, next);
-                previous = next;
-            }
-        }
-        else Gizmos.DrawLine(b.anchorA.position, b.anchorB.position);
         Gizmos.DrawWireSphere(b.anchorA.position, 0.3f);
         Gizmos.DrawWireSphere(b.anchorB.position, 0.3f);
+
+        Vector3 p0, p1, p2, p3;
+        if (Application.isPlaying && ready)
+        {
+            p0 = transform.TransformPoint(endA); p1 = transform.TransformPoint(handleA);
+            p2 = transform.TransformPoint(handleB); p3 = transform.TransformPoint(endB);
+        }
+        else
+        {
+            p0 = b.anchorA.position; p3 = b.anchorB.position;
+            Vector3 third = (p3 - p0) / 3f;
+            Vector3 up = transform.up;
+            p1 = p0 + third + up * (arch / 0.75f + sCurve / 0.29f);
+            p2 = p3 - third + up * (arch / 0.75f - sCurve / 0.29f);
+        }
+
+        Vector3 previous = p0;
+        for (int i = 1; i <= 24; i++)
+        {
+            Vector3 next = Bezier(p0, p1, p2, p3, i / 24f);
+            Gizmos.DrawLine(previous, next);
+            previous = next;
+        }
+
+        if (Application.isPlaying || !layOutPlatforms) return;
+        int count = GetComponentsInChildren<FallingPlatform>(true).Length;
+        for (int i = 0; i < count; i++)   // roughly where the platforms go (evenly in t, in play it is by length)
+        {
+            float t = count == 1 ? 0.5f : Mathf.Lerp(0.08f, 0.92f, i / (float)(count - 1));
+            Gizmos.DrawWireCube(Bezier(p0, p1, p2, p3, t) + transform.up * platformHeight, Vector3.one * 0.4f);
+        }
     }
 #endif
 }

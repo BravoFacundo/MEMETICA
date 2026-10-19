@@ -94,6 +94,7 @@ public class DebugTools : MonoBehaviour
         playerMove.enabled = !on;              // no walking, gravity or fall respawn while flying
         characterController.enabled = !on;     // no collisions
         if (!on) playerMove.ResetMotion();     // lands from where it is, without old speed
+        if (RetroCursor.Instance != null) RetroCursor.Instance.cursorImage.enabled = !on;   // no crosshair while flying
     }
 
     void Fly()

@@ -62,6 +62,7 @@ public class PlayerMove : MonoBehaviour
     private float airSpeed;
     private float lastGroundedTime = -99f;
     private float lastJumpPressedTime = -99f;
+    private float knockbackUntil;
     private bool wasGrounded;
 
     private Transform movingGround;
@@ -227,6 +228,7 @@ public class PlayerMove : MonoBehaviour
 
     private void UpdateHorizontalVelocity()
     {
+        if (Time.time < knockbackUntil) return;   // being thrown: no steering for a moment
         Vector3 input = transform.right * Input.GetAxis("Horizontal") + transform.forward * Input.GetAxis("Vertical");
         input = Vector3.ClampMagnitude(input, 1f);   // diagonal is not faster
 
@@ -296,6 +298,21 @@ public class PlayerMove : MonoBehaviour
             // Llevar el meme a una isla nueva (MemeOrb: desbloquea una versión más; MemeWindow: trigger Mover)
             if (look.heldObject != null && look.heldObject.TryGetComponent(out Meme heldMeme)) heldMeme.OnIslandVisited(island);
         }
+    }
+
+    //---- Thrown
+
+    // Something throws the player (a bridge bursting out of the ground): off the ground with this velocity,
+    // without steering for a moment so the throw is felt
+    public void Knockback(Vector3 velocity)
+    {
+        horizontalVelocity = new Vector3(velocity.x, 0f, velocity.z);
+        verticalVelocity = Mathf.Max(velocity.y, 0.5f);
+        airSpeed = Mathf.Max(walkSpeed, horizontalVelocity.magnitude * 0.5f);
+        knockbackUntil = Time.time + 0.35f;
+        movingGround = null;
+        lastGroundedTime = -99f;   // no coyote jump out of it
+        wasGrounded = false;
     }
 
     //---- Teleport (DebugTools)

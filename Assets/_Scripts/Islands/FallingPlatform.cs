@@ -114,6 +114,16 @@ public class FallingPlatform : MonoBehaviour
     // Every frame, after the shake/fall/rise of this frame: on the straight bridge, or on its point of the bent one
     void LateUpdate()
     {
+        // Laid out on the curve: its slot, plus how far it shook or fell from its rest (in the bridge's space)
+        if (bend != null && transform.parent != null && bend.PlatformSlot(this, out Vector3 slot, out Quaternion frame))
+        {
+            Transform bridgeRoot = bend.transform;
+            Vector3 moved = bridgeRoot.InverseTransformVector(transform.parent.TransformVector(localPosition - restLocalPosition));
+            Quaternion designed = Quaternion.Inverse(bridgeRoot.rotation) * transform.parent.rotation * restLocalRotation;
+            transform.SetPositionAndRotation(bridgeRoot.TransformPoint(slot + moved), bridgeRoot.rotation * (frame * designed));
+            return;
+        }
+
         if (bend == null || !bend.IsBending || transform.parent == null)
         {
             transform.localPosition = localPosition;

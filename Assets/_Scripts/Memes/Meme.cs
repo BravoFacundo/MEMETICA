@@ -42,6 +42,24 @@ public class Meme : MonoBehaviour
         body = GetComponent<Rigidbody>();
         groundMask = LayerMask.GetMask("Ground");
         lastGroundY = transform.position.y;
+        AttachToIslandBelow();
+    }
+
+    // Placed on an island in the scene: it becomes part of it before the islands move (Awake runs before their Start),
+    // so it goes down and comes up with its island. Before: islands that start below left it hanging in the sky,
+    // it fell into the void and reappeared in the tutorial
+    private void AttachToIslandBelow()
+    {
+        if (transform.parent != null && transform.parent.GetComponentInParent<Island>() != null) return;   // already inside one
+        if (!Physics.Raycast(transform.position + Vector3.up * 0.5f, Vector3.down, out RaycastHit ground, 5f, ~0, QueryTriggerInteraction.Ignore)) return;
+        Island island = ground.transform.GetComponentInParent<Island>();
+        if (island == null) return;
+
+        FloatMotion floating = ground.transform.GetComponentInParent<FloatMotion>();
+        transform.SetParent(floating != null ? floating.transform : island.transform, true);
+        body.isKinematic = true;   // PlayerLook turns it back to physics when picked up
+        body.constraints = RigidbodyConstraints.FreezeAll;
+        lastIsland = FindParentWithTag(ground.transform, "Isla") ?? island.gameObject;
     }
 
     protected virtual void Update()
@@ -106,6 +124,9 @@ public class Meme : MonoBehaviour
     private void CheckFallAndRespawn()
     {
         if (IsHeld || LevelManager.Instance == null) return;
+        if (body.isKinematic) { lastGroundY = transform.position.y; return; }   // attached (island, pedestal): moves with it, never falls
+        if (respawnPoint == null)   // the island it started on (before: always the tutorial)
+            respawnPoint = lastIsland != null ? LevelManager.Instance.RespawnPointOf(lastIsland) : LevelManager.Instance.startRespawnPoint;
         if (respawnPoint == null) respawnPoint = LevelManager.Instance.startRespawnPoint;
 
         if (transform.position.y < lastGroundY - LevelManager.Instance.fallDistance)
