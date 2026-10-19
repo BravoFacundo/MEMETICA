@@ -1,10 +1,12 @@
+using System.Collections;
 using UnityEngine;
 
 // Anything the player carries that holds a meme: MemeOrb (Game_Old) or MemeWindow (Game).
 // The environment (hold, pedestals, respawn, bridges and islands) only talks to this class,
 // so it works the same with both. Each representation decides what to do in the On... methods.
 // On its own (no MemeOrb / MemeWindow) it is a plain carryable meme with no visual logic, e.g. the tutorial orb.
-// Falling into the void: it reappears on the last island it touched (before: PlayerRespawn on the orbs).
+// Falling into the void: it comes back to the last island it touched as a meteor: glowing with a trail, falling
+// at an angle onto open ground near the island's middle (not trees, not pedestals), and breaking the ground on impact.
 // While held it doesn't check: it travels with the player, and PlayerMove tells it when the player falls.
 // Object name: Meme_<ID> (e.g. Meme_3Aa). Pedestals compare their Key ID with that ID.
 [RequireComponent(typeof(Rigidbody))]
@@ -17,6 +19,23 @@ public class Meme : MonoBehaviour
     public float restDelay = 3f;
     public float groundCheckRadius = 0.6f;
 
+    [Header("Respawn (meteor)")]
+    [Tooltip("Meters above the island it starts falling from")]
+    public float meteorHeight = 25f;
+    [Tooltip("Meters it travels sideways while falling (the angle of the fall)")]
+    public float meteorDrift = 10f;
+    [Tooltip("Seconds the fall takes (it speeds up)")]
+    public float meteorDuration = 1.1f;
+    [Tooltip("Meters around the island's middle (its RespawnPoint) where it can land")]
+    public float landingRadius = 4f;
+    [Tooltip("Never lands closer than this to a pedestal (it would place itself)")]
+    public float pedestalClearance = 3f;
+    public Color meteorColor = new Color(1f, 0.75f, 0.35f);
+    [Tooltip("Pieces that fly out where it lands (small rock and grass prefabs, like the bridges)")]
+    public GameObject[] impactDebris;
+    public int impactDebrisCount = 10;
+    public AudioClip impactClip;
+
     public string ID => IDOf(gameObject);
     public bool IsHeld { get; private set; }
     public Pedestal CurrentPedestal { get; private set; }
@@ -27,6 +46,7 @@ public class Meme : MonoBehaviour
     private Island startIsland;   // held still on it until it is up and still
 
     private Transform respawnPoint;
+    private Coroutine meteor;
     private Transform lastGroundHit;
     private GameObject lastIsland;
     private float lastGroundY;
@@ -190,11 +210,102 @@ public class Meme : MonoBehaviour
 
     private void Respawn()
     {
-        if (respawnPoint == null) return;
-        transform.position = respawnPoint.position;
+        if (respawnPoint == null || meteor != null) return;
+        meteor = StartCoroutine(MeteorFall());
+    }
+
+    //---- Meteor
+
+    IEnumerator MeteorFall()
+    {
+        transform.SetParent(null, true);
+        startIsland = null;
         body.velocity = Vector3.zero;
         body.angularVelocity = Vector3.zero;
+        body.isKinematic = true;
+        if (!FindLanding(out Vector3 start, out Vector3 landing)) { start = respawnPoint.position; landing = start; }   // (colliders still on: it measures itself)
+        Collider[] colliders = GetComponentsInChildren<Collider>();
+        foreach (Collider c in colliders) c.enabled = false;   // no pedestal or tree catches it on the way
+
+        // Glow and trail while it falls
+        Light glow = gameObject.AddComponent<Light>();
+        glow.type = LightType.Point;
+        glow.color = meteorColor;
+        glow.range = 10f;
+        glow.intensity = 6f;
+        TrailRenderer trail = gameObject.AddComponent<TrailRenderer>();
+        trail.time = 0.45f;
+        trail.startWidth = 0.7f;
+        trail.endWidth = 0f;
+        trail.material = new Material(Shader.Find("Sprites/Default"));
+        trail.startColor = meteorColor;
+        trail.endColor = new Color(meteorColor.r, meteorColor.g * 0.5f, 0f, 0f);
+
+        for (float t = 0f; t < meteorDuration; t += Time.deltaTime)
+        {
+            float p = t / Mathf.Max(meteorDuration, 0.01f);
+            transform.position = Vector3.Lerp(start, landing, p * p);   // speeds up like a meteor
+            transform.Rotate(Vector3.one * 720f * Time.deltaTime, Space.Self);
+            yield return null;
+        }
+        transform.position = landing;
+
+        // Impact: the ground breaks, then it is a normal meme again
+        DebrisBurst.Spawn(impactDebris, impactDebrisCount, landing, Vector3.up, 5f, 1.2f);
+        if (impactClip != null) AudioSource.PlayClipAtPoint(impactClip, landing);
+        foreach (Collider c in colliders) c.enabled = true;
+        body.isKinematic = false;
+        body.constraints = RigidbodyConstraints.None;
+        body.velocity = (landing - start).normalized * 2f;   // a little roll after the hit
+        lastGroundY = landing.y;
+        groundedTime = 0f;
+        trail.emitting = false;
         OnRespawned();
+
+        for (float t = 0f; t < 0.4f; t += Time.deltaTime) { glow.intensity = Mathf.Lerp(6f, 0f, t / 0.4f); yield return null; }
+        Destroy(glow);
+        Destroy(trail, trail.time);
+        meteor = null;
+    }
+
+    // Open ground of its island near the middle: not steep (tree tops, rocks), not near a pedestal, and a clear
+    // diagonal path from the sky. A few random tries, so it doesn't always land on the same spot
+    private bool FindLanding(out Vector3 start, out Vector3 landing)
+    {
+        start = landing = Vector3.zero;
+        Collider shape = GetComponentInChildren<Collider>(true);
+        float pivotToBottom = shape != null ? shape.bounds.extents.y : 0.3f;
+        Vector3 middle = respawnPoint.position;
+
+        for (int i = 0; i < 20; i++)
+        {
+            Vector2 offset = Random.insideUnitCircle * landingRadius;
+            Vector3 above = new Vector3(middle.x + offset.x, middle.y + 5f, middle.z + offset.y);
+            if (!Physics.Raycast(above, Vector3.down, out RaycastHit ground, 200f, ~0, QueryTriggerInteraction.Ignore)) continue;
+            if (lastIsland != null && FindParentWithTag(ground.transform, "Isla") != lastIsland) continue;
+            if (ground.normal.y < 0.85f || NearPedestal(ground.point)) continue;
+
+            Vector2 side = Random.insideUnitCircle.normalized;
+            Vector3 land = ground.point + Vector3.up * (pivotToBottom + 0.02f);
+            Vector3 from = land + Vector3.up * meteorHeight + new Vector3(side.x, 0f, side.y) * meteorDrift;
+            Vector3 path = land - from;
+            if (Physics.SphereCast(from, 0.5f, path.normalized, out _, path.magnitude - 0.8f, ~0, QueryTriggerInteraction.Ignore)) continue;   // trees, rocks in the way
+
+            start = from;
+            landing = land;
+            return true;
+        }
+        return false;
+    }
+
+    private bool NearPedestal(Vector3 point)
+    {
+        foreach (Pedestal pedestal in FindObjectsOfType<Pedestal>())
+        {
+            Vector3 offset = pedestal.transform.position - point; offset.y = 0f;
+            if (offset.magnitude < pedestalClearance) return true;
+        }
+        return false;
     }
 
     private static GameObject FindParentWithTag(Transform child, string tag)

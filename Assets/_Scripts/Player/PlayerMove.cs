@@ -27,6 +27,12 @@ public class PlayerMove : MonoBehaviour
     [Tooltip("Seconds a jump press is remembered before landing")]
     public float jumpBuffer = 0.2f;
 
+    [Header("Respawn")]
+    [Tooltip("After reappearing it falls fast, then brakes over these last meters before the ground. 0 = no brake")]
+    public float respawnBrakeDistance = 6f;
+    [Tooltip("Falling speed it brakes down to (m/s); the last bit it falls on its own")]
+    public float respawnLandingSpeed = 3f;
+
     [Header("Ground")]
     public Transform groundCheck;
     public float groundDistance = 0.2f;
@@ -63,6 +69,7 @@ public class PlayerMove : MonoBehaviour
     private float lastGroundedTime = -99f;
     private float lastJumpPressedTime = -99f;
     private float knockbackUntil;
+    private bool landingBrake;   // just respawned: brakes before touching the ground
     private bool wasGrounded;
 
     private Transform movingGround;
@@ -264,6 +271,8 @@ public class PlayerMove : MonoBehaviour
         }
 
         if (!isGrounded || verticalVelocity > 0f) verticalVelocity = Mathf.Max(verticalVelocity + gravity * Time.deltaTime, -maxFallSpeed);
+        if (isGrounded) landingBrake = false;
+        else if (landingBrake) BrakeBeforeGround();
     }
 
     //---- What is under the player
@@ -298,6 +307,23 @@ public class PlayerMove : MonoBehaviour
             // Llevar el meme a una isla nueva (MemeOrb: desbloquea una versión más; MemeWindow: trigger Mover)
             if (look.heldObject != null && look.heldObject.TryGetComponent(out Meme heldMeme)) heldMeme.OnIslandVisited(island);
         }
+    }
+
+    //---- Respawn landing
+
+    // Only the vertical speed: it can keep moving sideways while it brakes, wherever it is now
+    private void BrakeBeforeGround()
+    {
+        if (verticalVelocity >= -respawnLandingSpeed) return;
+        if (!Physics.Raycast(transform.position, Vector3.down, out RaycastHit ground, 200f, ~(1 << gameObject.layer), QueryTriggerInteraction.Ignore)) return;
+
+        float height = ground.distance - characterController.height * 0.5f - 0.6f;   // brakes until 0.6 m above, then drops
+        if (height > respawnBrakeDistance) return;
+        if (height <= 0f) { landingBrake = false; return; }
+
+        float speed = -verticalVelocity;
+        float braking = (speed * speed - respawnLandingSpeed * respawnLandingSpeed) / (2f * height);   // stops right at that height
+        verticalVelocity = -Mathf.Max(respawnLandingSpeed, speed - braking * Time.deltaTime);
     }
 
     //---- Thrown
@@ -385,6 +411,7 @@ public class PlayerMove : MonoBehaviour
         horizontalVelocity = Vector3.zero;
         verticalVelocity = 0f;
         movingGround = null;
+        landingBrake = respawnBrakeDistance > 0f;
         look.ResetSmoothing();
         debugHeight = transform.position.y;
 
