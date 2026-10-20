@@ -1,7 +1,7 @@
-// Herramienta de editor: revisa que la jerarquía siga cumpliendo lo que el código espera.
-// Menú: Memetica > Validar jerarquía
-// Usala después de mover o renombrar objetos. No modifica nada, solo avisa en la consola.
-// Hacé clic en cada aviso de la consola para seleccionar el objeto con problemas.
+// Editor tool: checks that the hierarchy still matches what the code expects.
+// Menu: Memetica > Validar jerarquía
+// Use it after moving or renaming things. It changes nothing, it only reports in the console.
+// Click each message in the console to select the object with the problem.
 
 using System.Collections.Generic;
 using System.Linq;
@@ -11,12 +11,8 @@ using UnityEngine.SceneManagement;
 
 public static class HierarchyValidator
 {
-    // Objetos que el código busca con GameObject.Find("...") → deben existir, ser únicos y estar activos
-    static readonly string[] RequiredNames =
-    {
-        // Jugador
-        "Player", "Main Camera", "GrabPivot",
-    };
+    // Objects the code finds by name (GameObject.Find) → must exist, be unique and active
+    static readonly string[] RequiredNames = { "Player", "Main Camera", "GrabPivot" };
 
     static readonly string[] RequiredTags = { "Isla", "Puente", "Pedestal", "Meme" };
 
@@ -28,32 +24,50 @@ public static class HierarchyValidator
         errors = 0; warnings = 0;
         var all = AllObjectsInScene();
 
-        // 1. Nombres buscados por código
+        // 1. Names the code looks for
         foreach (var name in RequiredNames)
         {
             var found = all.Where(g => g.name == name).ToList();
-            if (found.Count == 0) Error($"No existe '{name}' (el código lo busca por nombre).");
+            if (found.Count == 0) Error($"There is no '{name}' (the code finds it by name).");
             else
             {
-                if (found.Count > 1) Error($"Hay {found.Count} objetos llamados '{name}'. GameObject.Find agarra uno cualquiera.", found[1]);
-                if (!found[0].activeInHierarchy) Error($"'{name}' está desactivado (o su padre). GameObject.Find no encuentra objetos inactivos.", found[0]);
+                if (found.Count > 1) Error($"There are {found.Count} objects named '{name}'. GameObject.Find takes any of them.", found[1]);
+                if (!found[0].activeInHierarchy) Error($"'{name}' (or a parent) is off. GameObject.Find doesn't find inactive objects.", found[0]);
             }
         }
 
-        // 1b. LevelManager: referencias y convención de nombres
+        // 1b. LevelManager references, naming convention, islands and bridges
         LevelManager level = Object.FindObjectOfType<LevelManager>(true);
-        if (level == null) Error("No hay LevelManager en la escena.");
+        if (level == null) Error("There is no LevelManager in the scene.");
         else
         {
-            if (level.startRespawnPoint == null) Error("LevelManager: falta asignar Start Respawn Point.", level);
+            if (level.startRespawnPoint == null) Error("LevelManager: Start Respawn Point not assigned.", level);
 
             foreach (var isla in Object.FindObjectsOfType<Island>(true))
             {
-                if (!isla.name.StartsWith(level.islandPrefix)) Warn($"La isla '{isla.name}' no sigue la convención '{level.islandPrefix}ID'.", isla);
+                if (!isla.name.StartsWith(level.islandPrefix)) Warn($"Island '{isla.name}' does not follow the '{level.islandPrefix}ID' convention.", isla);
                 else if (level.RespawnPointOf(isla.gameObject) == null) Error($"Island '{isla.name}' has no '{level.respawnPointName}' inside it.", isla);
+                if (!isla.CompareTag("Isla")) Error($"Island '{isla.name}' is not tagged 'Isla' (respawn and meme crossings look for it).", isla);
+
+                // Floating: on the island itself (new) or on one direct child (old structure)
+                bool floatsItself = isla.GetComponent<FloatMotion>() != null;
+                int floatingChildren = isla.transform.Cast<Transform>().Count(c => c.GetComponent<FloatMotion>() != null);
+                if (!floatsItself && floatingChildren == 0) Warn($"Island '{isla.name}' doesn't float (no FloatMotion on it or on a direct child).", isla);
+                if (floatsItself && floatingChildren > 0) Warn($"Island '{isla.name}' floats twice (FloatMotion on it and on a child).", isla);
             }
             foreach (var puente in Object.FindObjectsOfType<Bridge>(true))
-                if (!puente.name.StartsWith(level.bridgePrefix)) Warn($"El puente '{puente.name}' no sigue la convención '{level.bridgePrefix}ID'.", puente);
+            {
+                if (!puente.name.StartsWith(level.bridgePrefix)) Warn($"Bridge '{puente.name}' does not follow the '{level.bridgePrefix}ID' convention.", puente);
+                bool bends = puente.TryGetComponent(out BridgeBend _);
+                if (puente.appearance == Bridge.Appearance.ExtendFromA && !bends) Error($"Bridge '{puente.name}' uses Extend From A but has no BridgeBend.", puente);
+                if (bends && (puente.anchorA == null || puente.anchorB == null)) Error($"Bridge '{puente.name}' has a BridgeBend but is missing an anchor (right click on Bridge > Create Anchors).", puente);
+                foreach (Transform anchor in new[] { puente.anchorA, puente.anchorB })
+                {
+                    if (anchor == null) continue;
+                    if (anchor.GetComponentInParent<Island>() == null) Warn($"Bridge '{puente.name}': anchor '{anchor.name}' is not inside an island.", anchor);
+                    else if (anchor.GetComponentInParent<FloatMotion>() == null) Warn($"Bridge '{puente.name}': anchor '{anchor.name}' is not inside the floating part of its island (that end won't follow it).", anchor);
+                }
+            }
             foreach (var elevator in Object.FindObjectsOfType<Elevator>(true))
             {
                 if (!elevator.name.StartsWith(level.elevatorPrefix)) Warn($"Elevator '{elevator.name}' does not follow the '{level.elevatorPrefix}ID' convention.", elevator);
@@ -62,16 +76,17 @@ public static class HierarchyValidator
             }
         }
 
-        // 2. Pedestales: partes asignadas, trigger y audio en la raíz, sonidos. Pinturas con su pedestal.
+        // 2. Pedestals: parts assigned, trigger and audio on the root, sounds, inside an island
         foreach (var ped in Object.FindObjectsOfType<Pedestal>(true))
         {
-            if (ped.transform.Find("PedTrigger") != null) Error($"El pedestal '{ped.name}' tiene la estructura vieja (Memetica > Migrar pedestales).", ped);
-            if (ped.socket == null) Error($"El pedestal '{ped.name}' no tiene Socket asignado.", ped);
-            if (ped.visualKeyed == null || ped.visualKeyless == null) Warn($"El pedestal '{ped.name}' no tiene asignados Visual_Keyed / Visual_Keyless.", ped);
-            if (!ped.TryGetComponent(out SphereCollider col) || !col.isTrigger) Error($"El pedestal '{ped.name}' no tiene SphereCollider trigger en la raíz.", ped);
-            if (!ped.TryGetComponent(out AudioSource _)) Error($"El pedestal '{ped.name}' no tiene AudioSource en la raíz.", ped);
+            if (ped.socket == null) Error($"Pedestal '{ped.name}' has no Socket assigned.", ped);
+            if (ped.visualKeyed == null || ped.visualKeyless == null) Warn($"Pedestal '{ped.name}' is missing Visual_Keyed / Visual_Keyless.", ped);
+            if (!ped.TryGetComponent(out SphereCollider col) || !col.isTrigger) Error($"Pedestal '{ped.name}' has no trigger SphereCollider on its root.", ped);
+            if (!ped.TryGetComponent(out AudioSource _)) Error($"Pedestal '{ped.name}' has no AudioSource on its root.", ped);
             if (ped.chargeClip == null || ped.correctClip == null || ped.incorrectClip == null || ped.snapClip == null)
-                Warn($"El pedestal '{ped.name}' tiene sonidos sin asignar.", ped);
+                Warn($"Pedestal '{ped.name}' has sounds not assigned.", ped);
+            if (ped.GetComponentInParent<Island>() != null && ped.GetComponentInParent<FloatMotion>() == null)
+                Warn($"Pedestal '{ped.name}' is not inside the floating part of its island (it won't float with it).", ped);
         }
         var allPedestals = Object.FindObjectsOfType<Pedestal>(true);
         foreach (var ped in allPedestals)
@@ -110,13 +125,13 @@ public static class HierarchyValidator
                     Warn($"Meme '{meme.name}' matches no pedestal Key ID: it only works on keyless (black) pedestals (fine if that's intended).", meme);
             }
             foreach (var go in all.Where(g => g.CompareTag("Meme") && g.GetComponentInParent<Meme>(true) == null))
-                Error($"'{go.name}' is tagged Meme but has no Meme component (Memetica > Migrar a Meme).", go);
+                Error($"'{go.name}' is tagged Meme but has no Meme component.", go);
         }
 
-        // 3. Orbes: hijos "Meme" y "Audio"
+        // 3. Orbs: "Meme" and "Audio" children
         foreach (var orb in Object.FindObjectsOfType<MemeOrb>(true))
             foreach (var child in new[] { "Meme", "Audio" })
-                if (orb.transform.Find(child) == null) Error($"El orbe '{orb.name}' perdió su hijo directo '{child}'.", orb);
+                if (orb.transform.Find(child) == null) Error($"Orb '{orb.name}' lost its direct child '{child}'.", orb);
 
         // 4. Falling platforms: pivots anywhere inside their bridge
         foreach (var plat in Object.FindObjectsOfType<FallingPlatform>(true))
@@ -128,17 +143,16 @@ public static class HierarchyValidator
                 Error($"Platform '{plat.name}' lost its pivots (PlatformPivotSuperior/Inferior) inside its bridge.", plat);
         }
 
-        // 5. Player: hijo "GroundCheck"
+        // 5. Player: "GroundCheck" child
         foreach (var move in Object.FindObjectsOfType<PlayerMove>(true))
-            if (move.transform.Find("GroundCheck") == null) Error($"'{move.name}' perdió su hijo directo 'GroundCheck'.", move);
+            if (move.transform.Find("GroundCheck") == null) Error($"'{move.name}' lost its direct child 'GroundCheck'.", move);
 
-        // 6. Tags que usa el código
+        // 6. Tags the code uses
         foreach (var tag in RequiredTags)
-            if (!all.Any(g => g.CompareTag(tag))) Error($"Ningún objeto tiene el tag '{tag}'.");
+            if (!all.Any(g => g.CompareTag(tag))) Error($"No object is tagged '{tag}'.");
 
-        // 7. Grupos de organización: objetos vacíos, sin tag, que contienen islas, puentes o ascensores.
-        //    Son los únicos donde la posición del padre importa (esos objetos se mueven con posiciones de mundo).
-        //    Las islas en sí (AreaTuto, Area1...) tienen tag "Isla" y quedan excluidas: NO se resetean.
+        // 7. Organizing groups: empty, untagged objects holding islands, bridges or elevators.
+        //    Their transform should be the identity, so what is inside sits where it was placed.
         foreach (var go in all)
         {
             bool isEmpty = go.GetComponents<Component>().Length == 1 && go.transform.childCount > 0;
@@ -150,22 +164,22 @@ public static class HierarchyValidator
             if (!isGroup) continue;
             var t = go.transform;
             if (t.localPosition != Vector3.zero || t.localRotation != Quaternion.identity || t.localScale != Vector3.one)
-                Warn($"El grupo '{go.name}' no está en posición 0 / rotación 0 / escala 1. Sus hijos pueden quedar desplazados (Reset en el Transform).", go);
+                Warn($"Group '{go.name}' is not at position 0 / rotation 0 / scale 1. What is inside may end up shifted (Reset its Transform).", go);
             if (!go.activeSelf)
-                Error($"El grupo '{go.name}' está desactivado: todo lo de adentro deja de existir para GameObject.Find.", go);
+                Error($"Group '{go.name}' is off: everything inside stops existing for the game.", go);
         }
 
 
-        // 8. Scripts faltantes ("The referenced script on this Behaviour is missing")
+        // 8. Missing scripts ("The referenced script on this Behaviour is missing")
         foreach (var go in all)
         {
             int missing = GameObjectUtility.GetMonoBehavioursWithMissingScriptCount(go);
-            if (missing > 0) Warn($"'{go.name}' tiene {missing} script(s) faltante(s) (Missing Script).", go);
+            if (missing > 0) Warn($"'{go.name}' has {missing} missing script(s).", go);
         }
 
         string result = errors == 0 && warnings == 0
-            ? "✔ Jerarquía OK: todo lo que el código necesita está en su lugar."
-            : $"Validación terminada: {errors} errores, {warnings} avisos.";
+            ? "✔ Hierarchy OK: everything the code needs is in place."
+            : $"Check finished: {errors} errors, {warnings} warnings.";
         if (errors > 0) Debug.LogError(result); else if (warnings > 0) Debug.LogWarning(result); else Debug.Log(result);
     }
 
@@ -177,6 +191,6 @@ public static class HierarchyValidator
         return list;
     }
 
-    static void Error(string msg, Object ctx = null) { errors++; Debug.LogError("[Jerarquía] " + msg, ctx); }
-    static void Warn(string msg, Object ctx = null) { warnings++; Debug.LogWarning("[Jerarquía] " + msg, ctx); }
+    static void Error(string msg, Object ctx = null) { errors++; Debug.LogError("[Hierarchy] " + msg, ctx); }
+    static void Warn(string msg, Object ctx = null) { warnings++; Debug.LogWarning("[Hierarchy] " + msg, ctx); }
 }

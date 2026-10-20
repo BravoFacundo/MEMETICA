@@ -9,7 +9,7 @@ using UnityEngine;
 
 public class PlayerMove : MonoBehaviour
 {
-    [Header("Player Move")]
+    [Section("Move")]
     public bool playerCanMove = true;
     public float walkSpeed = 5f;
     [Tooltip("With Shift, on the ground. In the air you keep the speed you jumped with")]
@@ -17,7 +17,7 @@ public class PlayerMove : MonoBehaviour
     [Tooltip("How fast you can change direction in the air (m/s²). Higher = more control, lower = more inertia")]
     public float airAcceleration = 15f;
 
-    [Header("Player Jump")]
+    [Section("Jump")]
     public float jumpHeight = 3f;
     public float gravity = -9.81f;
     [Tooltip("Max falling speed (m/s)")]
@@ -27,38 +27,37 @@ public class PlayerMove : MonoBehaviour
     [Tooltip("Seconds a jump press is remembered before landing")]
     public float jumpBuffer = 0.2f;
 
-    [Header("Respawn")]
+    [Section("Respawn")]
     [Tooltip("After reappearing it falls fast, then brakes over these last meters before the ground. 0 = no brake")]
     public float respawnBrakeDistance = 6f;
     [Tooltip("Falling speed it brakes down to (m/s); the last bit it falls on its own")]
     public float respawnLandingSpeed = 3f;
 
-    [Header("Ground")]
+    [Section("Ground")]
+    [Tooltip("Meters it sticks down when walking off a slope or step, instead of flying off for a moment. 0 = off")]
+    public float groundSnapDistance = 0.3f;
+    [Tooltip("It moves with the ground you stand on (rising bridges, floating islands). If the ground drops faster than this (m/s), you let go of it and fall on your own")]
+    public float maxGroundFollowDownSpeed = 6f;
+
+    [Section("Advanced", Closed = true)]
+    [Tooltip("Found by name (GroundCheck child)")]
     public Transform groundCheck;
     public float groundDistance = 0.2f;
     [Tooltip("Off: anything you stand on is ground (trees, rocks, memes). On: only Ground Mask counts, e.g. to limit where you can jump from")]
     public bool onlyGroundLayer = false;
+    [ShowIf(nameof(onlyGroundLayer))]
     public LayerMask groundMask;
-    [Tooltip("Meters it sticks down when walking off a slope or step, instead of flying off for a moment. 0 = off")]
-    public float groundSnapDistance = 0.3f;
-    [Tooltip("Moves with the ground you stand on (rising bridges, floating islands, falling platforms)")]
-    public bool followMovingGround = true;
-    [Tooltip("If the ground drops faster than this (m/s), you let go of it and fall on your own")]
-    public float maxGroundFollowDownSpeed = 6f;
-    public bool isGrounded;
 
-    [Header("Debug")]
+    [Section("Debug", Closed = true)]
     [Tooltip("Logs each frame the body moves more than 5 mm up or down in one step, with every step of that frame (to find the bumps). Slows the game while on")]
     public bool logBumps = false;
-
-    [Header("Cruces con meme (puente → isla)")]
-    public bool hit1Lock = false;
-    public bool hit2Lock = false;
-    public GameObject prevIsland;
-    public GameObject prevBridge;
-
-    [Header("Final")]
-    public bool ascend = false;   // lo prende el LevelManager al terminar el juego
+    [ReadOnlyField] public bool isGrounded;
+    // Carrying a meme from a bridge onto an island (MemeOrb: one more version)
+    [ReadOnlyField] public bool hit1Lock = false;
+    [ReadOnlyField] public bool hit2Lock = false;
+    [ReadOnlyField] public GameObject prevIsland;
+    [ReadOnlyField] public GameObject prevBridge;
+    [ReadOnlyField] public bool ascend = false;   // lo prende el LevelManager al terminar el juego
 
     private CharacterController characterController;
     private PlayerLook look;   // está en la Main Camera; se guarda una vez
@@ -200,7 +199,7 @@ public class PlayerMove : MonoBehaviour
     // The ground under the player moved since last frame: move the same amount
     private void FollowMovingGround()
     {
-        if (!followMovingGround || movingGround == null) return;
+        if (movingGround == null) return;
 
         Vector3 delta = movingGround.TransformPoint(movingGroundLocalPoint) - transform.position;
         if (delta.y < -maxGroundFollowDownSpeed * Time.deltaTime) { movingGround = null; return; }   // it drops too fast: let go
@@ -219,7 +218,7 @@ public class PlayerMove : MonoBehaviour
     private void FindGroundBelow()
     {
         movingGround = null;
-        if (!followMovingGround || verticalVelocity > 0f) return;   // jumping: on its own
+        if (verticalVelocity > 0f) return;   // jumping: on its own
 
         float castRadius = characterController.radius * 0.9f;
         float toFeet = characterController.height * 0.5f - castRadius;

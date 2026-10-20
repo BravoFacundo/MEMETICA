@@ -7349,7 +7349,6 @@ Transform:
   - {fileID: 984862590}
   - {fileID: 907288160}
   - {fileID: 2089941614}
-  - {fileID: 1569812923}
   m_Father: {fileID: 347423739}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1001 &86279803
@@ -7530,23 +7529,22 @@ MonoBehaviour:
   appearance: 2
   waitForIslands: 1
   delayAfterIslands: 0.3
-  topOverride: {fileID: 0}
   lowerOffset: 0
   startPoint: {fileID: 0}
-  moveDuration: 1.2
+  swingAngle: 100
+  slamBounce: 3
   launchHeight: 1.5
-  launchDebris:
-  - {fileID: 7393098362869938263, guid: 5aa1ba37a2b5e2f45afd8a3af127e862, type: 3}
-  - {fileID: 7617200879849885303, guid: e9145b5c228689843b6d6ba2412aff73, type: 3}
-  - {fileID: 379243778788410097, guid: 19388166165474c488a129d8427a779f, type: 3}
-  debrisCount: 24
   launchWarning: 0.6
   launchPushRadius: 3
   launchPushSpeed: 9
   launchShake: 0.04
   launchClip: {fileID: 0}
-  swingAngle: 100
-  slamBounce: 3
+  launchDebris:
+  - {fileID: 7393098362869938263, guid: 5aa1ba37a2b5e2f45afd8a3af127e862, type: 3}
+  - {fileID: 7617200879849885303, guid: e9145b5c228689843b6d6ba2412aff73, type: 3}
+  - {fileID: 379243778788410097, guid: 19388166165474c488a129d8427a779f, type: 3}
+  debrisCount: 24
+  moveDuration: 1.2
   slamShake: 0.05
   landingParticles: {fileID: 0}
   landClip: {fileID: 0}
@@ -7563,6 +7561,7 @@ MonoBehaviour:
     crackClip: {fileID: 0}
     fallClip: {fileID: 0}
     riseClip: {fileID: 0}
+  topOverride: {fileID: 0}
 --- !u!114 &91296460
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -7575,14 +7574,14 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 28bc0d934505a36409b28f0f7632c75e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  blendTime: 0.5
-  colliderChunks: 8
   arch: 0.3
   sCurve: 0
   layOutPlatforms: 1
   platformEndGap: 0.6
   platformHeight: 0
   diveAngle: 55
+  blendTime: 0.5
+  colliderChunks: 8
   weight: 0
 --- !u!1001 &91633937
 PrefabInstance:
@@ -13469,23 +13468,22 @@ MonoBehaviour:
   appearance: 2
   waitForIslands: 1
   delayAfterIslands: 0.3
-  topOverride: {fileID: 0}
   lowerOffset: 0
   startPoint: {fileID: 0}
-  moveDuration: 1.2
+  swingAngle: 100
+  slamBounce: 3
   launchHeight: 1.5
-  launchDebris:
-  - {fileID: 7393098362869938263, guid: 5aa1ba37a2b5e2f45afd8a3af127e862, type: 3}
-  - {fileID: 7617200879849885303, guid: e9145b5c228689843b6d6ba2412aff73, type: 3}
-  - {fileID: 379243778788410097, guid: 19388166165474c488a129d8427a779f, type: 3}
-  debrisCount: 24
   launchWarning: 0.6
   launchPushRadius: 3
   launchPushSpeed: 9
   launchShake: 0.04
   launchClip: {fileID: 0}
-  swingAngle: 100
-  slamBounce: 3
+  launchDebris:
+  - {fileID: 7393098362869938263, guid: 5aa1ba37a2b5e2f45afd8a3af127e862, type: 3}
+  - {fileID: 7617200879849885303, guid: e9145b5c228689843b6d6ba2412aff73, type: 3}
+  - {fileID: 379243778788410097, guid: 19388166165474c488a129d8427a779f, type: 3}
+  debrisCount: 24
+  moveDuration: 1.2
   slamShake: 0.05
   landingParticles: {fileID: 0}
   landClip: {fileID: 0}
@@ -13502,6 +13500,7 @@ MonoBehaviour:
     crackClip: {fileID: 0}
     fallClip: {fileID: 0}
     riseClip: {fileID: 0}
+  topOverride: {fileID: 0}
 --- !u!114 &156427165
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -13514,14 +13513,14 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 28bc0d934505a36409b28f0f7632c75e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  blendTime: 0.5
-  colliderChunks: 8
   arch: 0.3
   sCurve: 0
   layOutPlatforms: 1
   platformEndGap: 0.6
   platformHeight: 0
   diveAngle: 55
+  blendTime: 0.5
+  colliderChunks: 8
   weight: 0
 --- !u!1001 &158059253
 PrefabInstance:
@@ -26418,23 +26417,22 @@ MonoBehaviour:
   appearance: 2
   waitForIslands: 1
   delayAfterIslands: 0.3
-  topOverride: {fileID: 0}
   lowerOffset: 0
   startPoint: {fileID: 0}
-  moveDuration: 1.2
+  swingAngle: 100
+  slamBounce: 3
   launchHeight: 1.5
-  launchDebris:
-  - {fileID: 7393098362869938263, guid: 5aa1ba37a2b5e2f45afd8a3af127e862, type: 3}
-  - {fileID: 7617200879849885303, guid: e9145b5c228689843b6d6ba2412aff73, type: 3}
-  - {fileID: 379243778788410097, guid: 19388166165474c488a129d8427a779f, type: 3}
-  debrisCount: 24
   launchWarning: 0.6
   launchPushRadius: 3
   launchPushSpeed: 9
   launchShake: 0.04
   launchClip: {fileID: 0}
-  swingAngle: 100
-  slamBounce: 3
+  launchDebris:
+  - {fileID: 7393098362869938263, guid: 5aa1ba37a2b5e2f45afd8a3af127e862, type: 3}
+  - {fileID: 7617200879849885303, guid: e9145b5c228689843b6d6ba2412aff73, type: 3}
+  - {fileID: 379243778788410097, guid: 19388166165474c488a129d8427a779f, type: 3}
+  debrisCount: 24
+  moveDuration: 1.2
   slamShake: 0.05
   landingParticles: {fileID: 0}
   landClip: {fileID: 0}
@@ -26451,6 +26449,7 @@ MonoBehaviour:
     crackClip: {fileID: 0}
     fallClip: {fileID: 0}
     riseClip: {fileID: 0}
+  topOverride: {fileID: 0}
 --- !u!114 &231693238
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -26463,14 +26462,14 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 28bc0d934505a36409b28f0f7632c75e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  blendTime: 0.5
-  colliderChunks: 8
   arch: 0.3
   sCurve: 0
   layOutPlatforms: 1
   platformEndGap: 0.6
   platformHeight: 0
   diveAngle: 55
+  blendTime: 0.5
+  colliderChunks: 8
   weight: 0
 --- !u!1 &237435417 stripped
 GameObject:
@@ -63758,20 +63757,19 @@ MonoBehaviour:
   appearance: 0
   waitForIslands: 1
   delayAfterIslands: 0.3
-  topOverride: {fileID: 0}
   lowerOffset: 0
   startPoint: {fileID: 0}
-  moveDuration: 1.2
+  swingAngle: 100
+  slamBounce: 3
   launchHeight: 1.5
-  launchDebris: []
-  debrisCount: 14
   launchWarning: 0.6
   launchPushRadius: 3
   launchPushSpeed: 9
   launchShake: 0.04
   launchClip: {fileID: 0}
-  swingAngle: 100
-  slamBounce: 3
+  launchDebris: []
+  debrisCount: 14
+  moveDuration: 1.2
   slamShake: 0.05
   landingParticles: {fileID: 0}
   landClip: {fileID: 0}
@@ -63788,6 +63786,7 @@ MonoBehaviour:
     crackClip: {fileID: 0}
     fallClip: {fileID: 0}
     riseClip: {fileID: 0}
+  topOverride: {fileID: 0}
 --- !u!114 &568968344
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -63800,14 +63799,14 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 28bc0d934505a36409b28f0f7632c75e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  blendTime: 0.5
-  colliderChunks: 8
   arch: -0.2
   sCurve: 0.07
   layOutPlatforms: 1
   platformEndGap: 0.6
   platformHeight: 0
   diveAngle: 55
+  blendTime: 0.5
+  colliderChunks: 8
   weight: 0
 --- !u!1001 &570421879
 PrefabInstance:
@@ -68990,6 +68989,7 @@ Transform:
   - {fileID: 186155694}
   - {fileID: 1177816739}
   - {fileID: 985829827}
+  - {fileID: 1569812923}
   m_Father: {fileID: 837794711}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &596595558 stripped
@@ -69889,20 +69889,19 @@ MonoBehaviour:
   appearance: 0
   waitForIslands: 1
   delayAfterIslands: 0.3
-  topOverride: {fileID: 0}
   lowerOffset: 0
   startPoint: {fileID: 0}
-  moveDuration: 1.2
+  swingAngle: 100
+  slamBounce: 3
   launchHeight: 1.5
-  launchDebris: []
-  debrisCount: 14
   launchWarning: 0.6
   launchPushRadius: 3
   launchPushSpeed: 9
   launchShake: 0.04
   launchClip: {fileID: 0}
-  swingAngle: 100
-  slamBounce: 3
+  launchDebris: []
+  debrisCount: 14
+  moveDuration: 1.2
   slamShake: 0.05
   landingParticles: {fileID: 0}
   landClip: {fileID: 0}
@@ -69919,6 +69918,7 @@ MonoBehaviour:
     crackClip: {fileID: 0}
     fallClip: {fileID: 0}
     riseClip: {fileID: 0}
+  topOverride: {fileID: 0}
 --- !u!1001 &631987388
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -72862,23 +72862,22 @@ MonoBehaviour:
   appearance: 2
   waitForIslands: 1
   delayAfterIslands: 0.3
-  topOverride: {fileID: 0}
   lowerOffset: 0
   startPoint: {fileID: 0}
-  moveDuration: 1.2
+  swingAngle: 100
+  slamBounce: 3
   launchHeight: 1.5
-  launchDebris:
-  - {fileID: 7393098362869938263, guid: 5aa1ba37a2b5e2f45afd8a3af127e862, type: 3}
-  - {fileID: 7617200879849885303, guid: e9145b5c228689843b6d6ba2412aff73, type: 3}
-  - {fileID: 379243778788410097, guid: 19388166165474c488a129d8427a779f, type: 3}
-  debrisCount: 24
   launchWarning: 0.6
   launchPushRadius: 3
   launchPushSpeed: 9
   launchShake: 0.04
   launchClip: {fileID: 0}
-  swingAngle: 100
-  slamBounce: 3
+  launchDebris:
+  - {fileID: 7393098362869938263, guid: 5aa1ba37a2b5e2f45afd8a3af127e862, type: 3}
+  - {fileID: 7617200879849885303, guid: e9145b5c228689843b6d6ba2412aff73, type: 3}
+  - {fileID: 379243778788410097, guid: 19388166165474c488a129d8427a779f, type: 3}
+  debrisCount: 24
+  moveDuration: 1.2
   slamShake: 0.05
   landingParticles: {fileID: 0}
   landClip: {fileID: 0}
@@ -72895,6 +72894,7 @@ MonoBehaviour:
     crackClip: {fileID: 0}
     fallClip: {fileID: 0}
     riseClip: {fileID: 0}
+  topOverride: {fileID: 0}
 --- !u!114 &730945072
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -72907,14 +72907,14 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 28bc0d934505a36409b28f0f7632c75e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  blendTime: 0.5
-  colliderChunks: 8
   arch: 0.3
   sCurve: 0
   layOutPlatforms: 1
   platformEndGap: 0.6
   platformHeight: 0
   diveAngle: 55
+  blendTime: 0.5
+  colliderChunks: 8
   weight: 0
 --- !u!1001 &731053884
 PrefabInstance:
@@ -91945,6 +91945,10 @@ PrefabInstance:
     - target: {fileID: 3226923575914045670, guid: f089c2499c1cbb0498c51e07e1b33566, type: 3}
       propertyPath: KeyID
       value: 1B
+      objectReference: {fileID: 0}
+    - target: {fileID: 3226923575914045670, guid: f089c2499c1cbb0498c51e07e1b33566, type: 3}
+      propertyPath: inOrder
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 3226923575914045670, guid: f089c2499c1cbb0498c51e07e1b33566, type: 3}
       propertyPath: cluePainting
@@ -149379,7 +149383,7 @@ PrefabInstance:
   serializedVersion: 2
   m_Modification:
     serializedVersion: 3
-    m_TransformParent: {fileID: 84637338}
+    m_TransformParent: {fileID: 593529899}
     m_Modifications:
     - target: {fileID: 522926820628845222, guid: 2f3f7d4927009b84583c02fcbc509217, type: 3}
       propertyPath: m_RootOrder
@@ -149387,19 +149391,19 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 522926820628845222, guid: 2f3f7d4927009b84583c02fcbc509217, type: 3}
       propertyPath: m_LocalScale.x
-      value: 1.2990005
+      value: 1.2968425
       objectReference: {fileID: 0}
     - target: {fileID: 522926820628845222, guid: 2f3f7d4927009b84583c02fcbc509217, type: 3}
       propertyPath: m_LocalScale.y
-      value: 1.2990004
+      value: 1.1939231
       objectReference: {fileID: 0}
     - target: {fileID: 522926820628845222, guid: 2f3f7d4927009b84583c02fcbc509217, type: 3}
       propertyPath: m_LocalScale.z
-      value: 1.2990004
+      value: 1.1919333
       objectReference: {fileID: 0}
     - target: {fileID: 522926820628845222, guid: 2f3f7d4927009b84583c02fcbc509217, type: 3}
       propertyPath: m_LocalPosition.x
-      value: 29.017
+      value: 1.1109188
       objectReference: {fileID: 0}
     - target: {fileID: 522926820628845222, guid: 2f3f7d4927009b84583c02fcbc509217, type: 3}
       propertyPath: m_LocalPosition.y
@@ -149407,23 +149411,23 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 522926820628845222, guid: 2f3f7d4927009b84583c02fcbc509217, type: 3}
       propertyPath: m_LocalPosition.z
-      value: -3.3859997
+      value: -3.1721156
       objectReference: {fileID: 0}
     - target: {fileID: 522926820628845222, guid: 2f3f7d4927009b84583c02fcbc509217, type: 3}
       propertyPath: m_LocalRotation.w
-      value: 0.5935493
+      value: 0.68094385
       objectReference: {fileID: 0}
     - target: {fileID: 522926820628845222, guid: 2f3f7d4927009b84583c02fcbc509217, type: 3}
       propertyPath: m_LocalRotation.x
-      value: 0.3501107
+      value: 0.20465994
       objectReference: {fileID: 0}
     - target: {fileID: 522926820628845222, guid: 2f3f7d4927009b84583c02fcbc509217, type: 3}
       propertyPath: m_LocalRotation.y
-      value: -0.44146734
+      value: -0.2889805
       objectReference: {fileID: 0}
     - target: {fileID: 522926820628845222, guid: 2f3f7d4927009b84583c02fcbc509217, type: 3}
       propertyPath: m_LocalRotation.z
-      value: -0.5746549
+      value: -0.64103055
       objectReference: {fileID: 0}
     - target: {fileID: 522926820628845222, guid: 2f3f7d4927009b84583c02fcbc509217, type: 3}
       propertyPath: m_LocalEulerAnglesHint.x
@@ -157395,20 +157399,19 @@ MonoBehaviour:
   appearance: 0
   waitForIslands: 1
   delayAfterIslands: 0.3
-  topOverride: {fileID: 0}
   lowerOffset: 0
   startPoint: {fileID: 0}
-  moveDuration: 1.2
+  swingAngle: 100
+  slamBounce: 3
   launchHeight: 1.5
-  launchDebris: []
-  debrisCount: 14
   launchWarning: 0.6
   launchPushRadius: 3
   launchPushSpeed: 9
   launchShake: 0.04
   launchClip: {fileID: 0}
-  swingAngle: 100
-  slamBounce: 3
+  launchDebris: []
+  debrisCount: 14
+  moveDuration: 1.2
   slamShake: 0.05
   landingParticles: {fileID: 0}
   landClip: {fileID: 0}
@@ -157425,6 +157428,7 @@ MonoBehaviour:
     crackClip: {fileID: 0}
     fallClip: {fileID: 0}
     riseClip: {fileID: 0}
+  topOverride: {fileID: 0}
 --- !u!4 &1471182050
 Transform:
   m_ObjectHideFlags: 0
@@ -167206,23 +167210,22 @@ MonoBehaviour:
   appearance: 2
   waitForIslands: 1
   delayAfterIslands: 0.3
-  topOverride: {fileID: 0}
   lowerOffset: -10
   startPoint: {fileID: 0}
-  moveDuration: 1.2
+  swingAngle: 100
+  slamBounce: 3
   launchHeight: 1.5
-  launchDebris:
-  - {fileID: 7393098362869938263, guid: 5aa1ba37a2b5e2f45afd8a3af127e862, type: 3}
-  - {fileID: 7617200879849885303, guid: e9145b5c228689843b6d6ba2412aff73, type: 3}
-  - {fileID: 379243778788410097, guid: 19388166165474c488a129d8427a779f, type: 3}
-  debrisCount: 24
   launchWarning: 0.6
   launchPushRadius: 3
   launchPushSpeed: 9
   launchShake: 0.04
   launchClip: {fileID: 0}
-  swingAngle: 100
-  slamBounce: 3
+  launchDebris:
+  - {fileID: 7393098362869938263, guid: 5aa1ba37a2b5e2f45afd8a3af127e862, type: 3}
+  - {fileID: 7617200879849885303, guid: e9145b5c228689843b6d6ba2412aff73, type: 3}
+  - {fileID: 379243778788410097, guid: 19388166165474c488a129d8427a779f, type: 3}
+  debrisCount: 24
+  moveDuration: 1.2
   slamShake: 0.05
   landingParticles: {fileID: 0}
   landClip: {fileID: 0}
@@ -167239,6 +167242,7 @@ MonoBehaviour:
     crackClip: {fileID: 0}
     fallClip: {fileID: 0}
     riseClip: {fileID: 0}
+  topOverride: {fileID: 0}
 --- !u!114 &1682492658
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -167251,14 +167255,14 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 28bc0d934505a36409b28f0f7632c75e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  blendTime: 0.5
-  colliderChunks: 8
   arch: 0.3
   sCurve: 0
   layOutPlatforms: 1
   platformEndGap: 0.6
   platformHeight: 0
   diveAngle: 55
+  blendTime: 0.5
+  colliderChunks: 8
   weight: 0
 --- !u!1 &1684440674
 GameObject:
@@ -199120,14 +199124,15 @@ MonoBehaviour:
   liftRiseDuration: 3
   liftLowerDuration: 2.5
   liftOvershoot: 0.4
-  islandPrefix: Island_
-  bridgePrefix: Bridge_
-  elevatorPrefix: Elevator_
-  respawnPointName: RespawnPoint
+  sequenceGap: 0.3
   startRespawnPoint: {fileID: 1866690998}
   activateOnPlay:
   - {fileID: 1229787486}
   endingDuration: 10
+  islandPrefix: Island_
+  bridgePrefix: Bridge_
+  elevatorPrefix: Elevator_
+  respawnPointName: RespawnPoint
 --- !u!64 &2142791829
 MeshCollider:
   m_ObjectHideFlags: 0
@@ -203838,20 +203843,19 @@ MonoBehaviour:
   appearance: 0
   waitForIslands: 0
   delayAfterIslands: 0.3
-  topOverride: {fileID: 457766846}
   lowerOffset: -73
   startPoint: {fileID: 0}
-  moveDuration: 1.2
+  swingAngle: 100
+  slamBounce: 3
   launchHeight: 1.5
-  launchDebris: []
-  debrisCount: 14
   launchWarning: 0.6
   launchPushRadius: 3
   launchPushSpeed: 9
   launchShake: 0.04
   launchClip: {fileID: 0}
-  swingAngle: 100
-  slamBounce: 3
+  launchDebris: []
+  debrisCount: 14
+  moveDuration: 1.2
   slamShake: 0.05
   landingParticles: {fileID: 0}
   landClip: {fileID: 0}
@@ -203868,6 +203872,7 @@ MonoBehaviour:
     crackClip: {fileID: 0}
     fallClip: {fileID: 0}
     riseClip: {fileID: 0}
+  topOverride: {fileID: 457766846}
 --- !u!1 &3924657055092474348
 GameObject:
   m_ObjectHideFlags: 0
@@ -211939,21 +211944,22 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   KeylessPedestal: 1
   KeyID: 
-  pedestalID: 
   ControlledIslands: []
   ControlledBridges:
   - Tutorial
+  inOrder: 0
   groupID: 
   cluePainting: {fileID: 0}
-  socket: {fileID: 6550854910321787551}
-  visualKeyed: {fileID: 7653041071600983024}
-  visualKeyless: {fileID: 5875341168680392436}
   chargeClip: {fileID: 8300000, guid: 965f3244f5f8362419082390ab3e24c2, type: 3}
   correctClip: {fileID: 8300000, guid: 708aa9b78c6214e49a245c4f88139d62, type: 3}
   incorrectClip: {fileID: 8300000, guid: 15c2f96a00068b0469720d72634f0a85, type: 3}
   snapClip: {fileID: 8300000, guid: 8069a62e7b897a14393029d89482ec73, type: 3}
   breakClip: {fileID: 0}
   toppleTime: 0.7
+  socket: {fileID: 6550854910321787551}
+  visualKeyed: {fileID: 7653041071600983024}
+  visualKeyless: {fileID: 5875341168680392436}
+  pedestalID: 
 --- !u!135 &6550854911303881343
 SphereCollider:
   m_ObjectHideFlags: 0

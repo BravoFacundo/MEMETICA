@@ -15,36 +15,32 @@ public class PlayerLook : MonoBehaviour
 {
     private Transform playerTransform;
     
-    [Header("Player Look")]
+    [Section("Look")]
     public bool playerCanLook = true;   // the game starts looking (tutorial popups no longer block it)
     [Tooltip("Base sensitivity: the value at the middle of the settings slider (the slider scales it x0.25 to x4)")]
     public float mouseSensitivity = 3f;
     private float sensitivityMultiplier = 1f;   // from the settings window
     private float sensitivityReduction = 1;
     private float xRotation = 0f;
-    
-    [Header("Player Zoom")]
-    [SerializeField] private bool isZooming = false;
+
+    [Section("Zoom")]
     [SerializeField] private float zoomingSpeed = 5;
     [SerializeField] private int defaultFOV = 90;
     [SerializeField] private int zoomFOV = 20;
 
-    [Header("Hold Memes")]
+    [Section("Hold Memes")]
     public bool canHold = true;
     public float pickUpRange = 2.5f;
     public float moveForce = 250;
     [Tooltip("The held meme never gets closer to the camera than this (meters), so it doesn't hit your face or cross the near clip plane")]
     public float minHoldDistance = 0.6f;
-    public GameObject heldObject;
-    public bool FueAgarrada = false;   // stays on after snapping to a pedestal (PlayerMove keeps tracking bridges and islands)
     private Transform holdParent;
     private Rigidbody heldBody;
     private Collider[] heldColliders;
     private Collider playerCollider;
 
-    [Header("Paintings")]
+    [Section("Paintings")]
     [SerializeField] private float paintingLookRange = 10f;
-    [SerializeField] private bool clueSolved;   // debug: the painting's pedestal is solved
     private Transform currentPainting;
     private VideoPlayer paintingVideo;
     private AudioSource paintingAudio;
@@ -52,17 +48,22 @@ public class PlayerLook : MonoBehaviour
 
     private Camera playerCamera;
 
-    [Header("Camera Smoothing")]
+    [Section("Camera")]
     [Tooltip("Seconds the camera takes to catch up when the body pops in height (bumps riding rising islands, steps, rough ground). 0 = off. What the ground carries is never smoothed")]
     public float cameraSmoothTime = 0.08f;
     [Tooltip("Max meters the camera can lag behind the body")]
     public float cameraMaxLag = 0.25f;
     private float cameraLag;   // meters the camera is behind the body (vertical)
     private float lastBodyHeight;
-
-    [Header("Camera Shake")]
     [Tooltip("How fast the shake wobbles. Lower = slow rumble, higher = buzz")]
     public float shakeFrequency = 18f;
+
+    [Section("Debug", Closed = true)]
+    [ReadOnlyField, SerializeField] private bool isZooming = false;
+    [ReadOnlyField] public GameObject heldObject;
+    [ReadOnlyField] public bool FueAgarrada = false;   // stays on after snapping to a pedestal (PlayerMove keeps tracking bridges and islands)
+    [ReadOnlyField, SerializeField] private bool clueSolved;   // the painting's pedestal is solved
+
     private Vector3 cameraRestPosition;
     private Vector3 shakeOffset;
 

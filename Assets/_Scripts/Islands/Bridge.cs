@@ -5,79 +5,76 @@ using UnityEngine.Serialization;
 // Bridge: appears when its pedestal is solved and goes away when the meme is taken off.
 // It waits until the islands that are rising have arrived, so it always connects to something that is there.
 //   Rise From Below  the whole bridge rises from the void, passes the top a little and settles (see Lift)
-//   Swing Up         hinged at the end next to the pedestal: it swings up from below and slams onto the other side
 //   Extend From A    hidden in island A, it comes out of one spot (anchor A, like a hole: debris flying) like a dolphin:
 //                    the whole bridge follows one arc above its place, then settles onto anchor B and slams (needs a BridgeBend)
 // Place it in its final place, from island to island: that is where it ends up.
-// Bridge ends: the two far ends of everything visible in it; the start is the end closest to the pedestal
-// (or Start Point if assigned). With Swing Up its colliders turn on when it lands.
+// Bridge ends: the two far ends of everything visible in it (used when an anchor is missing).
 // Anchors: one at each end, inside each island's floating part (right click > Create Anchors).
 // With a BridgeBend, the bridge bends between them so its ends stay on the islands while they float.
 // It also owns the settings of its falling platforms (each platform can override them).
 public class Bridge : Lift
 {
-    public enum Appearance { RiseFromBelow, SwingUp, ExtendFromA }
+    // Numbers fixed: they are what the scene saves (1 was Swing Up, removed)
+    public enum Appearance { RiseFromBelow = 0, ExtendFromA = 2 }
 
-    [Header("Appearance")]
+    [Section("Appearance")]
     public Appearance appearance = Appearance.RiseFromBelow;
     [Tooltip("Waits until the rising islands arrive before appearing")]
     public bool waitForIslands = true;
     [Tooltip("Seconds after the islands arrive")]
-    public float delayAfterIslands = 0.3f;
-    [Tooltip("Optional: rises up to this object's height instead of where it is placed (the tutorial bridge uses it)")]
-    public Transform topOverride;
-    [Tooltip("Rise From Below: meters above the lowest point where it waits")]
-    [FormerlySerializedAs("offset")] public float lowerOffset = 0f;
-    [Tooltip("Swing Up: optional hinge end. Empty = the end closest to the pedestal that activated it")]
-    [FormerlySerializedAs("assembleFrom")] public Transform startPoint;
+    [ShowIf(nameof(waitForIslands))] public float delayAfterIslands = 0.3f;
 
-    [Header("Swing Up / Extend From A")]
-    [Tooltip("Seconds to swing or slide into place")]
-    public float moveDuration = 1.2f;
-    [Tooltip("Extend From A: meters the arc it flies along rises above its place (in the middle)")]
+    [Section("Rise From Below", nameof(appearance), Appearance.RiseFromBelow)]
+    [Tooltip("Meters above the lowest point where it waits")]
+    [FormerlySerializedAs("offset")] public float lowerOffset = 0f;
+
+    [Section("Extend From A", nameof(appearance), Appearance.ExtendFromA)]
+    [Tooltip("Meters the arc it flies along rises above its place (in the middle)")]
     public float launchHeight = 1.5f;
-    [Tooltip("Extend From A: pieces that break off island A when it bursts out (small rock and grass prefabs)")]
-    public GameObject[] launchDebris;
-    public int debrisCount = 14;
-    [Tooltip("Extend From A: seconds the ground shakes at anchor A before it bursts out (a warning)")]
+    [Tooltip("Seconds the ground shakes at anchor A before it bursts out (a warning)")]
     public float launchWarning = 0.6f;
-    [Tooltip("Extend From A: meters around anchor A where the burst throws the player. In front of it: off into the void; anywhere else: back")]
+    [Tooltip("Meters around anchor A where the burst throws the player. In front of it: off into the void; anywhere else: back")]
     public float launchPushRadius = 3f;
-    [Tooltip("Extend From A: speed the player is thrown at (m/s)")]
+    [Tooltip("Speed the player is thrown at (m/s)")]
     public float launchPushSpeed = 9f;
-    [Tooltip("Extend From A: camera shake when it bursts out. 0 = off")]
+    [Tooltip("Camera shake when it bursts out. 0 = off")]
     public float launchShake = 0.04f;
     public AudioClip launchClip;
-    [Tooltip("Degrees it hangs below before swinging up")]
-    public float swingAngle = 100f;
-    [Tooltip("Degrees it bounces back after slamming. 0 = no bounce")]
-    public float slamBounce = 3f;
+    [Tooltip("Pieces that break off island A when it bursts out (small rock and grass prefabs)")]
+    public GameObject[] launchDebris;
+    public int debrisCount = 14;
+
+    [Tooltip("Seconds to fly into place")]
+    public float moveDuration = 1.2f;
     [Tooltip("Camera shake when it slams. 0 = off")]
     public float slamShake = 0.05f;
     [Tooltip("Optional particles where it slams")]
     public ParticleSystem landingParticles;
     public AudioClip landClip;
 
-    [Header("Anchors")]
+    [Section("Anchors")]
     [Tooltip("End on one island. With both anchors, the bridge follows the islands while they float")]
     public Transform anchorA;
     [Tooltip("End on the other island")]
     public Transform anchorB;
 
-    [Header("Falling Platforms")]
+    [Section("Falling Platforms", Closed = true)]
     [Tooltip("Settings for every falling platform in this bridge (a platform can override them)")]
     public FallingPlatformSettings platformSettings = new FallingPlatformSettings();
+
+    [Section("Advanced", Closed = true)]
+    [Tooltip("Optional: rises up to this object's height instead of where it is placed (the tutorial bridge uses it)")]
+    public Transform topOverride;
 
     private Renderer[] allRenderers;
     private Collider[] allColliders;
     private Vector3 finalPosition;
     private Quaternion finalRotation;
-    private Vector3 lastOrigin;
     private Vector3 endA, endB;   // the two far ends in its final place, measured once at Start
 
     // Waiting for its islands before appearing
     public bool IsWaiting { get; private set; }
-    // From Raise until it has appeared (waiting, swinging, extending; Rise From Below: also see IsMoving)
+    // From Raise until it has appeared (waiting, extending; Rise From Below: also see IsMoving)
     public bool IsAppearing { get; private set; }
 
     // Where it ends when it appears (BridgeBend bends toward the anchors as seen from there, so every animation lands on the curve)
@@ -104,13 +101,6 @@ public class Bridge : Lift
 
     //---- Called by the LevelManager
 
-    // origin: where the activation came from (the pedestal), to know which end is the hinge
-    public void Raise(Vector3 origin)
-    {
-        lastOrigin = origin;
-        Raise();
-    }
-
     public override void Raise()
     {
         if (IsUp) return;
@@ -128,7 +118,6 @@ public class Bridge : Lift
         IsWaiting = false;
         IsAppearing = false;
         if (appearance == Appearance.RiseFromBelow) StartMove(BottomY, LowerDuration, false);
-        else if (appearance == Appearance.SwingUp) StartCoroutine(SwingRoutine(false));
         else StartCoroutine(ExtendRoutine(false));
     }
 
@@ -194,7 +183,6 @@ public class Bridge : Lift
         }
 
         if (appearance == Appearance.RiseFromBelow) StartMove(TopY, RiseDuration, true);
-        else if (appearance == Appearance.SwingUp) yield return SwingRoutine(true);
         else yield return ExtendRoutine(true);
         IsAppearing = false;
     }
@@ -274,54 +262,6 @@ public class Bridge : Lift
         }
     }
 
-    //---- Swing Up
-
-    IEnumerator SwingRoutine(bool appearing)
-    {
-        GetEnds(out Vector3 start, out Vector3 end);
-        Vector3 axis = HingeAxis(start, end);
-        if (appearing) SetVisible(true, false);
-        else SetSolid(false);   // whoever stands on it falls
-
-        // Appearing: accelerates into the slam. Going away: starts slow, speeds up into the void
-        for (float t = 0f; t < moveDuration; t += Time.deltaTime)
-        {
-            float p = t / Mathf.Max(moveDuration, 0.01f);
-            float hanging = appearing ? 1f - p * p : p * p;   // 1 = hanging below, 0 = in place
-            PoseRotatedAround(start, Quaternion.AngleAxis(swingAngle * hanging, axis));
-            yield return null;
-        }
-
-        if (!appearing) { SetVisible(false); ResetPose(); yield break; }
-
-        ResetPose();
-        SetSolid(true);
-        Land(end);
-
-        // Small bounce after the slam
-        if (slamBounce > 0f)
-        {
-            for (float t = 0f; t < 0.25f; t += Time.deltaTime)
-            {
-                PoseRotatedAround(start, Quaternion.AngleAxis(-slamBounce * Mathf.Sin(t / 0.25f * Mathf.PI), axis));
-                yield return null;
-            }
-            ResetPose();
-        }
-    }
-
-    // Axis of the hinge at the start end: horizontal, across the bridge. Positive angles hang it down
-    static Vector3 HingeAxis(Vector3 start, Vector3 end)
-    {
-        Vector3 direction = end - start; direction.y = 0f;
-        return Vector3.Cross(Vector3.up, direction.normalized);
-    }
-
-    void PoseRotatedAround(Vector3 pivot, Quaternion rotation)
-    {
-        transform.SetPositionAndRotation(pivot + rotation * (finalPosition - pivot), rotation * finalRotation);
-    }
-
     void ResetPose() => transform.SetPositionAndRotation(finalPosition, finalRotation);
 
     void MeasureEnds()
@@ -364,15 +304,6 @@ public class Bridge : Lift
         Vector2 start = mean + axis * min, end = mean + axis * max;
         a = new Vector3(start.x, 0f, start.y);
         b = new Vector3(end.x, 0f, end.y);
-    }
-
-    // The start (hinge) is the end closest to the pedestal (or Start Point), the other one is where it lands
-    void GetEnds(out Vector3 start, out Vector3 end)
-    {
-        Vector3 reference = startPoint != null ? startPoint.position : lastOrigin;
-        bool aFirst = (endA - reference).sqrMagnitude <= (endB - reference).sqrMagnitude;
-        start = startPoint != null ? startPoint.position : (aFirst ? endA : endB);
-        end = aFirst ? endB : endA;
     }
 
     //---- Shared

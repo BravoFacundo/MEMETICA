@@ -6,7 +6,7 @@ using UnityEngine;
 // At the end of the game every island falls away (FallAway).
 public class Island : Lift
 {
-    [Header("Island")]
+    [Section("Island")]
     [Tooltip("Already up when the game starts (Island_01, the tutorial). Off: it goes down at start and rises when its pedestal is solved")]
     public bool startRaised = false;
     [Tooltip("Camera shake while it moves. 0 = off")]

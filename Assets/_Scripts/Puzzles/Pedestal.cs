@@ -14,41 +14,38 @@ using UnityEngine;
 [RequireComponent(typeof(AudioSource), typeof(SphereCollider))]
 public class Pedestal : MonoBehaviour
 {
-    [Header("Tipo")]
-    [Tooltip("Negro (piedra): acepta cualquier meme. Blanco (mármol): necesita la llave.")]
+    [Section("Key")]
+    [Tooltip("Black (stone): takes any meme. White (marble): needs the key")]
     public bool KeylessPedestal = false;
-    [Tooltip("El meme es correcto si su ID empieza con esto (Meme_3Aa → ID 3Aa)")]
-    public string KeyID;
-    public string pedestalID;
+    [Tooltip("The meme is right if its ID starts with this (Meme_3Aa → ID 3Aa)")]
+    [ShowIf(nameof(KeylessPedestal), false)] public string KeyID;
 
-    [Header("Qué controla")]
+    [Section("What It Raises")]
     public string[] ControlledIslands;
     public string[] ControlledBridges;
     [Tooltip("One after the other, in list order: islands first (each after the previous arrives), then bridges. Off: all at once")]
     public bool inOrder = false;
 
-    [Header("Grupo enlazado (opcional)")]
+    [Section("Group & Clue")]
     [Tooltip("Pedestals with the same Group ID complete together when all of them have a meme. Empty = no group")]
     public string groupID;
-
-    [Header("Pista")]
     [Tooltip("The painting (easel) that gives the clue for this pedestal (before: Atril)")]
     public Transform cluePainting;
 
-    [Header("Partes")]
-    public Transform socket;
-    public GameObject visualKeyed;
-    public GameObject visualKeyless;
-
-    [Header("Sonidos")]
+    [Section("Sounds", Closed = true)]
     public AudioClip chargeClip;
     public AudioClip correctClip;
     public AudioClip incorrectClip;
     public AudioClip snapClip;
 
-    [Header("Romperse (solo el pedestal del ascensor)")]
+    [Section("Break (elevator pedestal)", Closed = true)]
     public AudioClip breakClip;       // golpe al tocar el piso
     public float toppleTime = 0.7f;   // cuánto tarda en volcarse
+
+    [Section("References", Closed = true)]
+    public Transform socket;
+    public GameObject visualKeyed;
+    public GameObject visualKeyless;
 
     // Estado (solo lectura desde afuera)
     public GameObject MemeObject { get; private set; }
@@ -192,11 +189,11 @@ public class Pedestal : MonoBehaviour
     {
         IsCorrect = true;
         Play(correctClip);
-        if (inOrder) LevelManager.Instance.RaiseInOrder(ControlledIslands, ControlledBridges, socket.position);
+        if (inOrder) LevelManager.Instance.RaiseInOrder(ControlledIslands, ControlledBridges);
         else
         {
             foreach (string id in ControlledIslands) LevelManager.Instance.SubirIsla(id);
-            foreach (string id in ControlledBridges) LevelManager.Instance.SubirPuente(id, socket.position);
+            foreach (string id in ControlledBridges) LevelManager.Instance.SubirPuente(id);
         }
         if (CurrentMeme != null) CurrentMeme.OnPedestalResult(this, true);
     }

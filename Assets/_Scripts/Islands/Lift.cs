@@ -9,15 +9,13 @@ using UnityEngine;
 // fall height (Top Y - Bottom Y) below it. So islands and bridges can be designed and tested all up.
 public abstract class Lift : MonoBehaviour
 {
-    [Header("Lift Timing")]
+    [Section("Rise & Fall")]
     [Tooltip("Off: uses the LevelManager values. On: the values below")]
     public bool overrideTiming = false;
-    public float riseDuration = 3f;
-    public float lowerDuration = 2.5f;
+    [ShowIf(nameof(overrideTiming))] public float riseDuration = 3f;
+    [ShowIf(nameof(overrideTiming))] public float lowerDuration = 2.5f;
     [Tooltip("Meters it passes the top before settling")]
-    public float overshoot = 0.4f;
-
-    [Header("Lift Sounds")]
+    [ShowIf(nameof(overrideTiming))] public float overshoot = 0.4f;
     public AudioClip riseClip;
     public AudioClip arriveClip;
 

@@ -18,32 +18,32 @@ using UnityEngine.Rendering;
 [RequireComponent(typeof(Bridge))]
 public class BridgeBend : MonoBehaviour
 {
-    [Header("Configuration")]
-    [Tooltip("Seconds the bend takes to fade in when the bridge starts appearing (and out when it leaves)")]
-    public float blendTime = 0.5f;
-    [Tooltip("Pieces the collision is cut into along the bridge. More = follows the bend closer")]
-    public int colliderChunks = 8;
-
-    [Header("Curve")]
+    [Section("Curve")]
     [Tooltip("Meters the middle rises above the straight line between the anchors. Negative = it sags")]
     public float arch = 0.3f;
     [Tooltip("S shape: meters the first half goes up and the second half down (negative = the other way). 0 = a single curve")]
     public float sCurve = 0f;
 
-    [Header("Falling Platforms")]
+    [Section("Falling Platforms")]
     [Tooltip("On: laid out evenly along the curve, the first next to anchor A and the last next to anchor B. Off: each keeps its designed place, bent with the bridge")]
     public bool layOutPlatforms = true;
     [Tooltip("Meters along the curve from each anchor to the first and the last platform")]
-    public float platformEndGap = 0.6f;
+    [ShowIf(nameof(layOutPlatforms))] public float platformEndGap = 0.6f;
     [Tooltip("Height of each platform's center over the curve (negative = under it)")]
-    public float platformHeight = 0f;
+    [ShowIf(nameof(layOutPlatforms))] public float platformHeight = 0f;
 
-    [Header("Appearing (Bridge: Extend From A)")]
+    [Section("Extend From A")]
     [Tooltip("Degrees below the horizontal the hidden part goes down into island A: the bridge comes out of (and goes back into) one spot, like a hole")]
     public float diveAngle = 55f;
 
-    [Header("Debug")]
-    [SerializeField] private float weight;
+    [Section("Advanced", Closed = true)]
+    [Tooltip("Seconds the bend takes to fade in when the bridge starts appearing (and out when it leaves)")]
+    public float blendTime = 0.5f;
+    [Tooltip("Pieces the collision is cut into along the bridge. More = follows the bend closer")]
+    public int colliderChunks = 8;
+
+    [Section("Debug", Closed = true)]
+    [ReadOnlyField, SerializeField] private float weight;
 
     class BentMesh
     {

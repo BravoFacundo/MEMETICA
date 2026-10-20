@@ -19,17 +19,14 @@ public class LevelManager : MonoBehaviour
 {
     public static LevelManager Instance { get; private set; }
 
-    [Header("ALTURAS")]
-    [Tooltip("Hasta dónde suben islas, puentes y ascensores (antes: MasterPivot)")]
+    [Section("Heights")]
+    [Tooltip("Islands and bridges wait (Top Y - Bottom Y) below where they are placed")]
     public float topY = 0f;
-    [Tooltip("Hasta dónde bajan al caer (antes: LimiteCaida)")]
     public float bottomY = -30f;
-
-    [Header("CAÍDAS")]
-    [Tooltip("Metros por debajo del último piso pisado para considerar que cayó al vacío (antes: Cage)")]
+    [Tooltip("Meters below the last ground stepped on to count as a fall into the void (before: Cage)")]
     public float fallDistance = 20f;
 
-    [Header("LIFT (islas y puentes)")]
+    [Section("Lift (islands and bridges)")]
     [Tooltip("Seconds an island or bridge takes to rise, however far it travels")]
     public float liftRiseDuration = 3f;
     [Tooltip("Seconds a bridge takes to go back down")]
@@ -39,24 +36,20 @@ public class LevelManager : MonoBehaviour
     [Tooltip("Pedestals with In Order: seconds between one thing arriving and the next one starting")]
     public float sequenceGap = 0.3f;
 
-    [Header("NOMBRES (convención Tipo_ID)")]
+    [Section("Game")]
+    [Tooltip("Where everything reappears at the start: the RespawnPoint of the tutorial island")]
+    public Transform startRespawnPoint;
+    [Tooltip("Objects you can turn off in the editor to see better (e.g. Clouds_HideIslands): they are turned on when the game starts")]
+    public GameObject[] activateOnPlay;
+    [Tooltip("Seconds the islands fall before the game closes")]
+    public float endingDuration = 10f;
+
+    [Section("Names (Type_ID)", Closed = true)]
     public string islandPrefix = "Island_";
     public string bridgePrefix = "Bridge_";
     public string elevatorPrefix = "Elevator_";
-    [Tooltip("Nombre del hijo de cada isla donde se reaparece")]
+    [Tooltip("Name of the child of each island where things reappear")]
     public string respawnPointName = "RespawnPoint";
-
-    [Header("REFERENCIAS")]
-    [Tooltip("Donde reaparece todo al empezar: el RespawnPoint de la isla del tutorial")]
-    public Transform startRespawnPoint;
-
-    [Header("ON IN THE GAME")]
-    [Tooltip("Objects you can turn off in the editor to see better (e.g. Clouds_HideIslands): they are turned on when the game starts")]
-    public GameObject[] activateOnPlay;
-
-    [Header("FIN DEL JUEGO")]
-    [Tooltip("Segundos que caen las islas antes de cerrar el juego")]
-    public float endingDuration = 10f;
 
     // Se arman solas al empezar, buscando los scripts en la escena
     private readonly Dictionary<string, Island> islands = new Dictionary<string, Island>();
@@ -88,17 +81,16 @@ public class LevelManager : MonoBehaviour
         }
     }
 
-    // origin: where the activation came from (the pedestal), so an assembling bridge builds from that end
-    public void SubirPuente(string id, Vector3 origin)
+    public void SubirPuente(string id)
     {
-        if (TryGet(bridges, bridgePrefix + id, out Bridge puente)) puente.Raise(origin);
+        if (TryGet(bridges, bridgePrefix + id, out Bridge puente)) puente.Raise();
     }
 
     // Pedestal with In Order: each island (or elevator) rises after the previous one arrived, then each bridge
     // appears after the previous one is in place. Lists in the order they should happen
-    public void RaiseInOrder(string[] islandIds, string[] bridgeIds, Vector3 origin) => StartCoroutine(InOrder(islandIds, bridgeIds, origin));
+    public void RaiseInOrder(string[] islandIds, string[] bridgeIds) => StartCoroutine(InOrder(islandIds, bridgeIds));
 
-    IEnumerator InOrder(string[] islandIds, string[] bridgeIds, Vector3 origin)
+    IEnumerator InOrder(string[] islandIds, string[] bridgeIds)
     {
         foreach (string id in islandIds)
         {
@@ -110,7 +102,7 @@ public class LevelManager : MonoBehaviour
         }
         foreach (string id in bridgeIds)
         {
-            SubirPuente(id, origin);
+            SubirPuente(id);
             yield return null;
             if (TryGet(bridges, bridgePrefix + id, out Bridge puente)) while (puente.IsAppearing || puente.IsMoving) yield return null;
             yield return new WaitForSeconds(sequenceGap);
@@ -143,12 +135,6 @@ public class LevelManager : MonoBehaviour
             foreach (Island isla in islands.Values) if (isla.IsMoving) return true;
             return false;
         }
-    }
-
-    // La isla con ese ID (por ejemplo "1" → Island_1), o null
-    public GameObject GetIsland(string id)
-    {
-        return TryGet(islands, islandPrefix + id, out Island isla) ? isla.gameObject : null;
     }
 
     // The island's respawn point (any child named RespawnPoint, at any depth), or null
