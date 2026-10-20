@@ -7530,9 +7530,6 @@ MonoBehaviour:
   waitForIslands: 1
   delayAfterIslands: 0.3
   lowerOffset: 0
-  startPoint: {fileID: 0}
-  swingAngle: 100
-  slamBounce: 3
   launchHeight: 1.5
   launchWarning: 0.6
   launchPushRadius: 3
@@ -13469,9 +13466,6 @@ MonoBehaviour:
   waitForIslands: 1
   delayAfterIslands: 0.3
   lowerOffset: 0
-  startPoint: {fileID: 0}
-  swingAngle: 100
-  slamBounce: 3
   launchHeight: 1.5
   launchWarning: 0.6
   launchPushRadius: 3
@@ -18560,7 +18554,7 @@ GameObject:
   - component: {fileID: 163665296}
   - component: {fileID: 163665295}
   m_Layer: 2
-  m_Name: Painting
+  m_Name: Image
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -26418,9 +26412,6 @@ MonoBehaviour:
   waitForIslands: 1
   delayAfterIslands: 0.3
   lowerOffset: 0
-  startPoint: {fileID: 0}
-  swingAngle: 100
-  slamBounce: 3
   launchHeight: 1.5
   launchWarning: 0.6
   launchPushRadius: 3
@@ -27096,17 +27087,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b0f4871ca7d54fc4f947f36942d7a16a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  restDelay: 3
-  groundCheckRadius: 0.6
-  meteorHeight: 25
-  meteorDrift: 10
-  meteorDuration: 1.1
-  landingRadius: 4
-  pedestalClearance: 3
-  meteorColor: {r: 1, g: 0.75, b: 0.35, a: 1}
-  impactDebris: []
-  impactDebrisCount: 10
-  impactClip: {fileID: 0}
   Player: {fileID: 0}
   materials:
   - {fileID: 2100000, guid: fe6b3e0908a8a2e47bd12cb8ee4d78bf, type: 2}
@@ -27114,17 +27094,6 @@ MonoBehaviour:
   - {fileID: 2100000, guid: 7c377d00fc2e61c49bf6851e226e6fad, type: 2}
   - {fileID: 2100000, guid: 6f4d38918c379bc449859f013458c59d, type: 2}
   matCount: 0
-  warnClip: {fileID: 8300000, guid: 1c7ed042ff75e17419921e1d0d6130e3, type: 3}
-  changeClip: {fileID: 8300000, guid: db64e738f22ef4945834da5b19582892, type: 3}
-  returnClip: {fileID: 8300000, guid: 995437a5722e2e147860694c5eb19ad1, type: 3}
-  sweepTickClip: {fileID: 8300000, guid: 8f16159e82a5f4645a1686d7878244cf, type: 3}
-  firstChangeAfter: 3
-  changeInterval: {x: 4, y: 8}
-  variantDuration: {x: 1.5, y: 2.5}
-  warnLead: 0.6
-  graceAfterEvent: 1
-  flashIntensity: 2
-  sweepPortion: 0.75
 --- !u!54 &270262298
 Rigidbody:
   m_ObjectHideFlags: 0
@@ -27812,17 +27781,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b0f4871ca7d54fc4f947f36942d7a16a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  restDelay: 3
-  groundCheckRadius: 0.6
-  meteorHeight: 25
-  meteorDrift: 10
-  meteorDuration: 1.1
-  landingRadius: 4
-  pedestalClearance: 3
-  meteorColor: {r: 1, g: 0.75, b: 0.35, a: 1}
-  impactDebris: []
-  impactDebrisCount: 10
-  impactClip: {fileID: 0}
   Player: {fileID: 0}
   materials:
   - {fileID: 2100000, guid: 082c5885416efec4084d933b134ee544, type: 2}
@@ -27831,17 +27789,6 @@ MonoBehaviour:
   - {fileID: 2100000, guid: 65c6c11ca18d1df40bc460b220cd9e84, type: 2}
   - {fileID: 2100000, guid: 87f8f7adb3458cf46b18286743d3bd50, type: 2}
   matCount: 0
-  warnClip: {fileID: 8300000, guid: 1c7ed042ff75e17419921e1d0d6130e3, type: 3}
-  changeClip: {fileID: 8300000, guid: db64e738f22ef4945834da5b19582892, type: 3}
-  returnClip: {fileID: 8300000, guid: 995437a5722e2e147860694c5eb19ad1, type: 3}
-  sweepTickClip: {fileID: 8300000, guid: 8f16159e82a5f4645a1686d7878244cf, type: 3}
-  firstChangeAfter: 3
-  changeInterval: {x: 4, y: 8}
-  variantDuration: {x: 1.5, y: 2.5}
-  warnLead: 0.6
-  graceAfterEvent: 1
-  flashIntensity: 2
-  sweepPortion: 0.75
 --- !u!54 &306690107
 Rigidbody:
   m_ObjectHideFlags: 0
@@ -63758,9 +63705,6 @@ MonoBehaviour:
   waitForIslands: 1
   delayAfterIslands: 0.3
   lowerOffset: 0
-  startPoint: {fileID: 0}
-  swingAngle: 100
-  slamBounce: 3
   launchHeight: 1.5
   launchWarning: 0.6
   launchPushRadius: 3
@@ -69890,9 +69834,6 @@ MonoBehaviour:
   waitForIslands: 1
   delayAfterIslands: 0.3
   lowerOffset: 0
-  startPoint: {fileID: 0}
-  swingAngle: 100
-  slamBounce: 3
   launchHeight: 1.5
   launchWarning: 0.6
   launchPushRadius: 3
@@ -72863,9 +72804,6 @@ MonoBehaviour:
   waitForIslands: 1
   delayAfterIslands: 0.3
   lowerOffset: 0
-  startPoint: {fileID: 0}
-  swingAngle: 100
-  slamBounce: 3
   launchHeight: 1.5
   launchWarning: 0.6
   launchPushRadius: 3
@@ -100874,7 +100812,7 @@ GameObject:
   - component: {fileID: 961894819}
   - component: {fileID: 961894822}
   m_Layer: 2
-  m_Name: Painting
+  m_Name: Image
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -119148,7 +119086,7 @@ GameObject:
   - component: {fileID: 1075741897}
   - component: {fileID: 1075741896}
   m_Layer: 2
-  m_Name: Imagen (3)
+  m_Name: Image
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -142618,6 +142556,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 1193274163}
+  - component: {fileID: 1193274164}
   m_Layer: 0
   m_Name: Painting
   m_TagString: Untagged
@@ -142643,6 +142582,31 @@ Transform:
   - {fileID: 1112547270}
   m_Father: {fileID: 1076672616}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1193274164
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1193274162}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 059a82fd5ea44d23a782843f1cca3e6b, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  frame: {fileID: 2800000, guid: 6aa5999e1a73468da51f3c0e0f836fc5, type: 3}
+  mirrorX: 1
+  mirrorY: 0
+  paintEdge: 0.5
+  thinPaint: 0.35
+  canvasColor: {r: 0.93, g: 0.92, b: 0.89, a: 1}
+  clothScale: 4
+  weave: 0.2
+  brushStrokes: 0.15
+  strokeSize: 0.25
+  relief: 0.5
+  board: {fileID: 2077065516201055382}
+  image: {fileID: 163665293}
 --- !u!1 &1196684155
 GameObject:
   m_ObjectHideFlags: 0
@@ -147832,6 +147796,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 1367615644}
+  - component: {fileID: 1367615645}
   m_Layer: 6
   m_Name: Painting
   m_TagString: Untagged
@@ -147857,6 +147822,31 @@ Transform:
   - {fileID: 225840116}
   m_Father: {fileID: 888874331}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1367615645
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1367615643}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 059a82fd5ea44d23a782843f1cca3e6b, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  frame: {fileID: 2800000, guid: 35114833ffb5409fad1ae040e7e7bee6, type: 3}
+  mirrorX: 1
+  mirrorY: 0
+  paintEdge: 0.26
+  thinPaint: 0.35
+  canvasColor: {r: 0.93, g: 0.92, b: 0.89, a: 1}
+  clothScale: 4
+  weave: 0.2
+  brushStrokes: 0.15
+  strokeSize: 0.25
+  relief: 0.5
+  board: {fileID: 209190644967728264}
+  image: {fileID: 961894816}
 --- !u!1 &1368146468 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 5070447678188584016, guid: fb72e3a55f4f3f844858ec5895b57046, type: 3}
@@ -155457,6 +155447,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 1462781593}
+  - component: {fileID: 1462781594}
   m_Layer: 6
   m_Name: Painting
   m_TagString: Untagged
@@ -155482,6 +155473,31 @@ Transform:
   - {fileID: 1532964082}
   m_Father: {fileID: 165005546}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1462781594
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1462781592}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 059a82fd5ea44d23a782843f1cca3e6b, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  frame: {fileID: 2800000, guid: e0f2243a6a1b4a0486537d0d7ca59077, type: 3}
+  mirrorX: 0
+  mirrorY: 0
+  paintEdge: 0.517
+  thinPaint: 0.36
+  canvasColor: {r: 0.93, g: 0.92, b: 0.89, a: 1}
+  clothScale: 4
+  weave: 0.2
+  brushStrokes: 0.15
+  strokeSize: 0.25
+  relief: 0.5
+  board: {fileID: 1321406670604011173}
+  image: {fileID: 1935266563}
 --- !u!4 &1464996928 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 1805616374771606476, guid: 94c51fd839663604fa1027f8f1329fe2, type: 3}
@@ -157400,9 +157416,6 @@ MonoBehaviour:
   waitForIslands: 1
   delayAfterIslands: 0.3
   lowerOffset: 0
-  startPoint: {fileID: 0}
-  swingAngle: 100
-  slamBounce: 3
   launchHeight: 1.5
   launchWarning: 0.6
   launchPushRadius: 3
@@ -167211,9 +167224,6 @@ MonoBehaviour:
   waitForIslands: 1
   delayAfterIslands: 0.3
   lowerOffset: -10
-  startPoint: {fileID: 0}
-  swingAngle: 100
-  slamBounce: 3
   launchHeight: 1.5
   launchWarning: 0.6
   launchPushRadius: 3
@@ -191865,17 +191875,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b0f4871ca7d54fc4f947f36942d7a16a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  restDelay: 3
-  groundCheckRadius: 0.6
-  meteorHeight: 25
-  meteorDrift: 10
-  meteorDuration: 1.1
-  landingRadius: 4
-  pedestalClearance: 3
-  meteorColor: {r: 1, g: 0.75, b: 0.35, a: 1}
-  impactDebris: []
-  impactDebrisCount: 10
-  impactClip: {fileID: 0}
   Player: {fileID: 0}
   materials:
   - {fileID: 2100000, guid: 1bb30b9c00e06c449a9e097c8d52f599, type: 2}
@@ -191883,17 +191882,6 @@ MonoBehaviour:
   - {fileID: 2100000, guid: 5087ca329f48b0b4aa93a1c59cfd99d3, type: 2}
   - {fileID: 2100000, guid: 733df6b0b11099741a636438fcff6786, type: 2}
   matCount: 0
-  warnClip: {fileID: 8300000, guid: 1c7ed042ff75e17419921e1d0d6130e3, type: 3}
-  changeClip: {fileID: 8300000, guid: db64e738f22ef4945834da5b19582892, type: 3}
-  returnClip: {fileID: 8300000, guid: 995437a5722e2e147860694c5eb19ad1, type: 3}
-  sweepTickClip: {fileID: 8300000, guid: 8f16159e82a5f4645a1686d7878244cf, type: 3}
-  firstChangeAfter: 3
-  changeInterval: {x: 4, y: 8}
-  variantDuration: {x: 1.5, y: 2.5}
-  warnLead: 0.6
-  graceAfterEvent: 1
-  flashIntensity: 2
-  sweepPortion: 0.75
 --- !u!54 &1893306332
 Rigidbody:
   m_ObjectHideFlags: 0
@@ -192845,7 +192833,7 @@ GameObject:
   - component: {fileID: 1935266566}
   - component: {fileID: 1935266565}
   m_Layer: 2
-  m_Name: Painting
+  m_Name: Image
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -198463,17 +198451,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b0f4871ca7d54fc4f947f36942d7a16a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  restDelay: 3
-  groundCheckRadius: 0.6
-  meteorHeight: 25
-  meteorDrift: 10
-  meteorDuration: 1.1
-  landingRadius: 4
-  pedestalClearance: 3
-  meteorColor: {r: 1, g: 0.75, b: 0.35, a: 1}
-  impactDebris: []
-  impactDebrisCount: 10
-  impactClip: {fileID: 0}
   Player: {fileID: 0}
   materials:
   - {fileID: 2100000, guid: d2a1ec7574154804791b1c26fcee5428, type: 2}
@@ -198483,17 +198460,6 @@ MonoBehaviour:
   - {fileID: 2100000, guid: aa86ba64f9895f64a9de83d92aa3f3e8, type: 2}
   - {fileID: 2100000, guid: ecb2db835bd0a2c4bada7d7b9aff8d50, type: 2}
   matCount: 0
-  warnClip: {fileID: 8300000, guid: 1c7ed042ff75e17419921e1d0d6130e3, type: 3}
-  changeClip: {fileID: 8300000, guid: db64e738f22ef4945834da5b19582892, type: 3}
-  returnClip: {fileID: 8300000, guid: 995437a5722e2e147860694c5eb19ad1, type: 3}
-  sweepTickClip: {fileID: 8300000, guid: 8f16159e82a5f4645a1686d7878244cf, type: 3}
-  firstChangeAfter: 3
-  changeInterval: {x: 4, y: 8}
-  variantDuration: {x: 1.5, y: 2.5}
-  warnLead: 0.6
-  graceAfterEvent: 1
-  flashIntensity: 2
-  sweepPortion: 0.75
 --- !u!114 &2121772794
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -199513,6 +199479,7 @@ GameObject:
   - component: {fileID: 4213384578216044604}
   - component: {fileID: 9181683224565740323}
   - component: {fileID: 1631977547}
+  - component: {fileID: 9181683224565740324}
   m_Layer: 0
   m_Name: Painting
   m_TagString: Pintura
@@ -199582,7 +199549,7 @@ MeshRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: -4205986887458705213, guid: 4517a9f6e28238d458674a2c5cf36405, type: 3}
+  - {fileID: 2100000, guid: 8402e631d4974ee5bd7d7c0d8762edda, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -200662,7 +200629,7 @@ MeshRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: -4205986887458705213, guid: 4517a9f6e28238d458674a2c5cf36405, type: 3}
+  - {fileID: 2100000, guid: 8402e631d4974ee5bd7d7c0d8762edda, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -201476,7 +201443,7 @@ MeshRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: -4205986887458705213, guid: 4517a9f6e28238d458674a2c5cf36405, type: 3}
+  - {fileID: 2100000, guid: 8402e631d4974ee5bd7d7c0d8762edda, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -203844,9 +203811,6 @@ MonoBehaviour:
   waitForIslands: 0
   delayAfterIslands: 0.3
   lowerOffset: -73
-  startPoint: {fileID: 0}
-  swingAngle: 100
-  slamBounce: 3
   launchHeight: 1.5
   launchWarning: 0.6
   launchPushRadius: 3
@@ -211959,7 +211923,6 @@ MonoBehaviour:
   socket: {fileID: 6550854910321787551}
   visualKeyed: {fileID: 7653041071600983024}
   visualKeyless: {fileID: 5875341168680392436}
-  pedestalID: 
 --- !u!135 &6550854911303881343
 SphereCollider:
   m_ObjectHideFlags: 0
@@ -215595,7 +215558,7 @@ MeshRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: -4205986887458705213, guid: 4517a9f6e28238d458674a2c5cf36405, type: 3}
+  - {fileID: 2100000, guid: 8402e631d4974ee5bd7d7c0d8762edda, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -215617,6 +215580,31 @@ MeshRenderer:
   m_SortingLayer: 0
   m_SortingOrder: 0
   m_AdditionalVertexStreams: {fileID: 0}
+--- !u!114 &9181683224565740324
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 159257132815135619}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 059a82fd5ea44d23a782843f1cca3e6b, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  frame: {fileID: 2800000, guid: a12328197902441dbdc1f97b31ab2656, type: 3}
+  mirrorX: 0
+  mirrorY: 1
+  paintEdge: 0.3
+  thinPaint: 0.35
+  canvasColor: {r: 0.93, g: 0.92, b: 0.89, a: 1}
+  clothScale: 3.84
+  weave: 0.2
+  brushStrokes: 0.15
+  strokeSize: 0.25
+  relief: 0.5
+  board: {fileID: 9181683224565740323}
+  image: {fileID: 1075741894}
 --- !u!1660057539 &9223372036854775807
 SceneRoots:
   m_ObjectHideFlags: 0

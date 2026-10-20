@@ -1,11 +1,10 @@
 // Memetica / Painting
 // The image or video on a canvas (VideoPlayer in Material Override mode, on _MainTex), painted on with brush strokes:
-// Painted Mask (white = paint) cuts its border with dry, ragged strokes, so the real canvas shows around it.
+// Painted Mask (white = paint) cuts its border with dry, ragged strokes, so the canvas board shows around it.
 // Where the paint gets thin (near the border) it fades a bit toward the canvas color, like dry brush.
-// Canvas Texture (subtle): the cloth weave and dried brush strokes over the image, darkening it a little and
-// catching the light as relief. The weave shows more where the paint is thin.
-// The mask belongs to the material, so it works the same for the first-frame image and for the video.
-// Tiling -1 / Offset 1 on the mask mirrors it: each painting can look different with the same texture.
+// Cloth: the same weave as the board (PaintingCloth.cginc), showing through the paint, more where it is thin.
+// Brush Strokes: dried paint over the image, catching the light as relief.
+// Set from the Painting component on the painting (parent), not here: it writes these values.
 
 Shader "Memetica/Painting"
 {
@@ -21,6 +20,7 @@ Shader "Memetica/Painting"
 
         [Header(Canvas Texture)]
         _CanvasTex ("Canvas Texture (R weave, G brush strokes)", 2D) = "gray" {}
+        _ClothScale ("Cloth Weave Tiles Per Meter", Float) = 4
         _Weave ("Cloth Weave", Range(0, 1)) = 0.2
         _Strokes ("Brush Strokes", Range(0, 1)) = 0.15
         _StrokeScale ("Brush Stroke Size", Range(0.05, 1)) = 0.25
@@ -37,45 +37,51 @@ Shader "Memetica/Painting"
         LOD 200
 
         CGPROGRAM
-        #pragma surface surf Standard fullforwardshadows addshadow
+        #pragma surface surf Standard fullforwardshadows addshadow vertex:vert
         #pragma target 3.0
+        #include "PaintingCloth.cginc"
 
-        sampler2D _MainTex, _MaskTex, _CanvasTex;
+        sampler2D _MainTex, _MaskTex;
         float4 _CanvasTex_TexelSize;
         fixed4 _CanvasColor;
-        half _Cutoff, _ThinPaint, _Weave, _Strokes, _StrokeScale, _Relief, _Glossiness, _Emission;
+        half _Cutoff, _ThinPaint, _Strokes, _StrokeScale, _Relief, _Glossiness, _Emission;
 
         struct Input
         {
             float2 uv_MainTex;
             float2 uv_MaskTex;
             float2 uv_CanvasTex;
+            float2 clothUV;
         };
 
-        // -0.5..0.5 around mid gray: how much the cloth and the dried paint stand out here
-        float CanvasHeight(float2 uv, half weave)
+        void vert (inout appdata_full v, out Input o)
         {
-            half w = tex2D(_CanvasTex, uv).r - 0.5;
-            half s = tex2D(_CanvasTex, uv * _StrokeScale).g - 0.5;   // strokes are bigger than the threads
-            return w * weave + s * _Strokes;
+            UNITY_INITIALIZE_OUTPUT(Input, o);
+            o.clothUV = ClothUV(v.vertex.xyz, v.normal);
+        }
+
+        // Dried paint: bigger than the threads, -0.5..0.5
+        half StrokeHeight(float2 uv)
+        {
+            return (tex2D(_CanvasTex, uv * _StrokeScale).g - 0.5) * _Strokes;
         }
 
         void surf (Input IN, inout SurfaceOutputStandard o)
         {
             half paint = tex2D(_MaskTex, IN.uv_MaskTex).r;
-            clip(paint - _Cutoff);                                        // no paint: the canvas behind shows
+            clip(paint - _Cutoff);                                        // no paint: the board behind shows
 
             half thickness = saturate((paint - _Cutoff) / (1 - _Cutoff)); // 0 at the edge of a stroke, 1 where it is full
             fixed3 image = tex2D(_MainTex, IN.uv_MainTex).rgb;
             fixed3 col = lerp(image, _CanvasColor.rgb, (1 - thickness) * _ThinPaint);
 
-            // Cloth and dried paint: shade the color, and bend the normal so they catch the light
-            half weave = _Weave * lerp(2, 1, thickness);                  // thin paint shows more cloth
+            // The cloth under the paint (more where it is thin), and the dried strokes on top
+            half weave = ClothWeave(IN.clothUV) * _Weave * lerp(2, 1, thickness);
             float2 uv = IN.uv_CanvasTex;
-            float h = CanvasHeight(uv, weave);
-            float hx = CanvasHeight(uv + float2(_CanvasTex_TexelSize.x, 0), weave);
-            float hy = CanvasHeight(uv + float2(0, _CanvasTex_TexelSize.y), weave);
-            col *= 1 + h * 2;
+            half h = StrokeHeight(uv);
+            half hx = StrokeHeight(uv + float2(_CanvasTex_TexelSize.x, 0));
+            half hy = StrokeHeight(uv + float2(0, _CanvasTex_TexelSize.y));
+            col *= 1 + (weave + h) * 2;
 
             o.Albedo = col;
             o.Normal = normalize(float3((h - hx) * _Relief * 8, (h - hy) * _Relief * 8, 1));
