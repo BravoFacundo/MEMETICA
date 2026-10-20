@@ -3,35 +3,23 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Video;
 
-// Meme as an orb (Game_Old). Before: OrbMemes. Same behavior as always:
+// Meme as an orb (both scenes). Before: OrbMemes. Same behavior as always:
 // the image mutates over time while you carry it and move, and returns to the original.
+// Mutation timing and sounds: MemeSettings (shared by every orb). Here only what is each orb's own: its images.
 public class MemeOrb : Meme
 {
     public GameObject Player;
 
-    [Header("Imágenes (la 0 es la original)")]
+    [Header("Images (0 is the original)")]
     public List<Material> materials = new List<Material>();
     public int matCount;
-
-    [Header("Mutación: cambia mientras lo llevás y te movés")]
-    public AudioClip warnClip;       // aviso: "está por cambiar"
-    public AudioClip changeClip;     // cambió
-    public AudioClip returnClip;     // volvió al original
-    public AudioClip sweepTickClip;  // cada imagen del barrido en el pedestal
-    public float firstChangeAfter = 3f;                        // segundos moviéndote hasta el primer cambio
-    public Vector2 changeInterval = new Vector2(4f, 8f);       // segundos moviéndote entre cambios
-    public Vector2 variantDuration = new Vector2(1.5f, 2.5f);  // cuánto dura la variante antes de volver al original
-    public float warnLead = 0.6f;                              // cuánto antes del cambio suena el aviso
-    public float graceAfterEvent = 1f;                         // no muta cerca de saltos, caídas, puentes o islas nuevas
-    public float flashIntensity = 2f;
-    [Range(0.3f, 1f)] public float sweepPortion = 0.75f;      // qué parte de la carga del pedestal ocupa el barrido
 
     private MeshRenderer memeRenderer;
     private AudioSource sfx;
     private MaterialPropertyBlock mpb;
     private PlayerMove playerMove;
     private readonly HashSet<GameObject> visitedIslands = new HashSet<GameObject>();
-    private float movingTime;            // tiempo acumulado moviéndote con el orbe en la mano
+    private float movingTime;            // time moving with the orb in the hand
     private float nextChangeAt;
     private float lastEventTime = -99f;
     private Vector3 lastPlayerPos;
@@ -44,13 +32,13 @@ public class MemeOrb : Meme
     {
         Player = GameObject.Find("Player");
 
-        // Las imágenes se asignan en el Inspector (antes se cargaban de Resources según el nombre del orbe)
-        if (materials.Count == 0) { Debug.LogError("[MemeOrb] '" + name + "' no tiene imágenes asignadas.", this); enabled = false; return; }
+        // Images are assigned in the Inspector (before: loaded from Resources by the orb's name)
+        if (materials.Count == 0) { Debug.LogError("[MemeOrb] '" + name + "' has no images assigned.", this); enabled = false; return; }
         matCount = 0;
         memeRenderer = gameObject.transform.Find("Meme").GetComponent<MeshRenderer>();
         memeRenderer.sharedMaterial = materials[matCount];
 
-        // Fuente de sonido propia para la mutación (la del orbe se mutea mientras lo llevás)
+        // Its own sound source for the mutation (the orb's one is muted while you carry it)
         sfx = gameObject.AddComponent<AudioSource>();
         sfx.playOnAwake = false; sfx.spatialBlend = 1f; sfx.minDistance = 4f;
         mpb = new MaterialPropertyBlock();
@@ -63,26 +51,26 @@ public class MemeOrb : Meme
     protected override void Update()
     {
         base.Update();
-        UpdateMutation();   //Imagen: muta con el tiempo mientras lo llevás y te movés
+        UpdateMutation();   // the image mutates over time while you carry it and move
     }
 
     //---- Meme events
 
     protected override void OnPickedUp() => ApplyHoldingEffects();
     protected override void OnDropped() => ApplyRestingEffects();
-    public override void OnBridgeCrossed() => MarkEvent();   // pisaste un puente nuevo: no mutar justo ahí
+    protected override void OnBridgeCrossed() => MarkEvent();   // a new bridge: don't mutate right there
 
-    // Lo llama PlayerMove al pisar una isla nueva con el orbe en la mano
-    public override void OnIslandVisited(GameObject island)
+    // Carried to another island: one more version unlocked
+    protected override void OnIslandVisited(GameObject island)
     {
         visitedIslands.Add(island);
         MarkEvent();
     }
 
-    // ---------- MUTACIÓN ----------
-    // La imagen no depende de ninguna acción puntual, solo del tiempo que llevás el orbe moviéndote.
-    // Después de cada variante vuelve al original. Al soltarlo, vuelve al original.
-    // Cada isla nueva a la que lo llevás desbloquea una versión más para el azar.
+    //---- Mutation
+    // The image doesn't depend on any single action, only on the time you move carrying the orb.
+    // After each variant, and when you drop it, it goes back to the original.
+    // Each new island you carry it to unlocks one more version for the random pick.
 
     void UpdateMutation()
     {
@@ -92,9 +80,9 @@ public class MemeOrb : Meme
         Vector3 delta = playerPos - lastPlayerPos; delta.y = 0f;
         lastPlayerPos = playerPos;
 
-        // Momentos que el jugador podría confundir con la causa del cambio: no mutar cerca de ellos
-        if (delta.magnitude > 3f) MarkEvent();                          // respawn / teletransporte
-        if (playerMove != null && !playerMove.isGrounded) MarkEvent();  // saltando o cayendo
+        // Moments the player could take as the cause of the change: no mutating near them
+        if (delta.magnitude > 3f) MarkEvent();                          // respawn / teleport
+        if (playerMove != null && !playerMove.isGrounded) MarkEvent();  // jumping or falling
 
         if (IsHeld && !wasHolded) StartMutationTimer();
         if (!IsHeld && wasHolded) StopMutationAndRestore();
@@ -102,50 +90,50 @@ public class MemeOrb : Meme
 
         if (!IsHeld || mutationRoutine != null) return;
 
-        if (delta.magnitude / Mathf.Max(Time.deltaTime, 0.0001f) > 0.5f) movingTime += Time.deltaTime; // solo cuenta si te movés
+        if (delta.magnitude / Mathf.Max(Time.deltaTime, 0.0001f) > 0.5f) movingTime += Time.deltaTime; // only counts while moving
         if (movingTime >= nextChangeAt && !InGrace())
             mutationRoutine = StartCoroutine(Mutate());
     }
 
     void StartMutationTimer()
     {
-        // Si lo sacás del pedestal a mitad del barrido, el barrido se corta y vuelve al original
+        // Taken off the pedestal mid-sweep: the sweep stops and it goes back to the original
         if (sweepRoutine != null) { StopCoroutine(sweepRoutine); sweepRoutine = null; SetImage(0); }
         movingTime = 0f;
-        nextChangeAt = firstChangeAfter;
+        nextChangeAt = Settings.firstChangeAfter;
     }
 
     void StopMutationAndRestore()
     {
         if (mutationRoutine != null) { StopCoroutine(mutationRoutine); mutationRoutine = null; }
-        if (matCount != 0) { SetImage(0); Play(returnClip); StartCoroutine(Flash(0.6f)); }
+        if (matCount != 0) { SetImage(0); Play(Settings.returnClip); StartCoroutine(Flash(0.6f)); }
     }
 
     void MarkEvent() { lastEventTime = Time.time; }
-    bool InGrace() { return Time.time - lastEventTime < graceAfterEvent; }
+    bool InGrace() { return Time.time - lastEventTime < Settings.graceAfterEvent; }
 
     int UnlockedVariants() { return Mathf.Clamp(1 + visitedIslands.Count, 1, materials.Count - 1); }
 
     IEnumerator Mutate()
     {
-        Play(warnClip);
-        yield return new WaitForSeconds(warnLead);
-        while (InGrace()) yield return null;   // si justo saltaste o pisaste un puente, espera
+        Play(Settings.warnClip);
+        yield return new WaitForSeconds(Settings.warnLead);
+        while (InGrace()) yield return null;   // you just jumped or stepped on a bridge: wait
 
         int max = UnlockedVariants();
         int v = Random.Range(1, max + 1);
-        if (max > 1 && v == lastVariant) v = (v % max) + 1;   // no repetir la misma variante seguida
+        if (max > 1 && v == lastVariant) v = (v % max) + 1;   // never the same variant twice in a row
         lastVariant = v;
-        SetImage(v); Play(changeClip); StartCoroutine(Flash(1f));
+        SetImage(v); Play(Settings.changeClip); StartCoroutine(Flash(1f));
 
-        yield return new WaitForSeconds(Random.Range(variantDuration.x, variantDuration.y));
+        yield return new WaitForSeconds(Random.Range(Settings.variantDuration.x, Settings.variantDuration.y));
 
-        SetImage(0); Play(returnClip); StartCoroutine(Flash(0.6f));
-        nextChangeAt = movingTime + Random.Range(changeInterval.x, changeInterval.y);
+        SetImage(0); Play(Settings.returnClip); StartCoroutine(Flash(0.6f));
+        nextChangeAt = movingTime + Random.Range(Settings.changeInterval.x, Settings.changeInterval.y);
         mutationRoutine = null;
     }
 
-    // Lo llama el pedestal mientras carga: muestra todas las versiones rápido y termina en el original
+    // Called by the pedestal while it charges: shows every version quickly and ends on the original
     public override void Sweep(float duration)
     {
         if (mutationRoutine != null) { StopCoroutine(mutationRoutine); mutationRoutine = null; }
@@ -155,12 +143,12 @@ public class MemeOrb : Meme
 
     IEnumerator SweepRoutine(float duration)
     {
-        // Termina antes que la carga del pedestal y vuelve al original en silencio,
-        // para no pisar el sonido de aceptación o rechazo
-        float step = duration * sweepPortion / materials.Count;
+        // Ends before the pedestal charge and goes back to the original silently,
+        // so it doesn't cover the accept or reject sound
+        float step = duration * Settings.sweepPortion / materials.Count;
         for (int i = 1; i < materials.Count; i++)
         {
-            SetImage(i); Play(sweepTickClip);
+            SetImage(i); Play(Settings.sweepTickClip);
             yield return new WaitForSeconds(step);
         }
         SetImage(0); StartCoroutine(Flash(1f));
@@ -175,7 +163,7 @@ public class MemeOrb : Meme
 
     void Play(AudioClip clip) { if (clip != null) sfx.PlayOneShot(clip); }
 
-    // Destello: sube la emisión del meme y la baja en 0.3 s
+    // Flash: raises the meme's emission and brings it down in 0.3 s
     IEnumerator Flash(float strength)
     {
         Color baseEmission = memeRenderer.sharedMaterial.GetColor("_EmissionColor");
@@ -185,7 +173,7 @@ public class MemeOrb : Meme
             t += Time.deltaTime;
             float k = 1f - t / dur;
             memeRenderer.GetPropertyBlock(mpb);
-            mpb.SetColor("_EmissionColor", Color.Lerp(baseEmission, Color.white * flashIntensity, k * k * strength));
+            mpb.SetColor("_EmissionColor", Color.Lerp(baseEmission, Color.white * Settings.flashIntensity, k * k * strength));
             memeRenderer.SetPropertyBlock(mpb);
             yield return null;
         }
@@ -196,17 +184,17 @@ public class MemeOrb : Meme
 
     void ApplyHoldingEffects()
     {
-        if (ID == "1Aa") GetComponent<AudioReverbZone>().enabled = true;   //Dios: efecto reverb
+        if (ID == "1Aa") GetComponent<AudioReverbZone>().enabled = true;   // God: reverb effect
 
-        //Desmutear el loop de sonidos de holding
+        // Unmute the holding sound loop
         transform.Find("Audio").GetComponent<AudioSource>().mute = false;
         GetComponent<AudioSource>().mute = true;
     }
 
     void ApplyRestingEffects()
     {
-        //Las modificaciones vuelven a la normalidad cuando ya no tenes el orbe
-        if (ID == "1Aa") GetComponent<AudioReverbZone>().enabled = false;   //Dios: se va el efecto reverb
+        // Everything back to normal when you no longer have the orb
+        if (ID == "1Aa") GetComponent<AudioReverbZone>().enabled = false;   // God: reverb off
 
         transform.Find("Audio").GetComponent<AudioSource>().mute = true;
         GetComponent<AudioSource>().mute = false;

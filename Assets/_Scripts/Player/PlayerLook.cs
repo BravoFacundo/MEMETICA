@@ -61,7 +61,6 @@ public class PlayerLook : MonoBehaviour
     [Section("Debug", Closed = true)]
     [ReadOnlyField, SerializeField] private bool isZooming = false;
     [ReadOnlyField] public GameObject heldObject;
-    [ReadOnlyField] public bool FueAgarrada = false;   // stays on after snapping to a pedestal (PlayerMove keeps tracking bridges and islands)
     [ReadOnlyField, SerializeField] private bool clueSolved;   // the painting's pedestal is solved
 
     private Vector3 cameraRestPosition;
@@ -201,7 +200,6 @@ public class PlayerLook : MonoBehaviour
         heldBody = objectRb;
         heldColliders = pickObject.GetComponentsInChildren<Collider>();
         IgnorePlayerCollision(true);
-        FueAgarrada = true;
 
         if (heldObject.TryGetComponent(out Meme meme)) meme.PickUp();
     }
@@ -219,7 +217,6 @@ public class PlayerLook : MonoBehaviour
         heldObject.transform.parent = null;
         heldObject = null;
         heldBody = null;
-        FueAgarrada = false;
     }
 
     //To avoid bugs or cheating, when the meme gets close enough to the pedestal it relocates until it is grabbed again.

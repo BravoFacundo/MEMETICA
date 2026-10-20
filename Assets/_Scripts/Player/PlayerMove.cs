@@ -52,12 +52,10 @@ public class PlayerMove : MonoBehaviour
     [Tooltip("Logs each frame the body moves more than 5 mm up or down in one step, with every step of that frame (to find the bumps). Slows the game while on")]
     public bool logBumps = false;
     [ReadOnlyField] public bool isGrounded;
-    // Carrying a meme from a bridge onto an island (MemeOrb: one more version)
-    [ReadOnlyField] public bool hit1Lock = false;
-    [ReadOnlyField] public bool hit2Lock = false;
-    [ReadOnlyField] public GameObject prevIsland;
-    [ReadOnlyField] public GameObject prevBridge;
     [ReadOnlyField] public bool ascend = false;   // lo prende el LevelManager al terminar el juego
+
+    // The player fell into the void and came back (the meme in the hand listens: it falls with them)
+    public static event System.Action Respawned;
 
     private CharacterController characterController;
     private PlayerLook look;   // está en la Main Camera; se guarda una vez
@@ -281,31 +279,8 @@ public class PlayerMove : MonoBehaviour
         // Un solo rayo hacia abajo para todo
         if (!Physics.Raycast(transform.position, Vector3.down, out RaycastHit hit)) return;
 
-        // Plataformas que caen
+        // Falling platforms (the meme in the hand tracks its own bridges and islands: Meme.TrackGround)
         if (isGrounded && hit.transform.TryGetComponent(out FallingPlatform platform)) platform.StepOn();
-
-        // Cruzar un puente y llegar a una isla nueva con el meme en la mano
-        if (!look.FueAgarrada) return;
-
-        GameObject bridge = FindParentWithTag(hit.transform.gameObject, "Puente");
-        if (bridge != null && !hit1Lock && prevBridge != bridge)
-        {
-            if (look.heldObject != null && look.heldObject.TryGetComponent(out Meme crossingMeme)) crossingMeme.OnBridgeCrossed();
-            hit2Lock = false;
-            hit1Lock = true;
-            prevBridge = bridge;
-        }
-
-        GameObject island = FindParentWithTag(hit.transform.gameObject, "Isla");
-        if (island != null && !hit2Lock && prevIsland != island)
-        {
-            hit1Lock = false;
-            hit2Lock = true;
-            prevIsland = island;
-
-            // Llevar el meme a una isla nueva (MemeOrb: desbloquea una versión más; MemeWindow: trigger Mover)
-            if (look.heldObject != null && look.heldObject.TryGetComponent(out Meme heldMeme)) heldMeme.OnIslandVisited(island);
-        }
     }
 
     //---- Respawn landing
@@ -413,9 +388,7 @@ public class PlayerMove : MonoBehaviour
         landingBrake = respawnBrakeDistance > 0f;
         look.ResetSmoothing();
         debugHeight = transform.position.y;
-
-        // El meme en la mano viaja con el jugador y también cuenta como caída (MemeWindow: trigger Caer)
-        if (look.heldObject != null && look.heldObject.TryGetComponent(out Meme heldMeme)) heldMeme.OnRespawned();
+        Respawned?.Invoke();   // the meme in the hand falls with the player
     }
 
     //In the project, the objects tagged "island" may be too far up the hierarchy from the object the raycast hits.

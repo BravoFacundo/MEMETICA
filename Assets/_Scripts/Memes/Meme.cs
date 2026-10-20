@@ -7,38 +7,19 @@ using UnityEngine;
 // On its own (no MemeOrb / MemeWindow) it is a plain carryable meme with no visual logic, e.g. the tutorial orb.
 // Falling into the void: it comes back to the last island it touched as a meteor: glowing with a trail, falling
 // at an angle onto open ground near the island's middle (not trees, not pedestals), and breaking the ground on impact.
-// While held it doesn't check: it travels with the player, and PlayerMove tells it when the player falls.
+// While held it travels with the player: it notices on its own the bridges and new islands it is carried to,
+// and the player falling (PlayerMove.Respawned). Shared values: MemeSettings (Assets/Resources).
 // Object name: Meme_<ID> (e.g. Meme_3Aa). Pedestals compare their Key ID with that ID.
 [RequireComponent(typeof(Rigidbody))]
 public class Meme : MonoBehaviour
 {
     public const string NamePrefix = "Meme_";
 
-    [Header("Rest")]
-    [Tooltip("Seconds on the ground before it freezes in place, so it doesn't roll away")]
-    public float restDelay = 3f;
-    public float groundCheckRadius = 0.6f;
-
-    [Header("Respawn (meteor)")]
-    [Tooltip("Meters above the island it starts falling from")]
-    public float meteorHeight = 25f;
-    [Tooltip("Meters it travels sideways while falling (the angle of the fall)")]
-    public float meteorDrift = 10f;
-    [Tooltip("Seconds the fall takes (it speeds up)")]
-    public float meteorDuration = 1.1f;
-    [Tooltip("Meters around the island's middle (its RespawnPoint) where it can land")]
-    public float landingRadius = 4f;
-    [Tooltip("Never lands closer than this to a pedestal (it would place itself)")]
-    public float pedestalClearance = 3f;
-    public Color meteorColor = new Color(1f, 0.75f, 0.35f);
-    [Tooltip("Pieces that fly out where it lands (small rock and grass prefabs, like the bridges)")]
-    public GameObject[] impactDebris;
-    public int impactDebrisCount = 10;
-    public AudioClip impactClip;
-
     public string ID => IDOf(gameObject);
     public bool IsHeld { get; private set; }
     public Pedestal CurrentPedestal { get; private set; }
+
+    protected static MemeSettings Settings => MemeSettings.Instance;
 
     protected Rigidbody body;
     private LayerMask groundMask;
@@ -48,7 +29,8 @@ public class Meme : MonoBehaviour
     private Transform respawnPoint;
     private Coroutine meteor;
     private Transform lastGroundHit;
-    private GameObject lastIsland;
+    private GameObject lastIsland;   // the island under it last (respawn there; carried to a new one: OnIslandVisited)
+    private GameObject lastBridge;   // the bridge carried over last (a new one: OnBridgeCrossed)
     private float lastGroundY;
 
     // "Meme_3Aa" → "3Aa". Everything after the first "_", so old names ("Orb_3Aa") still work
@@ -121,11 +103,21 @@ public class Meme : MonoBehaviour
         return nearest < float.MaxValue;
     }
 
+    protected virtual void OnEnable() => PlayerMove.Respawned += OnPlayerRespawned;
+    protected virtual void OnDisable() => PlayerMove.Respawned -= OnPlayerRespawned;
+
     protected virtual void Update()
     {
         ReleaseWhenIslandArrives();
         FreezeWhenRestingOnGround();
-        CheckFallAndRespawn();
+        TrackGround();
+        CheckFall();
+    }
+
+    // In the hand, the player's fall is its fall too (it travels with them)
+    private void OnPlayerRespawned()
+    {
+        if (IsHeld) OnRespawned();
     }
 
     //---- Called by the environment
@@ -161,51 +153,63 @@ public class Meme : MonoBehaviour
 
     public virtual void OnPedestalResult(Pedestal pedestal, bool isCorrect) { }
     public virtual void Sweep(float duration) { }
-    public virtual void OnBridgeCrossed() { }
-    public virtual void OnIslandVisited(GameObject island) { }
-    public virtual void OnRespawned() { }
 
     //---- Overridden by each representation
 
+    protected virtual void OnBridgeCrossed() { }                  // carried over a new bridge
+    protected virtual void OnIslandVisited(GameObject island) { } // carried to another island
+    protected virtual void OnRespawned() { }                      // came back after falling (meteor, or with the player)
     protected virtual void OnPickedUp() { }
     protected virtual void OnDropped() { }
     protected virtual void OnPlaced(Pedestal pedestal) { }
     protected virtual void OnRemovedFromPedestal(Pedestal pedestal) { }
 
-    // Fija el respawn a mano. Lo usa el ascensor con los memes que viajan en él.
+    // Sets the respawn by hand. The elevator uses it for the memes riding it
     public void SetRespawn(Transform point)
     {
         respawnPoint = point;
         lastGroundHit = null;
     }
 
+    //---- Where it is (before: PlayerMove tracked bridges and islands for the meme in the hand)
+
+    // What is under it: its island (it respawns there) and, while carried, the new bridges and islands it is taken to.
+    // Picked up on an island, that island doesn't count: only the ones you carry it to
+    private void TrackGround()
+    {
+        if (LevelManager.Instance == null) return;
+        if (body.isKinematic && !IsHeld) { lastGroundY = transform.position.y; return; }   // attached (island, pedestal): moves with it
+
+        if (!Physics.Raycast(transform.position, Vector3.down, out RaycastHit hit, 5f, ~0, QueryTriggerInteraction.Ignore)) return;
+        lastGroundY = hit.point.y;
+        if (hit.transform == lastGroundHit) return;   // still over the same thing
+        lastGroundHit = hit.transform;
+
+        GameObject bridge = FindParentWithTag(hit.transform, "Puente");
+        if (bridge != null && IsHeld && bridge != lastBridge)
+        {
+            lastBridge = bridge;
+            OnBridgeCrossed();
+        }
+
+        GameObject island = FindParentWithTag(hit.transform, "Isla");
+        if (island == null || island == lastIsland) return;   // a bridge, or the same island
+        lastIsland = island;
+        Transform point = LevelManager.Instance.RespawnPointOf(island);
+        if (point != null) respawnPoint = point;
+        if (IsHeld) OnIslandVisited(island);
+    }
+
     //---- Respawn
 
-    private void CheckFallAndRespawn()
+    private void CheckFall()
     {
-        if (IsHeld || LevelManager.Instance == null) return;
-        if (body.isKinematic) { lastGroundY = transform.position.y; return; }   // attached (island, pedestal): moves with it, never falls
+        if (IsHeld || body.isKinematic || LevelManager.Instance == null) return;   // in the hand: it falls with the player
         if (respawnPoint == null)   // the island it started on (before: always the tutorial)
             respawnPoint = lastIsland != null ? LevelManager.Instance.RespawnPointOf(lastIsland) : LevelManager.Instance.startRespawnPoint;
         if (respawnPoint == null) respawnPoint = LevelManager.Instance.startRespawnPoint;
 
-        if (transform.position.y < lastGroundY - LevelManager.Instance.fallDistance)
-        {
-            Respawn();
-            return;
-        }
-
-        if (!Physics.Raycast(transform.position, Vector3.down, out RaycastHit hit, 5f)) return;
-        lastGroundY = hit.point.y;
-        if (hit.transform == lastGroundHit) return;
-        lastGroundHit = hit.transform;
-
-        GameObject island = FindParentWithTag(hit.transform, "Isla");
-        if (island == null || island == lastIsland) return;   // un puente, o la misma isla
-        lastIsland = island;
-
-        Transform point = LevelManager.Instance.RespawnPointOf(lastIsland);
-        if (point != null) respawnPoint = point;
+        if (transform.position.y < lastGroundY - LevelManager.Instance.fallDistance) Respawn();
     }
 
     private void Respawn()
@@ -230,7 +234,7 @@ public class Meme : MonoBehaviour
         // Glow and trail while it falls
         Light glow = gameObject.AddComponent<Light>();
         glow.type = LightType.Point;
-        glow.color = meteorColor;
+        glow.color = Settings.meteorColor;
         glow.range = 10f;
         glow.intensity = 6f;
         TrailRenderer trail = gameObject.AddComponent<TrailRenderer>();
@@ -238,12 +242,12 @@ public class Meme : MonoBehaviour
         trail.startWidth = 0.7f;
         trail.endWidth = 0f;
         trail.material = new Material(Shader.Find("Sprites/Default"));
-        trail.startColor = meteorColor;
-        trail.endColor = new Color(meteorColor.r, meteorColor.g * 0.5f, 0f, 0f);
+        trail.startColor = Settings.meteorColor;
+        trail.endColor = new Color(Settings.meteorColor.r, Settings.meteorColor.g * 0.5f, 0f, 0f);
 
-        for (float t = 0f; t < meteorDuration; t += Time.deltaTime)
+        for (float t = 0f; t < Settings.meteorDuration; t += Time.deltaTime)
         {
-            float p = t / Mathf.Max(meteorDuration, 0.01f);
+            float p = t / Mathf.Max(Settings.meteorDuration, 0.01f);
             transform.position = Vector3.Lerp(start, landing, p * p);   // speeds up like a meteor
             transform.Rotate(Vector3.one * 720f * Time.deltaTime, Space.Self);
             yield return null;
@@ -251,8 +255,8 @@ public class Meme : MonoBehaviour
         transform.position = landing;
 
         // Impact: the ground breaks, then it is a normal meme again
-        DebrisBurst.Spawn(impactDebris, impactDebrisCount, landing, Vector3.up, 5f, 1.2f);
-        if (impactClip != null) AudioSource.PlayClipAtPoint(impactClip, landing);
+        DebrisBurst.Spawn(Settings.impactDebris, Settings.impactDebrisCount, landing, Vector3.up, 5f, 1.2f);
+        if (Settings.impactClip != null) AudioSource.PlayClipAtPoint(Settings.impactClip, landing);
         foreach (Collider c in colliders) c.enabled = true;
         body.isKinematic = false;
         body.constraints = RigidbodyConstraints.None;
@@ -279,7 +283,7 @@ public class Meme : MonoBehaviour
 
         for (int i = 0; i < 20; i++)
         {
-            Vector2 offset = Random.insideUnitCircle * landingRadius;
+            Vector2 offset = Random.insideUnitCircle * Settings.landingRadius;
             Vector3 above = new Vector3(middle.x + offset.x, middle.y + 5f, middle.z + offset.y);
             if (!Physics.Raycast(above, Vector3.down, out RaycastHit ground, 200f, ~0, QueryTriggerInteraction.Ignore)) continue;
             if (lastIsland != null && FindParentWithTag(ground.transform, "Isla") != lastIsland) continue;
@@ -287,7 +291,7 @@ public class Meme : MonoBehaviour
 
             Vector2 side = Random.insideUnitCircle.normalized;
             Vector3 land = ground.point + Vector3.up * (pivotToBottom + 0.02f);
-            Vector3 from = land + Vector3.up * meteorHeight + new Vector3(side.x, 0f, side.y) * meteorDrift;
+            Vector3 from = land + Vector3.up * Settings.meteorHeight + new Vector3(side.x, 0f, side.y) * Settings.meteorDrift;
             Vector3 path = land - from;
             if (Physics.SphereCast(from, 0.5f, path.normalized, out _, path.magnitude - 0.8f, ~0, QueryTriggerInteraction.Ignore)) continue;   // trees, rocks in the way
 
@@ -303,7 +307,7 @@ public class Meme : MonoBehaviour
         foreach (Pedestal pedestal in FindObjectsOfType<Pedestal>())
         {
             Vector3 offset = pedestal.transform.position - point; offset.y = 0f;
-            if (offset.magnitude < pedestalClearance) return true;
+            if (offset.magnitude < Settings.pedestalClearance) return true;
         }
         return false;
     }
@@ -319,9 +323,9 @@ public class Meme : MonoBehaviour
 
     private void FreezeWhenRestingOnGround()
     {
-        bool isResting = !IsHeld && CurrentPedestal == null && Physics.CheckSphere(transform.position, groundCheckRadius, groundMask);
+        bool isResting = !IsHeld && CurrentPedestal == null && Physics.CheckSphere(transform.position, Settings.groundCheckRadius, groundMask);
         groundedTime = isResting ? groundedTime + Time.deltaTime : 0f;
-        if (groundedTime >= restDelay && body.constraints != RigidbodyConstraints.FreezeAll)
+        if (groundedTime >= Settings.restDelay && body.constraints != RigidbodyConstraints.FreezeAll)
         {
             body.constraints = RigidbodyConstraints.FreezeAll;
             StickToFloatingGround();
@@ -331,7 +335,7 @@ public class Meme : MonoBehaviour
     // Resting on a floating island (FloatMotion): it becomes part of it, so it bobs with the ground instead of hovering
     private void StickToFloatingGround()
     {
-        if (!Physics.Raycast(transform.position, Vector3.down, out RaycastHit ground, groundCheckRadius + 1f, ~0, QueryTriggerInteraction.Ignore)) return;
+        if (!Physics.Raycast(transform.position, Vector3.down, out RaycastHit ground, Settings.groundCheckRadius + 1f, ~0, QueryTriggerInteraction.Ignore)) return;
         FloatMotion floating = ground.transform.GetComponentInParent<FloatMotion>();
         if (floating == null) return;
         transform.SetParent(floating.transform);

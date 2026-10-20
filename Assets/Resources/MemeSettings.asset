@@ -1,0 +1,38 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 124c1db8a2ca4c578316b6831ec99251, type: 3}
+  m_Name: MemeSettings
+  m_EditorClassIdentifier: 
+  restDelay: 3
+  groundCheckRadius: 0.6
+  meteorHeight: 25
+  meteorDrift: 10
+  meteorDuration: 1.1
+  landingRadius: 4
+  pedestalClearance: 3
+  meteorColor: {r: 1, g: 0.75, b: 0.35, a: 1}
+  impactDebris:
+  - {fileID: 7617200879849885303, guid: e9145b5c228689843b6d6ba2412aff73, type: 3}
+  - {fileID: 379243778788410097, guid: 19388166165474c488a129d8427a779f, type: 3}
+  impactDebrisCount: 10
+  impactClip: {fileID: 0}
+  warnClip: {fileID: 8300000, guid: 1c7ed042ff75e17419921e1d0d6130e3, type: 3}
+  changeClip: {fileID: 8300000, guid: db64e738f22ef4945834da5b19582892, type: 3}
+  returnClip: {fileID: 8300000, guid: 995437a5722e2e147860694c5eb19ad1, type: 3}
+  sweepTickClip: {fileID: 8300000, guid: 8f16159e82a5f4645a1686d7878244cf, type: 3}
+  firstChangeAfter: 3
+  changeInterval: {x: 4, y: 8}
+  variantDuration: {x: 1.5, y: 2.5}
+  warnLead: 0.6
+  graceAfterEvent: 1
+  flashIntensity: 2
+  sweepPortion: 0.75
