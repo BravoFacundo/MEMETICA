@@ -8,6 +8,8 @@ using UnityEngine.Serialization;
 //   Tilt   sway on X and Z, two rhythms so it is organic and not a pendulum
 //   Spin   turn a little to each side on Y
 // Every object starts at a different moment with a slightly different rhythm.
+// It can go on the same object as an Island: the island moves where it floats around (SetRestHeight), so
+// pedestals and everything interactive can sit right in Island_NN and still float and rise with it.
 [DefaultExecutionOrder(-10)]   // moves before bridges bend to it and the player follows it
 public class FloatMotion : MonoBehaviour
 {
@@ -41,11 +43,17 @@ public class FloatMotion : MonoBehaviour
     private Vector3 startPosition;
     private Quaternion startRotation;
     private float bobPhase, driftPhase, tiltPhaseX, tiltPhaseZ, spinPhase;
+    private Vector3 offset;
 
-    void Start()
+    // Awake, so an Island on the same object can move its rest height in its Start
+    void Awake()
     {
         startPosition = transform.localPosition;
         startRotation = transform.localRotation;
+    }
+
+    void Start()
+    {
 
         bobPhase = RandomPhase();
         driftPhase = RandomPhase();
@@ -62,7 +70,7 @@ public class FloatMotion : MonoBehaviour
     {
         float t = Time.time * 2f * Mathf.PI;
 
-        Vector3 offset = Vector3.up * Wave(t, bobPeriod, bobPhase) * bobAmplitude;
+        offset = Vector3.up * Wave(t, bobPeriod, bobPhase) * bobAmplitude;
         if (driftRange != 0f) offset += WorldToLocalVector(GetDriftDirection() * Wave(t, driftPeriod, driftPhase) * driftRange);
         transform.localPosition = startPosition + offset;
 
@@ -70,6 +78,20 @@ public class FloatMotion : MonoBehaviour
         float tiltZ = Wave(t, tiltPeriod * 1.3f, tiltPhaseZ) * tiltDegrees;
         float spinY = Wave(t, spinPeriod, spinPhase) * spinDegrees;
         transform.localRotation = startRotation * Quaternion.Euler(tiltX, spinY, tiltZ);
+    }
+
+    //---- Used by an Island (Lift) on the same object
+
+    // Height (world) of the place it floats around
+    public float RestHeight => transform.parent != null ? transform.parent.TransformPoint(startPosition).y : startPosition.y;
+
+    // Moves the place it floats around (rising, falling), keeping the floating on top
+    public void SetRestHeight(float worldY)
+    {
+        Vector3 rest = transform.parent != null ? transform.parent.TransformPoint(startPosition) : startPosition;
+        rest.y = worldY;
+        startPosition = transform.parent != null ? transform.parent.InverseTransformPoint(rest) : rest;
+        transform.localPosition = startPosition + offset;
     }
 
     //----

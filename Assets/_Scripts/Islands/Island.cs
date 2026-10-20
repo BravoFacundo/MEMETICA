@@ -42,7 +42,7 @@ public class Island : Lift
     {
         for (float speed = 0f; ; speed = Mathf.Min(speed + fallAwaySpeed * Time.deltaTime, fallAwaySpeed))
         {
-            SetHeight(transform.position.y - speed * Time.deltaTime);
+            SetHeight(CurrentHeight - speed * Time.deltaTime);
             yield return null;
         }
     }

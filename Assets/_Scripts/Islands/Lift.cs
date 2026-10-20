@@ -29,8 +29,16 @@ public abstract class Lift : MonoBehaviour
     private Coroutine moving;
 
     protected float designedY;   // where it was placed in the scene = where it ends up
+    private FloatMotion floating;  // on the same object (Island_NN floating itself): the lift moves where it floats around
 
-    protected virtual void Awake() => designedY = transform.position.y;
+    protected virtual void Awake()
+    {
+        designedY = transform.position.y;
+        floating = GetComponent<FloatMotion>();
+    }
+
+    // Height without the floating
+    protected float CurrentHeight => floating != null ? floating.RestHeight : transform.position.y;
 
     protected virtual void Start()
     {
@@ -92,7 +100,7 @@ public abstract class Lift : MonoBehaviour
         OnMoveStarted(rising);
         Play(rising ? riseClip : null);
 
-        float startY = transform.position.y;
+        float startY = CurrentHeight;
         duration = Mathf.Max(duration, 0.01f);
         float settleTime = rising && Overshoot > 0f ? Mathf.Min(0.6f, duration * 0.25f) : 0f;
         float travelTime = duration - settleTime;
@@ -124,7 +132,11 @@ public abstract class Lift : MonoBehaviour
 
     protected void SetUp(bool up) => IsUp = up;   // for subclasses that appear in their own way (Bridge: Assemble)
 
-    protected void SetHeight(float y) => transform.position = new Vector3(transform.position.x, y, transform.position.z);
+    protected void SetHeight(float y)
+    {
+        if (floating != null) floating.SetRestHeight(y);
+        else transform.position = new Vector3(transform.position.x, y, transform.position.z);
+    }
 
     protected void Play(AudioClip clip)
     {

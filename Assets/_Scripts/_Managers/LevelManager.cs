@@ -36,6 +36,8 @@ public class LevelManager : MonoBehaviour
     public float liftLowerDuration = 2.5f;
     [Tooltip("Meters it passes the top before settling")]
     public float liftOvershoot = 0.4f;
+    [Tooltip("Pedestals with In Order: seconds between one thing arriving and the next one starting")]
+    public float sequenceGap = 0.3f;
 
     [Header("NOMBRES (convención Tipo_ID)")]
     public string islandPrefix = "Island_";
@@ -90,6 +92,29 @@ public class LevelManager : MonoBehaviour
     public void SubirPuente(string id, Vector3 origin)
     {
         if (TryGet(bridges, bridgePrefix + id, out Bridge puente)) puente.Raise(origin);
+    }
+
+    // Pedestal with In Order: each island (or elevator) rises after the previous one arrived, then each bridge
+    // appears after the previous one is in place. Lists in the order they should happen
+    public void RaiseInOrder(string[] islandIds, string[] bridgeIds, Vector3 origin) => StartCoroutine(InOrder(islandIds, bridgeIds, origin));
+
+    IEnumerator InOrder(string[] islandIds, string[] bridgeIds, Vector3 origin)
+    {
+        foreach (string id in islandIds)
+        {
+            SubirIsla(id);
+            yield return null;
+            if (elevators.TryGetValue(NormalizeName(elevatorPrefix + id), out Elevator elevator)) while (elevator.IsRiding) yield return null;
+            else if (TryGet(islands, islandPrefix + id, out Island isla)) while (isla.IsMoving) yield return null;
+            yield return new WaitForSeconds(sequenceGap);
+        }
+        foreach (string id in bridgeIds)
+        {
+            SubirPuente(id, origin);
+            yield return null;
+            if (TryGet(bridges, bridgePrefix + id, out Bridge puente)) while (puente.IsAppearing || puente.IsMoving) yield return null;
+            yield return new WaitForSeconds(sequenceGap);
+        }
     }
 
     public void BajarPuente(string id)

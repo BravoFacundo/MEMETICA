@@ -77,6 +77,8 @@ public class Bridge : Lift
 
     // Waiting for its islands before appearing
     public bool IsWaiting { get; private set; }
+    // From Raise until it has appeared (waiting, swinging, extending; Rise From Below: also see IsMoving)
+    public bool IsAppearing { get; private set; }
 
     // Where it ends when it appears (BridgeBend bends toward the anchors as seen from there, so every animation lands on the curve)
     public Vector3 FinalPosition => appearance != Appearance.RiseFromBelow ? finalPosition : new Vector3(transform.position.x, TopY, transform.position.z);
@@ -114,6 +116,7 @@ public class Bridge : Lift
         if (IsUp) return;
         SetUp(true);
         StopAllCoroutines();
+        IsAppearing = true;
         StartCoroutine(AppearRoutine());
     }
 
@@ -123,6 +126,7 @@ public class Bridge : Lift
         SetUp(false);
         StopAllCoroutines();
         IsWaiting = false;
+        IsAppearing = false;
         if (appearance == Appearance.RiseFromBelow) StartMove(BottomY, LowerDuration, false);
         else if (appearance == Appearance.SwingUp) StartCoroutine(SwingRoutine(false));
         else StartCoroutine(ExtendRoutine(false));
@@ -192,6 +196,7 @@ public class Bridge : Lift
         if (appearance == Appearance.RiseFromBelow) StartMove(TopY, RiseDuration, true);
         else if (appearance == Appearance.SwingUp) yield return SwingRoutine(true);
         else yield return ExtendRoutine(true);
+        IsAppearing = false;
     }
 
     //---- Extend From A

@@ -24,6 +24,8 @@ public class Pedestal : MonoBehaviour
     [Header("Qué controla")]
     public string[] ControlledIslands;
     public string[] ControlledBridges;
+    [Tooltip("One after the other, in list order: islands first (each after the previous arrives), then bridges. Off: all at once")]
+    public bool inOrder = false;
 
     [Header("Grupo enlazado (opcional)")]
     [Tooltip("Pedestals with the same Group ID complete together when all of them have a meme. Empty = no group")]
@@ -190,8 +192,12 @@ public class Pedestal : MonoBehaviour
     {
         IsCorrect = true;
         Play(correctClip);
-        foreach (string id in ControlledIslands) LevelManager.Instance.SubirIsla(id);
-        foreach (string id in ControlledBridges) LevelManager.Instance.SubirPuente(id, socket.position);
+        if (inOrder) LevelManager.Instance.RaiseInOrder(ControlledIslands, ControlledBridges, socket.position);
+        else
+        {
+            foreach (string id in ControlledIslands) LevelManager.Instance.SubirIsla(id);
+            foreach (string id in ControlledBridges) LevelManager.Instance.SubirPuente(id, socket.position);
+        }
         if (CurrentMeme != null) CurrentMeme.OnPedestalResult(this, true);
     }
 
