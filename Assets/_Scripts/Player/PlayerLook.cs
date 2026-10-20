@@ -2,14 +2,13 @@
 //Being able to see far away is necessary for players to solve the puzzles, it allows them to plan their moves.
 //  Look & Zoom   mouse and right click
 //  Hold          grab, carry and drop memes (before: PlayerHoldObjects)
-//  Paintings     play a painting's video while looking at it (before: PlayerLookAtVideo)
+//  Paintings     tells the painting you look at that you are watching it (it plays and fades itself)
 //  Shake         camera shake when islands move (before: CameraShake)
 //  Smoothing     the camera absorbs small pops of the body in height (PlayerMove tells it what the ground carried)
 //Goes on the Main Camera.
 
 using System.Collections;
 using UnityEngine;
-using UnityEngine.Video;
 
 public class PlayerLook : MonoBehaviour
 {
@@ -41,10 +40,7 @@ public class PlayerLook : MonoBehaviour
 
     [Section("Paintings")]
     [SerializeField] private float paintingLookRange = 10f;
-    private Transform currentPainting;
-    private VideoPlayer paintingVideo;
-    private AudioSource paintingAudio;
-    private bool wasPaused;
+    private Painting currentPainting;
 
     private Camera playerCamera;
 
@@ -61,7 +57,6 @@ public class PlayerLook : MonoBehaviour
     [Section("Debug", Closed = true)]
     [ReadOnlyField, SerializeField] private bool isZooming = false;
     [ReadOnlyField] public GameObject heldObject;
-    [ReadOnlyField, SerializeField] private bool clueSolved;   // the painting's pedestal is solved
 
     private Vector3 cameraRestPosition;
     private Vector3 shakeOffset;
@@ -241,62 +236,21 @@ public class PlayerLook : MonoBehaviour
 
     private void UpdateLookedPainting()
     {
-        if (PauseMenu.GameIsPaused)
-        {
-            if (!wasPaused && paintingVideo != null) paintingVideo.Pause();
-            if (!wasPaused && paintingAudio != null) paintingAudio.Pause();
-            wasPaused = true;
-            return;
-        }
-        if (wasPaused)
-        {
-            wasPaused = false;
-            if (paintingVideo != null) paintingVideo.Play();
-            if (paintingAudio != null) paintingAudio.Play();
-        }
+        if (PauseMenu.GameIsPaused) return;   // the painting pauses itself
+        Painting looked = GetLookedPainting();
+        if (looked == currentPainting) return;
 
-        Transform lookedPainting = GetLookedPainting();
-        if (lookedPainting == currentPainting) return;
-
-        StopPainting();
-        if (lookedPainting != null) PlayPainting(lookedPainting);
+        if (currentPainting != null) currentPainting.StopWatching();   // its music fades out
+        currentPainting = looked;
+        if (currentPainting != null) currentPainting.Watch();
     }
 
-    private Transform GetLookedPainting()
+    // The painting the camera points at: its canvas or its image (not the easel or the chair)
+    private Painting GetLookedPainting()
     {
         if (!Physics.Raycast(transform.position, transform.forward, out RaycastHit hit, paintingLookRange)) return null;
-        if (!hit.transform.CompareTag("Pintura") || hit.transform.GetComponentInChildren<VideoPlayer>() == null) return null;
-        return hit.transform;
-    }
-
-    private void PlayPainting(Transform painting)
-    {
-        currentPainting = painting;
-        paintingVideo = painting.GetComponentInChildren<VideoPlayer>();
-        paintingAudio = painting.GetComponentInChildren<AudioSource>();
-        Pedestal pedestal = Pedestal.WithClue(painting);
-        clueSolved = pedestal != null && pedestal.IsCorrect;
-
-        paintingVideo.Play();
-        if (paintingAudio != null) paintingAudio.Play();
-    }
-
-    // A solved painting keeps where it was; an unsolved one starts over next time
-    private void StopPainting()
-    {
-        if (paintingVideo != null)
-        {
-            if (!clueSolved) paintingVideo.frame = 0;
-            paintingVideo.Pause();
-        }
-        if (paintingAudio != null)
-        {
-            if (!clueSolved) paintingAudio.time = 0;
-            paintingAudio.Pause();
-        }
-        currentPainting = null;
-        paintingVideo = null;
-        paintingAudio = null;
+        Painting painting = hit.transform.GetComponentInParent<Painting>();
+        return painting != null && painting.Shows(hit.transform) ? painting : null;
     }
 
     //---- Shake

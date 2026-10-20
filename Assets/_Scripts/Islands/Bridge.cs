@@ -62,10 +62,6 @@ public class Bridge : Lift
     [Tooltip("Settings for every falling platform in this bridge (a platform can override them)")]
     public FallingPlatformSettings platformSettings = new FallingPlatformSettings();
 
-    [Section("Advanced", Closed = true)]
-    [Tooltip("Optional: rises up to this object's height instead of where it is placed (the tutorial bridge uses it)")]
-    public Transform topOverride;
-
     private Renderer[] allRenderers;
     private Collider[] allColliders;
     private Vector3 finalPosition;
@@ -81,7 +77,6 @@ public class Bridge : Lift
     public Vector3 FinalPosition => appearance != Appearance.RiseFromBelow ? finalPosition : new Vector3(transform.position.x, TopY, transform.position.z);
     public Quaternion FinalRotation => appearance != Appearance.RiseFromBelow ? finalRotation : transform.rotation;
 
-    protected override float TopY => topOverride != null ? topOverride.position.y : base.TopY;
     protected override float BottomY => base.BottomY + lowerOffset;
 
     protected override void Start()
@@ -117,7 +112,7 @@ public class Bridge : Lift
         StopAllCoroutines();
         IsWaiting = false;
         IsAppearing = false;
-        if (appearance == Appearance.RiseFromBelow) StartMove(BottomY, LowerDuration, false);
+        if (appearance == Appearance.RiseFromBelow) StartMove(LowerDuration, false);
         else StartCoroutine(ExtendRoutine(false));
     }
 
@@ -182,7 +177,7 @@ public class Bridge : Lift
             IsWaiting = false;
         }
 
-        if (appearance == Appearance.RiseFromBelow) StartMove(TopY, RiseDuration, true);
+        if (appearance == Appearance.RiseFromBelow) StartMove(RiseDuration, true);
         else yield return ExtendRoutine(true);
         IsAppearing = false;
     }

@@ -8,6 +8,8 @@ using UnityEngine.Video;
 //          strokes. Written to its material, which is the painting's own one: the same painting in both scenes
 //          shares it, so set it in one scene only (the last one edited wins).
 // A painting with no root (just the tagged canvas) carries it on the canvas itself.
+// Watching (PlayerLook tells it): the video and its music play; looking away, the music fades out and then it pauses.
+// Looking back while it fades, it fades in again from where it was. An unsolved painting starts over next time.
 // Masks in _Rendering: PaintingMask (brush strokes), PaintingFrame_Splatter, PaintingFrame_Torn, PaintingFrame_Wavy.
 public class Painting : MonoBehaviour
 {
@@ -44,6 +46,12 @@ public class Painting : MonoBehaviour
     [Tooltip("How much the brush strokes catch the light")]
     [Range(0f, 2f)] public float relief = 0.5f;
 
+    [Section("Music")]
+    [Tooltip("Seconds the music takes to fade out after you look away (the video keeps going until it is silent)")]
+    public float fadeOutTime = 2.5f;
+    [Tooltip("Seconds it takes to come in when you look at it")]
+    public float fadeInTime = 0.3f;
+
     [Section("References")]
     [Tooltip("The canvas board (the object tagged Pintura; empty: only the image is styled)")]
     public Renderer board;
@@ -51,6 +59,11 @@ public class Painting : MonoBehaviour
     public Renderer image;
 
     private MaterialPropertyBlock boardBlock;
+    private VideoPlayer video;
+    private AudioSource music;
+    private float fullVolume = 1f;
+    private float volume;          // 0..1 of the full volume
+    private bool watched, playing, paused;
 
     // Added to a painting: finds its parts and starts from what the image's material already has (changes nothing)
     private void Reset()
@@ -86,7 +99,75 @@ public class Painting : MonoBehaviour
         if (material.HasProperty(ReliefId)) relief = material.GetFloat(ReliefId);
     }
 
-    private void Awake() => ApplyBoard();   // the board's values live on the renderer: set again when the game starts
+    private void Awake()
+    {
+        ApplyBoard();   // the board's values live on the renderer: set again when the game starts
+        if (image != null)
+        {
+            video = image.GetComponent<VideoPlayer>();
+            music = image.GetComponent<AudioSource>();
+        }
+        if (video == null) video = GetComponentInChildren<VideoPlayer>(true);
+        if (music == null && video != null) music = video.GetComponentInChildren<AudioSource>(true);
+        if (music != null) fullVolume = music.volume;
+    }
+
+    //---- Watching (PlayerLook)
+
+    // Its canvas or its image (what the player looks at)
+    public bool Shows(Transform part) =>
+        (board != null && part.IsChildOf(board.transform)) || (image != null && part.IsChildOf(image.transform));
+
+    public void Watch()
+    {
+        watched = true;
+        if (playing) return;   // still fading out: it comes back from where it is
+        playing = true;
+        volume = fadeInTime > 0f ? 0f : 1f;
+        SetVolume();
+        if (video != null) video.Play();
+        if (music != null) music.Play();
+    }
+
+    public void StopWatching() => watched = false;
+
+    private void Update()
+    {
+        if (!playing) return;
+        if (PauseMenu.GameIsPaused != paused) Pause(PauseMenu.GameIsPaused);
+        if (paused) return;
+
+        float seconds = watched ? fadeInTime : fadeOutTime;
+        volume = Mathf.MoveTowards(volume, watched ? 1f : 0f, seconds > 0f ? Time.deltaTime / seconds : 1f);
+        SetVolume();
+        if (!watched && volume <= 0f) Stop();
+    }
+
+    private void Pause(bool pause)
+    {
+        paused = pause;
+        if (pause) { if (video != null) video.Pause(); if (music != null) music.Pause(); }
+        else { if (video != null) video.Play(); if (music != null) music.UnPause(); }
+    }
+
+    // Silent: pauses. A solved painting keeps where it was; an unsolved one starts over next time
+    private void Stop()
+    {
+        playing = false;
+        Pedestal pedestal = Pedestal.WithClue(transform);
+        bool solved = pedestal != null && pedestal.IsCorrect;
+        if (video != null) { if (!solved) video.frame = 0; video.Pause(); }
+        if (music != null) { if (!solved) music.time = 0f; music.Pause(); }
+        volume = 0f;
+        SetVolume();
+    }
+
+    private void SetVolume()
+    {
+        if (music != null) music.volume = fullVolume * volume;
+    }
+
+    //---- Look
 
     private void OnValidate()
     {

@@ -7,6 +7,8 @@ using UnityEngine;
 // Timing comes from the LevelManager (Lift section) unless Override Timing is on.
 // Place it in the scene where it ends up (its final place): that is its top, and it waits the LevelManager's
 // fall height (Top Y - Bottom Y) below it. So islands and bridges can be designed and tested all up.
+// Inside something that moves (the tutorial bridge in its floating island) its place moves with it: it rises to
+// where it was placed on its parent, wherever the parent is now.
 public abstract class Lift : MonoBehaviour
 {
     [Section("Rise & Fall")]
@@ -26,12 +28,12 @@ public abstract class Lift : MonoBehaviour
     protected AudioSource audioSource;
     private Coroutine moving;
 
-    protected float designedY;   // where it was placed in the scene = where it ends up
+    private Vector3 designedPlace;   // where it was placed in the scene (on its parent) = where it ends up
     private FloatMotion floating;  // on the same object (Island_NN floating itself): the lift moves where it floats around
 
     protected virtual void Awake()
     {
-        designedY = transform.position.y;
+        designedPlace = transform.localPosition;
         floating = GetComponent<FloatMotion>();
     }
 
@@ -57,14 +59,14 @@ public abstract class Lift : MonoBehaviour
     {
         if (IsUp) return;
         IsUp = true;
-        StartMove(TopY, RiseDuration, true);
+        StartMove(RiseDuration, true);
     }
 
     public virtual void Lower()
     {
         if (!IsUp) return;
         IsUp = false;
-        StartMove(BottomY, LowerDuration, false);
+        StartMove(LowerDuration, false);
     }
 
     // Debug: already up, no animation (DebugTools starts)
@@ -78,38 +80,43 @@ public abstract class Lift : MonoBehaviour
 
     //---- Heights and timing
 
-    protected virtual float TopY => designedY;
-    protected virtual float BottomY => designedY - (level.topY - level.bottomY);
+    // Height (world) of its designed place now: follows a parent that moves
+    protected float DesignedY => transform.parent != null ? transform.parent.TransformPoint(designedPlace).y : designedPlace.y;
+    protected virtual float TopY => DesignedY;
+    protected virtual float BottomY => DesignedY - (level.topY - level.bottomY);
     protected float RiseDuration => overrideTiming ? riseDuration : level.liftRiseDuration;
     protected float LowerDuration => overrideTiming ? lowerDuration : level.liftLowerDuration;
     protected float Overshoot => overrideTiming ? overshoot : level.liftOvershoot;
 
     //---- Movement
 
-    protected void StartMove(float targetY, float duration, bool rising)
+    // Rising: to Top Y. Lowering: to Bottom Y
+    protected void StartMove(float duration, bool rising)
     {
         if (moving != null) StopCoroutine(moving);
-        moving = StartCoroutine(MoveRoutine(targetY, duration, rising));
+        moving = StartCoroutine(MoveRoutine(duration, rising));
     }
 
-    IEnumerator MoveRoutine(float targetY, float duration, bool rising)
+    // Heights are measured from the target each frame, so it lands right even if its parent moved meanwhile
+    IEnumerator MoveRoutine(float duration, bool rising)
     {
         IsMoving = true;
         OnMoveStarted(rising);
         Play(rising ? riseClip : null);
 
-        float startY = CurrentHeight;
+        float Target() => rising ? TopY : BottomY;
+        float start = CurrentHeight - Target();
         duration = Mathf.Max(duration, 0.01f);
         float settleTime = rising && Overshoot > 0f ? Mathf.Min(0.6f, duration * 0.25f) : 0f;
         float travelTime = duration - settleTime;
-        float travelTarget = rising ? targetY + Overshoot : targetY;
+        float travelEnd = rising ? Overshoot : 0f;
 
         // Travel: smooth start and end when rising, speeding up when lowering
         for (float t = 0f; t < travelTime; t += Time.deltaTime)
         {
             float p = t / travelTime;
             float eased = rising ? p * p * (3f - 2f * p) : p * p;
-            SetHeight(Mathf.LerpUnclamped(startY, travelTarget, eased));
+            SetHeight(Target() + Mathf.LerpUnclamped(start, travelEnd, eased));
             yield return null;
         }
 
@@ -117,11 +124,11 @@ public abstract class Lift : MonoBehaviour
         for (float t = 0f; t < settleTime; t += Time.deltaTime)
         {
             float p = t / settleTime;
-            SetHeight(Mathf.Lerp(travelTarget, targetY, p * p * (3f - 2f * p)));
+            SetHeight(Target() + Mathf.Lerp(travelEnd, 0f, p * p * (3f - 2f * p)));
             yield return null;
         }
 
-        SetHeight(targetY);
+        SetHeight(Target());
         IsMoving = false;
         if (rising) Play(arriveClip);
         OnMoveFinished(rising);
