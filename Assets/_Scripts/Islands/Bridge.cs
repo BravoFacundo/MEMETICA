@@ -25,7 +25,7 @@ public class Bridge : Lift
     [ShowIf(nameof(waitForIslands))] public float delayAfterIslands = 0.3f;
 
     [Section("Rise From Below", nameof(appearance), Appearance.RiseFromBelow)]
-    [Tooltip("Meters above the lowest point where it waits")]
+    [Tooltip("Meters it waits above the Drop Distance (negative: further down). Usually 0")]
     [FormerlySerializedAs("offset")] public float lowerOffset = 0f;
 
     [Section("Extend From A", nameof(appearance), Appearance.ExtendFromA)]
@@ -77,7 +77,8 @@ public class Bridge : Lift
     public Vector3 FinalPosition => appearance != Appearance.RiseFromBelow ? finalPosition : new Vector3(transform.position.x, TopY, transform.position.z);
     public Quaternion FinalRotation => appearance != Appearance.RiseFromBelow ? finalRotation : transform.rotation;
 
-    protected override float BottomY => base.BottomY + lowerOffset;
+    protected override float DropFrom(LevelManager lm) => lm.dropDistance - lowerOffset;
+    protected override bool HidesWhenDown => appearance == Appearance.RiseFromBelow;   // Extend From A hides inside island A
 
     protected override void Start()
     {
@@ -85,7 +86,7 @@ public class Bridge : Lift
         allRenderers = GetComponentsInChildren<Renderer>(true);
         allColliders = System.Array.FindAll(GetComponentsInChildren<Collider>(true), c => !c.isTrigger);
 
-        if (appearance == Appearance.RiseFromBelow) { SetHeight(BottomY); return; }   // waits below
+        if (appearance == Appearance.RiseFromBelow) { SetHeight(BottomY); SetPresent(false); return; }   // waits below, invisible
 
         SetHeight(TopY);   // always in its final place, hidden until it appears
         finalPosition = transform.position;
@@ -177,7 +178,7 @@ public class Bridge : Lift
             IsWaiting = false;
         }
 
-        if (appearance == Appearance.RiseFromBelow) StartMove(RiseDuration, true);
+        if (appearance == Appearance.RiseFromBelow) { SetPresent(true); StartMove(RiseDuration, true); }
         else yield return ExtendRoutine(true);
         IsAppearing = false;
     }

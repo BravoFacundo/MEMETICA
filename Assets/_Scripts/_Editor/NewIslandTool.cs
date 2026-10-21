@@ -37,7 +37,7 @@ public static class NewIslandTool
         if (Selection.activeTransform != null && Selection.activeTransform.GetComponent<Island>() == null)
             root.transform.SetParent(Selection.activeTransform.parent, false);   // next to what was selected (e.g. inside a Level)
         Vector3 at = SceneView.lastActiveSceneView != null ? SceneView.lastActiveSceneView.pivot : Vector3.zero;
-        root.transform.position = new Vector3(at.x, level != null ? level.topY : 0f, at.z);
+        root.transform.position = new Vector3(at.x, 0f, at.z);
         root.AddComponent<Island>();
         TrySetTag(root, "Isla");
 

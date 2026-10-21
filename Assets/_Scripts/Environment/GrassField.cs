@@ -92,8 +92,12 @@ public class GrassField : MonoBehaviour
 
     //-------------------------------------------------------------------------------------------------------------------
 
+    // Its island is down (Lift): not drawn
+    public bool Hidden { get; set; }
+
     private void DrawForCamera(Camera cam)
     {
+        if (Hidden) return;
         if (grassMaterial == null || points.Count == 0 || cam.cameraType == CameraType.Preview) return;
         if (isDirty || transform.lossyScale != builtScale) RebuildCells();
         if (cardMesh == null) cardMesh = CreateCardMesh();

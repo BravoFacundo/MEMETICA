@@ -4,7 +4,7 @@ using System.Text.RegularExpressions;
 using UnityEngine;
 
 // Todo lo general del nivel. Va en Managers > LevelManager.
-// - Alturas y caídas (antes: objetos MasterPivot, LimiteCaida y las Cage)
+// - Drop Distance: one distance for heights and falls (before: Top Y / Bottom Y, Fall Distance; MasterPivot, LimiteCaida, Cage)
 // - Subir y bajar islas, puentes y ascensores (antes: IslandsManager en "Scene Manager")
 // Los demás scripts lo usan con LevelManager.Instance.
 //
@@ -20,11 +20,10 @@ public class LevelManager : MonoBehaviour
     public static LevelManager Instance { get; private set; }
 
     [Section("Heights")]
-    [Tooltip("Islands and bridges wait (Top Y - Bottom Y) below where they are placed")]
-    public float topY = 0f;
-    public float bottomY = -30f;
-    [Tooltip("Meters below the last ground stepped on to count as a fall into the void (before: Cage)")]
-    public float fallDistance = 20f;
+    [Tooltip("One distance for the whole game, about down to the clouds: islands and bridges wait this far below their place " +
+             "(invisible), falling this far below the last ground is a fall into the void, and you (and memes) reappear this far " +
+             "above the ground of the RespawnPoint")]
+    public float dropDistance = 30f;
 
     [Section("Lift (islands and bridges)")]
     [Tooltip("Seconds an island or bridge takes to rise, however far it travels")]
@@ -35,6 +34,10 @@ public class LevelManager : MonoBehaviour
     public float liftOvershoot = 0.4f;
     [Tooltip("Pedestals with In Order: seconds between one thing arriving and the next one starting")]
     public float sequenceGap = 0.3f;
+
+    [Section("Debug", Closed = true)]
+    [Tooltip("Scene view: a shadow of each island and bridge where it waits hidden, and the line you fall from above each RespawnPoint")]
+    public bool showDropGizmos = true;
 
     [Section("Game")]
     [Tooltip("Where everything reappears at the start: the RespawnPoint of the tutorial island")]
@@ -138,6 +141,30 @@ public class LevelManager : MonoBehaviour
     }
 
     // The island's respawn point (any child named RespawnPoint, at any depth), or null
+    // Where the player reappears for a RespawnPoint: Drop Distance above the ground under it, falling down onto it
+    public Vector3 RespawnPosition(Transform point, out float groundY)
+    {
+        bool hasGround = Physics.Raycast(point.position + Vector3.up * 0.5f, Vector3.down, out RaycastHit ground, 200f, ~0, QueryTriggerInteraction.Ignore);
+        groundY = hasGround ? ground.point.y : point.position.y;
+        return new Vector3(point.position.x, groundY + dropDistance, point.position.z);
+    }
+
+#if UNITY_EDITOR
+    // Above each RespawnPoint: the fall the player makes when reappearing
+    void OnDrawGizmos()
+    {
+        if (!showDropGizmos) return;
+        Gizmos.color = new Color(1f, 0.85f, 0.3f, 0.8f);
+        foreach (Transform t in FindObjectsOfType<Transform>())
+        {
+            if (t.name != respawnPointName) continue;
+            Vector3 from = RespawnPosition(t, out float groundY);
+            Gizmos.DrawLine(from, new Vector3(from.x, groundY, from.z));
+            Gizmos.DrawWireSphere(from, 0.6f);
+        }
+    }
+#endif
+
     public Transform RespawnPointOf(GameObject island)
     {
         if (island == null) return null;

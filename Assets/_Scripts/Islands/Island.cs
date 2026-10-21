@@ -21,7 +21,7 @@ public class Island : Lift
         base.Start();
         if (Camera.main != null) look = Camera.main.GetComponent<PlayerLook>();
         if (startRaised) SetUp(true);
-        else SetHeight(BottomY);
+        else { SetHeight(BottomY); SetPresent(false); }   // waits below, invisible
     }
 
     // One rumble for the whole move (before: many 0.1 s shakes in a row, felt like hits)

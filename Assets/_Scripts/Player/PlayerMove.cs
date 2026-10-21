@@ -349,7 +349,7 @@ public class PlayerMove : MonoBehaviour
     // ¿Cayó al vacío? Si no, actualiza el punto de respawn según la isla que pisa
     private bool CheckFallAndRespawn()
     {
-        if (LevelManager.Instance != null && transform.position.y < lastGroundY - LevelManager.Instance.fallDistance)
+        if (LevelManager.Instance != null && transform.position.y < lastGroundY - LevelManager.Instance.dropDistance)
         {
             Respawn();
             return true;
@@ -378,9 +378,15 @@ public class PlayerMove : MonoBehaviour
 
     private void Respawn()
     {
+        // Its island went down meanwhile (invisible, nothing to land on): back to the start
+        if (Lift.IsHiddenAt(respawnPoint)) { respawnPoint = LevelManager.Instance.startRespawnPoint; lastIsland = null; lastGroundHit = null; }
+
+        // Drop Distance above the ground of the RespawnPoint: it falls down onto it (and brakes before landing)
+        Vector3 from = LevelManager.Instance.RespawnPosition(respawnPoint, out float groundY);
+        lastGroundY = groundY;
         // El CharacterController ignora el cambio de posición si está prendido
         characterController.enabled = false;
-        transform.position = respawnPoint.position;
+        transform.position = from;
         characterController.enabled = true;
         horizontalVelocity = Vector3.zero;
         verticalVelocity = 0f;
