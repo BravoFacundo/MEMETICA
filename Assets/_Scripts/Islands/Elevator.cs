@@ -95,7 +95,7 @@ public class Elevator : MonoBehaviour
 
         for (float t = 0f; t < 1f; )
         {
-            t = Mathf.Min(1f, t + Time.deltaTime / Mathf.Max(rideDuration, 0.01f));
+            t = Mathf.Min(1f, t + Time.deltaTime * DebugTools.ElevatorSpeed / Mathf.Max(rideDuration, 0.01f));   // faster when testing (DebugTools)
             Vector3 from = startParent != null ? startParent.TransformPoint(startLocal) : startLocal;
             Vector3 to = dockPoint.position;
             ControlPoints(from, to, out Vector3 p1, out Vector3 p2);

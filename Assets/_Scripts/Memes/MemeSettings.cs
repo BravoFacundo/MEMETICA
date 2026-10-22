@@ -11,9 +11,7 @@ public class MemeSettings : ScriptableObject
     public float restDelay = 3f;
     public float groundCheckRadius = 0.6f;
 
-    [Header("Respawn (meteor)")]
-    [Tooltip("Meters above the island it starts falling from")]
-    public float meteorHeight = 25f;
+    [Header("Meteor: the fall (a meme that fell into the void comes back as a meteor)")]
     [Tooltip("Meters it travels sideways while falling (the angle of the fall)")]
     public float meteorDrift = 10f;
     [Tooltip("Seconds the fall takes (it speeds up)")]
@@ -23,10 +21,59 @@ public class MemeSettings : ScriptableObject
     [Tooltip("Never lands closer than this to a pedestal (it would place itself)")]
     public float pedestalClearance = 3f;
     public Color meteorColor = new Color(1f, 0.75f, 0.35f);
+
+    [Header("Meteor: the rock (the meme falls inside it, it bursts on impact)")]
+    [Tooltip("Rock the meme falls as (any rock model): it bursts on impact in a dark cloud and the meme comes out. Empty: the meme falls as itself")]
+    public GameObject meteorRock;
+    [Tooltip("Meters wide the rock is (scaled to it, whatever the model)")]
+    public float meteorRockSize = 0.9f;
+    [Tooltip("Chunks of the rock thrown up when it bursts")]
+    public int meteorChunks = 6;
+
+    [Header("Meteor: impact")]
     [Tooltip("Pieces that fly out where it lands (small rock and grass prefabs, like the bridges)")]
     public GameObject[] impactDebris;
     public int impactDebrisCount = 10;
     public AudioClip impactClip;
+    [Tooltip("The cloud the rock bursts in (darker: it hides the meme coming out)")]
+    public Color impactSmokeColor = new Color(0.3f, 0.3f, 0.33f, 1f);
+
+    [Header("Meteor: smoke (rises from the meme until it is picked up)")]
+    [Tooltip("Smoke of the meteor (impact cloud and trail): Memetica/LowPolySmoke, solid low poly puffs")]
+    public Material smokeMaterial;
+    [Tooltip("Seconds between puffs of the smoke trail (it comes out broken)")]
+    public float smokeGap = 0.45f;
+    [Tooltip("The trail rising from the meme")]
+    public Color smokeColor = new Color(0.52f, 0.53f, 0.57f, 1f);
+    [Tooltip("Meters tall the pillar gets (seen from anywhere, zooming if needed)")]
+    public float smokeHeight = 40f;
+    [Tooltip("Meters per second the smoke rises")]
+    public float smokeRiseSpeed = 2.5f;
+    [Tooltip("Meters wide each puff starts (it grows as it rises)")]
+    public float smokeSize = 2.5f;
+
+    [Header("Meme sounds")]
+    [Tooltip("Last resort for any meme change with no sound of its own nor of its meme: meme sounds that any meme can use")]
+    public AudioClip[] fallbackSounds;
+
+    [Header("Mist (MemeOrb): every change happens inside it")]
+    [Tooltip("Seconds the fog takes to gather and hide the image (it is the warning that a change is coming)")]
+    public float mistIn = 1f;
+    [Tooltip("Seconds it takes to clear after the image changed")]
+    public float mistOut = 0.6f;
+    [Tooltip("Fog inside the orb: Memetica/ToonPuff, flat cartoon puffs (the orb is a flat drawing)")]
+    public Material fogMaterial;
+    [Tooltip("Fog wisps per second inside the bubble at its thickest")]
+    public float fogRate = 55f;
+    public Color fogColor = new Color(0.5f, 0.52f, 0.56f, 0.9f);
+    [Tooltip("After the swap, how much faster the wisps age (they fade out instead of lingering)")]
+    public float fogFadeSpeed = 3f;
+
+    [Header("Changes you must see (MemeOrb: fall alone, drop)")]
+    [Tooltip("Meters: it changes in front of you when you come this close and it is on screen")]
+    public float revealDistance = 10f;
+    [Tooltip("Seconds the change takes (the new image flickering in), so it ends about when you grab it")]
+    public float revealTime = 1.5f;
 
     [Header("Mutation (MemeOrb): it changes while you carry it and move")]
     [Tooltip("Warning: it is about to change")]
@@ -40,10 +87,8 @@ public class MemeSettings : ScriptableObject
     public float firstChangeAfter = 3f;
     [Tooltip("Seconds moving between changes (random between x and y)")]
     public Vector2 changeInterval = new Vector2(4f, 8f);
-    [Tooltip("How long a variant lasts before going back to the original (random between x and y)")]
+    [Tooltip("How long a change (move, fall, drop) shows before going back to the original (random between x and y)")]
     public Vector2 variantDuration = new Vector2(1.5f, 2.5f);
-    [Tooltip("Seconds before the change that the warning plays")]
-    public float warnLead = 0.6f;
     [Tooltip("No change this close to jumps, falls, new bridges or new islands (the player would think they caused it)")]
     public float graceAfterEvent = 1f;
     public float flashIntensity = 2f;

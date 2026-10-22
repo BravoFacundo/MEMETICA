@@ -2,15 +2,16 @@ using UnityEngine;
 
 // A burst of small pieces (rock, grass) that fly out, spin, shrink and disappear.
 // Bridges use it when they burst out of an island (Extend From A). Any small prefab works as a piece:
-// its colliders and scripts are turned off, it only flies.
+// its colliders and scripts are turned off, it only flies. The meteor uses it too: its rock breaking into chunks.
 public class DebrisBurst : MonoBehaviour
 {
     private float life;
     private float age;
     private Vector3 startScale;
 
-    // direction: where they fly (not normalized = it is fine), speed in m/s, spread: how much each piece strays from it
-    public static void Spawn(GameObject[] prefabs, int count, Vector3 position, Vector3 direction, float speed, float spread = 0.5f)
+    // direction: where they fly (not normalized = it is fine), speed in m/s, spread: how much each piece strays from it,
+    // size: meters wide each piece is (0 = the prefab's own size)
+    public static void Spawn(GameObject[] prefabs, int count, Vector3 position, Vector3 direction, float speed, float spread = 0.5f, float size = 0f)
     {
         if (prefabs == null || prefabs.Length == 0) return;
         for (int i = 0; i < count; i++)
@@ -19,7 +20,7 @@ public class DebrisBurst : MonoBehaviour
             if (prefab == null) continue;
 
             GameObject piece = Instantiate(prefab, position + Random.insideUnitSphere * 0.6f, Random.rotation);
-            piece.transform.localScale = prefab.transform.localScale * Random.Range(0.5f, 1.1f);
+            piece.transform.localScale = prefab.transform.localScale * Random.Range(0.5f, 1.1f) * Fit(piece, size);
             foreach (Collider c in piece.GetComponentsInChildren<Collider>()) c.enabled = false;
             foreach (MonoBehaviour b in piece.GetComponentsInChildren<MonoBehaviour>()) b.enabled = false;
 
@@ -33,6 +34,18 @@ public class DebrisBurst : MonoBehaviour
 
             piece.AddComponent<DebrisBurst>().life = Random.Range(0.8f, 1.4f);
         }
+    }
+
+    // How much to scale a piece so it is size meters wide (1 when size is 0)
+    static float Fit(GameObject piece, float size)
+    {
+        if (size <= 0f) return 1f;
+        Renderer[] parts = piece.GetComponentsInChildren<Renderer>();
+        if (parts.Length == 0) return 1f;
+        Bounds b = parts[0].bounds;
+        foreach (Renderer r in parts) b.Encapsulate(r.bounds);
+        float biggest = Mathf.Max(b.size.x, b.size.y, b.size.z);
+        return biggest > 0.0001f ? size / biggest : 1f;
     }
 
     void Start() => startScale = transform.localScale;

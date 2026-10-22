@@ -2,8 +2,8 @@
 // - Menú (Follow Mouse ✔): sigue al mouse y oculta el cursor real.
 // - Juego (Follow Mouse ✘): queda fija en el centro como mira; el ícono lo decide la sección Aim (before: Crosshair).
 // Aim: con Player Look asignado (escena Game) es mira fija; sin él (Menu) el cursor sigue al mouse.
-//   Zoom (clic derecho): lupa + mientras acerca, lupa mientras está acercado, lupa − mientras vuelve
-//   Mirando un meme: mano | Sosteniendo un meme: elegible | Nada: Dot (el punto)
+//   Zoom (right click): magnifier + while zooming in, nothing once fully zoomed (a clean view), magnifier − while zooming out
+//   Looking at a meme: hand | Holding a meme: nothing (the meme is seen clean) | Nothing: Dot
 //   En pausa no hace nada: ahí el cursor queda libre (lo maneja PauseMenu). Al volver, se re-aplica.
 // Default es siempre la flecha. En el juego, la mira usa Dot (el punto) y en la pausa vuelve la flecha.
 // El punto de clic de cada cursor es el PIVOT de su sprite
@@ -15,7 +15,8 @@ using UnityEngine.UI;
 
 // Point: algo clickeable (íconos) | Grab: algo que se agarra (orbes) | Busy: cargando (lo pone el UIManager)
 // NotAllowed: algo interactuable pero bloqueado (no hace nada) | ZoomIn/Zoom/ZoomOut/Dot: mira del juego
-public enum CursorState { Default, Grab, Busy, Point, NotAllowed, ZoomIn, Zoom, ZoomOut, Dot }
+// Hidden: no cursor at all (holding a meme, fully zoomed)
+public enum CursorState { Default, Grab, Busy, Point, NotAllowed, ZoomIn, Zoom, ZoomOut, Dot, Hidden }
 
 [RequireComponent(typeof(Canvas))]
 public class RetroCursor : MonoBehaviour
@@ -37,8 +38,6 @@ public class RetroCursor : MonoBehaviour
     [Header("Aim (Game only)")]
     [Tooltip("Main Camera. Empty (Menu) = free cursor that follows the mouse")]
     public PlayerLook playerLook;
-    [Tooltip("Qué se muestra mientras se sostiene un meme")]
-    public CursorState whileHolding = CursorState.Grab;
     [Tooltip("Margen de FOV para dar por terminado el acercamiento o el alejamiento")]
     public float fovMargin = 1f;
 
@@ -95,11 +94,11 @@ public class RetroCursor : MonoBehaviour
         float fov = aimCamera.fieldOfView;
 
         if (playerLook.IsZooming)
-            return fov > playerLook.ZoomFOV + fovMargin ? CursorState.ZoomIn : CursorState.Zoom;
+            return fov > playerLook.ZoomFOV + fovMargin ? CursorState.ZoomIn : CursorState.Hidden;
         if (fov < playerLook.DefaultFOV - fovMargin)
             return CursorState.ZoomOut;
 
-        if (playerLook.heldObject != null) return whileHolding;
+        if (playerLook.heldObject != null) return CursorState.Hidden;   // dropped: looking at it, the hand comes back
         if (playerLook.LookingAtMeme) return CursorState.Grab;
         return CursorState.Dot;
     }
@@ -126,6 +125,8 @@ public class RetroCursor : MonoBehaviour
     public void SetState(CursorState state)
     {
         if (busy) return;
+        cursorImage.enabled = state != CursorState.Hidden;
+        if (state == CursorState.Hidden) return;
 
         foreach (CursorStyle s in styles)
         {

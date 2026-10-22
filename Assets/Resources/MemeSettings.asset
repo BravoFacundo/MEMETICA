@@ -25,6 +25,22 @@ MonoBehaviour:
   - {fileID: 379243778788410097, guid: 19388166165474c488a129d8427a779f, type: 3}
   impactDebrisCount: 10
   impactClip: {fileID: 0}
+  mistIn: 1
+  mistOut: 0.6
+  fogMaterial: {fileID: 2100000, guid: 7af46d505eab4153b1def23ac1592f82, type: 2}
+  fogRate: 55
+  fogColor: {r: 0.5, g: 0.52, b: 0.56, a: 0.9}
+  fogFadeSpeed: 3
+  revealDistance: 10
+  revealTime: 1.5
+  meteorRock: {fileID: 919132149155446097, guid: 808565b62d782304695f3681c3d52d04, type: 3}
+  meteorRockSize: 0.9
+  smokeMaterial: {fileID: 2100000, guid: 002aa109b32346ce9442a5d5c427a06d, type: 2}
+  smokeGap: 0.45
+  smokeColor: {r: 0.52, g: 0.53, b: 0.57, a: 1}
+  smokeHeight: 40
+  smokeRiseSpeed: 2.5
+  smokeSize: 2.5
   warnClip: {fileID: 8300000, guid: 1c7ed042ff75e17419921e1d0d6130e3, type: 3}
   changeClip: {fileID: 8300000, guid: db64e738f22ef4945834da5b19582892, type: 3}
   returnClip: {fileID: 8300000, guid: 995437a5722e2e147860694c5eb19ad1, type: 3}

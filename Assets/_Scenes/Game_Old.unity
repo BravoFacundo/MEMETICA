@@ -559,8 +559,9 @@ GameObject:
   - component: {fileID: 32968219}
   - component: {fileID: 32968218}
   - component: {fileID: 32968220}
+  - component: {fileID: 32968221}
   m_Layer: 8
-  m_Name: Particle System
+  m_Name: LeavesParticles
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -5394,12 +5395,29 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 32968216}
-  m_Enabled: 1
+  m_Enabled: 0
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: b64991bdcf1076c4ab66ae36a28e1e28, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   strengthMultiplier: 1
+--- !u!114 &32968221
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 32968216}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 90067296dedf49dfb890f8250e69a115, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  kind: 0
+  tint: {r: 1, g: 1, b: 1, a: 1}
+  fadeTime: 1.5
+  tumble: 0.5
+  material: {fileID: 2100000, guid: 002aa109b32346ce9442a5d5c427a06d, type: 2}
 --- !u!4 &34455843 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 108507113624698413, guid: eebb56c82efbd8d4bb0eb6bd925a0e9d, type: 3}
@@ -7526,6 +7544,7 @@ MonoBehaviour:
   overshoot: 0.4
   riseClip: {fileID: 0}
   arriveClip: {fileID: 0}
+  staysInPlace: 0
   appearance: 2
   waitForIslands: 1
   delayAfterIslands: 0.3
@@ -7949,7 +7968,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!199 &116522264
 ParticleSystemRenderer:
   serializedVersion: 6
@@ -13461,6 +13480,7 @@ MonoBehaviour:
   overshoot: 0.4
   riseClip: {fileID: 0}
   arriveClip: {fileID: 0}
+  staysInPlace: 0
   appearance: 2
   waitForIslands: 1
   delayAfterIslands: 0.3
@@ -13695,8 +13715,9 @@ GameObject:
   - component: {fileID: 159480278}
   - component: {fileID: 159480277}
   - component: {fileID: 159480279}
+  - component: {fileID: 159480280}
   m_Layer: 8
-  m_Name: Particle System
+  m_Name: LeavesParticles
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -18530,12 +18551,29 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 159480275}
-  m_Enabled: 1
+  m_Enabled: 0
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: b64991bdcf1076c4ab66ae36a28e1e28, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   strengthMultiplier: 1
+--- !u!114 &159480280
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 159480275}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 90067296dedf49dfb890f8250e69a115, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  kind: 1
+  tint: {r: 1, g: 1, b: 1, a: 1}
+  fadeTime: 1.5
+  tumble: 0.5
+  material: {fileID: 2100000, guid: 002aa109b32346ce9442a5d5c427a06d, type: 2}
 --- !u!1 &163665290
 GameObject:
   m_ObjectHideFlags: 0
@@ -21091,8 +21129,9 @@ GameObject:
   - component: {fileID: 227270877}
   - component: {fileID: 227270876}
   - component: {fileID: 227270878}
+  - component: {fileID: 227270879}
   m_Layer: 8
-  m_Name: Particle System
+  m_Name: LeavesParticles
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -25926,12 +25965,29 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 227270874}
-  m_Enabled: 1
+  m_Enabled: 0
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: b64991bdcf1076c4ab66ae36a28e1e28, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   strengthMultiplier: 1
+--- !u!114 &227270879
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 227270874}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 90067296dedf49dfb890f8250e69a115, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  kind: 1
+  tint: {r: 1, g: 1, b: 1, a: 1}
+  fadeTime: 1.5
+  tumble: 0.5
+  material: {fileID: 2100000, guid: 002aa109b32346ce9442a5d5c427a06d, type: 2}
 --- !u!4 &227272465 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 1805616374771606476, guid: 94c51fd839663604fa1027f8f1329fe2, type: 3}
@@ -26118,7 +26174,7 @@ GameObject:
   - component: {fileID: 229786761}
   - component: {fileID: 229786762}
   m_Layer: 0
-  m_Name: WindAudio
+  m_Name: WindEffects
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -26133,7 +26189,7 @@ Transform:
   m_GameObject: {fileID: 229786760}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0.056353733, z: -0, w: 0.9984109}
-  m_LocalPosition: {x: -1.168208, y: -0.165087, z: -0.27997607}
+  m_LocalPosition: {x: 0.98, y: -0.165087, z: 0.08}
   m_LocalScale: {x: 0.61143225, y: 0.6114323, z: 0.61143225}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -26406,6 +26462,7 @@ MonoBehaviour:
   overshoot: 0.4
   riseClip: {fileID: 0}
   arriveClip: {fileID: 0}
+  staysInPlace: 0
   appearance: 2
   waitForIslands: 1
   delayAfterIslands: 0.3
@@ -26598,14 +26655,14 @@ Transform:
   m_GameObject: {fileID: 251033094}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: 6.419308e-12, w: 1}
-  m_LocalPosition: {x: -36.300003, y: 8.3, z: -45.100002}
+  m_LocalPosition: {x: 19.8, y: 0.3000002, z: -84.3}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 1988925183}
   - {fileID: 65781670}
   - {fileID: 1792282150}
-  m_Father: {fileID: 1592269844}
+  m_Father: {fileID: 715125930}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!114 &251033096
 MonoBehaviour:
@@ -27092,6 +27149,12 @@ MonoBehaviour:
   - {fileID: 2100000, guid: 7c377d00fc2e61c49bf6851e226e6fad, type: 2}
   - {fileID: 2100000, guid: 6f4d38918c379bc449859f013458c59d, type: 2}
   matCount: 0
+  moveSounds: []
+  fallImage: {fileID: 0}
+  fallSounds: []
+  dropImage: {fileID: 0}
+  dropSounds: []
+  memeSounds: []
 --- !u!54 &270262298
 Rigidbody:
   m_ObjectHideFlags: 0
@@ -27880,6 +27943,12 @@ MonoBehaviour:
   - {fileID: 2100000, guid: 65c6c11ca18d1df40bc460b220cd9e84, type: 2}
   - {fileID: 2100000, guid: 87f8f7adb3458cf46b18286743d3bd50, type: 2}
   matCount: 0
+  moveSounds: []
+  fallImage: {fileID: 0}
+  fallSounds: []
+  dropImage: {fileID: 0}
+  dropSounds: []
+  memeSounds: []
 --- !u!54 &306690107
 Rigidbody:
   m_ObjectHideFlags: 0
@@ -28485,7 +28554,7 @@ GameObject:
   - component: {fileID: 326655369}
   - component: {fileID: 326655370}
   m_Layer: 0
-  m_Name: WindAudio
+  m_Name: WindEffects
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -28500,7 +28569,7 @@ Transform:
   m_GameObject: {fileID: 326655368}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0.7933523, z: -0, w: 0.60876286}
-  m_LocalPosition: {x: -12.531955, y: -0.24107191, z: 5.9596024}
+  m_LocalPosition: {x: -14.49, y: -0.24107191, z: 6.91}
   m_LocalScale: {x: 0.89285696, y: 0.8928575, z: 0.89285696}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -28526,7 +28595,7 @@ AudioSource:
   SpatializePostEffects: 0
   Priority: 128
   DopplerLevel: 0
-  MinDistance: 5
+  MinDistance: 2.7490997
   MaxDistance: 15
   Pan2D: 0
   rolloffMode: 2
@@ -30819,7 +30888,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!199 &349427734
 ParticleSystemRenderer:
   serializedVersion: 6
@@ -36097,8 +36166,9 @@ GameObject:
   - component: {fileID: 374258425}
   - component: {fileID: 374258424}
   - component: {fileID: 374258426}
+  - component: {fileID: 374258427}
   m_Layer: 8
-  m_Name: Particle System
+  m_Name: LeavesParticles
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -40932,12 +41002,29 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 374258422}
-  m_Enabled: 1
+  m_Enabled: 0
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: b64991bdcf1076c4ab66ae36a28e1e28, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   strengthMultiplier: 1
+--- !u!114 &374258427
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 374258422}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 90067296dedf49dfb890f8250e69a115, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  kind: 0
+  tint: {r: 1, g: 1, b: 1, a: 1}
+  fadeTime: 1.5
+  tumble: 0.5
+  material: {fileID: 2100000, guid: 002aa109b32346ce9442a5d5c427a06d, type: 2}
 --- !u!1001 &375615194
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -41740,8 +41827,9 @@ GameObject:
   - component: {fileID: 395422727}
   - component: {fileID: 395422726}
   - component: {fileID: 395422728}
+  - component: {fileID: 395422729}
   m_Layer: 8
-  m_Name: Particle System
+  m_Name: LeavesParticles
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -46575,12 +46663,29 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 395422724}
-  m_Enabled: 1
+  m_Enabled: 0
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: b64991bdcf1076c4ab66ae36a28e1e28, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   strengthMultiplier: 1
+--- !u!114 &395422729
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 395422724}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 90067296dedf49dfb890f8250e69a115, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  kind: 1
+  tint: {r: 1, g: 1, b: 1, a: 1}
+  fadeTime: 1.5
+  tumble: 0.5
+  material: {fileID: 2100000, guid: 002aa109b32346ce9442a5d5c427a06d, type: 2}
 --- !u!1 &395546251 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 2544436480761032049, guid: 58a04ed3b9a72fe4eb0b19e2cba9eba5, type: 3}
@@ -47216,7 +47321,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!199 &406497345
 ParticleSystemRenderer:
   serializedVersion: 6
@@ -55489,7 +55594,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!199 &506496468
 ParticleSystemRenderer:
   serializedVersion: 6
@@ -60517,7 +60622,7 @@ GameObject:
   - component: {fileID: 507731338}
   - component: {fileID: 507731337}
   m_Layer: 0
-  m_Name: WindSound
+  m_Name: WindEffects
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -60641,7 +60746,7 @@ Transform:
   m_LocalScale: {x: 0.6114321, y: 0.6114323, z: 0.6114321}
   m_ConstrainProportionsScale: 0
   m_Children: []
-  m_Father: {fileID: 739895164}
+  m_Father: {fileID: 1240415339}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!4 &508209871 stripped
 Transform:
@@ -60875,7 +60980,7 @@ GameObject:
   - component: {fileID: 525707116}
   - component: {fileID: 525707117}
   m_Layer: 0
-  m_Name: WindAudio
+  m_Name: WindEffects
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -60890,7 +60995,7 @@ Transform:
   m_GameObject: {fileID: 525707115}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0.19509031, z: -0, w: 0.98078537}
-  m_LocalPosition: {x: -0.43148828, y: -0.165087, z: -0.09269283}
+  m_LocalPosition: {x: -0.32, y: -0.165087, z: -0.1}
   m_LocalScale: {x: 0.61143225, y: 0.6114323, z: 0.61143225}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -60916,7 +61021,7 @@ AudioSource:
   SpatializePostEffects: 0
   Priority: 128
   DopplerLevel: 0
-  MinDistance: 5
+  MinDistance: 3.8922203
   MaxDistance: 15
   Pan2D: 0
   rolloffMode: 2
@@ -63761,6 +63866,7 @@ MonoBehaviour:
   overshoot: 0.4
   riseClip: {fileID: 0}
   arriveClip: {fileID: 0}
+  staysInPlace: 0
   appearance: 0
   waitForIslands: 1
   delayAfterIslands: 0.3
@@ -63997,8 +64103,9 @@ GameObject:
   - component: {fileID: 579314787}
   - component: {fileID: 579314786}
   - component: {fileID: 579314788}
+  - component: {fileID: 579314789}
   m_Layer: 8
-  m_Name: Particle System
+  m_Name: LeavesParticles
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -68832,12 +68939,29 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 579314784}
-  m_Enabled: 1
+  m_Enabled: 0
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: b64991bdcf1076c4ab66ae36a28e1e28, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   strengthMultiplier: 1
+--- !u!114 &579314789
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 579314784}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 90067296dedf49dfb890f8250e69a115, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  kind: 0
+  tint: {r: 1, g: 1, b: 1, a: 1}
+  fadeTime: 1.5
+  tumble: 0.5
+  material: {fileID: 2100000, guid: 002aa109b32346ce9442a5d5c427a06d, type: 2}
 --- !u!4 &582229634 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 2544436480760738129, guid: 58a04ed3b9a72fe4eb0b19e2cba9eba5, type: 3}
@@ -69889,6 +70013,7 @@ MonoBehaviour:
   overshoot: 0.4
   riseClip: {fileID: 0}
   arriveClip: {fileID: 0}
+  staysInPlace: 0
   appearance: 0
   waitForIslands: 1
   delayAfterIslands: 0.3
@@ -72063,6 +72188,44 @@ MeshCollider:
   m_Convex: 0
   m_CookingOptions: 30
   m_Mesh: {fileID: 2954858793080512207, guid: 7fa568ba8ed55e84eb54589f74abb755, type: 3}
+--- !u!1 &715125929
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 715125930}
+  m_Layer: 0
+  m_Name: NonPlayableElements
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &715125930
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 715125929}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 29.7, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children:
+  - {fileID: 2078284026}
+  - {fileID: 970318745}
+  - {fileID: 907837358}
+  - {fileID: 1725674344}
+  - {fileID: 251033095}
+  - {fileID: 907290214}
+  - {fileID: 1435454132}
+  m_Father: {fileID: 1479239295}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1001 &717364895
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -72858,6 +73021,7 @@ MonoBehaviour:
   overshoot: 0.4
   riseClip: {fileID: 0}
   arriveClip: {fileID: 0}
+  staysInPlace: 0
   appearance: 2
   waitForIslands: 1
   delayAfterIslands: 0.3
@@ -73644,7 +73808,7 @@ Transform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
-  - {fileID: 507731338}
+  - {fileID: 1240415339}
   - {fileID: 2082326645}
   - {fileID: 1188938699}
   - {fileID: 2083685836}
@@ -74753,8 +74917,9 @@ GameObject:
   - component: {fileID: 785762882}
   - component: {fileID: 785762881}
   - component: {fileID: 785762883}
+  - component: {fileID: 785762884}
   m_Layer: 8
-  m_Name: Particle System
+  m_Name: LeavesParticles
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -79588,12 +79753,29 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 785762879}
-  m_Enabled: 1
+  m_Enabled: 0
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: b64991bdcf1076c4ab66ae36a28e1e28, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   strengthMultiplier: 1
+--- !u!114 &785762884
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 785762879}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 90067296dedf49dfb890f8250e69a115, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  kind: 0
+  tint: {r: 1, g: 1, b: 1, a: 1}
+  fadeTime: 1.5
+  tumble: 0.5
+  material: {fileID: 2100000, guid: 002aa109b32346ce9442a5d5c427a06d, type: 2}
 --- !u!1001 &785818171
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -81008,7 +81190,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!199 &837878123
 ParticleSystemRenderer:
   serializedVersion: 6
@@ -86062,7 +86244,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!199 &846153751
 ParticleSystemRenderer:
   serializedVersion: 6
@@ -92443,13 +92625,13 @@ Transform:
   m_GameObject: {fileID: 907290213}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: 6.419308e-12, w: 1}
-  m_LocalPosition: {x: -152.3, y: -88.4, z: 70.4}
+  m_LocalPosition: {x: -96.2, y: -96.4, z: 31.2}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 952318826}
   - {fileID: 898471531}
-  m_Father: {fileID: 1592269844}
+  m_Father: {fileID: 715125930}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!114 &907290215
 MonoBehaviour:
@@ -92499,7 +92681,7 @@ Transform:
   m_GameObject: {fileID: 907837357}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: -165.56467, y: 7.24, z: 50.800003}
+  m_LocalPosition: {x: -109.46466, y: -0.7600002, z: 11.600002}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
@@ -92507,7 +92689,7 @@ Transform:
   - {fileID: 1246138246}
   - {fileID: 1143031599}
   - {fileID: 845559063}
-  m_Father: {fileID: 1592269844}
+  m_Father: {fileID: 715125930}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!114 &907837359
 MonoBehaviour:
@@ -92549,7 +92731,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!199 &907909346
 ParticleSystemRenderer:
   serializedVersion: 6
@@ -97450,7 +97632,7 @@ GameObject:
   - component: {fileID: 908206781}
   - component: {fileID: 908206782}
   m_Layer: 0
-  m_Name: WindAudio
+  m_Name: WindEffects
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -97465,7 +97647,7 @@ Transform:
   m_GameObject: {fileID: 908206780}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0.23591308, z: -0, w: 0.97177416}
-  m_LocalPosition: {x: 6.214374, y: -0.27000046, z: 5.370435}
+  m_LocalPosition: {x: 4.2, y: -0.27000046, z: 4.4}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -101255,8 +101437,9 @@ GameObject:
   m_Component:
   - component: {fileID: 970318745}
   - component: {fileID: 970318746}
+  - component: {fileID: 970318747}
   m_Layer: 0
-  m_Name: Wind
+  m_Name: WindController
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -101271,7 +101454,7 @@ Transform:
   m_GameObject: {fileID: 970318744}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 85.8, y: -8, z: -39.2}
+  m_LocalPosition: {x: -0.8, y: -8, z: 7.4}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
@@ -101287,7 +101470,7 @@ Transform:
   - {fileID: 506496470}
   - {fileID: 846153753}
   - {fileID: 349427736}
-  m_Father: {fileID: 1435454132}
+  m_Father: {fileID: 715125930}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!114 &970318746
 MonoBehaviour:
@@ -101312,6 +101495,27 @@ MonoBehaviour:
   flutterSpeed: 6
   flutterStart: 0.6
   flutterScale: 1
+--- !u!114 &970318747
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 970318744}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 11bcd9ee5090492b8ca53b62a09e7dfb, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  area: {x: 114.3, y: 20, z: 117.729996}
+  perSecond: 2
+  life: {x: 3, y: 5}
+  speed: {x: 2.5, y: 4.5}
+  wander: 0.8
+  tailTime: 0.6
+  width: 0.25
+  color: {r: 1, g: 1, b: 1, a: 1}
+  material: {fileID: 2100000, guid: 0dfdf5dc59914084596dfa3e6875c1c4, type: 2}
 --- !u!1001 &972030395
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -101763,7 +101967,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!199 &1010556140
 ParticleSystemRenderer:
   serializedVersion: 6
@@ -108195,7 +108399,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!199 &1031116076
 ParticleSystemRenderer:
   serializedVersion: 6
@@ -114264,8 +114468,9 @@ GameObject:
   - component: {fileID: 1066039977}
   - component: {fileID: 1066039976}
   - component: {fileID: 1066039978}
+  - component: {fileID: 1066039979}
   m_Layer: 8
-  m_Name: Particle System
+  m_Name: LeavesParticles
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -119099,12 +119304,29 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1066039974}
-  m_Enabled: 1
+  m_Enabled: 0
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: b64991bdcf1076c4ab66ae36a28e1e28, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   strengthMultiplier: 1
+--- !u!114 &1066039979
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1066039974}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 90067296dedf49dfb890f8250e69a115, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  kind: 0
+  tint: {r: 1, g: 1, b: 1, a: 1}
+  fadeTime: 1.5
+  tumble: 0.5
+  material: {fileID: 2100000, guid: 002aa109b32346ce9442a5d5c427a06d, type: 2}
 --- !u!64 &1070705064
 MeshCollider:
   m_ObjectHideFlags: 0
@@ -128892,7 +129114,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!199 &1115815019
 ParticleSystemRenderer:
   serializedVersion: 6
@@ -134955,7 +135177,7 @@ GameObject:
   - component: {fileID: 1165027602}
   - component: {fileID: 1165027603}
   m_Layer: 0
-  m_Name: WindAudio
+  m_Name: WindEffects
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -134970,7 +135192,7 @@ Transform:
   m_GameObject: {fileID: 1165027601}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 0.6959569, y: -0.27000046, z: 0.60213476}
+  m_LocalPosition: {x: 0.97, y: -0.27000046, z: -0.07}
   m_LocalScale: {x: 0.9230201, y: 1, z: 0.9123259}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -134996,7 +135218,7 @@ AudioSource:
   SpatializePostEffects: 0
   Priority: 128
   DopplerLevel: 0
-  MinDistance: 5
+  MinDistance: 3.6912117
   MaxDistance: 15
   Pan2D: 0
   rolloffMode: 2
@@ -135219,6 +135441,18 @@ PrefabInstance:
     - target: {fileID: 3392008267583998772, guid: 39d8f1b5f315fc14d9af9c90f66cd3c9, type: 3}
       propertyPath: ridePopups.Array.data[0].hideAt
       value: 0.72
+      objectReference: {fileID: 0}
+    - target: {fileID: 4609027195107648329, guid: 39d8f1b5f315fc14d9af9c90f66cd3c9, type: 3}
+      propertyPath: m_Name
+      value: WindEffects
+      objectReference: {fileID: 0}
+    - target: {fileID: 5550307072717723039, guid: 39d8f1b5f315fc14d9af9c90f66cd3c9, type: 3}
+      propertyPath: m_LocalPosition.x
+      value: 0.6
+      objectReference: {fileID: 0}
+    - target: {fileID: 5550307072717723039, guid: 39d8f1b5f315fc14d9af9c90f66cd3c9, type: 3}
+      propertyPath: m_LocalPosition.z
+      value: -0.8
       objectReference: {fileID: 0}
     - target: {fileID: 7584257638246274648, guid: 39d8f1b5f315fc14d9af9c90f66cd3c9, type: 3}
       propertyPath: m_LocalPosition.x
@@ -135474,7 +135708,7 @@ GameObject:
   - component: {fileID: 1184045149}
   - component: {fileID: 1184045150}
   m_Layer: 0
-  m_Name: WindAudio
+  m_Name: WindEffects
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -143421,6 +143655,38 @@ GameObject:
   m_CorrespondingSourceObject: {fileID: 1235107498267470, guid: efd8147160aa6c64c8121a2ed788744e, type: 3}
   m_PrefabInstance: {fileID: 1239449464}
   m_PrefabAsset: {fileID: 0}
+--- !u!1 &1240415338
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1240415339}
+  m_Layer: 0
+  m_Name: Effects
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &1240415339
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1240415338}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children:
+  - {fileID: 507731338}
+  m_Father: {fileID: 739895164}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1241319219
 GameObject:
   m_ObjectHideFlags: 0
@@ -144259,7 +144525,7 @@ GameObject:
   - component: {fileID: 1268270256}
   - component: {fileID: 1268270257}
   m_Layer: 0
-  m_Name: WindAudio
+  m_Name: WindEffects
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -149513,8 +149779,9 @@ GameObject:
   - component: {fileID: 1414397461}
   - component: {fileID: 1414397460}
   - component: {fileID: 1414397462}
+  - component: {fileID: 1414397463}
   m_Layer: 8
-  m_Name: Particle System
+  m_Name: LeavesParticles
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -154348,12 +154615,29 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1414397458}
-  m_Enabled: 1
+  m_Enabled: 0
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: b64991bdcf1076c4ab66ae36a28e1e28, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   strengthMultiplier: 1
+--- !u!114 &1414397463
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1414397458}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 90067296dedf49dfb890f8250e69a115, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  kind: 1
+  tint: {r: 1, g: 1, b: 1, a: 1}
+  fadeTime: 1.5
+  tumble: 0.5
+  material: {fileID: 2100000, guid: 002aa109b32346ce9442a5d5c427a06d, type: 2}
 --- !u!64 &1415071771
 MeshCollider:
   m_ObjectHideFlags: 0
@@ -155110,15 +155394,14 @@ Transform:
   m_GameObject: {fileID: 1435454131}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: -85.8, y: 8, z: 39.2}
+  m_LocalPosition: {x: -29.7, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
-  - {fileID: 970318745}
   - {fileID: 2093541872}
   - {fileID: 1229787487}
   - {fileID: 1634125324}
-  m_Father: {fileID: 1592269844}
+  m_Father: {fileID: 715125930}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1001 &1440610348
 PrefabInstance:
@@ -157475,6 +157758,7 @@ MonoBehaviour:
   overshoot: 0.4
   riseClip: {fileID: 0}
   arriveClip: {fileID: 0}
+  staysInPlace: 0
   appearance: 0
   waitForIslands: 1
   delayAfterIslands: 0.3
@@ -157729,7 +158013,7 @@ Transform:
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 2125168367}
-  - {fileID: 1592269844}
+  - {fileID: 715125930}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1481351579 stripped
@@ -158070,11 +158354,11 @@ Transform:
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 1468560185}
+  - {fileID: 1965392543}
   - {fileID: 1316116714}
   - {fileID: 819028818}
   - {fileID: 66807110}
   - {fileID: 1961730511}
-  - {fileID: 1769274729}
   m_Father: {fileID: 799670870}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1001 &1513056705
@@ -158947,7 +159231,7 @@ GameObject:
   - component: {fileID: 1540167860}
   - component: {fileID: 1540167861}
   m_Layer: 0
-  m_Name: WindAudio
+  m_Name: WindEffects
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -158962,7 +159246,7 @@ Transform:
   m_GameObject: {fileID: 1540167859}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0.19509032, z: -0, w: 0.98078537}
-  m_LocalPosition: {x: 0.010759979, y: -0.165087, z: 0.4213971}
+  m_LocalPosition: {x: 1.17, y: -0.165087, z: 0.63}
   m_LocalScale: {x: 0.6114324, y: 0.6114323, z: 0.6114324}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -160597,43 +160881,6 @@ MeshCollider:
   m_Convex: 0
   m_CookingOptions: 30
   m_Mesh: {fileID: 4300000, guid: dbfbbcbee03629c41bd1cd382f27ec05, type: 3}
---- !u!1 &1592269843
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 1592269844}
-  m_Layer: 0
-  m_Name: NonPlayableElements
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 1
---- !u!4 &1592269844
-Transform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1592269843}
-  serializedVersion: 2
-  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 85.8, y: -8, z: -39.2}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
-  m_Children:
-  - {fileID: 2078284026}
-  - {fileID: 907837358}
-  - {fileID: 1725674344}
-  - {fileID: 251033095}
-  - {fileID: 907290214}
-  - {fileID: 1435454132}
-  m_Father: {fileID: 1479239295}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1001 &1599125328
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -161781,8 +162028,9 @@ GameObject:
   - component: {fileID: 1649259269}
   - component: {fileID: 1649259268}
   - component: {fileID: 1649259270}
+  - component: {fileID: 1649259271}
   m_Layer: 8
-  m_Name: Particle System
+  m_Name: LeavesParticles
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -166616,12 +166864,29 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1649259266}
-  m_Enabled: 1
+  m_Enabled: 0
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: b64991bdcf1076c4ab66ae36a28e1e28, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   strengthMultiplier: 1
+--- !u!114 &1649259271
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1649259266}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 90067296dedf49dfb890f8250e69a115, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  kind: 1
+  tint: {r: 1, g: 1, b: 1, a: 1}
+  fadeTime: 1.5
+  tumble: 0.5
+  material: {fileID: 2100000, guid: 002aa109b32346ce9442a5d5c427a06d, type: 2}
 --- !u!1001 &1652419408
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -167282,6 +167547,7 @@ MonoBehaviour:
   overshoot: 0.4
   riseClip: {fileID: 0}
   arriveClip: {fileID: 0}
+  staysInPlace: 0
   appearance: 2
   waitForIslands: 1
   delayAfterIslands: 0.3
@@ -168387,7 +168653,7 @@ Transform:
   m_GameObject: {fileID: 1725674343}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: 0.5710062, z: -0, w: 0.82094574}
-  m_LocalPosition: {x: 35, y: -5.1000004, z: 68.2}
+  m_LocalPosition: {x: 91.100006, y: -13.1, z: 29}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
@@ -168395,7 +168661,7 @@ Transform:
   - {fileID: 1684753706}
   - {fileID: 697192087}
   - {fileID: 2052093176}
-  m_Father: {fileID: 1592269844}
+  m_Father: {fileID: 715125930}
   m_LocalEulerAnglesHint: {x: 0, y: 69.641, z: 0}
 --- !u!114 &1725674345
 MonoBehaviour:
@@ -169213,7 +169479,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!199 &1762435502
 ParticleSystemRenderer:
   serializedVersion: 6
@@ -174304,7 +174570,7 @@ GameObject:
   - component: {fileID: 1769274729}
   - component: {fileID: 1769274730}
   m_Layer: 0
-  m_Name: WindSound
+  m_Name: WindEffects
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -174323,7 +174589,7 @@ Transform:
   m_LocalScale: {x: 0.60233706, y: 0.60233706, z: 0.60233706}
   m_ConstrainProportionsScale: 0
   m_Children: []
-  m_Father: {fileID: 1511693613}
+  m_Father: {fileID: 1965392543}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!82 &1769274730
 AudioSource:
@@ -175394,9 +175660,12 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   enabledInBuild: 0
-  startAt: -1
+  startAt: 1
   flySpeed: 10
   flyFastSpeed: 30
+  fastElevators: 1
+  fastElevatorSpeed: 6.35
+  allIslandsUp: 0
   starts:
   - name: 
     spawnPoint: {fileID: 902804681}
@@ -175649,8 +175918,9 @@ GameObject:
   - component: {fileID: 1839480435}
   - component: {fileID: 1839480434}
   - component: {fileID: 1839480436}
+  - component: {fileID: 1839480437}
   m_Layer: 8
-  m_Name: Particle System
+  m_Name: LeavesParticles
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -180484,12 +180754,29 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1839480432}
-  m_Enabled: 1
+  m_Enabled: 0
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: b64991bdcf1076c4ab66ae36a28e1e28, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   strengthMultiplier: 1
+--- !u!114 &1839480437
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1839480432}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 90067296dedf49dfb890f8250e69a115, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  kind: 0
+  tint: {r: 1, g: 1, b: 1, a: 1}
+  fadeTime: 1.5
+  tumble: 0.5
+  material: {fileID: 2100000, guid: 002aa109b32346ce9442a5d5c427a06d, type: 2}
 --- !u!1 &1840749061
 GameObject:
   m_ObjectHideFlags: 0
@@ -180539,7 +180826,7 @@ GameObject:
   - component: {fileID: 1846965212}
   - component: {fileID: 1846965213}
   m_Layer: 0
-  m_Name: WindAudio
+  m_Name: WindEffects
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -180553,12 +180840,12 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1846965211}
   serializedVersion: 2
-  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: -17.77, y: -99.96, z: -21.42}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 2.62, y: 0, z: 5.14}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
-  m_Father: {fileID: 1949685330}
+  m_Father: {fileID: 1886994013}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!82 &1846965213
 AudioSource:
@@ -181273,8 +181560,9 @@ GameObject:
   - component: {fileID: 1869328128}
   - component: {fileID: 1869328127}
   - component: {fileID: 1869328129}
+  - component: {fileID: 1869328130}
   m_Layer: 8
-  m_Name: Particle System
+  m_Name: LeavesParticles
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -186108,12 +186396,29 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1869328125}
-  m_Enabled: 1
+  m_Enabled: 0
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: b64991bdcf1076c4ab66ae36a28e1e28, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   strengthMultiplier: 1
+--- !u!114 &1869328130
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1869328125}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 90067296dedf49dfb890f8250e69a115, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  kind: 0
+  tint: {r: 1, g: 1, b: 1, a: 1}
+  fadeTime: 1.5
+  tumble: 0.5
+  material: {fileID: 2100000, guid: 002aa109b32346ce9442a5d5c427a06d, type: 2}
 --- !u!1001 &1870803886
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -186612,6 +186917,38 @@ MeshFilter:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1885580075}
   m_Mesh: {fileID: 10202, guid: 0000000000000000e000000000000000, type: 0}
+--- !u!1 &1886994012
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1886994013}
+  m_Layer: 0
+  m_Name: Effects
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &1886994013
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1886994012}
+  serializedVersion: 2
+  m_LocalRotation: {x: -0, y: -0.715002, z: -0, w: -0.6991224}
+  m_LocalPosition: {x: -19.676682, y: -103.395874, z: -18.919514}
+  m_LocalScale: {x: 0.961465, y: 1.5044981, z: 0.52943826}
+  m_ConstrainProportionsScale: 0
+  m_Children:
+  - {fileID: 1846965212}
+  m_Father: {fileID: 1949685330}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1001 &1888340978
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -186745,7 +187082,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!199 &1889992082
 ParticleSystemRenderer:
   serializedVersion: 6
@@ -191943,6 +192280,12 @@ MonoBehaviour:
   - {fileID: 2100000, guid: 5087ca329f48b0b4aa93a1c59cfd99d3, type: 2}
   - {fileID: 2100000, guid: 733df6b0b11099741a636438fcff6786, type: 2}
   matCount: 0
+  moveSounds: []
+  fallImage: {fileID: 0}
+  fallSounds: []
+  dropImage: {fileID: 0}
+  dropSounds: []
+  memeSounds: []
 --- !u!54 &1893306332
 Rigidbody:
   m_ObjectHideFlags: 0
@@ -193730,11 +194073,11 @@ Transform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
+  - {fileID: 1886994013}
   - {fileID: 1094582819}
   - {fileID: 692753700}
   - {fileID: 1680134494}
   - {fileID: 1889686996}
-  - {fileID: 1846965212}
   m_Father: {fileID: 10316943}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1001 &1953692125
@@ -193876,6 +194219,38 @@ MeshCollider:
   m_Convex: 0
   m_CookingOptions: 30
   m_Mesh: {fileID: 4300000, guid: 7aac06128c1d4f543914f69ebbdf7307, type: 3}
+--- !u!1 &1965392542
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1965392543}
+  m_Layer: 0
+  m_Name: Effects
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &1965392543
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1965392542}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children:
+  - {fileID: 1769274729}
+  m_Father: {fileID: 1511693613}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1965596995
 GameObject:
   m_ObjectHideFlags: 0
@@ -196696,11 +197071,11 @@ Transform:
   m_GameObject: {fileID: 2078284025}
   serializedVersion: 2
   m_LocalRotation: {x: 0.40821788, y: -0.23456968, z: 0.10938163, w: 0.8754261}
-  m_LocalPosition: {x: -85.8, y: 21.73, z: 39.2}
+  m_LocalPosition: {x: -29.7, y: 13.73, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
-  m_Father: {fileID: 1592269844}
+  m_Father: {fileID: 715125930}
   m_LocalEulerAnglesHint: {x: 50, y: -30, z: 0}
 --- !u!108 &2078284027
 Light:
@@ -198526,6 +198901,12 @@ MonoBehaviour:
   - {fileID: 2100000, guid: aa86ba64f9895f64a9de83d92aa3f3e8, type: 2}
   - {fileID: 2100000, guid: ecb2db835bd0a2c4bada7d7b9aff8d50, type: 2}
   matCount: 0
+  moveSounds: []
+  fallImage: {fileID: 0}
+  fallSounds: []
+  dropImage: {fileID: 0}
+  dropSounds: []
+  memeSounds: []
 --- !u!114 &2121772794
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -199150,13 +199531,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 66fffd19ac0788045bade4a922146703, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  topY: 0
-  bottomY: -30
-  fallDistance: 20
+  dropDistance: 30
   liftRiseDuration: 3
   liftLowerDuration: 2.5
   liftOvershoot: 0.4
   sequenceGap: 0.3
+  showDropGizmos: 1
   startRespawnPoint: {fileID: 1866690998}
   activateOnPlay:
   - {fileID: 1229787486}
@@ -203872,10 +204252,11 @@ MonoBehaviour:
   overshoot: 0.4
   riseClip: {fileID: 0}
   arriveClip: {fileID: 0}
+  staysInPlace: 1
   appearance: 0
   waitForIslands: 0
   delayAfterIslands: 0.3
-  lowerOffset: -2.93
+  lowerOffset: 27
   launchHeight: 1.5
   launchWarning: 0.6
   launchPushRadius: 3
@@ -211983,7 +212364,8 @@ MonoBehaviour:
   incorrectClip: {fileID: 8300000, guid: 15c2f96a00068b0469720d72634f0a85, type: 3}
   snapClip: {fileID: 8300000, guid: 8069a62e7b897a14393029d89482ec73, type: 3}
   breakClip: {fileID: 0}
-  toppleTime: 0.7
+  toppleTime: 1.1
+  slideAcceleration: 2.5
   socket: {fileID: 6550854910321787551}
   visualKeyed: {fileID: 7653041071600983024}
   visualKeyless: {fileID: 5875341168680392436}

@@ -56,6 +56,12 @@ public class PlayerMove : MonoBehaviour
 
     // The player fell into the void and came back (the meme in the hand listens: it falls with them)
     public static event System.Action Respawned;
+    // After a respawn: starts braking before the ground, and touches it (the meme in the hand changes on the way down)
+    public static event System.Action RespawnBraking;
+    public static event System.Action RespawnLanded;
+
+    // The island it stepped on last (null before any)
+    public GameObject CurrentIsland => lastIsland;
 
     private CharacterController characterController;
     private PlayerLook look;   // está en la Main Camera; se guarda una vez
@@ -67,6 +73,7 @@ public class PlayerMove : MonoBehaviour
     private float lastJumpPressedTime = -99f;
     private float knockbackUntil;
     private bool landingBrake;   // just respawned: brakes before touching the ground
+    private bool awaitingLanding, brakeAnnounced;   // just respawned: RespawnBraking / RespawnLanded not sent yet
     private bool wasGrounded;
 
     private Transform movingGround;
@@ -268,7 +275,11 @@ public class PlayerMove : MonoBehaviour
         }
 
         if (!isGrounded || verticalVelocity > 0f) verticalVelocity = Mathf.Max(verticalVelocity + gravity * Time.deltaTime, -maxFallSpeed);
-        if (isGrounded) landingBrake = false;
+        if (isGrounded)
+        {
+            landingBrake = false;
+            if (awaitingLanding) { awaitingLanding = false; RespawnLanded?.Invoke(); }
+        }
         else if (landingBrake) BrakeBeforeGround();
     }
 
@@ -293,6 +304,7 @@ public class PlayerMove : MonoBehaviour
 
         float height = ground.distance - characterController.height * 0.5f - 0.6f;   // brakes until 0.6 m above, then drops
         if (height > respawnBrakeDistance) return;
+        if (!brakeAnnounced) { brakeAnnounced = true; RespawnBraking?.Invoke(); }
         if (height <= 0f) { landingBrake = false; return; }
 
         float speed = -verticalVelocity;
@@ -392,6 +404,8 @@ public class PlayerMove : MonoBehaviour
         verticalVelocity = 0f;
         movingGround = null;
         landingBrake = respawnBrakeDistance > 0f;
+        awaitingLanding = true;
+        brakeAnnounced = false;
         look.ResetSmoothing();
         debugHeight = transform.position.y;
         Respawned?.Invoke();   // the meme in the hand falls with the player

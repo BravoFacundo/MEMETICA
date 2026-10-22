@@ -3,7 +3,15 @@ guid: 124c1db8a2ca4c578316b6831ec99251
 MonoImporter:
   externalObjects: {}
   serializedVersion: 2
-  defaultReferences: []
+  defaultReferences:
+  - meteorRock: {fileID: 100000, guid: 87e3befc1c46c324ebd2f9cb9421378d, type: 3}
+  - impactClip: {instanceID: 0}
+  - smokeMaterial: {instanceID: 0}
+  - fogMaterial: {instanceID: 0}
+  - warnClip: {instanceID: 0}
+  - changeClip: {instanceID: 0}
+  - returnClip: {instanceID: 0}
+  - sweepTickClip: {instanceID: 0}
   executionOrder: 0
   icon: {instanceID: 0}
   userData: 

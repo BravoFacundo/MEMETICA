@@ -18,6 +18,9 @@ public class Bridge : Lift
     public enum Appearance { RiseFromBelow = 0, ExtendFromA = 2 }
 
     [Section("Appearance")]
+    [Tooltip("In its place from the start and it stays there: visible and solid, it never lowers or hides " +
+             "(e.g. the tutorial stones resting on the island). Its pedestal doesn't move it")]
+    public bool staysInPlace = false;
     public Appearance appearance = Appearance.RiseFromBelow;
     [Tooltip("Waits until the rising islands arrive before appearing")]
     public bool waitForIslands = true;
@@ -86,6 +89,14 @@ public class Bridge : Lift
         allRenderers = GetComponentsInChildren<Renderer>(true);
         allColliders = System.Array.FindAll(GetComponentsInChildren<Collider>(true), c => !c.isTrigger);
 
+        if (staysInPlace)
+        {
+            SetUp(true);
+            finalPosition = transform.position;
+            finalRotation = transform.rotation;
+            MeasureEnds();
+            return;
+        }
         if (appearance == Appearance.RiseFromBelow) { SetHeight(BottomY); SetPresent(false); return; }   // waits below, invisible
 
         SetHeight(TopY);   // always in its final place, hidden until it appears
@@ -99,7 +110,7 @@ public class Bridge : Lift
 
     public override void Raise()
     {
-        if (IsUp) return;
+        if (IsUp || staysInPlace) return;
         SetUp(true);
         StopAllCoroutines();
         IsAppearing = true;
@@ -108,7 +119,7 @@ public class Bridge : Lift
 
     public override void Lower()
     {
-        if (!IsUp) return;
+        if (!IsUp || staysInPlace) return;
         SetUp(false);
         StopAllCoroutines();
         IsWaiting = false;

@@ -6,6 +6,8 @@ using UnityEngine.SceneManagement;
 //   F2  noclip: fly through everything, no gravity. WASD where you look, Space up, Ctrl down, Shift fast
 //   F3  hide all the UI and the crosshair (screenshots)
 //   F4 / F6  previous / next start   |   F5  restart the scene at the selected start
+//   F7  fast elevators: every ride goes Fast Elevator Speed times faster
+// All Islands Up: every island is already up when the game starts (to walk the whole level)
 // Starts: the player appears at Spawn Point with islands and bridges already up, elevators already docked
 // and memes already on their pedestals, as if that part had been played. Start At picks one when pressing Play.
 // Off in builds unless Enabled In Build is on (the exhibition build stays clean).
@@ -44,10 +46,24 @@ public class DebugTools : MonoBehaviour
     public float flySpeed = 10f;
     public float flyFastSpeed = 30f;
 
+    [Header("Elevators")]
+    [Tooltip("Rides go faster (F7 toggles it in play)")]
+    public bool fastElevators = false;
+    [Range(1f, 10f)] public float fastElevatorSpeed = 5f;
+
+    [Header("Islands")]
+    [Tooltip("Every island already up when the game starts")]
+    public bool allIslandsUp = false;
+
     [Header("Starts")]
     public DebugStart[] starts;
 
     private static int pendingStart = -1;   // survives the F5 reload
+
+    // How much faster elevators ride (1 = normal; DebugTools off in builds: always 1)
+    public static float ElevatorSpeed { get; private set; } = 1f;
+    // Islands read it in their Start (after this Awake). DebugTools off in builds: always false
+    public static bool AllIslandsUp { get; private set; }
 
     private PlayerMove playerMove;
     private CharacterController characterController;
@@ -60,9 +76,16 @@ public class DebugTools : MonoBehaviour
     void Awake()
     {
         if (!Application.isEditor && !Debug.isDebugBuild && !enabledInBuild) { enabled = false; return; }
+        AllIslandsUp = allIslandsUp;
         playerMove = FindObjectOfType<PlayerMove>();
         if (playerMove != null) characterController = playerMove.GetComponent<CharacterController>();
         if (Camera.main != null) cameraTransform = Camera.main.transform;
+    }
+
+    void OnDisable()
+    {
+        ElevatorSpeed = 1f;
+        AllIslandsUp = false;
     }
 
     void Start()
@@ -81,6 +104,8 @@ public class DebugTools : MonoBehaviour
         if (Input.GetKeyDown(KeyCode.F4)) SelectStart(-1);
         if (Input.GetKeyDown(KeyCode.F6)) SelectStart(1);
         if (Input.GetKeyDown(KeyCode.F5)) RestartAtSelectedStart();
+        if (Input.GetKeyDown(KeyCode.F7)) { fastElevators = !fastElevators; showHelp = true; }
+        ElevatorSpeed = fastElevators ? fastElevatorSpeed : 1f;
 
         if (noclip && !PauseMenu.GameIsPaused) Fly();
     }
@@ -217,8 +242,9 @@ public class DebugTools : MonoBehaviour
             "F2  noclip " + (noclip ? "ON" : "off") + "  (WASD, Space up, Ctrl down, Shift fast)\n" +
             "F3  hide UI " + (hiddenCanvases != null ? "ON" : "off") + "\n" +
             "F4 / F6  start: " + startName + "\n" +
-            "F5  restart at that start";
-        GUI.Box(new Rect(10, 10, 420, 110), "");
-        GUI.Label(new Rect(20, 15, 400, 100), text);
+            "F5  restart at that start\n" +
+            "F7  fast elevators " + (fastElevators ? "ON (x" + fastElevatorSpeed + ")" : "off");
+        GUI.Box(new Rect(10, 10, 420, 128), "");
+        GUI.Label(new Rect(20, 15, 400, 118), text);
     }
 }

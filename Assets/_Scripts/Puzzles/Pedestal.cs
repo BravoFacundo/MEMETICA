@@ -39,8 +39,12 @@ public class Pedestal : MonoBehaviour
     public AudioClip snapClip;
 
     [Section("Break (elevator pedestal)", Closed = true)]
-    public AudioClip breakClip;       // golpe al tocar el piso
-    public float toppleTime = 0.7f;   // cuánto tarda en volcarse
+    [Tooltip("Thud when it hits the ground on its side")]
+    public AudioClip breakClip;
+    [Tooltip("Seconds it takes to tip over (heavy stone: slow start, then it drops)")]
+    public float toppleTime = 1.1f;
+    [Tooltip("How fast it scrapes along the ground toward the edge after tipping over (m/s²)")]
+    public float slideAcceleration = 2.5f;
 
     [Section("References", Closed = true)]
     public Transform socket;
@@ -293,8 +297,10 @@ public class Pedestal : MonoBehaviour
     }
 #endif
 
-    // ---------- Romperse (pedestal del ascensor) ----------
-    // Vuelca el pedestal hacia el lado contrario a 'pushedFrom' y lo deja sin funcionar
+    // ---------- Break (elevator pedestal) ----------
+    // A heavy stone giving way: it tips over on its side toward the nearest edge (preferring away from 'pushedFrom',
+    // the player), scrapes along the ground until it is over the void, and falls off with gravity, slowly rolling
+    // over the edge, until it is gone (Drop Distance below). It touches nothing: nobody gets pushed.
     public void Break(Vector3 pushedFrom)
     {
         if (broken) return;
@@ -303,53 +309,106 @@ public class Pedestal : MonoBehaviour
         if (evaluating != null) StopCoroutine(evaluating);
         trigger.enabled = false;
         if (particles != null) particles.Stop();
+        foreach (Collider c in GetComponentsInChildren<Collider>()) c.enabled = false;
+        transform.SetParent(null, true);   // not riding the elevator any more
 
-        StartCoroutine(Topple(pushedFrom));
+        Vector3 start = Center();
+        Vector3 away = start - pushedFrom; away.y = 0f;
+        away = away.sqrMagnitude > 0.001f ? away.normalized : transform.forward;
+        StartCoroutine(FallOff(NearestEdge(start, away, out _), start.y));
     }
 
-    IEnumerator Topple(Vector3 pushedFrom)
+    IEnumerator FallOff(Vector3 dir, float startY)
     {
-        // Tamaño del pedestal (solo mallas, sin partículas) para encontrar el borde de la base sobre el que gira
+        // 1. Tips over its base edge on that side, speeding up like a falling weight
         MeshRenderer[] rends = GetComponentsInChildren<MeshRenderer>();
-        if (rends.Length == 0) yield break;
-        Bounds b = rends[0].bounds;
+        Bounds b = rends.Length > 0 ? rends[0].bounds : new Bounds(transform.position, Vector3.one);
         foreach (MeshRenderer r in rends) b.Encapsulate(r.bounds);
-
-        Vector3 dir = b.center - pushedFrom; dir.y = 0f;
-        if (dir.sqrMagnitude < 0.001f) dir = transform.forward;
-        dir.Normalize();
-        Vector3 axis = Vector3.Cross(Vector3.up, dir);
         float edge = Mathf.Abs(dir.x) * b.extents.x + Mathf.Abs(dir.z) * b.extents.z;
         Vector3 pivot = new Vector3(b.center.x, b.min.y, b.center.z) + dir * edge;
+        Vector3 axis = Vector3.Cross(Vector3.up, dir);
 
-        // Cae acelerando, como con gravedad
-        float t = 0f, angle = 0f;
-        while (t < toppleTime)
+        float angle = 0f;
+        for (float t = 0f; t < toppleTime; t += Time.deltaTime)
         {
-            t += Time.deltaTime;
-            float target = 90f * Mathf.Pow(Mathf.Clamp01(t / toppleTime), 2f);
+            float target = 90f * Mathf.Pow(t / toppleTime, 2.5f);
             transform.RotateAround(pivot, axis, target - angle);
             angle = target;
             yield return null;
         }
-
+        transform.RotateAround(pivot, axis, 90f - angle);
         if (breakClip != null) AudioSource.PlayClipAtPoint(breakClip, pivot);
 
-        // Rebote chico
-        yield return RotateBy(pivot, axis, -6f, 0.08f);
-        yield return RotateBy(pivot, axis, 6f, 0.10f);
-    }
-
-    IEnumerator RotateBy(Vector3 pivot, Vector3 axis, float degrees, float duration)
-    {
-        float t = 0f, done = 0f;
-        while (t < duration)
+        // 2. Scrapes toward the edge until its middle is over the void
+        float speed = 0f;
+        for (float t = 0f; t < 15f && HasGround(Center()); t += Time.deltaTime)
         {
-            t += Time.deltaTime;
-            float target = degrees * Mathf.Clamp01(t / duration);
-            transform.RotateAround(pivot, axis, target - done);
-            done = target;
+            speed = Mathf.Min(speed + slideAcceleration * Time.deltaTime, 3f);
+            transform.position += dir * speed * Time.deltaTime;
             yield return null;
         }
+
+        // 3. Off the edge: gravity, rolling slowly over it
+        if (!TryGetComponent(out Rigidbody body)) body = gameObject.AddComponent<Rigidbody>();
+        body.isKinematic = false;
+        body.useGravity = true;
+        body.interpolation = RigidbodyInterpolation.Interpolate;
+        body.velocity = dir * Mathf.Max(speed, 0.5f);
+        body.angularVelocity = axis * 1.2f;
+
+        float bottom = startY - LevelManager.Instance.dropDistance;
+        while (transform.position.y > bottom) yield return null;
+        gameObject.SetActive(false);
+    }
+
+    // Middle of its meshes (no particles)
+    Vector3 Center()
+    {
+        MeshRenderer[] rends = GetComponentsInChildren<MeshRenderer>();
+        if (rends.Length == 0) return transform.position;
+        Bounds b = rends[0].bounds;
+        foreach (MeshRenderer r in rends) b.Encapsulate(r.bounds);
+        return b.center;
+    }
+
+    // Of 8 directions, the one with the void closest (a gap at least 2 m long), favoring 'away'
+    Vector3 NearestEdge(Vector3 from, Vector3 away, out float distance)
+    {
+        Vector3 best = away;
+        float bestScore = float.MaxValue;
+        distance = 0f;
+        for (int k = 0; k < 8; k++)
+        {
+            Vector3 dir = Quaternion.AngleAxis(k * 45f, Vector3.up) * away;
+            float d = VoidDistance(from, dir);
+            float score = d - Vector3.Dot(dir, away) * 3f;
+            if (score < bestScore) { bestScore = score; best = dir; distance = d; }
+        }
+        return best;
+    }
+
+    // How far along dir there's nothing under (2 m of void in a row), up to 40 m
+    float VoidDistance(Vector3 from, Vector3 dir)
+    {
+        const float step = 0.5f;
+        float gapStart = -1f;
+        for (float d = 0f; d <= 40f; d += step)
+        {
+            if (HasGround(from + dir * d)) { gapStart = -1f; continue; }
+            if (gapStart < 0f) gapStart = d;
+            if (d - gapStart >= 2f) return gapStart;
+        }
+        return 40f;
+    }
+
+    bool HasGround(Vector3 point)
+    {
+        foreach (RaycastHit hit in Physics.RaycastAll(point + Vector3.up * 3f, Vector3.down, 20f, ~0, QueryTriggerInteraction.Ignore))
+        {
+            if (hit.collider is CharacterController || hit.transform.IsChildOf(transform)) continue;   // the player, itself
+            if (hit.rigidbody != null && !hit.rigidbody.isKinematic) continue;                           // memes
+            return true;
+        }
+        return false;
     }
 }

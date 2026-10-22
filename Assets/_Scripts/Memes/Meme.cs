@@ -5,10 +5,13 @@ using UnityEngine;
 // The environment (hold, pedestals, respawn, bridges and islands) only talks to this class,
 // so it works the same with both. Each representation decides what to do in the On... methods.
 // On its own (no MemeOrb / MemeWindow) it is a plain carryable meme with no visual logic, e.g. the tutorial orb.
-// Falling into the void: it comes back to the last island it touched as a meteor: glowing with a trail, falling
-// at an angle onto open ground near the island's middle (not trees, not pedestals), and breaking the ground on impact.
+// Falling into the void: it comes back to the last island it touched as a meteor: a rock (MeteorRock, the meme hidden
+// in it) glowing with a trail, falling at an angle onto open ground near the island's middle (not trees, not pedestals).
+// On impact the ground breaks, the rock bursts in a dark cloud and the meme comes out; smoke rises there until it is picked up.
 // While held it travels with the player: it notices on its own the bridges and new islands it is carried to,
-// and the player falling (PlayerMove.Respawned). Shared values: MemeSettings (Assets/Resources).
+// and the player falling (PlayerMove.Respawned, then braking and landing). Shared values: MemeSettings (Assets/Resources).
+// This class only detects (what happened, where the player is, whether they can see it); each representation
+// (MemeOrb, MemeWindow) decides what each change looks like and when it shows.
 // Object name: Meme_<ID> (e.g. Meme_3Aa). Pedestals compare their Key ID with that ID.
 [RequireComponent(typeof(Rigidbody))]
 public class Meme : MonoBehaviour
@@ -31,6 +34,8 @@ public class Meme : MonoBehaviour
     private Transform lastGroundHit;
     private GameObject lastIsland;   // the island under it last (respawn there; carried to a new one: OnIslandVisited)
     private GameObject lastBridge;   // the bridge carried over last (a new one: OnBridgeCrossed)
+    private readonly System.Collections.Generic.HashSet<GameObject> knownIslands = new System.Collections.Generic.HashSet<GameObject>();
+    private static PlayerMove player;
     private float lastGroundY;
 
     // "Meme_3Aa" → "3Aa". Everything after the first "_", so old names ("Orb_3Aa") still work
@@ -103,8 +108,19 @@ public class Meme : MonoBehaviour
         return nearest < float.MaxValue;
     }
 
-    protected virtual void OnEnable() => PlayerMove.Respawned += OnPlayerRespawned;
-    protected virtual void OnDisable() => PlayerMove.Respawned -= OnPlayerRespawned;
+    protected virtual void OnEnable()
+    {
+        PlayerMove.Respawned += OnPlayerRespawned;
+        PlayerMove.RespawnBraking += OnPlayerBraking;
+        PlayerMove.RespawnLanded += OnPlayerLanded;
+    }
+
+    protected virtual void OnDisable()
+    {
+        PlayerMove.Respawned -= OnPlayerRespawned;
+        PlayerMove.RespawnBraking -= OnPlayerBraking;
+        PlayerMove.RespawnLanded -= OnPlayerLanded;
+    }
 
     protected virtual void Update()
     {
@@ -115,9 +131,28 @@ public class Meme : MonoBehaviour
     }
 
     // In the hand, the player's fall is its fall too (it travels with them)
-    private void OnPlayerRespawned()
+    private void OnPlayerRespawned() { if (IsHeld) OnFell(true); }
+    private void OnPlayerBraking() { if (IsHeld) OnFallLanding(false); }
+    private void OnPlayerLanded() { if (IsHeld) OnFallLanding(true); }
+
+    //---- What the player is doing (for the representations)
+
+    protected static PlayerMove CurrentPlayer => player != null ? player : (player = FindObjectOfType<PlayerMove>());
+    // The island the player stepped on last, and the one this meme is on (or was carried over last)
+    protected GameObject PlayerIsland => CurrentPlayer != null ? CurrentPlayer.CurrentIsland : null;
+    protected GameObject MemeIsland => lastIsland;
+    // New islands it has been carried to (not counting where it was picked up)
+    protected int IslandsDiscovered { get; private set; }
+
+    // The player is this close and it is on their screen
+    protected bool PlayerSees(float distance)
     {
-        if (IsHeld) OnRespawned();
+        Camera cam = Camera.main;
+        if (cam == null) return false;
+        Vector3 toMeme = transform.position - cam.transform.position;
+        if (toMeme.magnitude > distance) return false;
+        Vector3 view = cam.WorldToViewportPoint(transform.position);
+        return view.z > 0f && view.x > 0f && view.x < 1f && view.y > 0f && view.y < 1f;
     }
 
     //---- Called by the environment
@@ -126,6 +161,7 @@ public class Meme : MonoBehaviour
     {
         IsHeld = true;
         groundedTime = 0f;
+        if (lastIsland != null) knownIslands.Add(lastIsland);   // where it is picked up is not new
         OnPickedUp();
     }
 
@@ -157,8 +193,9 @@ public class Meme : MonoBehaviour
     //---- Overridden by each representation
 
     protected virtual void OnBridgeCrossed() { }                  // carried over a new bridge
-    protected virtual void OnIslandVisited(GameObject island) { } // carried to another island
-    protected virtual void OnRespawned() { }                      // came back after falling (meteor, or with the player)
+    protected virtual void OnIslandVisited(GameObject island, bool firstTime) { } // carried to another island
+    protected virtual void OnFell(bool withPlayer) { }            // fell into the void: with the player (now falling down with them) or alone (it just landed as a meteor)
+    protected virtual void OnFallLanding(bool touchedGround) { }   // in the hand after a fall: the player starts braking (false) / touches the ground (true)
     protected virtual void OnPickedUp() { }
     protected virtual void OnDropped() { }
     protected virtual void OnPlaced(Pedestal pedestal) { }
@@ -197,7 +234,10 @@ public class Meme : MonoBehaviour
         lastIsland = island;
         Transform point = LevelManager.Instance.RespawnPointOf(island);
         if (point != null) respawnPoint = point;
-        if (IsHeld) OnIslandVisited(island);
+        if (!IsHeld) return;
+        bool firstTime = knownIslands.Add(island);
+        if (firstTime) IslandsDiscovered++;
+        OnIslandVisited(island, firstTime);
     }
 
     //---- Respawn
@@ -209,11 +249,13 @@ public class Meme : MonoBehaviour
             respawnPoint = lastIsland != null ? LevelManager.Instance.RespawnPointOf(lastIsland) : LevelManager.Instance.startRespawnPoint;
         if (respawnPoint == null) respawnPoint = LevelManager.Instance.startRespawnPoint;
 
-        if (transform.position.y < lastGroundY - LevelManager.Instance.fallDistance) Respawn();
+        if (transform.position.y < lastGroundY - LevelManager.Instance.dropDistance) Respawn();
     }
 
     private void Respawn()
     {
+        // Its island went down meanwhile (invisible, nothing to land on): to the start
+        if (Lift.IsHiddenAt(respawnPoint)) { respawnPoint = LevelManager.Instance.startRespawnPoint; lastIsland = null; lastGroundHit = null; }
         if (respawnPoint == null || meteor != null) return;
         meteor = StartCoroutine(MeteorFall());
     }
@@ -230,6 +272,13 @@ public class Meme : MonoBehaviour
         if (!FindLanding(out Vector3 start, out Vector3 landing)) { start = respawnPoint.position; landing = start; }   // (colliders still on: it measures itself)
         Collider[] colliders = GetComponentsInChildren<Collider>();
         foreach (Collider c in colliders) c.enabled = false;   // no pedestal or tree catches it on the way
+
+        // Hidden inside its rock while it falls (the rock is what you see tumbling)
+        MeteorRock rock = MeteorRock.Spawn(this);
+        var hidden = new System.Collections.Generic.List<Renderer>();
+        if (rock.HasModel)
+            foreach (Renderer r in GetComponentsInChildren<Renderer>())
+                if (r.enabled && !r.transform.IsChildOf(rock.transform)) { r.enabled = false; hidden.Add(r); }
 
         // Glow and trail while it falls
         Light glow = gameObject.AddComponent<Light>();
@@ -254,8 +303,9 @@ public class Meme : MonoBehaviour
         }
         transform.position = landing;
 
-        // Impact: the ground breaks, then it is a normal meme again
-        DebrisBurst.Spawn(Settings.impactDebris, Settings.impactDebrisCount, landing, Vector3.up, 5f, 1.2f);
+        // Impact: the ground breaks (pieces thrown up, like the bridges), the rock bursts and the meme comes out of it
+        DebrisBurst.Spawn(Settings.impactDebris, Settings.impactDebrisCount, landing, Vector3.up * 2f, 6f, 0.8f);
+        rock.Land(landing);
         if (Settings.impactClip != null) AudioSource.PlayClipAtPoint(Settings.impactClip, landing);
         foreach (Collider c in colliders) c.enabled = true;
         body.isKinematic = false;
@@ -264,9 +314,16 @@ public class Meme : MonoBehaviour
         lastGroundY = landing.y;
         groundedTime = 0f;
         trail.emitting = false;
-        OnRespawned();
+        OnFell(false);
 
-        for (float t = 0f; t < 0.4f; t += Time.deltaTime) { glow.intensity = Mathf.Lerp(6f, 0f, t / 0.4f); yield return null; }
+        // It shows again once the rock's cloud is around it, so you never see the swap
+        for (float t = 0f; t < 0.4f; t += Time.deltaTime)
+        {
+            if (t >= 0.08f && hidden.Count > 0) { foreach (Renderer r in hidden) if (r != null) r.enabled = true; hidden.Clear(); }
+            glow.intensity = Mathf.Lerp(6f, 0f, t / 0.4f);
+            yield return null;
+        }
+        foreach (Renderer r in hidden) if (r != null) r.enabled = true;
         Destroy(glow);
         Destroy(trail, trail.time);
         meteor = null;
@@ -291,7 +348,7 @@ public class Meme : MonoBehaviour
 
             Vector2 side = Random.insideUnitCircle.normalized;
             Vector3 land = ground.point + Vector3.up * (pivotToBottom + 0.02f);
-            Vector3 from = land + Vector3.up * Settings.meteorHeight + new Vector3(side.x, 0f, side.y) * Settings.meteorDrift;
+            Vector3 from = land + Vector3.up * LevelManager.Instance.dropDistance + new Vector3(side.x, 0f, side.y) * Settings.meteorDrift;   // from as high as the player reappears
             Vector3 path = land - from;
             if (Physics.SphereCast(from, 0.5f, path.normalized, out _, path.magnitude - 0.8f, ~0, QueryTriggerInteraction.Ignore)) continue;   // trees, rocks in the way
 
