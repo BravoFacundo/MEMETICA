@@ -29,7 +29,7 @@ public class Meme : MonoBehaviour
     public int reserveSlot = 1;
 
     // The meme it holds this game (Data, or the spare it got)
-    public MemeData Data { get; private set; }
+    public MemeData Data { get; protected set; }   // MemeChanger.SetMeme swaps it (the randomizer)
 
     public string ID => IDOf(gameObject);
     public bool IsHeld { get; private set; }
@@ -84,12 +84,25 @@ public class Meme : MonoBehaviour
     // On an island in the scene (its child, or resting on it): put down on its ground and held still, part of the island,
     // before the islands move (Awake runs before their Start). It goes down and comes up with its island, and once the
     // island has arrived it is let go with physics. Before: the island dropping 30 m at start counted as a fall into the void
+    // Keeps Its Place (MemeWindow): it stays exactly where it was placed (a tree branch…), still, until picked up
     private void HoldOnStartIsland()
     {
+        if (KeepsItsPlace) { body.isKinematic = true; body.constraints = RigidbodyConstraints.FreezeAll; }
         if (!FindGroundBelow(20f, out RaycastHit ground)) return;
         Island island = transform.parent != null ? transform.parent.GetComponentInParent<Island>() : null;
         if (island == null) island = ground.transform.GetComponentInParent<Island>();
         if (island == null) return;
+
+        if (KeepsItsPlace)   // part of its island (it goes down and up with it), where it is
+        {
+            if (transform.parent == null || transform.parent.GetComponentInParent<Island>() != island)
+            {
+                FloatMotion floats = ground.transform.GetComponentInParent<FloatMotion>();
+                transform.SetParent(floats != null ? floats.transform : island.transform, true);
+            }
+            lastIsland = FindParentWithTag(transform, "Isla") ?? island.gameObject;
+            return;
+        }
 
         // On the ground, not floating above it
         Collider shape = GetComponentInChildren<Collider>();
@@ -107,6 +120,9 @@ public class Meme : MonoBehaviour
         startIsland = island;
         lastIsland = FindParentWithTag(transform, "Isla") ?? island.gameObject;
     }
+
+    // Stays still where it was placed until picked up (a representation that lies on branches, shelves…)
+    protected virtual bool KeepsItsPlace => false;
 
     // Its island is up and still: physics again (it settles on the ground and freezes there as usual)
     private void ReleaseWhenIslandArrives()
@@ -170,7 +186,7 @@ public class Meme : MonoBehaviour
     protected GameObject MemeIsland => lastIsland;
     // Times it has been carried onto an island other than the last one (not the tutorial ones, nor the letter ones
     // unless MemeSettings' Letter Islands Unlock is on)
-    protected int IslandChanges { get; private set; }
+    protected int IslandChanges { get; set; }
 
     // The player is this close and it is on their screen
     protected bool PlayerSees(float distance)

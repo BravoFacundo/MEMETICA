@@ -5,6 +5,7 @@
 //  Paintings     tells the painting you look at that you are watching it (it plays and fades itself)
 //  Shake         camera shake when islands move (before: CameraShake)
 //  Smoothing     the camera absorbs small pops of the body in height (PlayerMove tells it what the ground carried)
+//  Pose          someone else bends the head for a moment (RespawnSlam: face to the ground and back up)
 //Goes on the Main Camera.
 
 using System.Collections;
@@ -60,6 +61,10 @@ public class PlayerLook : MonoBehaviour
 
     private Vector3 cameraRestPosition;
     private Vector3 shakeOffset;
+    private float poseDown, poseRoll, poseDip;   // SetPose: toward the ground (0-1), tilt (degrees), lower (meters)
+
+    // On: the mouse doesn't turn the camera (an animation is using it, e.g. RespawnSlam)
+    public bool LookLocked { get; set; }
 
     // Read by RetroCursor to show the zoom and hand icons
     public bool IsZooming => isZooming;
@@ -95,11 +100,12 @@ public class PlayerLook : MonoBehaviour
     
     void Update()
     {        
-        if (playerCanLook)
+        if (playerCanLook && !LookLocked)
         {
             MovePlayerView();
             ZoomOnPlayerView();
         }
+        else if (LookLocked) ApplyRotation();
         UpdateHeldMeme();
         UpdateLookedPainting();
     }
@@ -117,9 +123,12 @@ public class PlayerLook : MonoBehaviour
         xRotation -= mouseY;
         xRotation = Mathf.Clamp(xRotation, -90f, 90f);
 
-        transform.localRotation = Quaternion.Euler(xRotation, 0f, 0f);
+        ApplyRotation();
         playerTransform.Rotate(Vector3.up * mouseX);
     }
+
+    // Where you look, bent by the pose (if any)
+    void ApplyRotation() => transform.localRotation = Quaternion.Euler(Mathf.LerpUnclamped(xRotation, 85f, poseDown), 0f, poseRoll);
 
     private void ZoomOnPlayerView()
     {
@@ -139,7 +148,7 @@ public class PlayerLook : MonoBehaviour
         if (PauseMenu.GameIsPaused || !canHold) return;   // no grabbing while paused (clicking the pause window) or riding an elevator
 
         // Ignora triggers: si no, la zona del pedestal (que envuelve al meme) tapa el rayo
-        LookingAtMeme = Physics.Raycast(transform.position, transform.forward, out RaycastHit hit, pickUpRange, ~0, QueryTriggerInteraction.Ignore)
+        LookingAtMeme = Physics.Raycast(transform.position, transform.forward, out RaycastHit hit, pickUpRange, ~PhysicsLayers.PropsMask, QueryTriggerInteraction.Ignore)
                         && hit.transform.CompareTag("Meme");
 
         if (Input.GetMouseButtonDown(0))
@@ -248,7 +257,7 @@ public class PlayerLook : MonoBehaviour
     // The painting the camera points at: its canvas or its image (not the easel or the chair)
     private Painting GetLookedPainting()
     {
-        if (!Physics.Raycast(transform.position, transform.forward, out RaycastHit hit, paintingLookRange)) return null;
+        if (!Physics.Raycast(transform.position, transform.forward, out RaycastHit hit, paintingLookRange, Physics.DefaultRaycastLayers & ~PhysicsLayers.PropsMask)) return null;
         Painting painting = hit.transform.GetComponentInParent<Painting>();
         return painting != null && painting.Shows(hit.transform) ? painting : null;
     }
@@ -308,5 +317,16 @@ public class PlayerLook : MonoBehaviour
         ApplyCameraOffset();
     }
 
-    void ApplyCameraOffset() => transform.localPosition = cameraRestPosition + Vector3.up * cameraLag + shakeOffset;
+    void ApplyCameraOffset() => transform.localPosition = cameraRestPosition + Vector3.up * (cameraLag - poseDip) + shakeOffset;
+
+    //---- Pose
+
+    // Bends the head: down 0 = where you look, 1 = at the ground at your feet (past 0 the other way, a bit up);
+    // roll tilts it (degrees), dip lowers it (meters). All 0: back to normal
+    public void SetPose(float down, float roll, float dip)
+    {
+        poseDown = down; poseRoll = roll; poseDip = dip;
+        ApplyRotation();
+        ApplyCameraOffset();
+    }
 }

@@ -3,7 +3,8 @@
 //  Jump     coyote time (jump a moment after leaving a ledge) and jump buffer (press a moment before landing)
 //  Ground   anything you stand on counts (optional: only the Ground layer), snaps down slopes,
 //           and carries you with moving ground (bridges, islands, platforms)
-//  Respawn  back to the last island stepped on after falling into the void (before: PlayerRespawn)
+//  Respawn  back to the last island stepped on after falling into the void (before: PlayerRespawn). It falls from
+//           high and brakes before the ground; with a RespawnSlam (on and enabled) it slams down from close instead
 
 using UnityEngine;
 
@@ -59,12 +60,15 @@ public class PlayerMove : MonoBehaviour
     // After that fall and the respawn, it touches the ground (the meme in the hand goes back)
     public static event System.Action RespawnLanded;
     public bool FallingIntoVoid { get; private set; }
+    // On: walking and jumping keys do nothing (gravity and moving ground still do), e.g. RespawnSlam getting up
+    public bool InputLocked { get; set; }
 
     // The island it stepped on last (null before any)
     public GameObject CurrentIsland => lastIsland;
 
     private CharacterController characterController;
     private PlayerLook look;   // está en la Main Camera; se guarda una vez
+    private RespawnSlam slam;   // optional: the slam landing (Game)
 
     private Vector3 horizontalVelocity;
     private float verticalVelocity;
@@ -95,6 +99,7 @@ public class PlayerMove : MonoBehaviour
         characterController = GetComponent<CharacterController>();
         groundCheck = transform.Find("GroundCheck").GetComponent<Transform>();
         look = Camera.main.GetComponent<PlayerLook>();
+        slam = GetComponent<RespawnSlam>();
         airSpeed = walkSpeed;
         debugHeight = transform.position.y;
 
@@ -171,9 +176,12 @@ public class PlayerMove : MonoBehaviour
 
     //---- Ground
 
+    // What the player stands on and measures: everything but itself and the props (PhysicsLayers: solid only for memes)
+    private int SolidMask => ~(1 << gameObject.layer | PhysicsLayers.PropsMask);
+
     private void UpdateGrounded()
     {
-        int mask = onlyGroundLayer ? groundMask.value : ~(1 << gameObject.layer);   // never the player itself
+        int mask = onlyGroundLayer ? groundMask.value : SolidMask;   // never the player itself nor props
         bool sphereHit = Physics.CheckSphere(groundCheck.position, groundDistance, mask, QueryTriggerInteraction.Ignore);
         isGrounded = onlyGroundLayer ? sphereHit : sphereHit || characterController.isGrounded;
         isGrounded &= verticalVelocity <= 0.01f;   // going up after a jump is never grounded
@@ -194,7 +202,7 @@ public class PlayerMove : MonoBehaviour
         float lift = 0.1f;
         Vector3 bottomSphere = transform.position + characterController.center + Vector3.down * (characterController.height * 0.5f - radius);
         float reach = lift + characterController.skinWidth + groundSnapDistance;
-        if (!Physics.SphereCast(bottomSphere + Vector3.up * lift, radius, Vector3.down, out RaycastHit hit, reach, ~(1 << gameObject.layer), QueryTriggerInteraction.Ignore)) return;
+        if (!Physics.SphereCast(bottomSphere + Vector3.up * lift, radius, Vector3.down, out RaycastHit hit, reach, SolidMask, QueryTriggerInteraction.Ignore)) return;
         if (Vector3.Angle(hit.normal, Vector3.up) > characterController.slopeLimit) return;
 
         // Down to resting distance: the controller keeps Skin Width from the ground, measured along the slope
@@ -229,7 +237,7 @@ public class PlayerMove : MonoBehaviour
         float castRadius = characterController.radius * 0.9f;
         float toFeet = characterController.height * 0.5f - castRadius;
         Vector3 origin = transform.position + characterController.center;
-        if (!Physics.SphereCast(origin, castRadius, Vector3.down, out RaycastHit hit, toFeet + 0.3f + characterController.skinWidth, ~(1 << gameObject.layer), QueryTriggerInteraction.Ignore)) return;
+        if (!Physics.SphereCast(origin, castRadius, Vector3.down, out RaycastHit hit, toFeet + 0.3f + characterController.skinWidth, SolidMask, QueryTriggerInteraction.Ignore)) return;
         if (hit.normal.y < 0.7f) return;
 
         movingGround = hit.transform;
@@ -241,7 +249,7 @@ public class PlayerMove : MonoBehaviour
     private void UpdateHorizontalVelocity()
     {
         if (Time.time < knockbackUntil) return;   // being thrown: no steering for a moment
-        Vector3 input = transform.right * Input.GetAxis("Horizontal") + transform.forward * Input.GetAxis("Vertical");
+        Vector3 input = InputLocked ? Vector3.zero : transform.right * Input.GetAxis("Horizontal") + transform.forward * Input.GetAxis("Vertical");
         input = Vector3.ClampMagnitude(input, 1f);   // diagonal is not faster
 
         if (isGrounded)
@@ -258,7 +266,7 @@ public class PlayerMove : MonoBehaviour
 
     private void UpdateVerticalVelocity()
     {
-        if (Input.GetKeyDown(KeyCode.Space)) lastJumpPressedTime = Time.time;
+        if (Input.GetKeyDown(KeyCode.Space) && !InputLocked) lastJumpPressedTime = Time.time;
 
         // Standing: no push into the ground (SnapToGround keeps it on it). Before: pressed down at 2 m/s every frame,
         // the controller crept a few mm per frame into the ground and got popped out 8 cm every ~10 frames
@@ -298,7 +306,7 @@ public class PlayerMove : MonoBehaviour
     // No ground under the player, however far (the meme in the hand and invisible lowered islands don't count)
     private bool NothingBelow()
     {
-        int mask = ~(1 << gameObject.layer | 1 << 2);   // not the player, not Ignore Raycast
+        int mask = SolidMask & ~(1 << 2);   // not the player, not Ignore Raycast, not props
         foreach (RaycastHit hit in Physics.RaycastAll(transform.position, Vector3.down, 1000f, mask, QueryTriggerInteraction.Ignore))
             if (hit.collider.GetComponentInParent<Meme>() == null) return false;
         return true;
@@ -309,7 +317,7 @@ public class PlayerMove : MonoBehaviour
     private void UpdateGroundInteractions()
     {
         // Un solo rayo hacia abajo para todo
-        if (!Physics.Raycast(transform.position, Vector3.down, out RaycastHit hit)) return;
+        if (!Physics.Raycast(transform.position, Vector3.down, out RaycastHit hit, Mathf.Infinity, Physics.DefaultRaycastLayers & ~PhysicsLayers.PropsMask)) return;
 
         // Falling platforms (the meme in the hand tracks its own bridges and islands: Meme.TrackGround)
         if (isGrounded && hit.transform.TryGetComponent(out FallingPlatform platform)) platform.StepOn();
@@ -321,7 +329,7 @@ public class PlayerMove : MonoBehaviour
     private void BrakeBeforeGround()
     {
         if (verticalVelocity >= -respawnLandingSpeed) return;
-        if (!Physics.Raycast(transform.position, Vector3.down, out RaycastHit ground, 200f, ~(1 << gameObject.layer), QueryTriggerInteraction.Ignore)) return;
+        if (!Physics.Raycast(transform.position, Vector3.down, out RaycastHit ground, 200f, SolidMask, QueryTriggerInteraction.Ignore)) return;
 
         float height = ground.distance - characterController.height * 0.5f - 0.6f;   // brakes until 0.6 m above, then drops
         if (height > respawnBrakeDistance) return;
@@ -370,7 +378,7 @@ public class PlayerMove : MonoBehaviour
         lastGroundHit = null;
 
         // Fall reference = the ground below, however far (a spawn point high in the air must not count as falling into the void)
-        bool groundBelow = Physics.Raycast(transform.position, Vector3.down, out RaycastHit ground, 500f, ~(1 << gameObject.layer), QueryTriggerInteraction.Ignore);
+        bool groundBelow = Physics.Raycast(transform.position, Vector3.down, out RaycastHit ground, 500f, SolidMask, QueryTriggerInteraction.Ignore);
         lastGroundY = groundBelow ? ground.point.y : transform.position.y;
         look.ResetSmoothing();
         debugHeight = transform.position.y;
@@ -387,7 +395,7 @@ public class PlayerMove : MonoBehaviour
             return true;
         }
 
-        if (!Physics.Raycast(transform.position, Vector3.down, out RaycastHit hit, 5f)) return false;
+        if (!Physics.Raycast(transform.position, Vector3.down, out RaycastHit hit, 5f, Physics.DefaultRaycastLayers & ~PhysicsLayers.PropsMask)) return false;
         lastGroundY = hit.point.y;                           // el piso de abajo (sigue a islas y ascensores que se mueven)
         if (hit.transform == lastGroundHit) return false;   // sigue parado sobre lo mismo
         lastGroundHit = hit.transform;
@@ -425,6 +433,16 @@ public class PlayerMove : MonoBehaviour
         movingGround = null;
         landingBrake = respawnBrakeDistance > 0f;
         awaitingLanding = true;
+
+        // Slam: from close and fast, no brake (RespawnSlam lands it)
+        if (slam != null && slam.isActiveAndEnabled)
+        {
+            characterController.enabled = false;
+            transform.position = new Vector3(from.x, groundY + slam.height, from.z);
+            characterController.enabled = true;
+            verticalVelocity = -slam.StartSpeed(gravity);
+            landingBrake = false;
+        }
         look.ResetSmoothing();
         debugHeight = transform.position.y;
     }

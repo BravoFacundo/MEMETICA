@@ -35,6 +35,7 @@ Shader "Memetica/MemeSticker"
         #pragma target 3.0
 
         sampler2D _MainTex;
+        float4 _MainTex_TexelSize;
         fixed4 _Color, _EmissionColor, _BorderColor, _InkColor;
         half _Margin, _Border, _Ink, _Bulge, _Cutoff;
         float _DepthPull;
@@ -88,6 +89,9 @@ Shader "Memetica/MemeSticker"
             c *= 1 + _Bulge * dot(c, c) * 2;
             // The image a bit smaller than the plane, so the border fits around it
             float2 uv = 0.5 + c * (1 + 2 * _Margin);
+            // Not square: whole, as big as it fits (the rest is outside the shape)
+            float aspect = _MainTex_TexelSize.z / max(_MainTex_TexelSize.w, 1);
+            uv = 0.5 + (uv - 0.5) * (aspect > 1 ? float2(1, aspect) : float2(1 / aspect, 1));
 
             fixed4 image = tex2D(_MainTex, uv) * _Color;
             image.a *= all(uv == saturate(uv));

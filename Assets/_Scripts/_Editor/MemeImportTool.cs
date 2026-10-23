@@ -24,7 +24,8 @@
 //     "Loop" in the suffix (Move_06_NyanCatLoop) plays it in a loop while that change shows
 //   → <Meme>/<Prefix>_Data.asset (its Title starts as the folder name; edit it there)
 // Subfolders (Old, Materials) are not read. Sticker pictures are set up for the shader (alpha is transparency,
-// mipmaps for the border, clamped, up to 1024). Run it again after any change: it keeps what you set by hand (title,
+// mipmaps for the border, clamped, their proportion kept, up to 2048). Any proportion works: the meme shows whole in
+// the orb and in the window; 1266 x 1024 fills the window's hole exactly. Run it again after any change: it keeps what you set by hand (title,
 // loops). Older names still work: original = Base, drop = Leave. The Console lists each meme and what it lacks.
 
 using System.Collections.Generic;
@@ -261,19 +262,21 @@ public static class MemeImportTool
 
     //---- Assets
 
-    // Sticker pictures: transparency from alpha, mipmaps (the border is drawn from a blurred mip), no tiling, up to 1024
+    // Sticker pictures: transparency from alpha, mipmaps (the border is drawn from a blurred mip), no tiling, proportion kept
     static void SetUpSticker(string path)
     {
         if (!(AssetImporter.GetAtPath(path) is TextureImporter importer)) return;
         bool changed = importer.textureType != TextureImporterType.Default || !importer.alphaIsTransparency || !importer.mipmapEnabled
-                       || importer.wrapMode != TextureWrapMode.Clamp || importer.maxTextureSize != 1024 || !importer.sRGBTexture;
+                       || importer.wrapMode != TextureWrapMode.Clamp || importer.maxTextureSize != 2048 || !importer.sRGBTexture
+                       || importer.npotScale != TextureImporterNPOTScale.None;
         if (!changed) return;
         importer.textureType = TextureImporterType.Default;
         importer.alphaIsTransparency = true;
         importer.mipmapEnabled = true;
         importer.wrapMode = TextureWrapMode.Clamp;
-        importer.maxTextureSize = 1024;
+        importer.maxTextureSize = 2048;   // 1266 x 1024 (the window's hole) stays as it is
         importer.sRGBTexture = true;
+        importer.npotScale = TextureImporterNPOTScale.None;   // its proportion as it is (not squeezed to 1024 x 1024)
         importer.SaveAndReimport();
     }
 

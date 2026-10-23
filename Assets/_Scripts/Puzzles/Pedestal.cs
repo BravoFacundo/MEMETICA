@@ -11,6 +11,7 @@ using UnityEngine;
 //   └── Socket           punto de encastre del meme + partículas
 // Group: pedestals with the same Group ID don't evaluate alone; the group completes when all of them
 // have a meme, and then each one raises what it controls (before: PedestalGroup).
+// With a MemeRandomizer it doesn't judge: it gives the meme window a meme (the randomizer's raffle) and that raises the way.
 [RequireComponent(typeof(AudioSource), typeof(SphereCollider))]
 public class Pedestal : MonoBehaviour
 {
@@ -68,6 +69,7 @@ public class Pedestal : MonoBehaviour
     bool broken;
     bool groupCompleted;
     GameObject releasedMeme;   // just taken off: not snapped again until it leaves the trigger
+    MemeRandomizer randomizer;
 
     static PlayerLook look;
 
@@ -76,6 +78,7 @@ public class Pedestal : MonoBehaviour
         audioSource = GetComponent<AudioSource>();
         trigger = GetComponent<SphereCollider>();
         particles = socket != null ? socket.GetComponent<ParticleSystem>() : null;
+        randomizer = GetComponent<MemeRandomizer>();
         ApplyVisual();
         SyncTrigger();
     }
@@ -92,7 +95,7 @@ public class Pedestal : MonoBehaviour
     // A white pedestal waits for a meme that has a painting (the clue); a meme without one belongs on black ones
     void WarnIfNoClue()
     {
-        if (KeylessPedestal) return;
+        if (KeylessPedestal || randomizer != null) return;
         Meme key = Meme.WithKey(KeyID);
         if (key == null) Debug.LogWarning($"[Pedestal] '{name}': no meme with Key ID '{KeyID}' in the scene.", this);
         else if (key.Data != null && !key.Data.HasPainting)
@@ -144,7 +147,7 @@ public class Pedestal : MonoBehaviour
     {
         releasedMeme = MemeObject;   // not snapped again until it leaves the zone
         if (evaluating != null) StopCoroutine(evaluating);
-        bool lowerBridges = KeylessPedestal || Meme.IDOf(MemeObject).StartsWith(KeyID);
+        bool lowerBridges = randomizer == null && (KeylessPedestal || Meme.IDOf(MemeObject).StartsWith(KeyID));   // the randomizer's way stays
 
         if (CurrentMeme != null) CurrentMeme.RemoveFromPedestal(this);
         MemeObject = null;
@@ -165,6 +168,14 @@ public class Pedestal : MonoBehaviour
     IEnumerator Evaluate()
     {
         yield return new WaitForSeconds(Length(snapClip));
+
+        // Randomizer: the raffle, then right (its axis' way already rose)
+        if (randomizer != null)
+        {
+            yield return randomizer.Draw(CurrentMeme);
+            SetCorrect();
+            yield break;
+        }
 
         // Enlazado: carga en loop hasta que el grupo se complete
         if (IsGrouped)
