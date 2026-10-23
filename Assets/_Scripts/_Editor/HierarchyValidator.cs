@@ -128,10 +128,12 @@ public static class HierarchyValidator
                 Error($"'{go.name}' is tagged Meme but has no Meme component.", go);
         }
 
-        // 3. Orbs: "Meme" and "Audio" children
+        // 3. Orbs: their sticker and their meme
         foreach (var orb in Object.FindObjectsOfType<MemeOrb>(true))
-            foreach (var child in new[] { "Meme", "Audio" })
-                if (orb.transform.Find(child) == null) Error($"Orb '{orb.name}' lost its direct child '{child}'.", orb);
+        {
+            if (orb.sticker == null) Error($"Orb '{orb.name}' has no Sticker reference.", orb);
+            if (orb.data == null && orb.reserveGroup == null) Warn($"Orb '{orb.name}' has no meme (Data or Reserve Group).", orb);
+        }
 
         // 4. Falling platforms: pivots anywhere inside their bridge
         foreach (var plat in Object.FindObjectsOfType<FallingPlatform>(true))

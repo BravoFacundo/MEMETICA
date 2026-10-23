@@ -1,0 +1,60 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 768287d2d584491684181bc8170d860d, type: 3}
+  m_Name: Inte_Data
+  m_EditorClassIdentifier: 
+  title: Internet
+  baseImage:
+    picture: {fileID: 2800000, guid: 8d9f3ccd48067b6438588ad5668419d7, type: 3}
+    video: {fileID: 0}
+  variants:
+  - picture: {fileID: 2800000, guid: b6914e9bf82fafc4c966172d00e05996, type: 3}
+    video: {fileID: 0}
+  - picture: {fileID: 2800000, guid: b867b1da282b30c42bf56c52f66ba00d, type: 3}
+    video: {fileID: 0}
+  - picture: {fileID: 2800000, guid: 2031d142019201d48a9628c7d052767d, type: 3}
+    video: {fileID: 0}
+  - picture: {fileID: 2800000, guid: a2ad197ef92c8aa42ab706a389b77ea7, type: 3}
+    video: {fileID: 0}
+  - picture: {fileID: 2800000, guid: d4be432bef9e95045a36d74ffb99747a, type: 3}
+    video: {fileID: 0}
+  - picture: {fileID: 0}
+    video: {fileID: 32900000, guid: 8b8fc2c9f9470934e8362e0be86ab569, type: 3}
+  fall:
+    picture: {fileID: 2800000, guid: e4280dbba2e4725419b4d8cbcd1c4037, type: 3}
+    video: {fileID: 0}
+  leave:
+    picture: {fileID: 2800000, guid: 932d8cc8319e5314fb90f3743c527679, type: 3}
+    video: {fileID: 0}
+  grabSound: {fileID: 8300000, guid: 3c056baa48f115543b8bb47f9abd8616, type: 3}
+  moveSounds:
+  - clip: {fileID: 0}
+    loop: 0
+  - clip: {fileID: 0}
+    loop: 0
+  - clip: {fileID: 8300000, guid: f985da15fd5633242b25be6acabc792a, type: 3}
+    loop: 0
+  - clip: {fileID: 8300000, guid: 9aacdb86e158cc74e92b049270075c50, type: 3}
+    loop: 0
+  - clip: {fileID: 8300000, guid: 17ab88c3bf57e184db8bdd7e19480bb8, type: 3}
+    loop: 0
+  - clip: {fileID: 8300000, guid: 4a2e94f3823ec644190c2310e48e5ae9, type: 3}
+    loop: 1
+  fallSounds:
+  - clip: {fileID: 8300000, guid: 0c85e4bc656179e4fb7c6bf32d23e873, type: 3}
+    loop: 0
+  leaveSounds:
+  - clip: {fileID: 8300000, guid: daeef0b0846cb6b4b9e2e31ed1aea5b3, type: 3}
+    loop: 0
+  sounds: []
+  hints: []
+  references: []

@@ -3,163 +3,195 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Video;
 
-// Meme as an orb (both scenes). Before: OrbMemes. Its changes (a test of what MemeData will hold).
-// Meme (the base) detects what happens; this class decides how each change looks and when it shows:
-//   Move     carried to a new island: shows the variant it just unlocked. Moving around known islands, now and then
-//            it turns into one of the unlocked variants (as always)
-//   Fall     in your hand: it changes on the way down (starts when you brake, done when you land).
-//            Alone (meteor, falling inside a MeteorRock that smokes where it lands): it changes in front of you as you
-//            come close
-//   Drop     you let it go (not on a pedestal): once you have been on another island and come back, it changes in
+// Meme as an orb: a glass bubble (this object: Memetica/MemeOrb) with the meme inside as a sticker (child Sticker:
+// Memetica/MemeSticker, one shared material; each orb shows its images on it through a property block). An image
+// can be a video: a VideoPlayer made here plays it on the sticker (its picture, if any, until the first frame).
+// Its meme (images, sounds) is a MemeData (Meme: Data, or a spare from a MemeGroup). Meme (the base) detects what
+// happens; this class decides how each change looks and when it shows:
+//   Move     carried onto an island other than the last one: it changes, to the next variant of its list (1, 2…; the
+//            tutorial doesn't count), or to one of them once all were shown. Moving around, now and then too
+//   Fall     in your hand: as soon as nothing is below you (you will reappear) it turns into its Fall change, and
+//            when you land after reappearing it goes back.
+//            Alone (meteor): it changes in front of you as you come close
+//   Leave    you leave it (not on a pedestal): once you have been on another island and come back, it changes in
 //            front of you as you come close
-//   Show     on the pedestal: every image quickly, ending on the original (the sweep). Fall and drop only once
+//   Show     on a white pedestal: every image quickly, ending on the base one (the sweep). Fall and Leave only once
 //            you have seen them change
+// Whenever you find it again after losing sight of it (meteor, left behind) it is its base image: a change only
+// happens once you see it, and every change goes back to the base image.
 // Every change happens inside a mist: a fog swirls and multiplies inside the bubble while the glass clouds over
-// (shader Memetica/MemeOrb, _Frost); at its thickest the image swaps unseen, then both clear. Back to the original
-// the same way.
-// Its sound, the first that exists:
-//   its own sounds → this meme's sounds → MemeSettings' fallback sounds (any meme can use them).
-// Timing and transition sounds: MemeSettings (shared by every orb). Here only what is each orb's own.
+// (_Frost); at its thickest the image swaps unseen, then both clear. Back to the base image the same way.
+// Picking it up plays its Grab Sound. Its change sound, the first that exists: the image's own (each Move its own) → the meme's → MemeSettings' fallback. A looping one plays
+// while the change shows. Timing and transition sounds: MemeSettings (shared by every orb).
 public class MemeOrb : Meme
 {
-    public GameObject Player;
+    private static readonly int MainTexId = Shader.PropertyToID("_MainTex");
+    private static readonly int EmissionId = Shader.PropertyToID("_EmissionColor");
+    private static readonly int FrostId = Shader.PropertyToID("_Frost");
 
-    [Section("Move")]
-    [Tooltip("0 is the original; the rest are the variants it turns into while you move (one more per island you carry it to)")]
-    public List<Material> materials = new List<Material>();
-    public int matCount;
-    [Tooltip("Sounds of its variants (empty: this meme's sounds, then the fallback)")]
-    public AudioClip[] moveSounds;
+    [Section("References")]
+    [Tooltip("The image inside (child Sticker, with the shared MemeSticker material)")]
+    public Renderer sticker;
 
-    [Section("Fall")]
-    [Tooltip("Its change after falling into the void. Empty: nothing happens")]
-    public Material fallImage;
-    public AudioClip[] fallSounds;
+    // Before MemeData: one material per image. Read once by Memetica > Memes: migrate orbs (temporary), then removed
+    [HideInInspector] public List<Material> materials = new List<Material>();
 
-    [Section("Drop")]
-    [Tooltip("Its change after you let it go and come back from another island. Empty: nothing happens")]
-    public Material dropImage;
-    public AudioClip[] dropSounds;
-
-    [Section("Meme Sounds")]
-    [Tooltip("This meme's sounds: for any change that has none of its own")]
-    public AudioClip[] memeSounds;
-
-    private MeshRenderer memeRenderer;
-    private AudioSource sfx;
-    private MaterialPropertyBlock mpb;
-    private PlayerMove playerMove;
-    private float movingTime;            // time moving with the orb in the hand
+    private readonly List<MemeImage> images = new List<MemeImage>();   // 0 the base image, then its Move variants
+    private MemeImage shown;                // the image on the sticker now
+    private VideoPlayer videoPlayer;        // plays the shown image's video (made on the first one)
+    private bool showingVideoFrame;         // the sticker shows the video's frames (not its picture)
+    private bool hasMeme;                   // off: no MemeData, a plain carryable orb
+    private AudioSource sfx;                // transition sounds (warning, change, return, sweep ticks, grab)
+    private AudioSource memeSource;         // the meme's sound of the change showing: a new change cuts it
+    private MaterialPropertyBlock stickerBlock;
+    private Color baseEmission;
+    private float movingTime;               // time moving with the orb in the hand
     private float nextChangeAt;
     private float lastEventTime = -99f;
     private Vector3 lastPlayerPos;
     private bool wasHolded;
     private Coroutine mutationRoutine;
     private Coroutine sweepRoutine;
-    private Coroutine changeRoutine;   // a change showing (new island, fall, drop)
+    private Coroutine changeRoutine;   // a change showing (island change, fall, leave)
     private Coroutine revealRoutine;   // a pending change happening in front of the player
     private int lastVariant;
-    private int shownUnlocked = 1;     // variants already shown (1 is unlocked from the start)
+    private int shownUnlocked;         // variants already shown on arriving to an island
 
-    // A change waiting for the player to see it (fall alone, drop)
-    private Material pendingImage;
-    private AudioClip[] pendingSounds;
+    // A change waiting for the player to see it (fall alone, leave)
+    private MemeImage pendingImage;
     private bool pendingNeedsAway, playerWentAway;
     private bool fallingWithPlayer;
-    private Renderer shell;             // the bubble (its mist)
+    private bool fallSeen, leaveSeen;   // their change happened once: they join the sweep
+
+    private Renderer shell;            // the bubble (its mist)
     private MaterialPropertyBlock shellBlock;
-    private float mist;                 // 0 clear, 1 the image is hidden
-    private bool fogGathering;          // rising toward the change (wisps keep coming); off: they fade out fast
+    private float mist;                // 0 clear, 1 the image is hidden
+    private bool fogGathering;         // rising toward the change (wisps keep coming); off: they fade out fast
     private Coroutine mistClearing;
-    private ParticleSystem innerFog;    // the fog inside the bubble
+    private ParticleSystem innerFog;   // the fog inside the bubble
     private static Material fogMaterial;   // copy of MemeSettings' Fog Material, pulled toward the camera like the sticker
-    private static readonly int FrostId = Shader.PropertyToID("_Frost");
-    private bool fallSeen, dropSeen;   // their change happened once: they join the sweep
 
-    void Start()
+    private MemeImage BaseImage => images.Count > 0 ? images[0] : null;
+
+    private void Start()
     {
-        Player = GameObject.Find("Player");
-
-        // Images are assigned in the Inspector (before: loaded from Resources by the orb's name)
-        if (materials.Count == 0) { Debug.LogError("[MemeOrb] '" + name + "' has no images assigned.", this); enabled = false; return; }
-        matCount = 0;
-        memeRenderer = gameObject.transform.Find("Meme").GetComponent<MeshRenderer>();
-        memeRenderer.sharedMaterial = materials[matCount];
-
-        // Its own sound source for the mutation (the orb's one is muted while you carry it)
+        shell = GetComponent<Renderer>();
+        shellBlock = new MaterialPropertyBlock();
+        stickerBlock = new MaterialPropertyBlock();
         sfx = gameObject.AddComponent<AudioSource>();
         sfx.playOnAwake = false; sfx.spatialBlend = 1f; sfx.minDistance = 4f;
-        mpb = new MaterialPropertyBlock();
-        shell = GetComponent<MeshRenderer>();
-        shellBlock = new MaterialPropertyBlock();
-        playerMove = Player.GetComponent<PlayerMove>();
-        lastPlayerPos = Player.transform.position;
+        memeSource = gameObject.AddComponent<AudioSource>();
+        memeSource.playOnAwake = false; memeSource.spatialBlend = 1f; memeSource.minDistance = 4f;
+        if (CurrentPlayer != null) lastPlayerPos = CurrentPlayer.transform.position;
 
-        ApplyRestingEffects();   // before: the Update polling did it on the first frame
+        if (sticker == null) { Debug.LogError($"[MemeOrb] '{name}' has no Sticker reference.", this); return; }
+        sticker.transform.localScale = Vector3.one * Settings.stickerSize;
+        baseEmission = sticker.sharedMaterial != null && sticker.sharedMaterial.HasProperty(EmissionId)
+            ? sticker.sharedMaterial.GetColor(EmissionId) : Color.black;
+        if (Data == null || !MemeImage.Exists(Data.baseImage)) { Debug.LogWarning($"[MemeOrb] '{name}' has no meme (MemeData with a base image).", this); return; }
+
+        images.Add(Data.baseImage);
+        foreach (MemeImage variant in Data.variants) if (MemeImage.Exists(variant)) images.Add(variant);
+        hasMeme = true;
+        SetImage(BaseImage);
     }
 
     protected override void Update()
     {
         base.Update();
+        if (!hasMeme) return;
+        UpdateVideoFrame();
         UpdateMutation();   // the image mutates over time while you carry it and move
-        UpdatePending();    // fall and drop changes wait until you see them
+        UpdatePending();    // fall and leave changes wait until you see them
+        if (fallingWithPlayer && CurrentPlayer != null && CurrentPlayer.isGrounded && !CurrentPlayer.FallingIntoVoid)
+            OnFallLanded();   // it wasn't the void after all (it landed on something): back too
     }
 
     //---- Meme events
 
-    protected override void OnPickedUp() => ApplyHoldingEffects();
-    protected override void OnDropped() => ApplyRestingEffects();
     protected override void OnBridgeCrossed() => MarkEvent();   // a new bridge: don't mutate right there
 
-    // Fell into the void. With you: it changes on your way down. Alone (meteor, just landed by its rock): its change
-    // waits until you come close
+    // Picked up: the meme's own sound (Base.mp3)
+    protected override void OnPickedUp()
+    {
+        if (hasMeme) Play(Data.grabSound);
+    }
+
+    // Fell into the void. With you: it turns into its Fall change as soon as nothing is below you, and stays so the
+    // whole way down. Alone (meteor, just landed): its change waits until you come close
     protected override void OnFell(bool withPlayer)
     {
+        if (!hasMeme) return;
         MarkEvent();
-        if (withPlayer) { fallingWithPlayer = fallImage != null; return; }
-        if (fallImage != null) SetPending(fallImage, fallSounds, false);
+        if (!Data.HasFall) return;
+        if (!withPlayer) { SetPending(Data.fall, false); return; }
+
+        StopChanges();
+        fallingWithPlayer = true;
+        changeRoutine = StartCoroutine(MistSwap(() =>
+        {
+            SetImage(Data.fall); Play(Settings.changeClip); PlayChange(Data.fall);
+            fallSeen = true;
+        }, Settings.mistIn));
     }
 
-    // In your hand after a fall: braking starts the change, touching the ground makes sure it shows
-    protected override void OnFallLanding(bool touchedGround)
+    // In your hand, the fall is over (you reappeared and touched the ground): back to its base image
+    protected override void OnFallLanded()
     {
         if (!fallingWithPlayer) return;
-        if (!touchedGround) { if (revealRoutine == null) revealRoutine = StartCoroutine(RevealRoutine(fallImage, fallSounds)); return; }
         fallingWithPlayer = false;
-        if (revealRoutine == null && changeRoutine == null) ShowChange(fallImage, fallSounds);   // no braking: at once
+        StopChanges();
+        changeRoutine = StartCoroutine(BackAfterFall());
     }
 
-    // Carried to a new island: shows the variant it just unlocked. A known one: only a pause in the mutation
-    protected override void OnIslandVisited(GameObject island, bool firstTime)
+    IEnumerator BackAfterFall()
+    {
+        yield return MistSwap(() => { ShowBase(); Play(Settings.returnClip); }, Settings.mistIn);
+        nextChangeAt = movingTime + Random.Range(Settings.changeInterval.x, Settings.changeInterval.y);
+        changeRoutine = null;
+    }
+
+    void StopChanges()
+    {
+        if (mutationRoutine != null) { StopCoroutine(mutationRoutine); mutationRoutine = null; }
+        if (changeRoutine != null) { StopCoroutine(changeRoutine); changeRoutine = null; }
+        if (revealRoutine != null) { StopCoroutine(revealRoutine); revealRoutine = null; }
+    }
+
+    // Carried onto an island other than the last one: it changes. To the next variant of its list, or, once all were
+    // shown, to one of them (so every island change shows one, however many variants it has)
+    protected override void OnIslandVisited(GameObject island, bool counts)
     {
         MarkEvent();
-        if (!firstTime || materials.Count < 2 || revealRoutine != null) return;
+        if (!hasMeme || !counts || revealRoutine != null || fallingWithPlayer) return;
         int unlocked = UnlockedVariants();
-        if (unlocked <= shownUnlocked) return;
+        if (unlocked < 1) return;
+        int v = unlocked > shownUnlocked ? unlocked : RandomVariant(unlocked);
         shownUnlocked = unlocked;
-        ShowChange(materials[unlocked], moveSounds);
+        lastVariant = v;
+        ShowChange(images[v]);
     }
 
     //---- Mutation
     // The image doesn't depend on any single action, only on the time you move carrying the orb.
-    // After each variant, and when you drop it, it goes back to the original.
-    // Each new island you carry it to unlocks one more version for the random pick.
+    // After each variant, and when you let it go, it goes back to the base image.
+    // Each island change you carry it through unlocks one more variant for the random pick.
 
     void UpdateMutation()
     {
-        Vector3 playerPos = Player.transform.position;
+        Vector3 playerPos = CurrentPlayer != null ? CurrentPlayer.transform.position : lastPlayerPos;
         Vector3 delta = playerPos - lastPlayerPos; delta.y = 0f;
         lastPlayerPos = playerPos;
 
         // Moments the player could take as the cause of the change: no mutating near them
-        if (delta.magnitude > 3f) MarkEvent();                          // respawn / teleport
-        if (playerMove != null && !playerMove.isGrounded) MarkEvent();  // jumping or falling
+        if (delta.magnitude > 3f) MarkEvent();                                    // respawn / teleport
+        if (CurrentPlayer != null && !CurrentPlayer.isGrounded) MarkEvent();      // jumping or falling
 
         if (IsHeld && !wasHolded) StartMutationTimer();
         if (!IsHeld && wasHolded) OnLetGo();
         wasHolded = IsHeld;
 
-        if (!IsHeld || mutationRoutine != null || changeRoutine != null || revealRoutine != null || fallingWithPlayer || materials.Count < 2) return;
+        if (!IsHeld || mutationRoutine != null || changeRoutine != null || revealRoutine != null || fallingWithPlayer || UnlockedVariants() < 1) return;
 
         if (delta.magnitude / Mathf.Max(Time.deltaTime, 0.0001f) > 0.5f) movingTime += Time.deltaTime; // only counts while moving
         if (movingTime >= nextChangeAt && !InGrace())
@@ -168,56 +200,62 @@ public class MemeOrb : Meme
 
     void StartMutationTimer()
     {
-        // Taken off the pedestal mid-sweep: back to the original. A change happening goes on: you see it end in your hand
-        if (sweepRoutine != null) { StopCoroutine(sweepRoutine); sweepRoutine = null; SetImage(0); }
+        // Taken off the pedestal mid-sweep: back to the base image. A change happening goes on: you see it end in your hand
+        if (sweepRoutine != null) { StopCoroutine(sweepRoutine); sweepRoutine = null; ShowBase(); }
         movingTime = 0f;
         nextChangeAt = Settings.firstChangeAfter;
     }
 
-    // Let go: back to the original now; its Drop change waits until you go to another island and come back
+    // Let go: back to the base image now; its Leave change waits until you go to another island and come back
     // (on a pedestal the sweep takes over instead)
     void OnLetGo()
     {
         StopMutationAndRestore();
-        if (dropImage != null && CurrentPedestal == null) SetPending(dropImage, dropSounds, true);
+        if (Data.HasLeave && CurrentPedestal == null) SetPending(Data.leave, true);
     }
 
     void StopMutationAndRestore()
     {
         if (mutationRoutine != null) { StopCoroutine(mutationRoutine); mutationRoutine = null; }
-        if (matCount != 0) { SetImage(0); Play(Settings.returnClip); StartCoroutine(Flash(0.6f)); }
+        if (shown != BaseImage) { ShowBase(); Play(Settings.returnClip); StartCoroutine(Flash(0.6f)); }
         ClearMist();
     }
 
     void MarkEvent() { lastEventTime = Time.time; }
     bool InGrace() { return Time.time - lastEventTime < Settings.graceAfterEvent; }
 
-    int UnlockedVariants() { return Mathf.Clamp(1 + IslandsDiscovered, 1, materials.Count - 1); }
+    // How many Move variants it has unlocked: one per island change it was carried through, as many as it has
+    int UnlockedVariants() => Mathf.Min(IslandChanges, images.Count - 1);
+
+    // One of the first 'max' variants, never the last one shown again
+    int RandomVariant(int max)
+    {
+        int v = Random.Range(1, max + 1);
+        if (max > 1 && v == lastVariant) v = (v % max) + 1;
+        return v;
+    }
 
     IEnumerator Mutate()
     {
         while (InGrace()) yield return null;   // you just jumped or stepped on a bridge: wait
         Play(Settings.warnClip);   // the fog gathering is the warning
 
-        int max = UnlockedVariants();
-        int v = Random.Range(1, max + 1);
-        if (max > 1 && v == lastVariant) v = (v % max) + 1;   // never the same variant twice in a row
+        int v = RandomVariant(UnlockedVariants());
         lastVariant = v;
-        yield return MistSwap(() => { SetImage(v); Play(Settings.changeClip); Play(SoundFor(moveSounds)); }, Settings.mistIn);
+        yield return MistSwap(() => { SetImage(images[v]); Play(Settings.changeClip); PlayChange(images[v]); }, Settings.mistIn);
 
         yield return new WaitForSeconds(Random.Range(Settings.variantDuration.x, Settings.variantDuration.y));
 
-        yield return MistSwap(() => { SetImage(0); Play(Settings.returnClip); }, Settings.mistIn);
+        yield return MistSwap(() => { ShowBase(); Play(Settings.returnClip); }, Settings.mistIn);
         nextChangeAt = movingTime + Random.Range(Settings.changeInterval.x, Settings.changeInterval.y);
         mutationRoutine = null;
     }
 
-    //---- Changes that wait to be seen (fall alone, drop)
+    //---- Changes that wait to be seen (fall alone, leave)
 
-    void SetPending(Material image, AudioClip[] sounds, bool needsAway)
+    void SetPending(MemeImage image, bool needsAway)
     {
         pendingImage = image;
-        pendingSounds = sounds;
         pendingNeedsAway = needsAway;
         playerWentAway = false;
     }
@@ -229,7 +267,7 @@ public class MemeOrb : Meme
 
         if (pendingNeedsAway && !playerWentAway)
         {
-            if (IsHeld) { pendingImage = null; return; }   // picked up again before leaving: no drop change
+            if (IsHeld) { pendingImage = null; return; }   // picked up again before going away: no leave change
             GameObject playerIsland = PlayerIsland;
             if (playerIsland != null && MemeIsland != null && playerIsland != MemeIsland) playerWentAway = true;
             return;
@@ -238,13 +276,13 @@ public class MemeOrb : Meme
         // In front of you as you come close, or in your hand if you grabbed it without looking
         if (IsHeld || PlayerSees(Settings.revealDistance))
         {
-            revealRoutine = StartCoroutine(RevealRoutine(pendingImage, pendingSounds));
+            revealRoutine = StartCoroutine(RevealRoutine(pendingImage));
             pendingImage = null;
         }
     }
 
     // The change happening: the new image flickers in faster and faster, then shows as any change does
-    IEnumerator RevealRoutine(Material image, AudioClip[] sounds)
+    IEnumerator RevealRoutine(MemeImage image)
     {
         if (mutationRoutine != null) { StopCoroutine(mutationRoutine); mutationRoutine = null; }
         if (changeRoutine != null) { StopCoroutine(changeRoutine); changeRoutine = null; }
@@ -257,37 +295,33 @@ public class MemeOrb : Meme
             fogGathering = true;
             SetMist(Mathf.SmoothStep(0f, 1f, p));
             SetImage(image); yield return new WaitForSeconds(wait * Mathf.Lerp(0.3f, 0.8f, p));
-            SetImage(0); yield return new WaitForSeconds(wait);
+            SetImage(BaseImage); yield return new WaitForSeconds(wait);
             t += wait * (1f + Mathf.Lerp(0.3f, 0.8f, p));
         }
-        yield return ChangeRoutine(image, sounds, true);
+        yield return ChangeRoutine(image, true);
         revealRoutine = null;
     }
 
-    // Low poly smoke: a solid puff pops in small, swells, and shrinks away at the end (no fading, like the clouds)
-    static AnimationCurve Puffy(float start, float swell, float peak) =>
-        new AnimationCurve(new Keyframe(0f, start), new Keyframe(0.25f, swell), new Keyframe(0.75f, peak), new Keyframe(1f, 0f));
-
     //---- Showing a change
 
-    // Shows a change for a moment (stopping any other), then back to the original
-    void ShowChange(Material image, AudioClip[] sounds)
+    // Shows a change for a moment (stopping any other), then back to the base image
+    void ShowChange(MemeImage image)
     {
         if (mutationRoutine != null) { StopCoroutine(mutationRoutine); mutationRoutine = null; }
         if (changeRoutine != null) StopCoroutine(changeRoutine);
-        changeRoutine = StartCoroutine(ChangeRoutine(image, sounds));
+        changeRoutine = StartCoroutine(ChangeRoutine(image));
     }
 
-    IEnumerator ChangeRoutine(Material image, AudioClip[] sounds, bool mistAlreadyUp = false)
+    IEnumerator ChangeRoutine(MemeImage image, bool mistAlreadyUp = false)
     {
         yield return MistSwap(() =>
         {
-            SetImage(image); Play(Settings.changeClip); Play(SoundFor(sounds));
-            if (image == fallImage) fallSeen = true;
-            if (image == dropImage) dropSeen = true;
+            SetImage(image); Play(Settings.changeClip); PlayChange(image);
+            if (image == Data.fall) fallSeen = true;
+            if (image == Data.leave) leaveSeen = true;
         }, mistAlreadyUp ? 0f : Settings.mistIn);
         yield return new WaitForSeconds(Random.Range(Settings.variantDuration.x, Settings.variantDuration.y));
-        yield return MistSwap(() => { SetImage(0); Play(Settings.returnClip); }, Settings.mistIn);
+        yield return MistSwap(() => { ShowBase(); Play(Settings.returnClip); }, Settings.mistIn);
         nextChangeAt = movingTime + Random.Range(Settings.changeInterval.x, Settings.changeInterval.y);
         changeRoutine = null;
     }
@@ -325,8 +359,8 @@ public class MemeOrb : Meme
     }
 
     // How much the sticker is drawn toward the camera (MemeSticker's Depth Pull): the fog in front matches it
-    float StickerDepthPull => memeRenderer != null && memeRenderer.sharedMaterial != null && memeRenderer.sharedMaterial.HasProperty("_DepthPull")
-        ? memeRenderer.sharedMaterial.GetFloat("_DepthPull") : 0.2f;
+    float StickerDepthPull => sticker != null && sticker.sharedMaterial != null && sticker.sharedMaterial.HasProperty("_DepthPull")
+        ? sticker.sharedMaterial.GetFloat("_DepthPull") : 0.2f;
 
     // Gathering: the wisps come from the start (with the warning) and multiply, the glass clouds over with them:
     // both are at their thickest right at the swap. After it: no new wisps, the ones there fade out fast, the glass clears
@@ -416,29 +450,67 @@ public class MemeOrb : Meme
         return ps;
     }
 
-    // The sound of a change: its own, else this meme's, else the fallback (random in each list)
-    AudioClip SoundFor(AudioClip[] own) => Pick(own) ?? Pick(memeSounds) ?? Pick(Settings.fallbackSounds);
+    // A puff pops in small, swells, and shrinks away at the end (no fading, like the clouds)
+    static AnimationCurve Puffy(float start, float swell, float peak) =>
+        new AnimationCurve(new Keyframe(0f, start), new Keyframe(0.25f, swell), new Keyframe(0.75f, peak), new Keyframe(1f, 0f));
 
-    static AudioClip Pick(AudioClip[] clips)
+    //---- Sounds
+
+    // The sound of the image it just turned into: that Move's own (move_3.png → move_3.mp3), or one of the Fall /
+    // Leave ones; else one of the meme's; else MemeSettings' fallback
+    void PlayChange(MemeImage image)
+    {
+        MemeSound sound = image == Data.fall ? Pick(Data.fallSounds)
+                        : image == Data.leave ? Pick(Data.leaveSounds)
+                        : MoveSound(images.IndexOf(image));
+        sound = sound ?? Pick(Data.sounds);
+        if (sound == null)
+        {
+            AudioClip fallback = PickClip(Settings.fallbackSounds);
+            if (fallback != null) sound = new MemeSound { clip = fallback };
+        }
+        if (sound == null) return;
+        // One at a time: the previous change's sound stops (hopping islands fast doesn't pile them up)
+        memeSource.Stop();
+        memeSource.clip = sound.clip;
+        memeSource.loop = sound.loop;   // a loop lasts until it goes back (ShowBase)
+        memeSource.Play();
+    }
+
+    // Move variant v (1, 2…) has the sound at v - 1 of Move Sounds, if any
+    MemeSound MoveSound(int v)
+    {
+        MemeSound[] list = Data.moveSounds;
+        return list != null && v >= 1 && v <= list.Length && list[v - 1] != null && list[v - 1].clip != null ? list[v - 1] : null;
+    }
+
+    static MemeSound Pick(MemeSound[] sounds)
+    {
+        if (sounds == null) return null;
+        var valid = System.Array.FindAll(sounds, s => s != null && s.clip != null);
+        return valid.Length > 0 ? valid[Random.Range(0, valid.Length)] : null;
+    }
+
+    static AudioClip PickClip(AudioClip[] clips)
     {
         if (clips == null) return null;
-        int count = 0;
-        foreach (AudioClip c in clips) if (c != null) count++;
-        if (count == 0) return null;
-        int pick = Random.Range(0, count);
-        foreach (AudioClip c in clips) if (c != null && pick-- == 0) return c;
-        return null;
+        var valid = System.Array.FindAll(clips, c => c != null);
+        return valid.Length > 0 ? valid[Random.Range(0, valid.Length)] : null;
     }
+
+    void Play(AudioClip clip) { if (clip != null) sfx.PlayOneShot(clip); }
 
     //---- Show (pedestal)
 
-    // Called by the pedestal while it charges: shows every version quickly and ends on the original
+    // Called by the pedestal while it charges: shows every version quickly and ends on the base image
     public override void Sweep(float duration)
     {
+        if (!hasMeme) return;
         if (mutationRoutine != null) { StopCoroutine(mutationRoutine); mutationRoutine = null; }
         if (changeRoutine != null) { StopCoroutine(changeRoutine); changeRoutine = null; }
         if (revealRoutine != null) { StopCoroutine(revealRoutine); revealRoutine = null; }
         pendingImage = null;
+        memeSource.Stop();
         ClearMist();
         if (sweepRoutine != null) StopCoroutine(sweepRoutine);
         sweepRoutine = StartCoroutine(SweepRoutine(duration));
@@ -446,75 +518,114 @@ public class MemeOrb : Meme
 
     IEnumerator SweepRoutine(float duration)
     {
-        // Ends before the pedestal charge and goes back to the original silently,
+        // Ends before the pedestal charge and goes back to the base image silently,
         // so it doesn't cover the accept or reject sound
-        var images = new List<Material>();   // its variants, and fall / drop once seen
-        for (int i = 1; i < materials.Count; i++) images.Add(materials[i]);
-        if (fallImage != null && fallSeen) images.Add(fallImage);
-        if (dropImage != null && dropSeen) images.Add(dropImage);
+        var shownInSweep = new List<MemeImage>(images.GetRange(1, images.Count - 1));   // its variants, and fall / leave once seen
+        if (Data.HasFall && fallSeen) shownInSweep.Add(Data.fall);
+        if (Data.HasLeave && leaveSeen) shownInSweep.Add(Data.leave);
 
-        float step = duration * Settings.sweepPortion / Mathf.Max(images.Count + 1, 1);
-        foreach (Material image in images)
+        float step = duration * Settings.sweepPortion / Mathf.Max(shownInSweep.Count + 1, 1);
+        foreach (MemeImage image in shownInSweep)
         {
             SetImage(image); Play(Settings.sweepTickClip);
             yield return new WaitForSeconds(step);
         }
-        SetImage(0); StartCoroutine(Flash(1f));
+        ShowBase(); StartCoroutine(Flash(1f));
         sweepRoutine = null;
     }
 
-    void SetImage(int i)
+    //---- The sticker
+
+#if UNITY_EDITOR
+    // Scene view: the sticker shows its meme's base image, to tell the orbs apart
+    private void OnValidate() => UnityEditor.EditorApplication.delayCall += ShowBaseInEditor;
+
+    void ShowBaseInEditor()
     {
-        matCount = i;
-        memeRenderer.sharedMaterial = materials[i];
+        if (this == null || Application.isPlaying || sticker == null) return;
+        if (sticker.transform.localScale != Vector3.one * Settings.stickerSize)   // its size inside the bubble
+        {
+            UnityEditor.Undo.RecordObject(sticker.transform, "Sticker size");
+            sticker.transform.localScale = Vector3.one * Settings.stickerSize;
+        }
+        MemeData meme = data;
+        if (meme == null && reserveGroup != null && reserveSlot >= 1 && reserveSlot <= reserveGroup.reserve.Count)
+            meme = reserveGroup.reserve[reserveSlot - 1];
+        if (meme == null || meme.baseImage == null || meme.baseImage.picture == null) return;   // (a video-only base: no preview)
+        var block = new MaterialPropertyBlock();
+        sticker.GetPropertyBlock(block);
+        block.SetTexture(MainTexId, meme.baseImage.picture);
+        sticker.SetPropertyBlock(block);
+    }
+#endif
+
+    // Its picture now; its video (if any) plays and takes over the sticker from its first frame
+    void SetImage(MemeImage image)
+    {
+        if (!MemeImage.Exists(image)) return;
+        shown = image;
+        showingVideoFrame = false;
+        if (image.picture != null) SetStickerTexture(image.picture);
+
+        if (image.video == null) { if (videoPlayer != null) videoPlayer.Stop(); return; }
+        if (videoPlayer == null) videoPlayer = CreateVideoPlayer();
+        if (videoPlayer.clip != image.video) videoPlayer.clip = image.video;
+        videoPlayer.Play();
     }
 
-    // Any image (fall, drop): Mat Count is -1 when it isn't one of the Move list
-    void SetImage(Material image)
+    // The video's frames on the sticker once it has one (until then, its picture)
+    void UpdateVideoFrame()
     {
-        matCount = materials.IndexOf(image);
-        memeRenderer.sharedMaterial = image;
+        if (showingVideoFrame || shown == null || shown.video == null || videoPlayer == null) return;
+        if (!videoPlayer.isPlaying || videoPlayer.frame < 1 || videoPlayer.texture == null) return;
+        SetStickerTexture(videoPlayer.texture);
+        showingVideoFrame = true;
     }
 
-    void Play(AudioClip clip) { if (clip != null) sfx.PlayOneShot(clip); }
+    // Plays to a texture we read (no render texture), looping and silent (the change sounds are its sound)
+    VideoPlayer CreateVideoPlayer()
+    {
+        VideoPlayer player = gameObject.AddComponent<VideoPlayer>();
+        player.playOnAwake = false;
+        player.isLooping = true;
+        player.renderMode = VideoRenderMode.APIOnly;
+        player.audioOutputMode = VideoAudioOutputMode.None;
+        player.skipOnDrop = true;
+        return player;
+    }
+
+    void SetStickerTexture(Texture texture)
+    {
+        sticker.GetPropertyBlock(stickerBlock);
+        stickerBlock.SetTexture(MainTexId, texture);
+        sticker.SetPropertyBlock(stickerBlock);
+    }
+
+    // Back to the base image: a looping change sound stops with it
+    void ShowBase()
+    {
+        SetImage(BaseImage);
+        if (memeSource != null && memeSource.loop && memeSource.isPlaying) memeSource.Stop();
+    }
 
     // Flash: raises the meme's emission and brings it down in 0.3 s
     IEnumerator Flash(float strength)
     {
-        Color baseEmission = memeRenderer.sharedMaterial.GetColor("_EmissionColor");
         float t = 0f, dur = 0.3f;
         while (t < dur)
         {
             t += Time.deltaTime;
             float k = 1f - t / dur;
-            memeRenderer.GetPropertyBlock(mpb);
-            mpb.SetColor("_EmissionColor", Color.Lerp(baseEmission, Color.white * Settings.flashIntensity, k * k * strength));
-            memeRenderer.SetPropertyBlock(mpb);
+            SetEmission(Color.Lerp(baseEmission, Color.white * Settings.flashIntensity, k * k * strength));
             yield return null;
         }
-        memeRenderer.SetPropertyBlock(null);
+        SetEmission(baseEmission);
     }
 
-    //---- Effects while held / resting (before: Holding / NotHolding coroutines polled every second)
-
-    void ApplyHoldingEffects()
+    void SetEmission(Color color)
     {
-        // Unmute the holding sound loop
-        transform.Find("Audio").GetComponent<AudioSource>().mute = false;
-        GetComponent<AudioSource>().mute = true;
-    }
-
-    void ApplyRestingEffects()
-    {
-        // Everything back to normal when you no longer have the orb
-        transform.Find("Audio").GetComponent<AudioSource>().mute = true;
-        GetComponent<AudioSource>().mute = false;
-
-        VideoPlayer video = GetComponentInChildren<VideoPlayer>();
-        if (video != null)
-        {
-            video.frame = 0;
-            video.Pause();
-        }
+        sticker.GetPropertyBlock(stickerBlock);
+        stickerBlock.SetColor(EmissionId, color);
+        sticker.SetPropertyBlock(stickerBlock);
     }
 }

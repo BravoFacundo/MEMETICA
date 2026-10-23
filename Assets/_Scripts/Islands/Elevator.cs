@@ -221,7 +221,6 @@ public class Elevator : MonoBehaviour
         while ((meme == null || !meme.IsHeld) && Vector3.Distance(memeObject.transform.position, startPos) < 1f)
             yield return null;
 
-        PlayerMove player = FindObjectOfType<PlayerMove>();
-        pedestal.Break(player != null ? player.transform.position : transform.position);
+        pedestal.Break();
     }
 }

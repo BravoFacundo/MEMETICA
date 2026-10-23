@@ -7,6 +7,7 @@ using UnityEngine.SceneManagement;
 //   F3  hide all the UI and the crosshair (screenshots)
 //   F4 / F6  previous / next start   |   F5  restart the scene at the selected start
 //   F7  fast elevators: every ride goes Fast Elevator Speed times faster
+//   F8  the meme in your hand changes as if you had carried it onto another island (the next Move)
 // All Islands Up: every island is already up when the game starts (to walk the whole level)
 // Starts: the player appears at Spawn Point with islands and bridges already up, elevators already docked
 // and memes already on their pedestals, as if that part had been played. Start At picks one when pressing Play.
@@ -105,6 +106,7 @@ public class DebugTools : MonoBehaviour
         if (Input.GetKeyDown(KeyCode.F6)) SelectStart(1);
         if (Input.GetKeyDown(KeyCode.F5)) RestartAtSelectedStart();
         if (Input.GetKeyDown(KeyCode.F7)) { fastElevators = !fastElevators; showHelp = true; }
+        if (Input.GetKeyDown(KeyCode.F8)) ForceMemeChange();
         ElevatorSpeed = fastElevators ? fastElevatorSpeed : 1f;
 
         if (noclip && !PauseMenu.GameIsPaused) Fly();
@@ -230,6 +232,13 @@ public class DebugTools : MonoBehaviour
     }
 #endif
 
+    void ForceMemeChange()
+    {
+        Meme held = Meme.Held;
+        if (held != null) held.DebugIslandChange();
+        else Debug.Log("[DebugTools] F8: pick up a meme first.");
+    }
+
     //---- Help on screen
 
     void OnGUI()
@@ -243,8 +252,9 @@ public class DebugTools : MonoBehaviour
             "F3  hide UI " + (hiddenCanvases != null ? "ON" : "off") + "\n" +
             "F4 / F6  start: " + startName + "\n" +
             "F5  restart at that start\n" +
-            "F7  fast elevators " + (fastElevators ? "ON (x" + fastElevatorSpeed + ")" : "off");
-        GUI.Box(new Rect(10, 10, 420, 128), "");
-        GUI.Label(new Rect(20, 15, 400, 118), text);
+            "F7  fast elevators " + (fastElevators ? "ON (x" + fastElevatorSpeed + ")" : "off") + "\n" +
+            "F8  the meme in your hand changes (next Move)";
+        GUI.Box(new Rect(10, 10, 420, 146), "");
+        GUI.Label(new Rect(20, 15, 400, 136), text);
     }
 }

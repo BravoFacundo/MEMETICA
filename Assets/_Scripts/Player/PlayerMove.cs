@@ -54,11 +54,11 @@ public class PlayerMove : MonoBehaviour
     [ReadOnlyField] public bool isGrounded;
     [ReadOnlyField] public bool ascend = false;   // lo prende el LevelManager al terminar el juego
 
-    // The player fell into the void and came back (the meme in the hand listens: it falls with them)
-    public static event System.Action Respawned;
-    // After a respawn: starts braking before the ground, and touches it (the meme in the hand changes on the way down)
-    public static event System.Action RespawnBraking;
+    // Falling with nothing below: it will reappear (the meme in the hand turns into its Fall change on the way down)
+    public static event System.Action VoidFallStarted;
+    // After that fall and the respawn, it touches the ground (the meme in the hand goes back)
     public static event System.Action RespawnLanded;
+    public bool FallingIntoVoid { get; private set; }
 
     // The island it stepped on last (null before any)
     public GameObject CurrentIsland => lastIsland;
@@ -73,7 +73,8 @@ public class PlayerMove : MonoBehaviour
     private float lastJumpPressedTime = -99f;
     private float knockbackUntil;
     private bool landingBrake;   // just respawned: brakes before touching the ground
-    private bool awaitingLanding, brakeAnnounced;   // just respawned: RespawnBraking / RespawnLanded not sent yet
+    private bool awaitingLanding;   // just respawned: RespawnLanded not sent yet
+    private const float voidFallMargin = 3f;   // meters below the last ground before a fall with nothing below counts
     private bool wasGrounded;
 
     private Transform movingGround;
@@ -278,9 +279,29 @@ public class PlayerMove : MonoBehaviour
         if (isGrounded)
         {
             landingBrake = false;
+            FallingIntoVoid = false;
             if (awaitingLanding) { awaitingLanding = false; RespawnLanded?.Invoke(); }
         }
-        else if (landingBrake) BrakeBeforeGround();
+        else
+        {
+            if (landingBrake) BrakeBeforeGround();
+            // Already well below where it stood (not just the end of a jump over a gap), with nothing under it
+            bool belowLastGround = transform.position.y < lastGroundY - voidFallMargin;
+            if (!FallingIntoVoid && !awaitingLanding && verticalVelocity < 0f && belowLastGround && NothingBelow())
+            {
+                FallingIntoVoid = true;
+                VoidFallStarted?.Invoke();
+            }
+        }
+    }
+
+    // No ground under the player, however far (the meme in the hand and invisible lowered islands don't count)
+    private bool NothingBelow()
+    {
+        int mask = ~(1 << gameObject.layer | 1 << 2);   // not the player, not Ignore Raycast
+        foreach (RaycastHit hit in Physics.RaycastAll(transform.position, Vector3.down, 1000f, mask, QueryTriggerInteraction.Ignore))
+            if (hit.collider.GetComponentInParent<Meme>() == null) return false;
+        return true;
     }
 
     //---- What is under the player
@@ -304,7 +325,6 @@ public class PlayerMove : MonoBehaviour
 
         float height = ground.distance - characterController.height * 0.5f - 0.6f;   // brakes until 0.6 m above, then drops
         if (height > respawnBrakeDistance) return;
-        if (!brakeAnnounced) { brakeAnnounced = true; RespawnBraking?.Invoke(); }
         if (height <= 0f) { landingBrake = false; return; }
 
         float speed = -verticalVelocity;
@@ -405,10 +425,8 @@ public class PlayerMove : MonoBehaviour
         movingGround = null;
         landingBrake = respawnBrakeDistance > 0f;
         awaitingLanding = true;
-        brakeAnnounced = false;
         look.ResetSmoothing();
         debugHeight = transform.position.y;
-        Respawned?.Invoke();   // the meme in the hand falls with the player
     }
 
     //In the project, the objects tagged "island" may be too far up the hierarchy from the object the raycast hits.

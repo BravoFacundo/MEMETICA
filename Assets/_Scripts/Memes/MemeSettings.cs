@@ -69,7 +69,16 @@ public class MemeSettings : ScriptableObject
     [Tooltip("After the swap, how much faster the wisps age (they fade out instead of lingering)")]
     public float fogFadeSpeed = 3f;
 
-    [Header("Changes you must see (MemeOrb: fall alone, drop)")]
+    [Header("Sticker (MemeOrb)")]
+    [Tooltip("Size of the meme inside the bubble (the Sticker's scale; every orb gets it, in the editor too). " +
+             "Small enough that square images stay inside the sphere")]
+    public float stickerSize = 0.08f;
+
+    [Header("Unlocking (MemeOrb: one more Move variant per new island it is carried to)")]
+    [Tooltip("The letter islands (Island_A, B, C: between bridges) unlock a variant too. The tutorial never does")]
+    public bool letterIslandsUnlock = true;
+
+    [Header("Changes you must see (MemeOrb: fall alone, leave)")]
     [Tooltip("Meters: it changes in front of you when you come this close and it is on screen")]
     public float revealDistance = 10f;
     [Tooltip("Seconds the change takes (the new image flickering in), so it ends about when you grab it")]
@@ -79,7 +88,7 @@ public class MemeSettings : ScriptableObject
     [Tooltip("Warning: it is about to change")]
     public AudioClip warnClip;
     public AudioClip changeClip;
-    [Tooltip("Back to the original")]
+    [Tooltip("Back to the base image")]
     public AudioClip returnClip;
     [Tooltip("Each image of the sweep on the pedestal")]
     public AudioClip sweepTickClip;
@@ -87,8 +96,8 @@ public class MemeSettings : ScriptableObject
     public float firstChangeAfter = 3f;
     [Tooltip("Seconds moving between changes (random between x and y)")]
     public Vector2 changeInterval = new Vector2(4f, 8f);
-    [Tooltip("How long a change (move, fall, drop) shows before going back to the original (random between x and y)")]
-    public Vector2 variantDuration = new Vector2(1.5f, 2.5f);
+    [Tooltip("How long a change (move, fall, leave) shows before going back to the base image (random between x and y)")]
+    public Vector2 variantDuration = new Vector2(5f, 6f);
     [Tooltip("No change this close to jumps, falls, new bridges or new islands (the player would think they caused it)")]
     public float graceAfterEvent = 1f;
     public float flashIntensity = 2f;

@@ -14,17 +14,27 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   restDelay: 3
   groundCheckRadius: 0.6
-  meteorHeight: 25
   meteorDrift: 10
   meteorDuration: 1.1
   landingRadius: 4
   pedestalClearance: 3
   meteorColor: {r: 1, g: 0.75, b: 0.35, a: 1}
+  meteorRock: {fileID: 5941325095857925921, guid: 6a99f89c0d0ecb34e9de0640eed4b4ab, type: 3}
+  meteorRockSize: 0.9
+  meteorChunks: 6
   impactDebris:
   - {fileID: 7617200879849885303, guid: e9145b5c228689843b6d6ba2412aff73, type: 3}
   - {fileID: 379243778788410097, guid: 19388166165474c488a129d8427a779f, type: 3}
   impactDebrisCount: 10
   impactClip: {fileID: 0}
+  impactSmokeColor: {r: 0.3, g: 0.3, b: 0.33, a: 1}
+  smokeMaterial: {fileID: 2100000, guid: 002aa109b32346ce9442a5d5c427a06d, type: 2}
+  smokeGap: 0.45
+  smokeColor: {r: 0.52, g: 0.53, b: 0.57, a: 1}
+  smokeHeight: 40
+  smokeRiseSpeed: 2.5
+  smokeSize: 2.5
+  fallbackSounds: []
   mistIn: 1
   mistOut: 0.6
   fogMaterial: {fileID: 2100000, guid: 7af46d505eab4153b1def23ac1592f82, type: 2}
@@ -33,22 +43,13 @@ MonoBehaviour:
   fogFadeSpeed: 3
   revealDistance: 10
   revealTime: 1.5
-  meteorRock: {fileID: 919132149155446097, guid: 808565b62d782304695f3681c3d52d04, type: 3}
-  meteorRockSize: 0.9
-  smokeMaterial: {fileID: 2100000, guid: 002aa109b32346ce9442a5d5c427a06d, type: 2}
-  smokeGap: 0.45
-  smokeColor: {r: 0.52, g: 0.53, b: 0.57, a: 1}
-  smokeHeight: 40
-  smokeRiseSpeed: 2.5
-  smokeSize: 2.5
   warnClip: {fileID: 8300000, guid: 1c7ed042ff75e17419921e1d0d6130e3, type: 3}
   changeClip: {fileID: 8300000, guid: db64e738f22ef4945834da5b19582892, type: 3}
   returnClip: {fileID: 8300000, guid: 995437a5722e2e147860694c5eb19ad1, type: 3}
   sweepTickClip: {fileID: 8300000, guid: 8f16159e82a5f4645a1686d7878244cf, type: 3}
   firstChangeAfter: 3
   changeInterval: {x: 4, y: 8}
-  variantDuration: {x: 1.5, y: 2.5}
-  warnLead: 0.6
+  variantDuration: {x: 5, y: 6}
   graceAfterEvent: 1
   flashIntensity: 2
   sweepPortion: 0.75

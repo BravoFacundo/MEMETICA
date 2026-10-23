@@ -86,6 +86,18 @@ public class Pedestal : MonoBehaviour
     void Start()
     {
         if (look == null) look = Camera.main.GetComponent<PlayerLook>();
+        WarnIfNoClue();
+    }
+
+    // A white pedestal waits for a meme that has a painting (the clue); a meme without one belongs on black ones
+    void WarnIfNoClue()
+    {
+        if (KeylessPedestal) return;
+        Meme key = Meme.WithKey(KeyID);
+        if (key == null) Debug.LogWarning($"[Pedestal] '{name}': no meme with Key ID '{KeyID}' in the scene.", this);
+        else if (key.Data != null && !key.Data.HasPainting)
+            Debug.LogWarning($"[Pedestal] '{name}' waits for '{key.name}', whose meme '{key.Data.title}' has no painting (MemeData: Hints). " +
+                             "Give it one, or make this pedestal black (Keyless).", this);
     }
 
     // The pedestal whose clue is this painting (or one of its parents), or null
@@ -298,10 +310,10 @@ public class Pedestal : MonoBehaviour
 #endif
 
     // ---------- Break (elevator pedestal) ----------
-    // A heavy stone giving way: it tips over on its side toward the nearest edge (preferring away from 'pushedFrom',
-    // the player), scrapes along the ground until it is over the void, and falls off with gravity, slowly rolling
-    // over the edge, until it is gone (Drop Distance below). It touches nothing: nobody gets pushed.
-    public void Break(Vector3 pushedFrom)
+    // A heavy stone giving way: it always tips over on its side toward the nearest edge, scrapes along the ground until
+    // it is over the void, and falls off with gravity, slowly rolling over the edge, until it is gone (Drop Distance
+    // below). It touches nothing: nobody gets pushed.
+    public void Break()
     {
         if (broken) return;
         broken = true;
@@ -313,9 +325,7 @@ public class Pedestal : MonoBehaviour
         transform.SetParent(null, true);   // not riding the elevator any more
 
         Vector3 start = Center();
-        Vector3 away = start - pushedFrom; away.y = 0f;
-        away = away.sqrMagnitude > 0.001f ? away.normalized : transform.forward;
-        StartCoroutine(FallOff(NearestEdge(start, away, out _), start.y));
+        StartCoroutine(FallOff(NearestEdge(start), start.y));
     }
 
     IEnumerator FallOff(Vector3 dir, float startY)
@@ -371,18 +381,16 @@ public class Pedestal : MonoBehaviour
         return b.center;
     }
 
-    // Of 8 directions, the one with the void closest (a gap at least 2 m long), favoring 'away'
-    Vector3 NearestEdge(Vector3 from, Vector3 away, out float distance)
+    // Of 16 directions, the one with the void closest (a gap at least 2 m long)
+    Vector3 NearestEdge(Vector3 from)
     {
-        Vector3 best = away;
-        float bestScore = float.MaxValue;
-        distance = 0f;
-        for (int k = 0; k < 8; k++)
+        Vector3 best = Vector3.forward;
+        float nearest = float.MaxValue;
+        for (int k = 0; k < 16; k++)
         {
-            Vector3 dir = Quaternion.AngleAxis(k * 45f, Vector3.up) * away;
+            Vector3 dir = Quaternion.AngleAxis(k * 22.5f, Vector3.up) * Vector3.forward;
             float d = VoidDistance(from, dir);
-            float score = d - Vector3.Dot(dir, away) * 3f;
-            if (score < bestScore) { bestScore = score; best = dir; distance = d; }
+            if (d < nearest) { nearest = d; best = dir; }
         }
         return best;
     }

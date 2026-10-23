@@ -8,15 +8,28 @@ using UnityEngine;
 // Falling into the void: it comes back to the last island it touched as a meteor: a rock (MeteorRock, the meme hidden
 // in it) glowing with a trail, falling at an angle onto open ground near the island's middle (not trees, not pedestals).
 // On impact the ground breaks, the rock bursts in a dark cloud and the meme comes out; smoke rises there until it is picked up.
-// While held it travels with the player: it notices on its own the bridges and new islands it is carried to,
-// and the player falling (PlayerMove.Respawned, then braking and landing). Shared values: MemeSettings (Assets/Resources).
+// While held it travels with the player: it notices on its own the bridges and islands it is carried to,
+// and the player falling into the void (PlayerMove.VoidFallStarted, then RespawnLanded). Shared values: MemeSettings (Assets/Resources).
 // This class only detects (what happened, where the player is, whether they can see it); each representation
 // (MemeOrb, MemeWindow) decides what each change looks like and when it shows.
-// Object name: Meme_<ID> (e.g. Meme_3Aa). Pedestals compare their Key ID with that ID.
+// Object name: Meme_<ID> (e.g. Meme_3Aa). Pedestals compare their Key ID with that ID: the ID is the orb's place in
+// the level, the meme in it (MemeData) can be any. Data: a fixed one, or a spare from a MemeGroup (Reserve Slot).
 [RequireComponent(typeof(Rigidbody))]
 public class Meme : MonoBehaviour
 {
     public const string NamePrefix = "Meme_";
+
+    [Section("Meme")]
+    [Tooltip("The meme it holds: its images and sounds (Art/Memes/<Meme>/<Meme>.asset)")]
+    public MemeData data;
+    [Tooltip("Takes a spare meme from this group instead (Data is then used only if the group has none for its slot)")]
+    public MemeGroup reserveGroup;
+    [ShowIf(nameof(reserveGroup))]
+    [Tooltip("Which spare: 1 = the first of the reserve (or the first drawn), 2 = the second…")]
+    public int reserveSlot = 1;
+
+    // The meme it holds this game (Data, or the spare it got)
+    public MemeData Data { get; private set; }
 
     public string ID => IDOf(gameObject);
     public bool IsHeld { get; private set; }
@@ -34,8 +47,8 @@ public class Meme : MonoBehaviour
     private Transform lastGroundHit;
     private GameObject lastIsland;   // the island under it last (respawn there; carried to a new one: OnIslandVisited)
     private GameObject lastBridge;   // the bridge carried over last (a new one: OnBridgeCrossed)
-    private readonly System.Collections.Generic.HashSet<GameObject> knownIslands = new System.Collections.Generic.HashSet<GameObject>();
     private static PlayerMove player;
+    private static readonly System.Collections.Generic.List<Meme> all = new System.Collections.Generic.List<Meme>();
     private float lastGroundY;
 
     // "Meme_3Aa" → "3Aa". Everything after the first "_", so old names ("Orb_3Aa") still work
@@ -45,8 +58,23 @@ public class Meme : MonoBehaviour
         return separator >= 0 ? meme.name.Substring(separator + 1) : meme.name;
     }
 
+    // The meme in the player's hand, or null
+    public static Meme Held => all.Find(m => m.IsHeld);
+
+    // DebugTools: as if it had just been carried onto another island (it changes there, wherever you are)
+    public void DebugIslandChange()
+    {
+        IslandChanges++;
+        OnIslandVisited(lastIsland, true);
+    }
+
+    // The meme a white pedestal waits for (its ID starts with the Key ID), or null
+    public static Meme WithKey(string keyID) =>
+        string.IsNullOrEmpty(keyID) ? null : all.Find(m => m.ID.StartsWith(keyID));
+
     protected virtual void Awake()
     {
+        Data = reserveGroup != null ? reserveGroup.Reserve(reserveSlot) ?? data : data;
         body = GetComponent<Rigidbody>();
         groundMask = LayerMask.GetMask("Ground");
         lastGroundY = transform.position.y;
@@ -110,15 +138,15 @@ public class Meme : MonoBehaviour
 
     protected virtual void OnEnable()
     {
-        PlayerMove.Respawned += OnPlayerRespawned;
-        PlayerMove.RespawnBraking += OnPlayerBraking;
+        all.Add(this);
+        PlayerMove.VoidFallStarted += OnPlayerVoidFall;
         PlayerMove.RespawnLanded += OnPlayerLanded;
     }
 
     protected virtual void OnDisable()
     {
-        PlayerMove.Respawned -= OnPlayerRespawned;
-        PlayerMove.RespawnBraking -= OnPlayerBraking;
+        all.Remove(this);
+        PlayerMove.VoidFallStarted -= OnPlayerVoidFall;
         PlayerMove.RespawnLanded -= OnPlayerLanded;
     }
 
@@ -131,9 +159,8 @@ public class Meme : MonoBehaviour
     }
 
     // In the hand, the player's fall is its fall too (it travels with them)
-    private void OnPlayerRespawned() { if (IsHeld) OnFell(true); }
-    private void OnPlayerBraking() { if (IsHeld) OnFallLanding(false); }
-    private void OnPlayerLanded() { if (IsHeld) OnFallLanding(true); }
+    private void OnPlayerVoidFall() { if (IsHeld) OnFell(true); }
+    private void OnPlayerLanded() { if (IsHeld) OnFallLanded(); }
 
     //---- What the player is doing (for the representations)
 
@@ -141,8 +168,9 @@ public class Meme : MonoBehaviour
     // The island the player stepped on last, and the one this meme is on (or was carried over last)
     protected GameObject PlayerIsland => CurrentPlayer != null ? CurrentPlayer.CurrentIsland : null;
     protected GameObject MemeIsland => lastIsland;
-    // New islands it has been carried to (not counting where it was picked up)
-    protected int IslandsDiscovered { get; private set; }
+    // Times it has been carried onto an island other than the last one (not the tutorial ones, nor the letter ones
+    // unless MemeSettings' Letter Islands Unlock is on)
+    protected int IslandChanges { get; private set; }
 
     // The player is this close and it is on their screen
     protected bool PlayerSees(float distance)
@@ -161,7 +189,6 @@ public class Meme : MonoBehaviour
     {
         IsHeld = true;
         groundedTime = 0f;
-        if (lastIsland != null) knownIslands.Add(lastIsland);   // where it is picked up is not new
         OnPickedUp();
     }
 
@@ -193,9 +220,9 @@ public class Meme : MonoBehaviour
     //---- Overridden by each representation
 
     protected virtual void OnBridgeCrossed() { }                  // carried over a new bridge
-    protected virtual void OnIslandVisited(GameObject island, bool firstTime) { } // carried to another island
-    protected virtual void OnFell(bool withPlayer) { }            // fell into the void: with the player (now falling down with them) or alone (it just landed as a meteor)
-    protected virtual void OnFallLanding(bool touchedGround) { }   // in the hand after a fall: the player starts braking (false) / touches the ground (true)
+    protected virtual void OnIslandVisited(GameObject island, bool counts) { }    // carried onto an island other than the last one (counts: not the tutorial)
+    protected virtual void OnFell(bool withPlayer) { }            // fell into the void: with the player (nothing below them: they will reappear) or alone (it just landed as a meteor)
+    protected virtual void OnFallLanded() { }                     // in the hand after that fall: the player reappeared and touched the ground
     protected virtual void OnPickedUp() { }
     protected virtual void OnDropped() { }
     protected virtual void OnPlaced(Pedestal pedestal) { }
@@ -235,9 +262,18 @@ public class Meme : MonoBehaviour
         Transform point = LevelManager.Instance.RespawnPointOf(island);
         if (point != null) respawnPoint = point;
         if (!IsHeld) return;
-        bool firstTime = knownIslands.Add(island);
-        if (firstTime) IslandsDiscovered++;
-        OnIslandVisited(island, firstTime);
+        bool counts = Unlocks(island);   // the tutorial: only a pause in the changes
+        if (counts) IslandChanges++;
+        OnIslandVisited(island, counts);
+    }
+
+    // The tutorial never unlocks a change; the letter islands (Island_A…, between bridges) only if set so
+    public static bool Unlocks(GameObject island)
+    {
+        if (island.name.Contains("Tutorial")) return false;
+        int separator = island.name.LastIndexOf('_');
+        bool letter = separator >= 0 && island.name.Length - separator - 1 == 1 && char.IsLetter(island.name[separator + 1]);
+        return !letter || Settings.letterIslandsUnlock;
     }
 
     //---- Respawn

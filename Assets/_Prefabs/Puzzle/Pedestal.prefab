@@ -124,7 +124,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!4 &4294621937603341139
 Transform:
   m_ObjectHideFlags: 0
@@ -239,7 +239,7 @@ Transform:
   m_GameObject: {fileID: 3226923575181979654}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 1.62, z: 0}
+  m_LocalPosition: {x: 0, y: 1.65, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -5151,20 +5151,21 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   KeylessPedestal: 0
   KeyID: 
-  pedestalID: 
   ControlledIslands: []
   ControlledBridges: []
-  group: {fileID: 0}
-  socket: {fileID: 3226923575181979655}
-  visualKeyed: {fileID: 2023253672444881256}
-  visualKeyless: {fileID: 2857672062698841196}
+  inOrder: 0
+  groupID: 
+  cluePainting: {fileID: 0}
   chargeClip: {fileID: 8300000, guid: 965f3244f5f8362419082390ab3e24c2, type: 3}
   correctClip: {fileID: 8300000, guid: 708aa9b78c6214e49a245c4f88139d62, type: 3}
   incorrectClip: {fileID: 8300000, guid: 15c2f96a00068b0469720d72634f0a85, type: 3}
   snapClip: {fileID: 8300000, guid: 8069a62e7b897a14393029d89482ec73, type: 3}
   breakClip: {fileID: 8300000, guid: f155031a589b30a4b948c6ee6eb17bfc, type: 3}
   toppleTime: 0.7
-  LinkedPedestals: []
+  slideAcceleration: 2.5
+  socket: {fileID: 3226923575181979655}
+  visualKeyed: {fileID: 2023253672444881256}
+  visualKeyless: {fileID: 2857672062698841196}
 --- !u!82 &6429361867974928861
 AudioSource:
   m_ObjectHideFlags: 0
