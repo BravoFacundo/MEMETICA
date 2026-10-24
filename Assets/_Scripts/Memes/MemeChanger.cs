@@ -100,6 +100,15 @@ public abstract class MemeChanger : Meme
         return true;
     }
 
+    // No meme on it (empty window)
+    public bool IsEmpty => !hasMeme;
+
+    // Its Fall change, if it hasn't shown it yet: next time you are close (the recall: it comes flying to you)
+    public void PendFall()
+    {
+        if (hasMeme && Data.HasFall && !fallSeen) SetPending(Data.fall, false);
+    }
+
     //---- Another meme
 
     // From now on it is this meme, from scratch: its base image, its Move list from 1, nothing pending.
@@ -163,6 +172,7 @@ public abstract class MemeChanger : Meme
         SetMeme(winner);
         Play(win != null ? win : Settings.changeClip);
         PlayGrab(winner.grabSound);
+        grabHeard = true;   // picking it up from the pedestal next: no sound again
         StartCoroutine(Flash(1f));
     }
 
@@ -205,6 +215,7 @@ public abstract class MemeChanger : Meme
     // Picked up: the meme's own sound (Base.mp3). Not over a change showing (its sound goes on to the end)
     protected override void OnPickedUp()
     {
+        if (grabHeard) { grabHeard = false; return; }   // just won in the raffle: its sound was already heard
         if (hasMeme && changeRoutine == null && revealRoutine == null) PlayGrab(Data.grabSound);
     }
 
@@ -498,6 +509,7 @@ public abstract class MemeChanger : Meme
     // The meme's own sound (picked up, won in the raffle): not again while it is still sounding (picked up right after
     // the raffle, or picked up and dropped quickly)
     private float grabSoundEnds;
+    private bool grabHeard;   // won in the raffle: the next pick up is silent
     void PlayGrab(AudioClip clip, [System.Runtime.CompilerServices.CallerMemberName] string why = "")
     {
         if (clip == null || Time.time < grabSoundEnds) return;

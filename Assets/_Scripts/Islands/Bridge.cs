@@ -11,11 +11,12 @@ using UnityEngine.Serialization;
 // Bridge ends: the two far ends of everything visible in it (used when an anchor is missing).
 // Anchors: one at each end, inside each island's floating part (right click > Create Anchors).
 // With a BridgeBend, the bridge bends between them so its ends stay on the islands while they float.
+//   Stone By Stone   a stone path (StonePath): its stones rise from the void one after another, from A to B
 // It also owns the settings of its falling platforms (each platform can override them).
 public class Bridge : Lift
 {
     // Numbers fixed: they are what the scene saves (1 was Swing Up, removed)
-    public enum Appearance { RiseFromBelow = 0, ExtendFromA = 2 }
+    public enum Appearance { RiseFromBelow = 0, ExtendFromA = 2, StoneByStone = 3 }
 
     [Section("Appearance")]
     [Tooltip("In its place from the start and it stays there: visible and solid, it never lowers or hides " +
@@ -98,6 +99,13 @@ public class Bridge : Lift
             return;
         }
         if (appearance == Appearance.RiseFromBelow) { SetHeight(BottomY); SetPresent(false); return; }   // waits below, invisible
+        if (appearance == Appearance.StoneByStone)   // in its place: its stones hide and rise themselves (StonePath)
+        {
+            finalPosition = transform.position;
+            finalRotation = transform.rotation;
+            MeasureEnds();
+            return;
+        }
 
         SetHeight(TopY);   // always in its final place, hidden until it appears
         finalPosition = transform.position;
@@ -125,6 +133,7 @@ public class Bridge : Lift
         IsWaiting = false;
         IsAppearing = false;
         if (appearance == Appearance.RiseFromBelow) StartMove(LowerDuration, false);
+        else if (appearance == Appearance.StoneByStone) { if (TryGetComponent(out StonePath path)) StartCoroutine(path.SinkWave()); }
         else StartCoroutine(ExtendRoutine(false));
     }
 
@@ -134,6 +143,7 @@ public class Bridge : Lift
         if (appearance == Appearance.RiseFromBelow) { base.SnapUp(); return; }
         StopAllCoroutines();
         SetUp(true);
+        if (appearance == Appearance.StoneByStone) { if (TryGetComponent(out StonePath path)) path.ShowAll(); return; }
         ResetPose();
         SetVisible(true);
         if (TryGetComponent(out BridgeBend bend)) bend.SetReveal(0f, 1f);
@@ -190,6 +200,11 @@ public class Bridge : Lift
         }
 
         if (appearance == Appearance.RiseFromBelow) { SetPresent(true); StartMove(RiseDuration, true); }
+        else if (appearance == Appearance.StoneByStone)
+        {
+            if (TryGetComponent(out StonePath path)) yield return path.RiseWave();
+            else Debug.LogWarning($"[Bridge] '{name}': Stone By Stone needs a StonePath.", this);
+        }
         else yield return ExtendRoutine(true);
         IsAppearing = false;
     }

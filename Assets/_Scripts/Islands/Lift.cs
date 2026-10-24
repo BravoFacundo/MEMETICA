@@ -77,6 +77,14 @@ public abstract class Lift : MonoBehaviour
         StartMove(RiseDuration, true);
     }
 
+    // Rises taking these seconds (from now on), whatever its timing says (MemeRandomizer's timing)
+    public void RaiseIn(float seconds)
+    {
+        riseFor = seconds;
+        Raise();
+    }
+    private float riseFor = -1f;
+
     public virtual void Lower()
     {
         if (!IsUp) return;
@@ -102,7 +110,7 @@ public abstract class Lift : MonoBehaviour
     protected float BottomY => DesignedY - DropFrom(level);
     // How far below its place it waits (the LevelManager's Drop Distance; a bridge can change it)
     protected virtual float DropFrom(LevelManager lm) => lm.dropDistance;
-    protected float RiseDuration => overrideTiming ? riseDuration : level.liftRiseDuration;
+    protected float RiseDuration => riseFor > 0f ? riseFor : overrideTiming ? riseDuration : level.liftRiseDuration;
     protected float LowerDuration => overrideTiming ? lowerDuration : level.liftLowerDuration;
     protected float Overshoot => overrideTiming ? overshoot : level.liftOvershoot;
 

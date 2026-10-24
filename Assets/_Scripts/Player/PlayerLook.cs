@@ -201,7 +201,7 @@ public class PlayerLook : MonoBehaviour
             if (c != null && !c.isTrigger) Physics.IgnoreCollision(c, playerCollider, ignore);
     }
 
-    private void PickUpObject(GameObject pickObject)
+    private void PickUpObject(GameObject pickObject, float hudSeconds = 0f)
     {
         if (!pickObject.TryGetComponent(out Rigidbody objectRb)) return;
 
@@ -212,7 +212,7 @@ public class PlayerLook : MonoBehaviour
 
         // A meme window: on the screen, exactly as its HUD version (MemeDock). The rest: pulled to the GrabPivot
         carriedInHud = MemeDock.Instance != null && MemeDock.Instance.CanCarry(pickObject);
-        if (carriedInHud) MemeDock.Instance.Carry(pickObject.GetComponent<Meme>());
+        if (carriedInHud) MemeDock.Instance.Carry(pickObject.GetComponent<Meme>(), hudSeconds);
         else
         {
             objectRb.isKinematic = false;
@@ -224,6 +224,12 @@ public class PlayerLook : MonoBehaviour
         }
 
         if (heldObject.TryGetComponent(out Meme meme)) meme.PickUp();
+    }
+
+    // Into the hand from anywhere (MemeRecall): as if picked up; a meme window flies to the HUD in Hud Seconds
+    public void Grab(GameObject meme, float hudSeconds = 0f)
+    {
+        if (heldObject == null) PickUpObject(meme, hudSeconds);
     }
 
     // Let go: from the Drop Pivot if there is one (it goes there first, from the corner), else where it is
@@ -380,6 +386,13 @@ public class PlayerLook : MonoBehaviour
     void ApplyCameraOffset() => transform.localPosition = cameraRestPosition + Vector3.up * (cameraLag - poseDip) + shakeOffset;
 
     //---- Pose
+
+    // Looking straight ahead (a respawn facing its course)
+    public void LookLevel()
+    {
+        xRotation = 0f;
+        ApplyRotation();
+    }
 
     // Bends the head: down 0 = where you look, 1 = at the ground at your feet (past 0 the other way, a bit up);
     // roll tilts it (degrees), dip lowers it (meters). All 0: back to normal

@@ -16,6 +16,8 @@ using UnityEngine;
 // A meme that falls or is thrown into the zone goes in on its own. The meme window carried in the HUD (Game) comes out
 // of its HUD place and flies to the socket (Snap Fly Time), then stops dead there.
 // With a MemeRandomizer it doesn't judge: it gives the meme window a meme (the randomizer's raffle) and that raises the way.
+// With a PedestalRetire it is used once: right and its meme taken off, it goes into the ground (inactive) until it
+// comes back (or for good).
 [RequireComponent(typeof(AudioSource), typeof(SphereCollider))]
 public class Pedestal : MonoBehaviour
 {
@@ -24,6 +26,10 @@ public class Pedestal : MonoBehaviour
     public bool KeylessPedestal = false;
     [Tooltip("The meme is right if its ID starts with this (Meme_3Aa → ID 3Aa)")]
     [ShowIf(nameof(KeylessPedestal), false)] public string KeyID;
+    [Tooltip("White: the meme it waits for (one of our MemeData: the meme window has to be showing it). Set, Key ID isn't used")]
+    [ShowIf(nameof(KeylessPedestal), false)] public MemeData keyMeme;
+    [Tooltip("White, Game: right, the meme window empties (its meme is downloaded)")]
+    [ShowIf(nameof(KeylessPedestal), false)] public bool drainMeme = false;
 
     [Section("What It Raises")]
     public string[] ControlledIslands;
@@ -77,7 +83,9 @@ public class Pedestal : MonoBehaviour
     bool groupCompleted;
     GameObject releasedMeme;   // just taken off: not snapped again until it leaves the trigger
     MemeRandomizer randomizer;
+    PedestalRetire retire;
     bool seating;              // the meme window flying from the HUD to the socket
+    RigidbodyInterpolation seatedInterpolation = RigidbodyInterpolation.Interpolate;   // what it had before (given back when let go)
 
     static PlayerLook playerLook;
     // The player's camera (found by its PlayerLook, not by the MainCamera tag: other cameras may have it)
@@ -89,6 +97,7 @@ public class Pedestal : MonoBehaviour
         trigger = GetComponent<SphereCollider>();
         particles = socket != null ? socket.GetComponent<ParticleSystem>() : null;
         randomizer = GetComponent<MemeRandomizer>();
+        retire = GetComponent<PedestalRetire>();
         ApplyVisual();
         SyncTrigger();
     }
@@ -105,6 +114,7 @@ public class Pedestal : MonoBehaviour
     void WarnIfNoClue()
     {
         if (KeylessPedestal || randomizer != null) return;
+        if (keyMeme != null) return;   // a MemeData: the meme window shows it when it carries it
         Meme key = Meme.WithKey(KeyID);
         if (key == null) Debug.LogWarning($"[Pedestal] '{name}': no meme with Key ID '{KeyID}' in the scene.", this);
         else if (key.Data != null && !key.Data.HasPainting)
@@ -120,11 +130,28 @@ public class Pedestal : MonoBehaviour
         return null;
     }
 
+    // MemeRecall's Snap In Range: carried within reach of a pedestal that waits for it (the randomizer, or a white one
+    // whose Key Meme it shows), it goes in without looking. Once per pedestal (a retiring randomizer: each round)
+    bool AutoSnap(GameObject inHand)
+    {
+        MemeRecall assist = MemeRecall.Instance;
+        if (assist == null || !assist.AutoSnaps) return false;
+        if (everRight && !(randomizer != null && retire != null)) return false;   // (a randomizer that goes down: every round it is back up)
+        float radius = trigger.radius * Mathf.Max(transform.lossyScale.x, transform.lossyScale.y, transform.lossyScale.z);
+        if (Vector3.Distance(look.transform.position, socket.position) > look.pickUpRange + radius) return false;
+        if (randomizer != null) return true;
+        return !KeylessPedestal && keyMeme != null && Fits(inHand);
+    }
+    bool everRight;   // it was right once (no more auto snapping)
+
+    // Takes memes: not broken, and not in the ground (PedestalRetire)
+    bool Usable => !broken && (retire == null || retire.IsUp);
+
     // ---------- Meme entra / sale ----------
     // Loose (falling, thrown) into the zone: in. In the hand: only by looking (Update)
     void OnTriggerEnter(Collider other)
     {
-        if (broken || HasMeme || !other.CompareTag("Meme") || other.gameObject == releasedMeme) return;
+        if (!Usable || HasMeme || !other.CompareTag("Meme") || other.gameObject == releasedMeme) return;
         if (look.heldObject == other.gameObject) return;
         Snap(other.gameObject);
     }
@@ -170,8 +197,13 @@ public class Pedestal : MonoBehaviour
     void Seat(GameObject memeObject)
     {
         memeObject.transform.position = socket.position;
-        memeObject.transform.SetParent(socket);   // moves with the pedestal (floating islands, elevators)
-        if (memeObject.TryGetComponent(out Rigidbody body)) body.isKinematic = true;
+        memeObject.transform.SetParent(socket);   // moves with the pedestal (floating islands, elevators, the turning platform)
+        if (memeObject.TryGetComponent(out Rigidbody body))
+        {
+            body.isKinematic = true;
+            if (body.interpolation != RigidbodyInterpolation.None) seatedInterpolation = body.interpolation;
+            body.interpolation = RigidbodyInterpolation.None;   // (interpolated, it lags behind a pedestal that moves)
+        }
         if (particles != null) particles.Play();
 
         MemeObject = memeObject;
@@ -192,7 +224,7 @@ public class Pedestal : MonoBehaviour
         {
             // In the hand: in when you look at the zone
             GameObject inHand = look.heldObject;
-            if (!broken && inHand != null && inHand != releasedMeme && inHand.CompareTag("Meme") && LookedAt()) Snap(inHand);
+            if (Usable && inHand != null && inHand != releasedMeme && inHand.CompareTag("Meme") && (LookedAt() || AutoSnap(inHand))) Snap(inHand);
             return;
         }
 
@@ -206,15 +238,19 @@ public class Pedestal : MonoBehaviour
     {
         releasedMeme = MemeObject;   // not snapped again until it leaves the zone
         if (evaluating != null) StopCoroutine(evaluating);
-        bool lowerBridges = randomizer == null && (KeylessPedestal || Meme.IDOf(MemeObject).StartsWith(KeyID));   // the randomizer's way stays
+        bool lowerBridges = randomizer == null && (KeylessPedestal || Fits(MemeObject));   // the randomizer's way stays
+        bool done = IsCorrect;
 
+        if (MemeDock.Instance == null || !MemeDock.Instance.OnScreen(CurrentMeme))   // (carried to the HUD: MemeDock takes care of it)
+            if (MemeObject.TryGetComponent(out Rigidbody body)) body.interpolation = seatedInterpolation;
         if (CurrentMeme != null) CurrentMeme.RemoveFromPedestal(this);
         MemeObject = null;
         CurrentMeme = null;
         IsCorrect = false;
-        if (!rejecting && !broken) Play(incorrectClip);   // si lo expulsamos nosotros, el "incorrecto" ya sonó
+        if (!rejecting && !broken && !(done && retire != null)) Play(incorrectClip);   // si lo expulsamos nosotros, el "incorrecto" ya sonó
         rejecting = false;
 
+        if (done && retire != null) { retire.Retire(); return; }   // used: into the ground, its way stays up
         if (lowerBridges && !broken) LowerBridges();
     }
 
@@ -252,8 +288,15 @@ public class Pedestal : MonoBehaviour
         if (CurrentMeme != null) CurrentMeme.Sweep(Length(chargeClip));
         yield return new WaitForSeconds(Length(chargeClip));
 
-        if (Meme.IDOf(MemeObject).StartsWith(KeyID)) SetCorrect();
+        if (Fits(MemeObject)) SetCorrect();
         else { SetIncorrect(); Reject(); }
+    }
+
+    // The one it waits for: showing its Key Meme (if set), else its ID starts with Key ID
+    bool Fits(GameObject memeObject)
+    {
+        if (keyMeme != null) return memeObject.TryGetComponent(out Meme meme) && meme.Data == keyMeme;
+        return Meme.IDOf(memeObject).StartsWith(KeyID);
     }
 
     // ---------- Grupo ----------
@@ -274,7 +317,10 @@ public class Pedestal : MonoBehaviour
     void SetCorrect()
     {
         IsCorrect = true;
+        everRight = true;
         Play(correctClip);
+        if (drainMeme && !KeylessPedestal && CurrentMeme is MemeChanger window) window.SetMeme(null);   // downloaded
+        if (retire != null && retire.when == PedestalRetire.When.Result && randomizer == null) retire.Retire();
         if (inOrder) LevelManager.Instance.RaiseInOrder(ControlledIslands, ControlledBridges);
         else
         {
@@ -294,6 +340,22 @@ public class Pedestal : MonoBehaviour
     void LowerBridges()
     {
         foreach (string id in ControlledBridges) LevelManager.Instance.BajarPuente(id);
+    }
+
+    // Lets its meme go with a little hop, no "wrong" sound (a pedestal going into the ground: PedestalRetire)
+    public void DropMeme()
+    {
+        if (MemeObject == null || seating) return;
+        GameObject meme = MemeObject;
+        rejecting = true;   // (no "incorrect")
+        meme.transform.SetParent(null, true);
+        Release();
+        if (meme.TryGetComponent(out Rigidbody rb))
+        {
+            rb.constraints = RigidbodyConstraints.None;
+            rb.isKinematic = false;
+            rb.AddForce(transform.forward * 60f + transform.up * 220f);
+        }
     }
 
     void Reject()

@@ -8,6 +8,7 @@ using UnityEngine.SceneManagement;
 //   F4 / F6  previous / next start   |   F5  restart the scene at the selected start
 //   F7  fast elevators: every ride goes Fast Elevator Speed times faster
 //   F8  the meme in your hand changes as if you had carried it onto another island (the next Move)
+//   F9 / F10  win / lose now (GameManager)   |   F11  the countdown starts (if it hadn't) with 10 seconds left
 // All Islands Up: every island is already up when the game starts (to walk the whole level)
 // Log Meme Sounds: every sound a meme plays goes to the Console ([Meme sound] who: clip (why) frame), to find repeated ones
 // Starts: the player appears at Spawn Point with islands and bridges already up, elevators already docked
@@ -116,6 +117,12 @@ public class DebugTools : MonoBehaviour
         if (Input.GetKeyDown(KeyCode.F5)) RestartAtSelectedStart();
         if (Input.GetKeyDown(KeyCode.F7)) { fastElevators = !fastElevators; showHelp = true; }
         if (Input.GetKeyDown(KeyCode.F8)) ForceMemeChange();
+        if (GameManager.Instance != null)
+        {
+            if (Input.GetKeyDown(KeyCode.F9)) GameManager.Instance.Win();
+            if (Input.GetKeyDown(KeyCode.F10)) GameManager.Instance.Lose();
+            if (Input.GetKeyDown(KeyCode.F11)) GameManager.Instance.SkipTo(10f);
+        }
         ElevatorSpeed = fastElevators ? fastElevatorSpeed : 1f;
 
         if (noclip && !PauseMenu.GameIsPaused) Fly();
@@ -262,8 +269,10 @@ public class DebugTools : MonoBehaviour
             "F4 / F6  start: " + startName + "\n" +
             "F5  restart at that start\n" +
             "F7  fast elevators " + (fastElevators ? "ON (x" + fastElevatorSpeed + ")" : "off") + "\n" +
-            "F8  the meme in your hand changes (next Move)";
-        GUI.Box(new Rect(10, 10, 420, 146), "");
-        GUI.Label(new Rect(20, 15, 400, 136), text);
+            "F8  the meme in your hand changes (next Move)\n" +
+            "F9 / F10  win / lose now   F11  10 s left" +
+            (GameManager.Instance != null ? "  (" + GameManager.Instance.Current + ", " + GameManager.Format(GameManager.Instance.TimeLeft) + ")" : "  (no GameManager)");
+        GUI.Box(new Rect(10, 10, 420, 166), "");
+        GUI.Label(new Rect(20, 15, 400, 156), text);
     }
 }

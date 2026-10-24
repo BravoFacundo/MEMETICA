@@ -35,7 +35,7 @@ public class MemeDock : MonoBehaviour
     private Coroutine flying, swappingBack;
     private Meme onScreen;       // the one riding with the camera now
     private Vector3 worldScale;  // its size in the world
-    private RigidbodyInterpolation interpolation;
+    private RigidbodyInterpolation interpolation = RigidbodyInterpolation.Interpolate;
     private Renderer[] renderers;
 
     private HudWindow Hud => HudWindow.Instance;
@@ -58,13 +58,13 @@ public class MemeDock : MonoBehaviour
     // Whether it goes to the HUD (a meme window, with its HUD version on the canvas)
     public bool CanCarry(GameObject meme) => Hud != null && meme.TryGetComponent(out MemeWindow _);
 
-    // Picked up: toward its HUD place
-    public void Carry(Meme meme)
+    // Picked up: toward its HUD place, in Seconds (0: Fly Time; MemeRecall: longer from far away)
+    public void Carry(Meme meme, float seconds = 0f)
     {
         Carried = meme;
         EnterScreen(meme);
         if (flying != null) StopCoroutine(flying);
-        flying = StartCoroutine(FlyToHud(meme));
+        flying = StartCoroutine(FlyToHud(meme, seconds > 0f ? seconds : flyTime));
     }
 
     // Leaving the hand (let go, placed): the 3D one starts where the HUD one is, hidden for the first Swap Back At of
@@ -113,7 +113,7 @@ public class MemeDock : MonoBehaviour
     }
 
     // Toward its HUD place; near the end the 3D one hides and the HUD one shows
-    IEnumerator FlyToHud(Meme meme)
+    IEnumerator FlyToHud(Meme meme, float flyTime)
     {
         Transform t = meme.transform;
         Vector3 fromPosition = t.localPosition;
@@ -183,7 +183,7 @@ public class MemeDock : MonoBehaviour
     {
         if (meme.TryGetComponent(out Rigidbody body))
         {
-            if (!on) { interpolation = body.interpolation; body.interpolation = RigidbodyInterpolation.None; }
+            if (!on) { if (body.interpolation != RigidbodyInterpolation.None) interpolation = body.interpolation; body.interpolation = RigidbodyInterpolation.None; }   // (off on a pedestal: keeps the one it had)
             else body.interpolation = interpolation;
             body.isKinematic = !on;
         }

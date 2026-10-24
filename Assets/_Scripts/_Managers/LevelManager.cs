@@ -95,21 +95,27 @@ public class LevelManager : MonoBehaviour
 
     IEnumerator InOrder(string[] islandIds, string[] bridgeIds)
     {
-        foreach (string id in islandIds)
+        foreach (string id in islandIds) yield return RaiseAndWait(id, true);
+        foreach (string id in bridgeIds) yield return RaiseAndWait(id, false);
+    }
+
+    // Raises one island (or elevator) or bridge and waits until it arrived, plus the Sequence Gap (MemeRandomizer's way too)
+    public IEnumerator RaiseAndWait(string id, bool island)
+    {
+        if (island)
         {
             SubirIsla(id);
             yield return null;
             if (elevators.TryGetValue(NormalizeName(elevatorPrefix + id), out Elevator elevator)) while (elevator.IsRiding) yield return null;
             else if (TryGet(islands, islandPrefix + id, out Island isla)) while (isla.IsMoving) yield return null;
-            yield return new WaitForSeconds(sequenceGap);
         }
-        foreach (string id in bridgeIds)
+        else
         {
             SubirPuente(id);
             yield return null;
             if (TryGet(bridges, bridgePrefix + id, out Bridge puente)) while (puente.IsAppearing || puente.IsMoving) yield return null;
-            yield return new WaitForSeconds(sequenceGap);
         }
+        yield return new WaitForSeconds(sequenceGap);
     }
 
     public void BajarPuente(string id)
@@ -129,6 +135,34 @@ public class LevelManager : MonoBehaviour
     }
 
     // ---------- Consultas ----------
+
+    // The island (or elevator) with that ID, or null (the hub's platform aims at it)
+    public Transform FindIsland(string id)
+    {
+        if (elevators.TryGetValue(NormalizeName(elevatorPrefix + id), out Elevator elevator)) return elevator.transform;
+        return TryGet(islands, islandPrefix + id, out Island isla) ? isla.transform : null;
+    }
+
+    // A name in a list (MemeRandomizer's Sequence): Island_09 / Elevator_X / Bridge_T1, or just its ID (09, T1) if only
+    // an island or only a bridge has it. Gives the ID and which one it is; false (and a warning) if nothing has it
+    public bool Resolve(string entry, out string id, out bool island)
+    {
+        id = entry != null ? entry.Trim() : "";
+        island = true;
+        if (id.Length == 0) return false;
+        if (id.StartsWith(islandPrefix)) { id = id.Substring(islandPrefix.Length); return true; }
+        if (id.StartsWith(elevatorPrefix)) { id = id.Substring(elevatorPrefix.Length); return true; }
+        if (id.StartsWith(bridgePrefix)) { id = id.Substring(bridgePrefix.Length); island = false; return true; }
+
+        bool isIsland = islands.ContainsKey(NormalizeName(islandPrefix + id)) || elevators.ContainsKey(NormalizeName(elevatorPrefix + id));
+        bool isBridge = bridges.ContainsKey(NormalizeName(bridgePrefix + id));
+        if (isIsland && isBridge) Debug.LogWarning($"[LevelManager] '{entry}' is both {islandPrefix}{id} and {bridgePrefix}{id}: using the island (write the full name).", this);
+        if (!isIsland && !isBridge) { Debug.LogWarning($"[LevelManager] No existe '{entry}' en la escena (ni {islandPrefix}{id} ni {bridgePrefix}{id}).", this); return false; }
+        island = isIsland;
+        return true;
+    }
+
+    public Transform FindBridge(string id) => TryGet(bridges, bridgePrefix + id, out Bridge puente) ? puente.transform : null;
 
     // Bridges wait for this before appearing, so they connect to islands that are already there
     public bool AnyIslandMoving
@@ -157,13 +191,30 @@ public class LevelManager : MonoBehaviour
         Gizmos.color = new Color(1f, 0.85f, 0.3f, 0.8f);
         foreach (Transform t in FindObjectsOfType<Transform>())
         {
-            if (t.name != respawnPointName) continue;
+            if (t.name != respawnPointName || t.TryGetComponent(out RespawnPoint _)) continue;   // (those draw their own)
             Vector3 from = RespawnPosition(t, out float groundY);
             Gizmos.DrawLine(from, new Vector3(from.x, groundY, from.z));
             Gizmos.DrawWireSphere(from, 0.6f);
         }
     }
 #endif
+
+    // The island's respawn point nearest to a place (an island can have several: one before each part of a course), or null
+    public Transform RespawnPointOf(GameObject island, Vector3 near)
+    {
+        if (island == null) return null;
+        Island root = island.GetComponentInParent<Island>();
+        Transform container = root != null ? root.transform : island.transform;
+        Transform best = null;
+        float nearest = float.MaxValue;
+        foreach (Transform child in container.GetComponentsInChildren<Transform>(true))
+        {
+            if (child.name != respawnPointName && !child.TryGetComponent(out RespawnPoint _)) continue;
+            float d = (child.position - near).sqrMagnitude;
+            if (d < nearest) { nearest = d; best = child; }
+        }
+        return best;
+    }
 
     public Transform RespawnPointOf(GameObject island)
     {
