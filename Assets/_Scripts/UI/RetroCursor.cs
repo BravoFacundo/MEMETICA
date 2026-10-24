@@ -1,26 +1,26 @@
-// Cursor por software: una Image que reemplaza al cursor de Windows.
-// - Menú (Follow Mouse ✔): sigue al mouse y oculta el cursor real.
-// - Juego (Follow Mouse ✘): queda fija en el centro como mira; el ícono lo decide la sección Aim (before: Crosshair).
-// Aim: con Player Look asignado (escena Game) es mira fija; sin él (Menu) el cursor sigue al mouse.
-//   Zoom (right click): magnifier + while zooming in, nothing once fully zoomed (a clean view), magnifier − while zooming out
+// The game's cursor: an Image that replaces Windows' cursor. Two ways of being, decided here every frame:
+//   Crosshair  playing (Game): fixed in the middle as the aim; its icon follows what you do (Aim, below)
+//   Free       it follows the mouse: in the Menu, in the pause, and while playing with Free Key held (Ctrl). Playing,
+//              the mouse moves it instead of the camera but you keep walking and jumping (it isn't a pause), and it
+//              clicks buttons: the UI ones (WindowButton: the HUD, the meme window in the HUD) and the 3D meme window's
+//              in the world (WindowControls, within World Range). In the Menu and the pause only the UI ones
+// Aim icons: Zoom (right click): magnifier + while zooming in, nothing once fully zoomed, magnifier − while zooming out.
 //   Looking at a meme: hand | Holding a meme: nothing (the meme is seen clean) | Nothing: Dot
-//   En pausa no hace nada: ahí el cursor queda libre (lo maneja PauseMenu). Al volver, se re-aplica.
-// Default es siempre la flecha. En el juego, la mira usa Dot (el punto) y en la pausa vuelve la flecha.
-// El punto de clic de cada cursor es el PIVOT de su sprite
-// (flecha y mano que señala → donde apunta la punta, mano que agarra → Center). El cambio de cursor al pasar por un ícono lo hace DesktopIcon.
+// Each cursor's click point is its sprite's PIVOT (arrow and pointing hand → the tip, grabbing hand → Center).
 
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 
-// Point: algo clickeable (íconos) | Grab: algo que se agarra (orbes) | Busy: cargando (lo pone el UIManager)
-// NotAllowed: algo interactuable pero bloqueado (no hace nada) | ZoomIn/Zoom/ZoomOut/Dot: mira del juego
-// Hidden: no cursor at all (holding a meme, fully zoomed)
+// Point: something clickable | Grab: something you grab (memes) | Busy: loading (UIManager)
+// NotAllowed: something you can't do (a locked button) | ZoomIn/Zoom/ZoomOut/Dot: the aim | Hidden: no cursor
 public enum CursorState { Default, Grab, Busy, Point, NotAllowed, ZoomIn, Zoom, ZoomOut, Dot, Hidden }
 
 [RequireComponent(typeof(Canvas))]
 public class RetroCursor : MonoBehaviour
 {
+    public enum Mode { Crosshair, Free }
+
     [System.Serializable]
     public class CursorStyle
     {
@@ -31,68 +31,87 @@ public class RetroCursor : MonoBehaviour
     public static RetroCursor Instance { get; private set; }
 
     public Image cursorImage;
-    [Tooltip("Menú: sigue al mouse. Juego: queda fija en el centro como mira")]
-    public bool followMouse = true;
     public List<CursorStyle> styles = new List<CursorStyle>();
 
+    [Header("Free cursor while playing (Game only)")]
+    [Tooltip("Hold it to free the cursor while playing")]
+    public KeyCode freeKey = KeyCode.LeftControl;
+    [Tooltip("Meters away a window in the world can be clicked")]
+    public float worldRange = 6f;
+
     [Header("Aim (Game only)")]
-    [Tooltip("Main Camera. Empty (Menu) = free cursor that follows the mouse")]
+    [Tooltip("Main Camera. Empty (Menu) = always the free cursor")]
     public PlayerLook playerLook;
-    [Tooltip("Margen de FOV para dar por terminado el acercamiento o el alejamiento")]
+    [Tooltip("FOV margin to call the zoom in or out finished")]
     public float fovMargin = 1f;
 
+    public Mode CurrentMode { get; private set; } = Mode.Free;
+    // Free while playing (not the Menu, not the pause): the windows can be clicked
+    public bool FreeWhilePlaying => CurrentMode == Mode.Free && playerLook != null && !PauseMenu.GameIsPaused;
+
     private RectTransform rect;
-    private bool busy;   // mientras carga, nada más cambia el cursor
+    private bool busy;   // while loading, nothing else changes the cursor
     private Camera aimCamera;
-    private CursorState currentAim;
-    private bool aimStarted;
+    private CursorState current = (CursorState)(-1);
+    private bool modeStarted;
+    private bool wasPaused;
 
     void Awake()
     {
         Instance = this;
-        GetComponent<Canvas>().sortingOrder = 999;   // arriba de la UI (el marco va en 1000)
+        GetComponent<Canvas>().sortingOrder = 999;   // above the UI (the frame is at 1000)
         rect = cursorImage.rectTransform;
-        cursorImage.raycastTarget = false;           // que no bloquee clics
+        cursorImage.raycastTarget = false;           // it doesn't block clicks
         SetState(CursorState.Default);
     }
 
-    // Solo en modo menú se oculta el cursor de Windows (en el juego lo maneja el bloqueo de cámara y la pausa)
-    void OnEnable() { if (followMouse) Cursor.visible = false; }
-    void OnApplicationFocus(bool focused) { if (focused && followMouse) Cursor.visible = false; }   // Windows lo vuelve a mostrar al cambiar de ventana
-    void OnDisable() { if (followMouse) Cursor.visible = true; }
-
     void Start()
     {
-        // The scene decides the mode: player (Game) → fixed aim in the center; no player (Menu) → follows the mouse
-        bool hasPlayer = playerLook != null;
-        SetFollowMouse(!hasPlayer);
-        if (hasPlayer) aimCamera = playerLook.GetComponent<Camera>();
+        if (playerLook == null) return;
+        aimCamera = playerLook.GetComponent<Camera>();
     }
+
+    // Windows shows its own cursor again when the game window gets the focus back
+    void OnApplicationFocus(bool focused) { if (focused && CurrentMode == Mode.Free) Cursor.visible = false; }
+    void OnDisable() => Cursor.visible = true;
 
     void Update()
     {
-        if (aimCamera == null) return;
-        if (PauseMenu.GameIsPaused) { aimStarted = false; return; }   // al salir de la pausa vuelve a poner la mira
+        Mode wanted = playerLook == null || PauseMenu.GameIsPaused || Input.GetKey(freeKey) ? Mode.Free : Mode.Crosshair;
+        bool paused = PauseMenu.GameIsPaused;
+        if (!modeStarted || wanted != CurrentMode || paused != wasPaused) ApplyMode(wanted);   // the pause also locks / frees it
+        wasPaused = paused;
 
-        CursorState wanted = DecideAimState();
-        if (aimStarted && wanted == currentAim) return;   // solo cambia cuando hace falta
-        aimStarted = true;
-        currentAim = wanted;
-        SetState(wanted);
+        if (playerLook == null || PauseMenu.GameIsPaused) return;   // Menu / pause: the UI buttons set the icon
+        if (CurrentMode == Mode.Crosshair) SetState(AimState());
+        else UpdateWindows();
     }
 
     void LateUpdate()
     {
-        // En un Canvas Overlay, pantalla = posición
-        rect.position = followMouse
-            ? Input.mousePosition
-            : new Vector3(Screen.width * 0.5f, Screen.height * 0.5f, 0f);
+        // On an Overlay Canvas, screen = position
+        rect.position = CurrentMode == Mode.Free ? Input.mousePosition : new Vector3(Screen.width * 0.5f, Screen.height * 0.5f, 0f);
     }
 
-    CursorState DecideAimState()
+    void ApplyMode(Mode mode)
+    {
+        modeStarted = true;
+        CurrentMode = mode;
+        bool free = mode == Mode.Free;
+        Cursor.visible = false;   // ours, never Windows'
+        Cursor.lockState = free ? CursorLockMode.None : CursorLockMode.Locked;
+        if (playerLook != null) playerLook.CursorFree = free && !PauseMenu.GameIsPaused;
+        if (free) SetState(CursorState.Default);   // the arrow (the aim sets its own icon)
+    }
+
+    // Before: PauseMenu switched it. Now the mode is decided here; kept so old calls still work
+    public void SetFollowMouse(bool value) { }
+
+    //---- Crosshair
+
+    CursorState AimState()
     {
         float fov = aimCamera.fieldOfView;
-
         if (playerLook.IsZooming)
             return fov > playerLook.ZoomFOV + fovMargin ? CursorState.ZoomIn : CursorState.Hidden;
         if (fov < playerLook.DefaultFOV - fovMargin)
@@ -103,18 +122,42 @@ public class RetroCursor : MonoBehaviour
         return CursorState.Dot;
     }
 
-    // Cambia entre mira fija (juego) y cursor libre (menú y pausa). Lo usa PauseMenu.
-    public void SetFollowMouse(bool value)
+    //---- Free while playing: the windows' buttons
+
+    void UpdateWindows()
     {
-        followMouse = value;
-        if (value)
-        {
-            Cursor.visible = false;                   // our arrow is shown, not the Windows one
-            Cursor.lockState = CursorLockMode.None;   // free mouse (Menu and pause)
-        }
+        // Over the UI (the HUD window's buttons): the UI buttons set the icon and take the click
+        if (UnityEngine.EventSystems.EventSystem.current != null && UnityEngine.EventSystems.EventSystem.current.IsPointerOverGameObject()) return;
+        WindowControls window = WindowUnderCursor(out Vector2 uv);
+        SetState(window != null ? window.Hover(uv) : CursorState.Default);
+        if (window != null && Input.GetMouseButtonDown(0)) window.Click(uv);
     }
 
-    // Cursor de carga: lo pone el UIManager y bloquea cualquier otro cambio hasta que se saque
+    // The 3D window in the world the cursor is on, the nearest within range (the HUD's are UI buttons)
+    WindowControls WindowUnderCursor(out Vector2 uv)
+    {
+        uv = default;
+        WindowControls best = null;
+        float bestDistance = worldRange;
+        Ray ray = aimCamera.ScreenPointToRay(Input.mousePosition);
+
+        foreach (WindowControls window in WindowControls.All)
+        {
+            if (!window.Clickable) continue;
+            Transform picture = window.picture;
+            if (!new Plane(picture.forward, picture.position).Raycast(ray, out float distance) || distance > bestDistance) continue;
+
+            Vector3 local = picture.InverseTransformPoint(ray.GetPoint(distance));
+            var at = new Vector2(local.x + 0.5f, local.y + 0.5f);
+            if (at.x < 0f || at.y < 0f || at.x > 1f || at.y > 1f) continue;
+            best = window; bestDistance = distance; uv = at;
+        }
+        return best;
+    }
+
+    //---- Icons
+
+    // Loading cursor: UIManager sets it and it blocks any other change until it is taken off
     public void SetBusy(bool value)
     {
         busy = false;
@@ -124,7 +167,8 @@ public class RetroCursor : MonoBehaviour
 
     public void SetState(CursorState state)
     {
-        if (busy) return;
+        if (busy || state == current) return;
+        current = state;
         cursorImage.enabled = state != CursorState.Hidden;
         if (state == CursorState.Hidden) return;
 
@@ -132,10 +176,10 @@ public class RetroCursor : MonoBehaviour
         {
             if (s.state != state || s.sprite == null) continue;
             cursorImage.sprite = s.sprite;
-            // La Image no usa el pivot del sprite por sí sola: se lo copiamos al RectTransform
+            // The Image doesn't use the sprite's pivot on its own: copied to the RectTransform
             rect.pivot = new Vector2(s.sprite.pivot.x / s.sprite.rect.width, s.sprite.pivot.y / s.sprite.rect.height);
             return;
         }
-        Debug.LogWarning("[RetroCursor] No hay sprite asignado para el estado " + state + " en Styles.", this);
+        Debug.LogWarning("[RetroCursor] No sprite in Styles for the state " + state + ".", this);
     }
 }

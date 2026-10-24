@@ -135,7 +135,7 @@ Canvas:
   m_AdditionalShaderChannelsFlag: 0
   m_UpdateRectTransformForStandalone: 0
   m_SortingLayerID: 0
-  m_SortingOrder: 0
+  m_SortingOrder: 999
   m_TargetDisplay: 0
 --- !u!114 &4991800545653113286
 MonoBehaviour:
@@ -173,7 +173,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   cursorImage: {fileID: 6887459877957968429}
-  followMouse: 0
   styles:
   - state: 0
     sprite: {fileID: 21300000, guid: 236fee05cb6123b48968684731a7d512, type: 3}
@@ -193,6 +192,8 @@ MonoBehaviour:
     sprite: {fileID: 21300000, guid: 06d581cfe3b61f444be5c26e75962220, type: 3}
   - state: 4
     sprite: {fileID: 21300000, guid: 96288778ae6c44142969dd81ef511e33, type: 3}
+  freeKey: 306
+  worldRange: 6
   playerLook: {fileID: 0}
-  whileHolding: 1
   fovMargin: 1
+  hudCamera: {fileID: 0}

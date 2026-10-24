@@ -1,5 +1,5 @@
 // Editor tool: checks that the hierarchy still matches what the code expects.
-// Menu: Memetica > Validar jerarquía
+// Menu: Memetica > Check > Validate Hierarchy
 // Use it after moving or renaming things. It changes nothing, it only reports in the console.
 // Click each message in the console to select the object with the problem.
 
@@ -18,7 +18,7 @@ public static class HierarchyValidator
 
     static int errors, warnings;
 
-    [MenuItem("Memetica/Validar jerarquía")]
+    [MenuItem("Memetica/Check/Validate Hierarchy", false, 400)]
     public static void Validate()
     {
         errors = 0; warnings = 0;

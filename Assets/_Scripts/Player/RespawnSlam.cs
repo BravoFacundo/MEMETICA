@@ -4,13 +4,17 @@ using UnityEngine;
 // The funny respawn (Game): after falling into the void you reappear close above your island, slam down fast, and
 // land on your face. One of the Sounds plays as you hit the ground and the head goes to the floor (tilted, low,
 // wobbling), then you get up quickly (a little past, like shaking it off) and only then you can move and look again.
-// It can't be skipped, but the whole thing is about a second (Fall Time + the landing).
+// It can't be skipped, but the whole thing is about a second (Fall Time + the landing). The meme in your hand keeps
+// its Fall change until you are up (PlayerMove.RespawnLanded comes then).
+// The void fall itself is short too: Fall Depth meters below the island and you reappear.
 // Goes on the Player (with PlayerMove). Without it, or disabled (Game_Old), the respawn is the old one: from high up,
 // braking before the ground.
 [RequireComponent(typeof(PlayerMove))]
 public class RespawnSlam : MonoBehaviour
 {
     [Section("Fall")]
+    [Tooltip("Meters you fall into the void, below the last ground, before you reappear (the old respawn: LevelManager's Drop Distance)")]
+    public float fallDepth = 12f;
     [Tooltip("Meters above the island's ground you reappear")]
     public float height = 8f;
     [Tooltip("Seconds it takes to hit the ground")]
@@ -51,13 +55,14 @@ public class RespawnSlam : MonoBehaviour
 
     void Start() => look = Camera.main.GetComponent<PlayerLook>();
 
-    void OnEnable() => PlayerMove.RespawnLanded += Land;
+    void OnEnable() => PlayerMove.RespawnTouchedDown += Land;
 
     void OnDisable()
     {
-        PlayerMove.RespawnLanded -= Land;
+        PlayerMove.RespawnTouchedDown -= Land;
         if (landing != null) { StopCoroutine(landing); landing = null; }
         Release();
+        if (move != null) move.FinishRespawn();   // turned off mid-landing: back in play anyway
     }
 
     // The speed to start falling with so it hits the ground in Fall Time (PlayerMove's gravity, negative, does the rest)
@@ -103,6 +108,7 @@ public class RespawnSlam : MonoBehaviour
 
         Release();
         landing = null;
+        move.FinishRespawn();   // now the meme in your hand goes back
     }
 
     void Pose(float down, float tilt, float drop)

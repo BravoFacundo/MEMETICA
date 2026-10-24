@@ -78,11 +78,15 @@ public class MemeSettings : ScriptableObject
     [Tooltip("The letter islands (Island_A, B, C: between bridges) unlock a variant too. The tutorial never does")]
     public bool letterIslandsUnlock = true;
 
-    [Header("Changes you must see (MemeOrb: fall alone, leave)")]
-    [Tooltip("Meters: it changes in front of you when you come this close and it is on screen")]
-    public float revealDistance = 10f;
-    [Tooltip("Seconds the change takes (the new image flickering in), so it ends about when you grab it")]
-    public float revealTime = 1.5f;
+    [Header("Falls")]
+    [Tooltip("Seconds the meme in your hand takes to turn into its Fall change once you fall into the void (almost at once: the joke is the surprise)")]
+    public float fallSwapTime = 0.05f;
+
+    [Header("Changes you must see (fall alone (meteor), leave)")]
+    [Tooltip("Meters: it changes in front of you when you come this close and it is on screen (close: it happens right in your face)")]
+    public float revealDistance = 1.25f;
+    [Tooltip("Seconds the change takes (the new image flickering in)")]
+    public float revealTime = 0.35f;
 
     [Header("Mutation (MemeOrb): it changes while you carry it and move")]
     [Tooltip("Warning: it is about to change")]
@@ -96,7 +100,7 @@ public class MemeSettings : ScriptableObject
     public float firstChangeAfter = 3f;
     [Tooltip("Seconds moving between changes (random between x and y)")]
     public Vector2 changeInterval = new Vector2(4f, 8f);
-    [Tooltip("How long a change (move, fall, leave) shows before going back to the base image (random between x and y)")]
+    [Tooltip("How long a change shows before going back to the base image (random between x and y). Fall and Leave with a sound: as long as their sound")]
     public Vector2 variantDuration = new Vector2(5f, 6f);
     [Tooltip("No change this close to jumps, falls, new bridges or new islands (the player would think they caused it)")]
     public float graceAfterEvent = 1f;

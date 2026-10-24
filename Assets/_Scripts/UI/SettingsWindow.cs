@@ -41,9 +41,9 @@ public static class GameSettings
 
 #if UNITY_EDITOR
     // Testing outside Play mode (F9 is handled by UIManager while playing)
-    [UnityEditor.MenuItem("Memetica/Idioma/Inglés")]
+    [UnityEditor.MenuItem("Memetica/Language/English", false, 500)]
     private static void SetEnglishFromMenu() => SetLanguage(GameLanguage.English);
-    [UnityEditor.MenuItem("Memetica/Idioma/Español")]
+    [UnityEditor.MenuItem("Memetica/Language/Spanish", false, 501)]
     private static void SetSpanishFromMenu() => SetLanguage(GameLanguage.Spanish);
 #endif
 }

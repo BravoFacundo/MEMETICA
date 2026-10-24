@@ -11,6 +11,10 @@ using UnityEngine;
 //   └── Socket           punto de encastre del meme + partículas
 // Group: pedestals with the same Group ID don't evaluate alone; the group completes when all of them
 // have a meme, and then each one raises what it controls (before: PedestalGroup).
+// Placing: a meme in your hand goes in when you look at the pedestal's zone (the sphere around the Socket, within
+// reach), not when it touches it (carried in a corner of the screen, it would get stolen from the edge of the view).
+// A meme that falls or is thrown into the zone goes in on its own. The meme window carried in the HUD (Game) comes out
+// of its HUD place and flies to the socket (Snap Fly Time), then stops dead there.
 // With a MemeRandomizer it doesn't judge: it gives the meme window a meme (the randomizer's raffle) and that raises the way.
 [RequireComponent(typeof(AudioSource), typeof(SphereCollider))]
 public class Pedestal : MonoBehaviour
@@ -38,6 +42,9 @@ public class Pedestal : MonoBehaviour
     public AudioClip correctClip;
     public AudioClip incorrectClip;
     public AudioClip snapClip;
+
+    [Tooltip("Game: seconds the meme window takes to fly from its HUD place to the socket")]
+    public float snapFlyTime = 0.2f;
 
     [Section("Break (elevator pedestal)", Closed = true)]
     [Tooltip("Thud when it hits the ground on its side")]
@@ -70,8 +77,11 @@ public class Pedestal : MonoBehaviour
     bool groupCompleted;
     GameObject releasedMeme;   // just taken off: not snapped again until it leaves the trigger
     MemeRandomizer randomizer;
+    bool seating;              // the meme window flying from the HUD to the socket
 
-    static PlayerLook look;
+    static PlayerLook playerLook;
+    // The player's camera (found by its PlayerLook, not by the MainCamera tag: other cameras may have it)
+    static PlayerLook look => playerLook != null ? playerLook : (playerLook = FindObjectOfType<PlayerLook>());
 
     void Awake()
     {
@@ -88,7 +98,6 @@ public class Pedestal : MonoBehaviour
 
     void Start()
     {
-        if (look == null) look = Camera.main.GetComponent<PlayerLook>();
         WarnIfNoClue();
     }
 
@@ -112,12 +121,54 @@ public class Pedestal : MonoBehaviour
     }
 
     // ---------- Meme entra / sale ----------
+    // Loose (falling, thrown) into the zone: in. In the hand: only by looking (Update)
     void OnTriggerEnter(Collider other)
     {
         if (broken || HasMeme || !other.CompareTag("Meme") || other.gameObject == releasedMeme) return;
+        if (look.heldObject == other.gameObject) return;
+        Snap(other.gameObject);
+    }
 
-        GameObject memeObject = other.gameObject;
-        look.SnapObject(memeObject);
+    // The camera looks at the zone (the sphere around the Socket), within reach
+    bool LookedAt()
+    {
+        Transform cam = look.transform;
+        float radius = trigger.radius * Mathf.Max(transform.lossyScale.x, transform.lossyScale.y, transform.lossyScale.z);
+        Vector3 toSocket = socket.position - cam.position;
+        float along = Vector3.Dot(toSocket, cam.forward);
+        if (along < 0f || along > look.pickUpRange + radius) return false;
+        return (toSocket - cam.forward * along).sqrMagnitude <= radius * radius;
+    }
+
+    void Snap(GameObject memeObject)
+    {
+        bool fromHud = MemeDock.Instance != null && memeObject.TryGetComponent(out Meme inHud) && MemeDock.Instance.OnScreen(inHud);
+        Vector3 size = look.SnapObject(memeObject, fromHud ? snapFlyTime : 0f);
+        MemeObject = memeObject;   // taken: nothing else snaps in meanwhile
+        if (fromHud) { seating = true; evaluating = StartCoroutine(FlyIn(memeObject, size)); return; }
+        Seat(memeObject);
+    }
+
+    // From the HUD place to the socket, growing back to its size in the world; it stops dead there
+    IEnumerator FlyIn(GameObject memeObject, Vector3 size)
+    {
+        if (memeObject.TryGetComponent(out Rigidbody flying)) flying.isKinematic = true;
+        Transform t = memeObject.transform;
+        Vector3 from = t.position, fromSize = t.localScale;
+        for (float time = 0f; time < snapFlyTime; time += Time.deltaTime)
+        {
+            float p = 1f - (1f - time / snapFlyTime) * (1f - time / snapFlyTime);   // fast, then slowing down
+            t.position = Vector3.Lerp(from, socket.position, p);
+            t.localScale = Vector3.Lerp(fromSize, size, p);
+            yield return null;
+        }
+        t.localScale = size;
+        seating = false;
+        Seat(memeObject);
+    }
+
+    void Seat(GameObject memeObject)
+    {
         memeObject.transform.position = socket.position;
         memeObject.transform.SetParent(socket);   // moves with the pedestal (floating islands, elevators)
         if (memeObject.TryGetComponent(out Rigidbody body)) body.isKinematic = true;
@@ -135,9 +186,17 @@ public class Pedestal : MonoBehaviour
     // (placing it made a fake exit, picking it up made a fake entry that snapped it back)
     void Update()
     {
-        if (releasedMeme != null && !InsideZone(releasedMeme)) releasedMeme = null;   // it really left: it can be placed again
-        if (!HasMeme) return;
+        if (look == null) return;
+        if (releasedMeme != null && !InsideZone(releasedMeme) && !LookedAt()) releasedMeme = null;   // it really left: it can be placed again
+        if (!HasMeme)
+        {
+            // In the hand: in when you look at the zone
+            GameObject inHand = look.heldObject;
+            if (!broken && inHand != null && inHand != releasedMeme && inHand.CompareTag("Meme") && LookedAt()) Snap(inHand);
+            return;
+        }
 
+        if (seating) return;   // still flying in
         bool held = CurrentMeme != null && CurrentMeme.IsHeld;
         bool movedAway = Vector3.Distance(MemeObject.transform.position, socket.position) > 0.5f;
         if (held || movedAway) Release();
@@ -330,6 +389,7 @@ public class Pedestal : MonoBehaviour
         broken = true;
 
         if (evaluating != null) StopCoroutine(evaluating);
+        seating = false;
         trigger.enabled = false;
         if (particles != null) particles.Stop();
         foreach (Collider c in GetComponentsInChildren<Collider>()) c.enabled = false;

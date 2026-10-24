@@ -287,7 +287,8 @@ public class GrassField : MonoBehaviour
     private readonly Dictionary<Texture, Texture2D> readableTextures = new();
     private int groundMisses;
 
-    [ContextMenu("Test Fill")]
+    // Paints it again over its ground (its children's meshes, plus Extra Ground Meshes). Also: Memetica > Level > Grass
+    [ContextMenu("Regenerate")]
     public void TestFill()
     {
         Undo.RecordObject(this, "Grass Test Fill");

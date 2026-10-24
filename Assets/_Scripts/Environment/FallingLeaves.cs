@@ -97,6 +97,7 @@ public class FallingLeaves : MonoBehaviour
     // Lands the ones reaching the ground (flat, still) and shrinks the ones that are going away
     private void LateUpdate()
     {
+        if (particles == null) return;   // before Start (e.g. right after a script reload)
         int count = ps.GetParticles(particles);
         if (count == 0) return;
         ps.GetCustomParticleData(landed, ParticleSystemCustomData.Custom1);

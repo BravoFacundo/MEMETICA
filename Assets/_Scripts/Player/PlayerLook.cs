@@ -34,7 +34,12 @@ public class PlayerLook : MonoBehaviour
     public float moveForce = 250;
     [Tooltip("The held meme never gets closer to the camera than this (meters), so it doesn't hit your face or cross the near clip plane")]
     public float minHoldDistance = 0.6f;
-    private Transform holdParent;
+    [Tooltip("Letting go: it first goes to the Drop Pivot (child of the camera, in front of you) and is let go there. 0 = let go where it is")]
+    public float dropTime = 0.12f;
+    private Transform holdParent;   // GrabPivot: where it is carried
+    private Transform dropParent;   // DropPivot: where it is let go
+    private Coroutine dropping;
+    private bool carriedInHud;      // a meme window: carried on the screen, as its HUD version (MemeDock)
     private Rigidbody heldBody;
     private Collider[] heldColliders;
     private Collider playerCollider;
@@ -65,6 +70,10 @@ public class PlayerLook : MonoBehaviour
 
     // On: the mouse doesn't turn the camera (an animation is using it, e.g. RespawnSlam)
     public bool LookLocked { get; set; }
+    // On: the mouse moves the cursor instead of the camera (RetroCursor free, Ctrl held); clicks don't grab
+    public bool CursorFree { get; set; }
+    // Where the held meme is pulled to (MemeDock flies it back there)
+    public Transform HoldPoint => holdParent;
 
     // Read by RetroCursor to show the zoom and hand icons
     public bool IsZooming => isZooming;
@@ -79,6 +88,8 @@ public class PlayerLook : MonoBehaviour
         cameraRestPosition = transform.localPosition;
         lastBodyHeight = playerTransform.position.y;
         holdParent = GameObject.Find("GrabPivot").transform;
+        GameObject dropPivot = GameObject.Find("DropPivot");
+        if (dropPivot != null) dropParent = dropPivot.transform;
         playerCollider = playerTransform.GetComponent<CharacterController>();
         Cursor.lockState = CursorLockMode.Locked;
 
@@ -92,7 +103,7 @@ public class PlayerLook : MonoBehaviour
     // Physics forces go in FixedUpdate: same pull at any frame rate (before: Update, stronger at high FPS)
     void FixedUpdate()
     {
-        if (heldObject == null || PauseMenu.GameIsPaused || !canHold) return;
+        if (heldObject == null || dropping != null || carriedInHud || PauseMenu.GameIsPaused || !canHold) return;
         PullHeldObject();
         KeepHeldObjectOffFace();
     }
@@ -100,7 +111,7 @@ public class PlayerLook : MonoBehaviour
     
     void Update()
     {        
-        if (playerCanLook && !LookLocked)
+        if (playerCanLook && !LookLocked && !CursorFree)
         {
             MovePlayerView();
             ZoomOnPlayerView();
@@ -146,6 +157,7 @@ public class PlayerLook : MonoBehaviour
     private void UpdateHeldMeme()
     {
         if (PauseMenu.GameIsPaused || !canHold) return;   // no grabbing while paused (clicking the pause window) or riding an elevator
+        if (CursorFree) { LookingAtMeme = false; return; }   // the click is the cursor's (RetroCursor)
 
         // Ignora triggers: si no, la zona del pedestal (que envuelve al meme) tapa el rayo
         LookingAtMeme = Physics.Raycast(transform.position, transform.forward, out RaycastHit hit, pickUpRange, ~PhysicsLayers.PropsMask, QueryTriggerInteraction.Ignore)
@@ -154,7 +166,7 @@ public class PlayerLook : MonoBehaviour
         if (Input.GetMouseButtonDown(0))
         {
             if (heldObject == null) { if (LookingAtMeme) PickUpObject(hit.transform.gameObject); }
-            else DropObject();
+            else if (dropping == null) DropObject();
         }
     }
 
@@ -193,22 +205,61 @@ public class PlayerLook : MonoBehaviour
     {
         if (!pickObject.TryGetComponent(out Rigidbody objectRb)) return;
 
-        objectRb.constraints = RigidbodyConstraints.None;
-        objectRb.isKinematic = false;
-        objectRb.useGravity = false;
-        objectRb.freezeRotation = true;
-        objectRb.drag = 10;
-
-        objectRb.transform.parent = holdParent;
         heldObject = pickObject;
         heldBody = objectRb;
         heldColliders = pickObject.GetComponentsInChildren<Collider>();
-        IgnorePlayerCollision(true);
+        objectRb.constraints = RigidbodyConstraints.None;
+
+        // A meme window: on the screen, exactly as its HUD version (MemeDock). The rest: pulled to the GrabPivot
+        carriedInHud = MemeDock.Instance != null && MemeDock.Instance.CanCarry(pickObject);
+        if (carriedInHud) MemeDock.Instance.Carry(pickObject.GetComponent<Meme>());
+        else
+        {
+            objectRb.isKinematic = false;
+            objectRb.useGravity = false;
+            objectRb.freezeRotation = true;
+            objectRb.drag = 10;
+            objectRb.transform.parent = holdParent;
+            IgnorePlayerCollision(true);
+        }
 
         if (heldObject.TryGetComponent(out Meme meme)) meme.PickUp();
     }
 
+    // Let go: from the Drop Pivot if there is one (it goes there first, from the corner), else where it is
     public void DropObject()
+    {
+        if (dropping != null) return;
+        Vector3 size = heldObject.transform.lossyScale;
+        if (carriedInHud) { size = MemeDock.Instance.Uncarry(heldObject.GetComponent<Meme>(), dropTime); carriedInHud = false; }   // from the screen to the world
+        if (dropParent == null || dropTime <= 0f) { heldObject.transform.localScale = size; LetGo(); return; }
+        dropping = StartCoroutine(DropFromPivot(size));
+    }
+
+    // To the Drop Pivot (growing back to its size in the world, if it came from the screen), then let go
+    IEnumerator DropFromPivot(Vector3 size)
+    {
+        heldBody.isKinematic = true;
+        heldObject.transform.parent = null;
+        Vector3 from = heldObject.transform.position;
+        Vector3 fromSize = heldObject.transform.localScale;
+        for (float t = 0f; t < dropTime && heldObject != null; t += Time.deltaTime)
+        {
+            float p = Mathf.SmoothStep(0f, 1f, t / dropTime);
+            heldObject.transform.position = Vector3.Lerp(from, dropParent.position, p);
+            heldObject.transform.localScale = Vector3.Lerp(fromSize, size, p);
+            yield return null;
+        }
+        if (heldObject != null) heldObject.transform.localScale = size;
+        dropping = null;
+        if (heldObject == null) yield break;   // snapped onto a pedestal meanwhile
+        heldObject.transform.position = dropParent.position;
+        heldBody.isKinematic = false;
+        heldBody.velocity = Vector3.zero;
+        LetGo();
+    }
+
+    void LetGo()
     {
         Rigidbody heldRig = heldObject.GetComponent<Rigidbody>();
         heldRig.useGravity = true;
@@ -225,8 +276,16 @@ public class PlayerLook : MonoBehaviour
 
     //To avoid bugs or cheating, when the meme gets close enough to the pedestal it relocates until it is grabbed again.
     //The pedestal tells the Meme itself (Meme.PlaceOnPedestal); here only the physics and the hand are released.
-    public void SnapObject(GameObject memeObject)
+    // Returns its size in the world. From the screen (a meme window in the HUD) it comes out where the HUD one is, as
+    // big as it showed: the pedestal flies it to its socket in Snap Time, growing back to that size
+    public Vector3 SnapObject(GameObject memeObject, float snapTime = 0f)
     {
+        Vector3 size = memeObject.transform.lossyScale;
+        if (carriedInHud && heldObject == memeObject)
+        {
+            size = MemeDock.Instance.Uncarry(memeObject.GetComponent<Meme>(), snapTime);
+            carriedInHud = false;
+        }
         Rigidbody snapRig = memeObject.GetComponent<Rigidbody>();
         snapRig.useGravity = true;
         snapRig.drag = 1;
@@ -239,6 +298,7 @@ public class PlayerLook : MonoBehaviour
             heldObject = null;
             heldBody = null;
         }
+        return size;
     }
 
     //---- Paintings

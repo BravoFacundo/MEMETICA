@@ -3,7 +3,7 @@ using UnityEngine;
 using UnityEngine.Video;
 
 // One meme: its images and sounds. An asset per meme (<Prefix>_Data in its folder), made and updated from its files
-// by Memetica > Memes: import (Reli_Base.png, Reli_Move_01.png…, Reli_Fall.png, Reli_Leave.png, sounds with the same
+// by Memetica > Memes > Import (Reli_Base.png, Reli_Move_01.png…, Reli_Fall.png, Reli_Leave.png, sounds with the same
 // names; see MemeImportTool). The orb in the scene (Meme_<ID>) holds one; the ID stays the orb's, so any meme can go
 // in any orb.
 //   Move   every time it is carried onto an island other than the last one it changes: variant 1, then 2… (the tutorial

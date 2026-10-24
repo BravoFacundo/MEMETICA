@@ -33,6 +33,8 @@ public class PlayerMove : MonoBehaviour
     public float respawnBrakeDistance = 6f;
     [Tooltip("Falling speed it brakes down to (m/s); the last bit it falls on its own")]
     public float respawnLandingSpeed = 3f;
+    [Tooltip("Meters below the last ground, with nothing under you, when the fall counts as into the void (the meme in your hand turns into its Fall change). Low: right away; too low: the end of a jump over a gap counts too")]
+    public float voidFallMargin = 1.5f;
 
     [Section("Ground")]
     [Tooltip("Meters it sticks down when walking off a slope or step, instead of flying off for a moment. 0 = off")]
@@ -57,8 +59,12 @@ public class PlayerMove : MonoBehaviour
 
     // Falling with nothing below: it will reappear (the meme in the hand turns into its Fall change on the way down)
     public static event System.Action VoidFallStarted;
-    // After that fall and the respawn, it touches the ground (the meme in the hand goes back)
+    // After that fall and the respawn, it touches the ground (RespawnSlam lands you on your face here)
+    public static event System.Action RespawnTouchedDown;
+    // Back in play after the respawn: touched the ground, or got up after the slam (the meme in the hand goes back)
     public static event System.Action RespawnLanded;
+    // From the respawn until back in play
+    public bool Respawning => awaitingLanding;
     public bool FallingIntoVoid { get; private set; }
     // On: walking and jumping keys do nothing (gravity and moving ground still do), e.g. RespawnSlam getting up
     public bool InputLocked { get; set; }
@@ -78,7 +84,7 @@ public class PlayerMove : MonoBehaviour
     private float knockbackUntil;
     private bool landingBrake;   // just respawned: brakes before touching the ground
     private bool awaitingLanding;   // just respawned: RespawnLanded not sent yet
-    private const float voidFallMargin = 3f;   // meters below the last ground before a fall with nothing below counts
+    private bool touchedDown;       // just respawned: RespawnTouchedDown already sent
     private bool wasGrounded;
 
     private Transform movingGround;
@@ -288,7 +294,12 @@ public class PlayerMove : MonoBehaviour
         {
             landingBrake = false;
             FallingIntoVoid = false;
-            if (awaitingLanding) { awaitingLanding = false; RespawnLanded?.Invoke(); }
+            if (awaitingLanding && !touchedDown)
+            {
+                touchedDown = true;
+                RespawnTouchedDown?.Invoke();
+                if (!SlamOn) FinishRespawn();   // with the slam, once you got up
+            }
         }
         else
         {
@@ -320,10 +331,27 @@ public class PlayerMove : MonoBehaviour
         if (!Physics.Raycast(transform.position, Vector3.down, out RaycastHit hit, Mathf.Infinity, Physics.DefaultRaycastLayers & ~PhysicsLayers.PropsMask)) return;
 
         // Falling platforms (the meme in the hand tracks its own bridges and islands: Meme.TrackGround)
-        if (isGrounded && hit.transform.TryGetComponent(out FallingPlatform platform)) platform.StepOn();
+        if (!isGrounded) return;
+        if (hit.transform.TryGetComponent(out FallingPlatform platform)) platform.StepOn();
+        else
+        {
+            PathStone stone = hit.collider.GetComponentInParent<PathStone>();   // stone paths (StonePath)
+            if (stone != null) stone.StepOn();
+        }
     }
 
     //---- Respawn landing
+
+    private bool SlamOn => slam != null && slam.isActiveAndEnabled;
+
+    // Back in play after a respawn (RespawnSlam calls it once you got up)
+    public void FinishRespawn()
+    {
+        if (!awaitingLanding) return;
+        awaitingLanding = false;
+        touchedDown = false;
+        RespawnLanded?.Invoke();
+    }
 
     // Only the vertical speed: it can keep moving sideways while it brakes, wherever it is now
     private void BrakeBeforeGround()
@@ -389,7 +417,8 @@ public class PlayerMove : MonoBehaviour
     // ¿Cayó al vacío? Si no, actualiza el punto de respawn según la isla que pisa
     private bool CheckFallAndRespawn()
     {
-        if (LevelManager.Instance != null && transform.position.y < lastGroundY - LevelManager.Instance.dropDistance)
+        float depth = SlamOn ? slam.fallDepth : LevelManager.Instance != null ? LevelManager.Instance.dropDistance : float.MaxValue;
+        if (LevelManager.Instance != null && transform.position.y < lastGroundY - depth)
         {
             Respawn();
             return true;
@@ -433,9 +462,10 @@ public class PlayerMove : MonoBehaviour
         movingGround = null;
         landingBrake = respawnBrakeDistance > 0f;
         awaitingLanding = true;
+        touchedDown = false;
 
         // Slam: from close and fast, no brake (RespawnSlam lands it)
-        if (slam != null && slam.isActiveAndEnabled)
+        if (SlamOn)
         {
             characterController.enabled = false;
             transform.position = new Vector3(from.x, groundY + slam.height, from.z);

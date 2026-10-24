@@ -9,6 +9,7 @@ using UnityEngine.SceneManagement;
 //   F7  fast elevators: every ride goes Fast Elevator Speed times faster
 //   F8  the meme in your hand changes as if you had carried it onto another island (the next Move)
 // All Islands Up: every island is already up when the game starts (to walk the whole level)
+// Log Meme Sounds: every sound a meme plays goes to the Console ([Meme sound] who: clip (why) frame), to find repeated ones
 // Starts: the player appears at Spawn Point with islands and bridges already up, elevators already docked
 // and memes already on their pedestals, as if that part had been played. Start At picks one when pressing Play.
 // Off in builds unless Enabled In Build is on (the exhibition build stays clean).
@@ -56,6 +57,10 @@ public class DebugTools : MonoBehaviour
     [Tooltip("Every island already up when the game starts")]
     public bool allIslandsUp = false;
 
+    [Header("Memes")]
+    [Tooltip("Every sound a meme plays goes to the Console, with why: [Meme sound] (can be switched while playing)")]
+    public bool logMemeSounds = false;
+
     [Header("Starts")]
     public DebugStart[] starts;
 
@@ -65,6 +70,8 @@ public class DebugTools : MonoBehaviour
     public static float ElevatorSpeed { get; private set; } = 1f;
     // Islands read it in their Start (after this Awake). DebugTools off in builds: always false
     public static bool AllIslandsUp { get; private set; }
+    // MemeChanger reads it (DebugTools off in builds: always false)
+    public static bool LogMemeSounds { get; private set; }
 
     private PlayerMove playerMove;
     private CharacterController characterController;
@@ -78,6 +85,7 @@ public class DebugTools : MonoBehaviour
     {
         if (!Application.isEditor && !Debug.isDebugBuild && !enabledInBuild) { enabled = false; return; }
         AllIslandsUp = allIslandsUp;
+        LogMemeSounds = logMemeSounds;
         playerMove = FindObjectOfType<PlayerMove>();
         if (playerMove != null) characterController = playerMove.GetComponent<CharacterController>();
         if (Camera.main != null) cameraTransform = Camera.main.transform;
@@ -99,6 +107,7 @@ public class DebugTools : MonoBehaviour
 
     void Update()
     {
+        LogMemeSounds = logMemeSounds;   // switchable while playing
         if (Input.GetKeyDown(KeyCode.F1)) showHelp = !showHelp;
         if (Input.GetKeyDown(KeyCode.F2)) SetNoclip(!noclip);
         if (Input.GetKeyDown(KeyCode.F3)) ToggleUI();

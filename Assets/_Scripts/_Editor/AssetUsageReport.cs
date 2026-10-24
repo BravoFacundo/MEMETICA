@@ -1,5 +1,5 @@
 // Herramienta de editor: genera un reporte de qué assets usa el juego y cuáles no.
-// Menú: Memetica > Reporte de assets en uso
+// Menú: Memetica > Check > Asset Usage Report
 // Resultado: AssetUsageReport.csv en la misma carpeta que este script.
 // No mueve ni borra nada, solo lee.
 //
@@ -19,7 +19,7 @@ using UnityEngine;
 
 public static class AssetUsageReport
 {
-    [MenuItem("Memetica/Reporte de assets en uso")]
+    [MenuItem("Memetica/Check/Asset Usage Report", false, 401)]
     public static void Generate()
     {
         // 1. Escenas del juego (Build Settings) y escenas viejas (el resto)

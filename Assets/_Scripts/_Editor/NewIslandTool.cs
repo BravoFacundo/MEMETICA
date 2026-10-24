@@ -1,4 +1,4 @@
-// Menu: Memetica > New Island. Creates an empty island with everything the code needs, ready to fill:
+// Menu: Memetica > Level > New Island. Creates an empty island with everything the code needs, ready to fill:
 //   Island_NN            Island (rises, falls) + FloatMotion (floats), tag "Isla". Place it where it ends up (up).
 //   │                    Interactive things go right here: pedestals, paintings, memes, triggers, bridge anchors
 //   ├── Pivots
@@ -20,7 +20,7 @@ public static class NewIslandTool
 {
     const float RespawnHeight = 20f;
 
-    [MenuItem("Memetica/New Island")]
+    [MenuItem("Memetica/Level/New Island", false, 300)]
     public static void Create()
     {
         LevelManager level = Object.FindObjectOfType<LevelManager>(true);

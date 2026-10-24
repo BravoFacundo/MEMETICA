@@ -41,8 +41,9 @@ MonoBehaviour:
   fogRate: 55
   fogColor: {r: 0.5, g: 0.52, b: 0.56, a: 0.9}
   fogFadeSpeed: 3
-  revealDistance: 10
-  revealTime: 1.5
+  fallSwapTime: 0.05
+  revealDistance: 1.25
+  revealTime: 0.35
   warnClip: {fileID: 8300000, guid: 1c7ed042ff75e17419921e1d0d6130e3, type: 3}
   changeClip: {fileID: 8300000, guid: db64e738f22ef4945834da5b19582892, type: 3}
   returnClip: {fileID: 8300000, guid: 995437a5722e2e147860694c5eb19ad1, type: 3}

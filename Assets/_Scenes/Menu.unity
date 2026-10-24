@@ -4975,9 +4975,7 @@ RectTransform:
   - {fileID: 2091270471}
   - {fileID: 1204880481}
   - {fileID: 1279382758}
-  - {fileID: 492246107}
-  - {fileID: 2088855015}
-  - {fileID: 976773932}
+  - {fileID: 616561483}
   m_Father: {fileID: 2085327457}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
@@ -19287,11 +19285,11 @@ RectTransform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
-  m_Father: {fileID: 198076234}
+  m_Father: {fileID: 616561483}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 1, y: 1}
   m_AnchorMax: {x: 1, y: 1}
-  m_AnchoredPosition: {x: -652.16815, y: -104.504456}
+  m_AnchoredPosition: {x: -329.16815, y: 253.49554}
   m_SizeDelta: {x: 152.4856, y: 45.7638}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &492246108
@@ -25831,6 +25829,44 @@ PrefabInstance:
     m_AddedGameObjects: []
     m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 94c51fd839663604fa1027f8f1329fe2, type: 3}
+--- !u!1 &616561482
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 616561483}
+  m_Layer: 0
+  m_Name: Tabs
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!224 &616561483
+RectTransform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 616561482}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children:
+  - {fileID: 492246107}
+  - {fileID: 2088855015}
+  - {fileID: 976773932}
+  m_Father: {fileID: 198076234}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+  m_AnchorMin: {x: 0, y: 1}
+  m_AnchorMax: {x: 0, y: 1}
+  m_AnchoredPosition: {x: 373, y: -408}
+  m_SizeDelta: {x: 100, y: 100}
+  m_Pivot: {x: 0.5, y: 0.5}
 --- !u!64 &618542284
 MeshCollider:
   m_ObjectHideFlags: 0
@@ -53932,11 +53968,11 @@ RectTransform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
-  m_Father: {fileID: 198076234}
+  m_Father: {fileID: 616561483}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 1, y: 1}
   m_AnchorMax: {x: 1, y: 1}
-  m_AnchoredPosition: {x: -346.16815, y: -104.504456}
+  m_AnchoredPosition: {x: -23.168213, y: 253.49554}
   m_SizeDelta: {x: 152.4856, y: 45.7638}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &976773933
@@ -109880,11 +109916,11 @@ RectTransform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
-  m_Father: {fileID: 198076234}
+  m_Father: {fileID: 616561483}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 1, y: 1}
   m_AnchorMax: {x: 1, y: 1}
-  m_AnchoredPosition: {x: -499.16815, y: -104.504456}
+  m_AnchoredPosition: {x: -176.16815, y: 253.49554}
   m_SizeDelta: {x: 152.4856, y: 45.7638}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &2088855016
@@ -110050,7 +110086,7 @@ MonoBehaviour:
   english: 
   spanish: 
   englishSprite: {fileID: 21300000, guid: 9e64947a3a519444181dde374940d9d8, type: 3}
-  spanishSprite: {fileID: 21300000, guid: bb4c6205aa2fc6e49a02b5a22b74e247, type: 3}
+  spanishSprite: {fileID: 21300000, guid: 9e64947a3a519444181dde374940d9d8, type: 3}
 --- !u!1001 &2091787225
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -121928,6 +121964,10 @@ PrefabInstance:
     - target: {fileID: 3479262178077489770, guid: 51519634598f43149a0e1ff447634786, type: 3}
       propertyPath: m_AnchoredPosition.x
       value: 271
+      objectReference: {fileID: 0}
+    - target: {fileID: 3479262178077489770, guid: 51519634598f43149a0e1ff447634786, type: 3}
+      propertyPath: m_AnchoredPosition.y
+      value: -240
       objectReference: {fileID: 0}
     - target: {fileID: 4073575134953481894, guid: 51519634598f43149a0e1ff447634786, type: 3}
       propertyPath: onClick.m_PersistentCalls.m_Calls.Array.data[0].m_Target

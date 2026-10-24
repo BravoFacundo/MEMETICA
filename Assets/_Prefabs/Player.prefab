@@ -65,6 +65,7 @@ Transform:
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 5010361175199749868}
+  - {fileID: 2227823890813634854}
   m_Father: {fileID: 5516410023588367253}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!20 &93914746732543162
@@ -77,7 +78,7 @@ Camera:
   m_Enabled: 1
   serializedVersion: 2
   m_ClearFlags: 2
-  m_BackGroundColor: {r: 0, g: 0.49411768, b: 0.62352943, a: 1}
+  m_BackGroundColor: {r: 0.19215687, g: 0.19215687, b: 0.19215687, a: 1}
   m_projectionMatrixMode: 1
   m_GateFitMode: 2
   m_FOVAxisMode: 0
@@ -140,7 +141,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   playerCanLook: 1
   mouseSensitivity: 3
-  isZooming: 0
   zoomingSpeed: 5
   defaultFOV: 90
   zoomFOV: 20
@@ -148,10 +148,13 @@ MonoBehaviour:
   pickUpRange: 2.5
   moveForce: 250
   minHoldDistance: 0.6
-  heldObject: {fileID: 0}
-  FueAgarrada: 0
+  dropTime: 0.12
   paintingLookRange: 10
-  clueSolved: 0
+  cameraSmoothTime: 0.08
+  cameraMaxLag: 0.25
+  shakeFrequency: 18
+  isZooming: 0
+  heldObject: {fileID: 0}
 --- !u!114 &1376298146507446115
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -279,21 +282,51 @@ MonoBehaviour:
   maxFallSpeed: 25
   coyoteTime: 0.2
   jumpBuffer: 0.2
+  respawnBrakeDistance: 6
+  respawnLandingSpeed: 3
+  voidFallMargin: 1.5
+  groundSnapDistance: 0.3
+  maxGroundFollowDownSpeed: 6
   groundCheck: {fileID: 7196435289276824733}
   groundDistance: 0.4
   onlyGroundLayer: 0
   groundMask:
     serializedVersion: 2
     m_Bits: 64
-  groundSnapDistance: 0.3
-  followMovingGround: 1
-  maxGroundFollowDownSpeed: 6
+  logBumps: 0
   isGrounded: 0
-  hit1Lock: 0
-  hit2Lock: 0
-  prevIsland: {fileID: 0}
-  prevBridge: {fileID: 0}
   ascend: 0
+--- !u!1 &7336801035387777779
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 2227823890813634854}
+  m_Layer: 0
+  m_Name: DropPivot
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &2227823890813634854
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7336801035387777779}
+  serializedVersion: 2
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalPosition: {x: 0, y: -0.15, z: 0.8000002}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 4718809981102358580}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &8871488068279905055
 GameObject:
   m_ObjectHideFlags: 0

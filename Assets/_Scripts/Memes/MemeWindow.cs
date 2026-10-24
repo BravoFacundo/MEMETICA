@@ -1,21 +1,26 @@
 using System.Collections;
 using UnityEngine;
 
-// Meme as a window of the game's retro OS (Game): a flat picture of a window (Art/Models/MemeWindow/MemeWindow_Frame.png,
-// shader Memetica/MemeWindow) with the meme in its panel. When and which change shows: MemeChanger (the same rules as
-// the orb). It can start empty (no Data): the panel as drawn, until MemeRandomizer's raffle gives it a meme.
+// Meme as a window of the game's retro OS (Game), made of your PNG layers: the frame in front (its middle
+// transparent) and behind it the Content (shader Memetica/MemeWindow: its own background, the meme on it), with a body
+// behind both (the depth). When and which change shows: MemeChanger (the same rules as the orb). It can start empty
+// (no Data): the Content's background only, until MemeRandomizer's raffle gives it a meme.
 // How it behaves:
 //   Placed      it stays exactly where it was put in the scene (a tree branch, a shelf…), still, as it was turned,
 //               until you pick it up (you may have to jump for it)
-//   Held        it faces you
+//   Held        it flies to its HUD version (HudWindow, on the HUD canvas), which shows instead while you carry it (MemeDock)
 //   Dropped     After Drop: Fall Face Up, it falls like a box and, once still, lies down with the meme facing up so
 //               you always see it; Float, it stays floating where you let it go, bobbing and facing you
 //   Pedestal    it faces you
+//   Let go      its Minimize / Close buttons or Q: it comes out of the HUD and falls. Its buttons: HudWindow (in the
+//               HUD), WindowControls (in the world)
 // Changes: the meme breaks into ever bigger squares (an old image loading), the new one comes in coarse and sharpens.
-// Hierarchy (Memetica > Memes: make MemeWindow prefab):
-//   Meme_Window (this, Rigidbody, BoxCollider, tag Meme)
+// Hierarchy (Memetica > Memes > Make MemeWindow Prefab from Selected PNGs):
+//   Meme_Window (this, WindowControls, Rigidbody, BoxCollider, tag Meme)
 //   └── Window (FaceCamera: on only while it faces you)
-//       └── Picture (a quad, its front toward the Window's forward)
+//       ├── Content (quad: the meme, Memetica/MemeWindow)
+//       ├── Frame (quad: your frame PNG, in front)
+//       └── Body (the depth)
 public class MemeWindow : MemeChanger
 {
     private static readonly int MainTexId = Shader.PropertyToID("_MainTex");
@@ -32,9 +37,11 @@ public class MemeWindow : MemeChanger
     public float floatBob = 0.05f;
     [Tooltip("Fall Face Up: seconds it takes to lie down once it stopped")]
     public float lieDownTime = 0.3f;
+    [Tooltip("In the hand: 0 = straight ahead and upright on the screen, 1 = right at the camera. A little gives it depth")]
+    [Range(0f, 1f)] public float heldTurn = 0.2f;
 
     [Section("References")]
-    [Tooltip("The window picture's renderer (material Memetica/MemeWindow)")]
+    [Tooltip("The Content's renderer, where the meme shows (material Memetica/MemeWindow)")]
     public Renderer window;
     [Tooltip("Turns the window toward the camera (on the Window child)")]
     public FaceCamera facing;
@@ -72,8 +79,11 @@ public class MemeWindow : MemeChanger
         base.OnPickedUp();
         floating = loose = false;
         if (lyingDown != null) { StopCoroutine(lyingDown); lyingDown = null; }
-        Face(true);
+        if (OnScreen) Face(false); else Face(true, true);   // on the screen (its HUD version shows): still
     }
+
+    // Still, as its parent turns it (MemeDock)
+    public void StopFacing() => Face(false);
 
     protected override void OnDropped()
     {
@@ -105,10 +115,13 @@ public class MemeWindow : MemeChanger
         Face(true);
     }
 
-    // On: the window turns to the camera. Off: the whole meme takes the window's turn (what you saw) and is a box again
-    void Face(bool on)
+    // On: the window turns to the camera (in the hand: mostly ahead, upright on the screen; elsewhere: right at it,
+    // upright in the world). Off: the whole meme takes the window's turn (what you saw) and is a box again
+    void Face(bool on, bool held = false)
     {
         if (facing == null) return;
+        facing.towardCamera = held ? heldTurn : 1f;
+        facing.cameraUp = held;
         if (!on && facing.enabled)
         {
             Quaternion seen = facing.transform.rotation;
@@ -177,14 +190,47 @@ public class MemeWindow : MemeChanger
 
     //---- Look
 
-    protected override void ShowTexture(Texture texture) => Set(b => { b.SetTexture(MainTexId, texture); b.SetFloat(FilledId, 1f); });
+    // What it shows also goes to its HUD version while it is on the screen (HudWindow)
+    private Texture shownTexture;
+    private float shownCover;
+    private bool OnScreen => MemeDock.Instance != null && MemeDock.Instance.OnScreen(this);
 
-    protected override void ShowEmpty() => Set(b => b.SetFloat(FilledId, 0f));
+    protected override void ShowTexture(Texture texture)
+    {
+        shownTexture = texture;
+        Set(b => { b.SetTexture(MainTexId, texture); b.SetFloat(FilledId, 1f); });
+        if (OnScreen && HudWindow.Instance != null) HudWindow.Instance.SetTexture(texture);
+    }
 
-    protected override void SetGlow(float amount) => Set(b => b.SetFloat(GlowId, amount * 0.5f));
+    protected override void ShowEmpty()
+    {
+        shownTexture = null;
+        Set(b => b.SetFloat(FilledId, 0f));
+        if (OnScreen && HudWindow.Instance != null) HudWindow.Instance.SetEmpty();
+    }
+
+    protected override void SetGlow(float amount)
+    {
+        Set(b => b.SetFloat(GlowId, amount * 0.5f));
+        if (OnScreen && HudWindow.Instance != null) HudWindow.Instance.SetGlow(amount);
+    }
+
+    // Its HUD version shows what it shows now (MemeDock, when it swaps)
+    public void MirrorTo(HudWindow hud)
+    {
+        if (hud == null) return;
+        if (shownTexture != null) hud.SetTexture(shownTexture); else hud.SetEmpty();
+        hud.SetCover(shownCover);
+        hud.SetGlow(0f);
+    }
 
     // Coming up the meme breaks into squares, going away the new one sharpens
-    protected override void SetCover(float amount, bool rising) => Set(b => b.SetFloat(PixelateId, amount));
+    protected override void SetCover(float amount, bool rising)
+    {
+        shownCover = amount;
+        Set(b => b.SetFloat(PixelateId, amount));
+        if (OnScreen && HudWindow.Instance != null) HudWindow.Instance.SetCover(amount);
+    }
 
     protected override void PreviewInEditor(MemeData meme)
     {

@@ -2,7 +2,7 @@ using UnityEngine;
 
 // Who collides with what, for the layers the code relies on.
 //   Props   decoration without a collider of its own before (grass patches, rocks, hills…), made solid by
-//           Memetica > Props: solid for memes. Memes (and debris) rest on it and never sink into it; the player walks
+//           Memetica > Level > Props Solid for Memes. Memes (and debris) rest on it and never sink into it; the player walks
 //           through it as before (it ignores the player's layer, Ignore Raycast), and the player's own checks (ground,
 //           grabbing, paintings) leave it out.
 // Set when the game starts, in the editor and in builds.
@@ -21,7 +21,7 @@ public static class PhysicsLayers
     private static void SetUp()
     {
         props = -2;
-        if (Props < 0) return;   // no props yet (Memetica > Props: solid for memes adds the layer)
+        if (Props < 0) return;   // no props yet (Memetica > Level > Props Solid for Memes adds the layer)
         Physics.IgnoreLayerCollision(Props, LayerMask.NameToLayer(PlayerLayerName), true);
     }
 }

@@ -1,5 +1,5 @@
 // Herramienta de editor: pone viento a los objetos seleccionados (y sus hijos).
-// Menú: Memetica > Viento > Aplicar viento a la selección
+// Menú: Memetica > Level > Wind > Apply Wind to Selection
 //   - Cada material de cada Mesh Renderer se cambia por su copia "_Wind" (shader Memetica/Wind Sway).
 //     La copia se crea una sola vez en la MISMA carpeta que el shader WindSway y se reutiliza (sirve para atlas).
 //     Así, si movés la carpeta, la herramienta la sigue sola.
@@ -8,7 +8,7 @@
 //   - Si la escena no tiene WindController, lo crea.
 // Ctrl+Z deshace los cambios en la escena.
 //
-// Menú: Memetica > Viento > Partículas siguen el viento
+// Menú: Memetica > Level > Wind > Particles Follow the Wind
 //   Agrega WindParticles a las partículas de hojas (material con "Lea"/"Leaf") y de ráfagas (objetos "WindParticles").
 
 using System.Linq;
@@ -21,7 +21,7 @@ public static class WindTool
 {
     const string ShaderName = "Memetica/Wind Sway";
 
-    [MenuItem("Memetica/Viento/Aplicar viento a la selección")]
+    [MenuItem("Memetica/Level/Wind/Apply Wind to Selection", false, 310)]
     static void ApplyToSelection()
     {
         Shader wind = Shader.Find(ShaderName);
@@ -75,7 +75,7 @@ public static class WindTool
         Debug.Log($"[Viento] Listo: {renderers} renderers con viento, {created} materiales _Wind nuevos en {folder}.");
     }
 
-    [MenuItem("Memetica/Viento/Partículas siguen el viento")]
+    [MenuItem("Memetica/Level/Wind/Particles Follow the Wind", false, 311)]
     static void AddWindParticles()
     {
         Undo.SetCurrentGroupName("Partículas siguen el viento");
@@ -100,7 +100,7 @@ public static class WindTool
         Debug.Log("[Viento] Listo: " + added + " sistemas de partículas siguen el viento.");
     }
 
-    [MenuItem("Memetica/Viento/Aplicar viento a la selección", true)]
+    [MenuItem("Memetica/Level/Wind/Apply Wind to Selection", true)]
     static bool HasSelection() => Selection.gameObjects.Length > 0;
 
     static Material GetWindCopy(Material src, Shader wind, string folder, ref int created)

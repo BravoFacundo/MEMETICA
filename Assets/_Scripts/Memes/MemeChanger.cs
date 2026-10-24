@@ -155,14 +155,14 @@ public abstract class MemeChanger : Meme
             }
             else if (k % 2 == 0) ShowEmpty();   // only one left: it blinks in and out
             else SetImage(winner.baseImage);
-            Play(final ? null : tick ?? Settings.sweepTickClip);
+            if (!final) Play(tick != null ? tick : Settings.sweepTickClip);   // (not ??: an empty Inspector field isn't a real null)
             yield return new WaitForSeconds(steps[k]);
         }
 
         raffling = false;
         SetMeme(winner);
-        Play(win ?? Settings.changeClip);
-        Play(winner.grabSound);
+        Play(win != null ? win : Settings.changeClip);
+        PlayGrab(winner.grabSound);
         StartCoroutine(Flash(1f));
     }
 
@@ -194,7 +194,7 @@ public abstract class MemeChanger : Meme
         UpdateVideoFrame();
         UpdateMutation();   // the image mutates over time while you carry it and move
         UpdatePending();    // fall and leave changes wait until you see them
-        if (fallingWithPlayer && CurrentPlayer != null && CurrentPlayer.isGrounded && !CurrentPlayer.FallingIntoVoid)
+        if (fallingWithPlayer && CurrentPlayer != null && CurrentPlayer.isGrounded && !CurrentPlayer.FallingIntoVoid && !CurrentPlayer.Respawning)
             OnFallLanded();   // it wasn't the void after all (it landed on something): back too
     }
 
@@ -202,10 +202,10 @@ public abstract class MemeChanger : Meme
 
     protected override void OnBridgeCrossed() => MarkEvent();   // a new bridge: don't mutate right there
 
-    // Picked up: the meme's own sound (Base.mp3)
+    // Picked up: the meme's own sound (Base.mp3). Not over a change showing (its sound goes on to the end)
     protected override void OnPickedUp()
     {
-        if (hasMeme) Play(Data.grabSound);
+        if (hasMeme && changeRoutine == null && revealRoutine == null) PlayGrab(Data.grabSound);
     }
 
     // Fell into the void. With you: it turns into its Fall change as soon as nothing is below you, and stays so the
@@ -223,10 +223,10 @@ public abstract class MemeChanger : Meme
         {
             SetImage(Data.fall); Play(Settings.changeClip); PlayChange(Data.fall);
             fallSeen = true;
-        }, Settings.mistIn));
+        }, Settings.fallSwapTime));
     }
 
-    // In your hand, the fall is over (you reappeared and touched the ground): back to its base image
+    // In your hand, the fall is over (you reappeared, landed and got up): back to its base image
     protected override void OnFallLanded()
     {
         if (!fallingWithPlayer) return;
@@ -404,13 +404,17 @@ public abstract class MemeChanger : Meme
 
     IEnumerator ChangeRoutine(MemeImage image, bool coverAlreadyUp = false)
     {
+        float soundLength = 0f;
         yield return CoverSwap(() =>
         {
-            SetImage(image); Play(Settings.changeClip); PlayChange(image);
+            SetImage(image); Play(Settings.changeClip); soundLength = PlayChange(image);
             if (image == Data.fall) fallSeen = true;
             if (image == Data.leave) leaveSeen = true;
         }, coverAlreadyUp ? 0f : Settings.mistIn);
-        yield return new WaitForSeconds(Random.Range(Settings.variantDuration.x, Settings.variantDuration.y));
+        // Fall and Leave last as long as their sound (picked up meanwhile, it goes on to the end); the rest, Variant Duration
+        bool untilSoundEnds = soundLength > 0f && (image == Data.fall || image == Data.leave);
+        yield return new WaitForSeconds(untilSoundEnds ? Mathf.Max(0f, soundLength - Settings.mistOut)
+                                                       : Random.Range(Settings.variantDuration.x, Settings.variantDuration.y));
         yield return CoverSwap(() => { ShowBase(); Play(Settings.returnClip); }, Settings.mistIn);
         nextChangeAt = movingTime + Random.Range(Settings.changeInterval.x, Settings.changeInterval.y);
         changeRoutine = null;
@@ -448,8 +452,8 @@ public abstract class MemeChanger : Meme
     //---- Sounds
 
     // The sound of the image it just turned into: that Move's own (Move_03.png → Move_03.mp3), or one of the Fall /
-    // Leave ones; else one of the meme's; else MemeSettings' fallback
-    void PlayChange(MemeImage image)
+    // Leave ones; else one of the meme's; else MemeSettings' fallback. Returns its length (0: none, or a loop)
+    float PlayChange(MemeImage image)
     {
         MemeSound sound = image == Data.fall ? Pick(Data.fallSounds)
                         : image == Data.leave ? Pick(Data.leaveSounds)
@@ -460,12 +464,14 @@ public abstract class MemeChanger : Meme
             AudioClip fallback = PickClip(Settings.fallbackSounds);
             if (fallback != null) sound = new MemeSound { clip = fallback };
         }
-        if (sound == null) return;
+        if (sound == null) return 0f;
         // One at a time: the previous change's sound stops (hopping islands fast doesn't pile them up)
         memeSource.Stop();
         memeSource.clip = sound.clip;
         memeSource.loop = sound.loop;   // a loop lasts until it goes back (ShowBase)
         memeSource.Play();
+        if (DebugTools.LogMemeSounds) Debug.Log($"[Meme sound] {name}: {sound.clip.name} (change: {(image == Data.fall ? "Fall" : image == Data.leave ? "Leave" : "Move")}{(sound.loop ? ", loop" : "")}) frame {Time.frameCount}", this);
+        return sound.loop ? 0f : sound.clip.length;
     }
 
     // Move variant v (1, 2…) has the sound at v - 1 of Move Sounds, if any
@@ -489,7 +495,22 @@ public abstract class MemeChanger : Meme
         return valid.Length > 0 ? valid[Random.Range(0, valid.Length)] : null;
     }
 
-    void Play(AudioClip clip) { if (clip != null) sfx.PlayOneShot(clip); }
+    // The meme's own sound (picked up, won in the raffle): not again while it is still sounding (picked up right after
+    // the raffle, or picked up and dropped quickly)
+    private float grabSoundEnds;
+    void PlayGrab(AudioClip clip, [System.Runtime.CompilerServices.CallerMemberName] string why = "")
+    {
+        if (clip == null || Time.time < grabSoundEnds) return;
+        grabSoundEnds = Time.time + clip.length;
+        Play(clip, why);
+    }
+
+    void Play(AudioClip clip, [System.Runtime.CompilerServices.CallerMemberName] string why = "")
+    {
+        if (clip == null) return;
+        sfx.PlayOneShot(clip);
+        if (DebugTools.LogMemeSounds) Debug.Log($"[Meme sound] {name}: {clip.name} ({why}) frame {Time.frameCount}", this);
+    }
 
     //---- Show (pedestal)
 

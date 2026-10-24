@@ -1,4 +1,4 @@
-// Memetica > Memes: import. Makes or updates the MemeData of every meme folder in Art/Memes from its files.
+// Memetica > Memes > Import. Makes or updates the MemeData of every meme folder in Art/Memes from its files.
 //
 // Every file has its meme's 4-letter prefix, then what it is, then (optional) a number and a free suffix:
 //   Reli_Base.png   Reli_Move_01.png   Reli_Move_01_Jazz.mp3   Inte_Move_06_NyanCatLoop.mp3   Mode_Fall.mp4
@@ -63,7 +63,7 @@ public static class MemeImportTool
         public string path;
     }
 
-    [MenuItem("Memetica/Memes: import")]
+    [MenuItem("Memetica/Memes/Import", false, 200)]
     public static void ImportAll()
     {
         RenameFormerFolders();
