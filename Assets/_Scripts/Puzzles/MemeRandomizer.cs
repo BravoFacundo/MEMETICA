@@ -79,7 +79,7 @@ public class MemeRandomizer : MonoBehaviour
     [ReadOnlyField, TextArea(2, 12)] public string timeline;
 
     [Section("After The Raffle")]
-    [Tooltip("The player can't walk (only look around) from the winner until its first bridge starts")]
+    [Tooltip("The player can't walk (only look around) from the raffle until its first bridge starts")]
     public bool lockPlayer = true;
 
     private readonly List<Axis> drawn = new List<Axis>();
@@ -192,11 +192,31 @@ public class MemeRandomizer : MonoBehaviour
             winner = pool[Random.Range(0, pool.Count)];
         }
 
+        // You stay on the platform from the raffle until your way starts (Lock Player)
+        Hold(true);
+        raffling = true;
         yield return window.Raffle(left.ConvertAll(a => a.meme), winner.meme, raffleTime, tickClip, winClip);
-        if (window.Data != winner.meme) yield break;   // taken off halfway
+        raffling = false;
+        if (window.Data != winner.meme) { Hold(false); yield break; }   // taken off halfway
 
         drawn.Add(winner);
         StartCoroutine(OpenWay(winner));   // its own (taking the meme off now doesn't stop it); the pedestal says "right" meanwhile
+    }
+
+    bool raffling;
+    PlayerMove held;
+
+    void Hold(bool on)
+    {
+        if (!lockPlayer) return;
+        if (held == null) held = FindObjectOfType<PlayerMove>();
+        if (held != null) held.InputLocked = on;
+    }
+
+    // The meme taken off while it raffles (the pedestal stops it): free again
+    void Update()
+    {
+        if (raffling && TryGetComponent(out Pedestal pedestal) && !pedestal.HasMeme) { raffling = false; Hold(false); }
     }
 
     // Into the ground (if it retires), the platform turns toward it (if on one), then its way rises

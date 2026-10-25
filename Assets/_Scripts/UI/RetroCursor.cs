@@ -5,7 +5,8 @@
 //              clicks buttons: the UI ones (WindowButton: the HUD, the meme window in the HUD) and the 3D meme window's
 //              in the world (WindowControls, within World Range). In the Menu and the pause only the UI ones
 // Aim icons: Zoom (right click): magnifier + while zooming in, nothing once fully zoomed, magnifier − while zooming out.
-//   Looking at a meme: hand | Holding a meme: nothing (the meme is seen clean) | Nothing: Dot
+//   Looking at a meme you can pick up: hand | Holding a meme in front (Game_Old): nothing (seen clean) | Else: Dot
+//   (Game: carrying the meme window on the HUD keeps the aim: hand only over an optional meme, DexCollectible)
 // Each cursor's click point is its sprite's PIVOT (arrow and pointing hand → the tip, grabbing hand → Center).
 
 using System.Collections.Generic;
@@ -118,8 +119,8 @@ public class RetroCursor : MonoBehaviour
         if (fov < playerLook.DefaultFOV - fovMargin)
             return CursorState.ZoomOut;
 
-        if (playerLook.heldObject != null) return CursorState.Hidden;   // dropped: looking at it, the hand comes back
-        if (playerLook.LookingAtMeme) return CursorState.Grab;
+        if (playerLook.heldObject != null && !playerLook.CarriedInHud) return CursorState.Hidden;   // Game_Old: the meme in front, seen clean
+        if (playerLook.CanGrabLooked) return CursorState.Grab;   // (carrying yours: only an optional meme)
         return CursorState.Dot;
     }
 

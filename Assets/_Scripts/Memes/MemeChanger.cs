@@ -29,6 +29,8 @@ public abstract class MemeChanger : Meme
     private MemeImage shown;                // the image showing now
     private VideoPlayer videoPlayer;        // plays the shown image's video (made on the first one)
     private bool showingVideoFrame;         // showing the video's frames (not its picture)
+    private bool videoStarted;              // picked up once (MemeData Video Start = On Pick Up: till then, still)
+    private bool VideoWaits => !videoStarted && Data != null && Data.videoStart == MemeData.VideoStart.OnPickUp;
     private bool hasMeme;                   // off: no MemeData, a plain carryable meme
     private AudioSource sfx;                // transition sounds (warning, change, return, sweep ticks, grab)
     private AudioSource memeSource;         // the meme's sound of the change showing: a new change cuts it
@@ -49,7 +51,8 @@ public abstract class MemeChanger : Meme
     private MemeImage pendingImage;
     private bool pendingNeedsAway, playerWentAway;
     private bool fallingWithPlayer;
-    private bool fallSeen, leaveSeen;   // their change happened once: they join the sweep
+    private bool fallSeen, leaveSeen;
+    private GameObject lastFallIsland;   // the island you fell from the last time its Fall change showed   // their change happened once: they join the sweep
 
     private float cover;                // 0 clear, 1 the image is hidden
     private Coroutine coverClearing;
@@ -103,10 +106,43 @@ public abstract class MemeChanger : Meme
     // No meme on it (empty window)
     public bool IsEmpty => !hasMeme;
 
-    // Its Fall change, if it hasn't shown it yet: next time you are close (the recall: it comes flying to you)
+    // Its Leave change (you forgot it and it came to you: MemeRecall), right now, if it hasn't shown it yet. False: it
+    // has none left to show
+    public bool PendLeave()
+    {
+        if (!hasMeme || !Data.HasLeave || leaveSeen) return false;
+        ShowNow(Data.leave);
+        return true;
+    }
+
+    // Its Fall change right now, if it hasn't shown it yet (the recall)
     public void PendFall()
     {
-        if (hasMeme && Data.HasFall && !fallSeen) SetPending(Data.fall, false);
+        if (hasMeme && Data.HasFall && !fallSeen) ShowNow(Data.fall);
+    }
+
+    // A change at once: no teasing, no mist in (it comes flying to you already changed), back to the base after its sound
+    void ShowNow(MemeImage image)
+    {
+        StopChanges();
+        pendingImage = null;
+        changeRoutine = StartCoroutine(InstantChange(image));
+    }
+
+    IEnumerator InstantChange(MemeImage image)
+    {
+        ClearCover();
+        SetImage(image);
+        Play(Settings.changeClip);
+        float soundLength = PlayChange(image);
+        if (image == Data.fall) fallSeen = true;
+        if (image == Data.leave) leaveSeen = true;
+        MemeDex.Report(Data, image);
+        yield return new WaitForSeconds(soundLength > 0f ? Mathf.Max(0f, soundLength - Settings.mistOut)
+                                                       : Random.Range(Settings.variantDuration.x, Settings.variantDuration.y));
+        yield return CoverSwap(() => { ShowBase(); Play(Settings.returnClip); }, Settings.mistIn);
+        nextChangeAt = movingTime + Random.Range(Settings.changeInterval.x, Settings.changeInterval.y);
+        changeRoutine = null;
     }
 
     //---- Another meme
@@ -124,6 +160,8 @@ public abstract class MemeChanger : Meme
         fallingWithPlayer = fallSeen = leaveSeen = false;
         shownUnlocked = lastVariant = 0;
         IslandChanges = 0;
+        visitedIslands.Clear();
+        videoStarted = false;
         movingTime = 0f;
         nextChangeAt = Settings.firstChangeAfter;
 
@@ -171,7 +209,7 @@ public abstract class MemeChanger : Meme
         raffling = false;
         SetMeme(winner);
         Play(win != null ? win : Settings.changeClip);
-        PlayGrab(winner.grabSound);
+        PlayGrab(winner.BaseSound);
         grabHeard = true;   // picking it up from the pedestal next: no sound again
         StartCoroutine(Flash(1f));
     }
@@ -215,8 +253,10 @@ public abstract class MemeChanger : Meme
     // Picked up: the meme's own sound (Base.mp3). Not over a change showing (its sound goes on to the end)
     protected override void OnPickedUp()
     {
+        StartVideo();
         if (grabHeard) { grabHeard = false; return; }   // just won in the raffle: its sound was already heard
-        if (hasMeme && changeRoutine == null && revealRoutine == null) PlayGrab(Data.grabSound);
+        if (pendingImage != null && (!pendingNeedsAway || playerWentAway)) return;   // a change about to show (its own sound): not both at once
+        if (hasMeme && changeRoutine == null && revealRoutine == null) PlayGrab(Data.BaseSound);
     }
 
     // Fell into the void. With you: it turns into its Fall change as soon as nothing is below you, and stays so the
@@ -228,12 +268,18 @@ public abstract class MemeChanger : Meme
         if (!Data.HasFall) return;
         if (!withPlayer) { SetPending(Data.fall, false); return; }
 
+        // Falling again from the same island: no Fall change (only the landing sound differs). From another one: yes
+        GameObject island = CurrentPlayer != null ? CurrentPlayer.CurrentIsland : null;
+        if (island != null && island == lastFallIsland) return;
+        lastFallIsland = island;
+
         StopChanges();
         fallingWithPlayer = true;
         changeRoutine = StartCoroutine(CoverSwap(() =>
         {
             SetImage(Data.fall); Play(Settings.changeClip); PlayChange(Data.fall);
             fallSeen = true;
+            MemeDex.Report(Data, Data.fall);
         }, Settings.fallSwapTime));
     }
 
@@ -313,7 +359,8 @@ public abstract class MemeChanger : Meme
     void OnLetGo()
     {
         StopMutationAndRestore();
-        if (Data.HasLeave && CurrentPedestal == null) SetPending(Data.leave, true);
+        bool optional = MemeIsland != null && IslandRole.Of(MemeIsland.transform) == IslandRole.Role.Optional;
+        if (Data.HasLeave && CurrentPedestal == null && !optional) SetPending(Data.leave, true);   // (not in an optional course)
     }
 
     void StopMutationAndRestore()
@@ -421,6 +468,7 @@ public abstract class MemeChanger : Meme
             SetImage(image); Play(Settings.changeClip); soundLength = PlayChange(image);
             if (image == Data.fall) fallSeen = true;
             if (image == Data.leave) leaveSeen = true;
+            MemeDex.Report(Data, image);   // Fall, Leave or a Move: into the MemeDex
         }, coverAlreadyUp ? 0f : Settings.mistIn);
         // Fall and Leave last as long as their sound (picked up meanwhile, it goes on to the end); the rest, Variant Duration
         bool untilSoundEnds = soundLength > 0f && (image == Data.fall || image == Data.leave);
@@ -462,14 +510,13 @@ public abstract class MemeChanger : Meme
 
     //---- Sounds
 
-    // The sound of the image it just turned into: that Move's own (Move_03.png → Move_03.mp3), or one of the Fall /
-    // Leave ones; else one of the meme's; else MemeSettings' fallback. Returns its length (0: none, or a loop)
+    // The sound of the image it just turned into: its own (next to it in the MemeData); else one of its Fallback Sounds,
+    // else its Fallback Sound; else MemeSettings' fallback. Returns its length (0: none, or a loop)
     float PlayChange(MemeImage image)
     {
-        MemeSound sound = image == Data.fall ? Pick(Data.fallSounds)
-                        : image == Data.leave ? Pick(Data.leaveSounds)
-                        : MoveSound(images.IndexOf(image));
-        sound = sound ?? Pick(Data.sounds);
+        MemeSound sound = image.sound != null ? new MemeSound { clip = image.sound, loop = image.loop }   // its own, next to it
+                        : Pick(Data.fallbackSounds)
+                        ?? (Data.fallbackSound != null ? new MemeSound { clip = Data.fallbackSound } : null);
         if (sound == null)
         {
             AudioClip fallback = PickClip(Settings.fallbackSounds);
@@ -483,13 +530,6 @@ public abstract class MemeChanger : Meme
         memeSource.Play();
         if (DebugTools.LogMemeSounds) Debug.Log($"[Meme sound] {name}: {sound.clip.name} (change: {(image == Data.fall ? "Fall" : image == Data.leave ? "Leave" : "Move")}{(sound.loop ? ", loop" : "")}) frame {Time.frameCount}", this);
         return sound.loop ? 0f : sound.clip.length;
-    }
-
-    // Move variant v (1, 2…) has the sound at v - 1 of Move Sounds, if any
-    MemeSound MoveSound(int v)
-    {
-        MemeSound[] list = Data.moveSounds;
-        return list != null && v >= 1 && v <= list.Length && list[v - 1] != null && list[v - 1].clip != null ? list[v - 1] : null;
     }
 
     static MemeSound Pick(MemeSound[] sounds)
@@ -573,6 +613,13 @@ public abstract class MemeChanger : Meme
     }
 #endif
 
+    // Picked up (or collected: DexCollectible): a video still on its first frame plays from there
+    public void StartVideo()
+    {
+        videoStarted = true;
+        if (videoPlayer != null && videoPlayer.isPaused && shown != null && shown.video != null) videoPlayer.Play();
+    }
+
     // Its picture now; its video (if any) plays and takes over from its first frame
     void SetImage(MemeImage image)
     {
@@ -595,6 +642,7 @@ public abstract class MemeChanger : Meme
         if (!videoPlayer.isPlaying || videoPlayer.frame < 1 || videoPlayer.texture == null) return;
         ShowTexture(videoPlayer.texture);
         showingVideoFrame = true;
+        if (VideoWaits) videoPlayer.Pause();   // its first frame, until picked up
     }
 
     // Plays to a texture we read (no render texture), looping and silent (the change sounds are its sound)

@@ -38,6 +38,8 @@ public class MemeDock : MonoBehaviour
     private RigidbodyInterpolation interpolation = RigidbodyInterpolation.Interpolate;
     private Renderer[] renderers;
 
+    public Camera Cam => cam;
+
     private HudWindow Hud => HudWindow.Instance;
 
     void Awake() => Instance = this;
@@ -79,6 +81,16 @@ public class MemeDock : MonoBehaviour
         if (swappingBack != null) StopCoroutine(swappingBack);
         swappingBack = StartCoroutine(SwapBack(flightTime * swapBackAt));
         return worldScale;
+    }
+
+    // Gone from your hand for good (an optional meme, once in the MemeDex: DexCollectible). Its HUD version hides
+    public void Discard(Meme meme)
+    {
+        if (Carried != meme) return;
+        Carried = null;
+        if (flying != null) { StopCoroutine(flying); flying = null; }
+        if (onScreen == meme) { onScreen = null; meme.transform.SetParent(null, true); }
+        Hud.Show(false);
     }
 
     //---- The swap
@@ -153,10 +165,13 @@ public class MemeDock : MonoBehaviour
     // Where the 3D window looks just like its HUD version, in the camera's space: in its middle, facing the camera,
     // as far as its height fills the HUD one's height (never closer than Min Distance: then it grows).
     // Scale: local to the camera (the camera itself is at scale 1)
-    void HudPose(out Vector3 position, out Quaternion rotation, out Vector3 scale)
+    void HudPose(out Vector3 position, out Quaternion rotation, out Vector3 scale) => HudPose(Hud, onScreen, worldScale, out position, out rotation, out scale);
+
+    // The same for any HUD window and meme window (an optional meme's own place: DexCollectible)
+    public void HudPose(HudWindow hud, Meme meme, Vector3 worldScale, out Vector3 position, out Quaternion rotation, out Vector3 scale)
     {
-        Hud.ViewportRect(out Vector2 center, out float height);
-        float tall = WindowHeight();
+        hud.ViewportRect(out Vector2 center, out float height);
+        float tall = WindowHeight(meme, worldScale);
         float viewTall = 2f * Mathf.Tan(cam.fieldOfView * 0.5f * Mathf.Deg2Rad) * Mathf.Max(height, 0.001f);   // per meter away
         float distance = Mathf.Max(tall / viewTall, minDistance);
         scale = worldScale * (viewTall * distance / tall);
@@ -165,9 +180,9 @@ public class MemeDock : MonoBehaviour
     }
 
     // Meters tall of its frame (the picture its buttons are on), at its size in the world
-    float WindowHeight()
+    static float WindowHeight(Meme meme, Vector3 worldScale)
     {
-        if (onScreen != null && onScreen.TryGetComponent(out WindowControls controls) && controls.picture != null)
+        if (meme != null && meme.TryGetComponent(out WindowControls controls) && controls.picture != null)
             return controls.picture.localScale.y * worldScale.y;   // (the Window between them is at scale 1)
         return 0.7f * worldScale.y;
     }
@@ -190,5 +205,5 @@ public class MemeDock : MonoBehaviour
         foreach (Collider c in meme.GetComponentsInChildren<Collider>(true)) c.enabled = on;
     }
 
-    static float Ease(float p) => p < 0.5f ? 4f * p * p * p : 1f - Mathf.Pow(-2f * p + 2f, 3f) / 2f;
+    public static float Ease(float p) => p < 0.5f ? 4f * p * p * p : 1f - Mathf.Pow(-2f * p + 2f, 3f) / 2f;
 }

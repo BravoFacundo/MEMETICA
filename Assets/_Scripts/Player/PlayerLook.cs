@@ -80,6 +80,10 @@ public class PlayerLook : MonoBehaviour
     public float DefaultFOV => defaultFOV;
     public float ZoomFOV => zoomFOV;
     public bool LookingAtMeme { get; private set; }
+    // Clicking now would pick up what you look at: hands free, or an optional meme (DexCollectible: never in the hand)
+    public bool CanGrabLooked { get; private set; }
+    // Carrying a meme window on the screen (Game): the middle of the screen is free, the aim stays
+    public bool CarriedInHud => carriedInHud;
 
     void Start()
     {
@@ -157,15 +161,18 @@ public class PlayerLook : MonoBehaviour
     private void UpdateHeldMeme()
     {
         if (PauseMenu.GameIsPaused || !canHold) return;   // no grabbing while paused (clicking the pause window) or riding an elevator
-        if (CursorFree) { LookingAtMeme = false; return; }   // the click is the cursor's (RetroCursor)
+        if (CursorFree) { LookingAtMeme = CanGrabLooked = false; return; }   // the click is the cursor's (RetroCursor)
 
         // Ignora triggers: si no, la zona del pedestal (que envuelve al meme) tapa el rayo
         LookingAtMeme = Physics.Raycast(transform.position, transform.forward, out RaycastHit hit, pickUpRange, ~PhysicsLayers.PropsMask, QueryTriggerInteraction.Ignore)
                         && hit.transform.CompareTag("Meme");
+        DexCollectible dex = LookingAtMeme ? hit.transform.GetComponentInParent<DexCollectible>() : null;
+        CanGrabLooked = LookingAtMeme && (heldObject == null || dex != null);
 
         if (Input.GetMouseButtonDown(0))
         {
-            if (heldObject == null) { if (LookingAtMeme) PickUpObject(hit.transform.gameObject); }
+            if (dex != null) dex.Collect();   // an optional meme: to its own HUD place, your hand stays as it is
+            else if (heldObject == null) { if (LookingAtMeme) PickUpObject(hit.transform.gameObject); }
             else if (dropping == null) DropObject();
         }
     }
@@ -224,6 +231,15 @@ public class PlayerLook : MonoBehaviour
         }
 
         if (heldObject.TryGetComponent(out Meme meme)) meme.PickUp();
+    }
+
+    // Out of the hand without letting it go anywhere (it is gone: DexCollectible)
+    public void ForgetHeld(GameObject meme)
+    {
+        if (heldObject != meme) return;
+        heldObject = null;
+        heldBody = null;
+        carriedInHud = false;
     }
 
     // Into the hand from anywhere (MemeRecall): as if picked up; a meme window flies to the HUD in Hud Seconds

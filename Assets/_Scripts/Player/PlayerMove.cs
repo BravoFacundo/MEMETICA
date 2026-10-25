@@ -477,6 +477,11 @@ public class PlayerMove : MonoBehaviour
         {
             lastGroundHit = hit.transform;
             groundIsland = FindParentWithTag(hit.transform.gameObject, "Isla");
+            if (groundIsland == null && hit.transform.GetComponentInParent<Bridge>() == null)   // (an island without the Isla tag)
+            {
+                Island island = hit.transform.GetComponentInParent<Island>();
+                if (island != null) groundIsland = island.gameObject;
+            }
         }
         if (groundIsland == null) return false;              // a bridge
 
@@ -485,8 +490,25 @@ public class PlayerMove : MonoBehaviour
         lastIsland = groundIsland;
         nextRespawnCheck = Time.time + 0.25f;
         Transform point = LevelManager.Instance.RespawnPointOf(groundIsland, transform.position);
+        if (point == null && isGrounded) point = SafeSpot(groundIsland, hit.point);   // no RespawnPoint on it: where you last stood
         if (point != null) respawnPoint = point;
         return false;
+    }
+
+    // An island without a RespawnPoint: you reappear where you last stood on it (it floats with it)
+    private Transform safeSpot;
+    private GameObject warnedIsland;
+    private Transform SafeSpot(GameObject island, Vector3 ground)
+    {
+        if (safeSpot == null) safeSpot = new GameObject("PlayerSafeSpot").transform;
+        if (safeSpot.parent != island.transform) safeSpot.SetParent(island.transform, true);
+        safeSpot.position = ground;
+        if (warnedIsland != island)
+        {
+            warnedIsland = island;
+            Debug.LogWarning($"[PlayerMove] '{island.name}' has no RespawnPoint: falling, you reappear where you last stood on it (Memetica > Level > Respawn > New Respawn Point).", island);
+        }
+        return safeSpot;
     }
 
     // Fija el respawn a mano. Lo usa el ascensor: el jugador llega al Área 1 sin haberla pisado.
@@ -499,7 +521,12 @@ public class PlayerMove : MonoBehaviour
     private void Respawn()
     {
         // Its island went down meanwhile (invisible, nothing to land on): back to the start
-        if (Lift.IsHiddenAt(respawnPoint)) { respawnPoint = LevelManager.Instance.startRespawnPoint; lastIsland = null; lastGroundHit = null; }
+        if (respawnPoint == null || Lift.IsHiddenAt(respawnPoint))
+        {
+            Debug.LogWarning($"[PlayerMove] Respawn '{(respawnPoint != null ? respawnPoint.name : "none")}' " +
+                             (respawnPoint != null ? "is in an island that is down" : "not set") + ": back to the start respawn point.", respawnPoint);
+            respawnPoint = LevelManager.Instance.startRespawnPoint; lastIsland = null; lastGroundHit = null;
+        }
 
         // Drop Distance above the ground of the RespawnPoint: it falls down onto it (and brakes before landing)
         Vector3 from = LevelManager.Instance.RespawnPosition(respawnPoint, out float groundY);

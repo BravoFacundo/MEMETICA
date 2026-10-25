@@ -16,46 +16,51 @@ MonoBehaviour:
   baseImage:
     picture: {fileID: 2800000, guid: 458ffa35baa0c60418965351a1ddfbff, type: 3}
     video: {fileID: 0}
-  variants:
-  - picture: {fileID: 2800000, guid: 9b5818c5e0aca9c4ead2ad6d71bc99c1, type: 3}
-    video: {fileID: 0}
-  - picture: {fileID: 2800000, guid: f87e846c4babddc4a883f406ec59a8bd, type: 3}
-    video: {fileID: 0}
-  - picture: {fileID: 2800000, guid: 3f7738b32cf50e0488e2ce340372be8f, type: 3}
-    video: {fileID: 0}
-  - picture: {fileID: 2800000, guid: 4d18e28ed8326b64caecaa234f4f6071, type: 3}
-    video: {fileID: 0}
-  - picture: {fileID: 2800000, guid: 8c7851536c25d19498ca1f1758b37b27, type: 3}
-    video: {fileID: 0}
-  - picture: {fileID: 2800000, guid: e5d1f7a9c67c31d48a47785f97b7cb72, type: 3}
-    video: {fileID: 0}
+    sound: {fileID: 0}
+    loop: 0
   fall:
     picture: {fileID: 2800000, guid: f064843096a36e844a9bb25e838a5aa1, type: 3}
     video: {fileID: 0}
+    sound: {fileID: 0}
+    loop: 0
   leave:
     picture: {fileID: 2800000, guid: 84c8d25357352c84e94b2d7a1468d2c2, type: 3}
     video: {fileID: 0}
-  grabSound: {fileID: 8300000, guid: 2548bb7c49e56b24ba9bb0a7b874473a, type: 3}
-  moveSounds:
-  - clip: {fileID: 8300000, guid: 26919f6c8e364994c81f9fde844e9343, type: 3}
+    sound: {fileID: 8300000, guid: b5752b0bcbf1eba498c3d9bde94e6a54, type: 3}
     loop: 0
-  - clip: {fileID: 8300000, guid: 96e4d4b7e0fb4494c8157da9b66a8f59, type: 3}
+  variants:
+  - picture: {fileID: 2800000, guid: 9b5818c5e0aca9c4ead2ad6d71bc99c1, type: 3}
+    video: {fileID: 0}
+    sound: {fileID: 8300000, guid: 26919f6c8e364994c81f9fde844e9343, type: 3}
     loop: 0
-  - clip: {fileID: 8300000, guid: 60cc542bbb39f9b48ab8bca7b8bdc299, type: 3}
+  - picture: {fileID: 2800000, guid: f87e846c4babddc4a883f406ec59a8bd, type: 3}
+    video: {fileID: 0}
+    sound: {fileID: 8300000, guid: 96e4d4b7e0fb4494c8157da9b66a8f59, type: 3}
     loop: 0
-  - clip: {fileID: 8300000, guid: 75b2660ff97bc064b856ab2160acbf24, type: 3}
+  - picture: {fileID: 2800000, guid: 3f7738b32cf50e0488e2ce340372be8f, type: 3}
+    video: {fileID: 0}
+    sound: {fileID: 8300000, guid: 60cc542bbb39f9b48ab8bca7b8bdc299, type: 3}
     loop: 0
-  - clip: {fileID: 8300000, guid: 5cb7997849d2dae4a9df6d11e58a88eb, type: 3}
+  - picture: {fileID: 2800000, guid: 4d18e28ed8326b64caecaa234f4f6071, type: 3}
+    video: {fileID: 0}
+    sound: {fileID: 8300000, guid: 75b2660ff97bc064b856ab2160acbf24, type: 3}
     loop: 0
-  - clip: {fileID: 8300000, guid: 5c17fa4422c760c48835f05e9d9c0361, type: 3}
+  - picture: {fileID: 2800000, guid: 8c7851536c25d19498ca1f1758b37b27, type: 3}
+    video: {fileID: 0}
+    sound: {fileID: 8300000, guid: 5cb7997849d2dae4a9df6d11e58a88eb, type: 3}
     loop: 0
-  fallSounds: []
-  leaveSounds:
-  - clip: {fileID: 8300000, guid: b5752b0bcbf1eba498c3d9bde94e6a54, type: 3}
+  - picture: {fileID: 2800000, guid: e5d1f7a9c67c31d48a47785f97b7cb72, type: 3}
+    video: {fileID: 0}
+    sound: {fileID: 8300000, guid: 5c17fa4422c760c48835f05e9d9c0361, type: 3}
     loop: 0
-  sounds:
+  fallbackSound: {fileID: 8300000, guid: 2548bb7c49e56b24ba9bb0a7b874473a, type: 3}
+  fallbackSounds:
   - clip: {fileID: 8300000, guid: 2548bb7c49e56b24ba9bb0a7b874473a, type: 3}
     loop: 0
+  moveSounds: []
+  fallSounds: []
+  leaveSounds: []
+  sounds: []
   hints:
   - {fileID: 32900000, guid: 3047c5e0be58db8449a7a41a1b877d1b, type: 3}
   - {fileID: 32900000, guid: de1a9dabb4c12dc4eaa429100f1834a4, type: 3}

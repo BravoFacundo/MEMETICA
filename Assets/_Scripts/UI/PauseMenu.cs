@@ -4,10 +4,12 @@ using UnityEngine;
 // Also the pause "framing" effect (before: PauseViewport), both parts driven by the same animation:
 //   - the camera view shrinks a few pixels on every side (Camera.rect: costs nothing)
 //   - the monitor frame comes in from outside the screen (scaled up → normal size) and settles around it
-// On resume both go back. Owns Canvas_Frame: nothing else should toggle it.
+// On resume both go back. Owns Canvas_Frame: nothing else should toggle it (Framed asks for it without pausing).
 public class PauseMenu : MonoBehaviour
 {
     public static bool GameIsPaused = false;
+    // The frame on without pausing (OrbitView: the view behind the end screens, the menu)
+    public static bool Framed = false;
 
     [Header("Frame Effect")]
     [Tooltip("Margin on each side while paused, in frame pixels (the frame border is 10)")]
@@ -28,12 +30,16 @@ public class PauseMenu : MonoBehaviour
     [Tooltip("The frame image inside Canvas_Frame (the one that gets scaled)")]
     public RectTransform frame;
 
-    private float frameAmount = -1f;   // 0 = playing (full view, frame off screen), 1 = paused (framed). -1 forces the first apply
+    private float frameAmount = -1f;
+    private PlayerLook look;
+    // The player's (not Camera.main: the end screens' OrbitView turns that camera off)
+    private PlayerLook Look => look != null ? look : (look = targetCamera != null ? targetCamera.GetComponent<PlayerLook>() : FindObjectOfType<PlayerLook>());   // 0 = playing (full view, frame off screen), 1 = paused (framed). -1 forces the first apply
 
     void Start()
     {
         // A fresh Game scene always starts unpaused (the static flag survives scene loads)
         GameIsPaused = false;
+        Framed = false;
         Time.timeScale = 1f;
         ApplyFrame(0f);
     }
@@ -61,7 +67,7 @@ public class PauseMenu : MonoBehaviour
         if (RetroCursor.Instance != null) RetroCursor.Instance.SetFollowMouse(false);   // back to the fixed aim (RetroCursor sets the icon)
 
         Time.timeScale = 1f;
-        Camera.main.GetComponent<PlayerLook>().playerCanLook = true;
+        if (Look != null) Look.playerCanLook = true;
         Cursor.lockState = CursorLockMode.Locked;
     }
 
@@ -77,7 +83,7 @@ public class PauseMenu : MonoBehaviour
         }
 
         Time.timeScale = 0f;
-        Camera.main.GetComponent<PlayerLook>().playerCanLook = false;
+        if (Look != null) Look.playerCanLook = false;
         Cursor.lockState = CursorLockMode.None;
     }
 
@@ -98,7 +104,7 @@ public class PauseMenu : MonoBehaviour
 
     private void AnimateFrame()
     {
-        float target = GameIsPaused ? 1f : 0f;
+        float target = GameIsPaused || Framed ? 1f : 0f;
         if (Mathf.Approximately(frameAmount, target)) return;
 
         // Unscaled time: the game is frozen while paused

@@ -9,6 +9,7 @@ using UnityEngine.SceneManagement;
 //   F7  fast elevators: every ride goes Fast Elevator Speed times faster
 //   F8  the meme in your hand changes as if you had carried it onto another island (the next Move)
 //   F9 / F10  win / lose now (GameManager)   |   F11  the countdown starts (if it hadn't) with 10 seconds left
+//   F12 the MemeDex so far (in unlock order, then what is missing) to the Console
 // All Islands Up: every island is already up when the game starts (to walk the whole level)
 // Log Meme Sounds: every sound a meme plays goes to the Console ([Meme sound] who: clip (why) frame), to find repeated ones
 // Starts: the player appears at Spawn Point with islands and bridges already up, elevators already docked
@@ -123,6 +124,7 @@ public class DebugTools : MonoBehaviour
             if (Input.GetKeyDown(KeyCode.F10)) GameManager.Instance.Lose();
             if (Input.GetKeyDown(KeyCode.F11)) GameManager.Instance.SkipTo(10f);
         }
+        if (Input.GetKeyDown(KeyCode.F12) && MemeDex.Instance != null) MemeDex.Instance.LogProgress();
         ElevatorSpeed = fastElevators ? fastElevatorSpeed : 1f;
 
         if (noclip && !PauseMenu.GameIsPaused) Fly();
@@ -270,7 +272,7 @@ public class DebugTools : MonoBehaviour
             "F5  restart at that start\n" +
             "F7  fast elevators " + (fastElevators ? "ON (x" + fastElevatorSpeed + ")" : "off") + "\n" +
             "F8  the meme in your hand changes (next Move)\n" +
-            "F9 / F10  win / lose now   F11  10 s left" +
+            "F9 / F10  win / lose now   F11  10 s left   F12  MemeDex" +
             (GameManager.Instance != null ? "  (" + GameManager.Instance.Current + ", " + GameManager.Format(GameManager.Instance.TimeLeft) + ")" : "  (no GameManager)");
         GUI.Box(new Rect(10, 10, 420, 166), "");
         GUI.Label(new Rect(20, 15, 400, 156), text);

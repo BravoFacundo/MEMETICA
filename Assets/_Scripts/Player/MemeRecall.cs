@@ -11,7 +11,7 @@ using UnityEngine;
 //     Snap In Range        carrying it within reach of a pedestal that waits for it (the randomizer, or a white one
 //                          whose Key Meme it shows), it goes in even if you don't look at it (once per pedestal)
 // Close, it flies straight to its place on your HUD; farther than Fly Up To, it just appears there.
-// Optionally it brings its Fall change if it hasn't shown it yet (you never fell with it: you see it anyway).
+// Coming back it shows its Leave change (you forgot it) if it hasn't yet; optionally else its Fall change.
 // Goes on the Player, with MemeDock.
 public class MemeRecall : MonoBehaviour
 {
@@ -41,7 +41,9 @@ public class MemeRecall : MonoBehaviour
     public float speed = 40f;
     [Tooltip("Meters: farther than this it doesn't fly, it just appears in your hand")]
     public float flyUpTo = 25f;
-    [Tooltip("When it comes back with its meme, it shows its Fall change if it never did")]
+    [Tooltip("When it comes back with its meme, it shows its Leave change (you forgot it) if it never did")]
+    public bool leaveOnArrival = true;
+    [Tooltip("…else its Fall change, if it never did")]
     public bool fallOnArrival = false;
     [Tooltip("When it sets off toward you (not 3D)")]
     public AudioClip comeClip;
@@ -82,16 +84,24 @@ public class MemeRecall : MonoBehaviour
         {
             Transform from = lastPlace;
             lastPlace = place;
-            if (free && bringWhenLeaving && from != null)
+            bool optional = IslandRole.Of(place) == IslandRole.Role.Optional;   // an optional course: it waits
+            if (free && bringWhenLeaving && from != null && !optional)
                 foreach (MemeWindow window in windows)
                     if (CanCome(window) && LeftBehind(window, from, place)) { flying = StartCoroutine(Fly(window)); return; }
         }
         if (!FreeToCome(true)) { away = 0f; return; }
+        if (lastPlace != null && IslandRole.Of(lastPlace) == IslandRole.Role.Optional) { away = 0f; return; }   // an optional course: it waits
 
         // Far
         MemeWindow far = null;
         foreach (MemeWindow window in windows)
-            if (CanCome(window) && Vector3.Distance(window.transform.position, transform.position) >= distance) { far = window; break; }
+        {
+            if (!CanCome(window) || Vector3.Distance(window.transform.position, transform.position) < distance) continue;
+            Pedestal holder = window.CurrentPedestal;
+            if (holder != null && HoldsTheWay(holder) && Raised(holder, lastPlace)) continue;   // holding up the way you are on
+            far = window;
+            break;
+        }
         away = far != null ? away + Time.deltaTime : 0f;
         if (far != null && away >= delay) flying = StartCoroutine(Fly(far));
     }
@@ -112,6 +122,7 @@ public class MemeRecall : MonoBehaviour
     bool CanCome(MemeWindow window)
     {
         if (window == null || window.IsHeld || !window.gameObject.activeInHierarchy) return false;
+        if (window.TryGetComponent(out DexCollectible _)) return false;   // an optional meme: not yours
         if (window.TryGetComponent(out Rigidbody body) && !body.isKinematic && body.velocity.sqrMagnitude > 1f) return false;   // still falling
         Pedestal pedestal = window.CurrentPedestal;
         if (pedestal == null || HoldsTheWay(pedestal)) return true;   // (a black one: LeftBehind decides)
@@ -187,8 +198,9 @@ public class MemeRecall : MonoBehaviour
             t.position = cam.transform.position - cam.transform.forward * 0.6f + cam.transform.up * 0.3f;
             seconds = 0.3f;
         }
+        bool left = leaveOnArrival && window.PendLeave();   // you forgot it: its Leave change (before the grab: only its sound)
+        if (!left && fallOnArrival) window.PendFall();
         if (look.heldObject == null) look.Grab(window.gameObject, seconds);
-        if (fallOnArrival) window.PendFall();
         yield return new WaitForSeconds(seconds);
         away = 0f;
         flying = null;

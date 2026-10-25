@@ -22,7 +22,8 @@
 //     Fall, Leave  their sounds (Fall_02… for more, picked at random)
 //     any other    the meme's sounds
 //     "Loop" in the suffix (Move_06_NyanCatLoop) plays it in a loop while that change shows
-//   → <Meme>/<Prefix>_Data.asset (its Title starts as the folder name; edit it there)
+//   → <Meme>/MemeData_<Meme>.asset (older ones: <Prefix>_Data, still updated if there's no MemeData_ one).
+//     Each image gets its sound next to it (Base, Move_01…, Fall, Leave); one you set there by hand stays
 // Subfolders (Old, Materials) are not read. Sticker pictures are set up for the shader (alpha is transparency,
 // mipmaps for the border, clamped, their proportion kept, up to 2048). Any proportion works: the meme shows whole in
 // the orb and in the window; 1266 x 1024 fills the window's hole exactly. Run it again after any change: it keeps what you set by hand (title,
@@ -44,7 +45,7 @@ public static class MemeImportTool
     // Prefix → meme folder, and what that folder was called before
     static readonly Dictionary<string, string> Folders = new Dictionary<string, string>
     {
-        { "reli", "Religion" }, { "cons", "Conspiracy" }, { "inte", "Internet" }, { "mode", "Mode" },
+        { "reli", "Religion" }, { "cons", "Conspiracy" }, { "inte", "Internet" }, { "mode", "Mode" }, { "trol", "Troll" },
     };
     static readonly Dictionary<string, string> FormerFolders = new Dictionary<string, string> { { "Mode", "Fashion" } };
 
@@ -159,21 +160,36 @@ public static class MemeImportTool
         foreach (Parsed f in known.Where(f => f.kind == FileKind.Image && stickerRoles.Contains(f.role))) SetUpSticker(f.path);
         var moveNumbers = known.Where(f => f.role == "move" && f.number > 0 && (f.kind == FileKind.Image || f.kind == FileKind.Video))
                                .Select(f => f.number).Distinct().OrderBy(n => n).ToList();
+        MemeImage oldBase = data.baseImage, oldFall = data.fall, oldLeave = data.leave;
+        List<MemeImage> oldVariants = data.variants;
         data.baseImage = baseImage;
         data.variants = moveNumbers.Select(n => Image("move", n)).ToList();
         data.fall = Image("fall");
         data.leave = Image("leave");
+        // Sounds set by hand next to the images stay (a sound file found below replaces them)
+        KeepSound(data.baseImage, oldBase); KeepSound(data.fall, oldFall); KeepSound(data.leave, oldLeave);
+        for (int i = 0; i < data.variants.Count && oldVariants != null && i < oldVariants.Count; i++) KeepSound(data.variants[i], oldVariants[i]);
         var references = Numbered(known, "reference", FileKind.Image).Select(f => Load<Texture2D>(f.path)).ToList();
         if (references.Count > 0) data.references = references;
 
         // Sounds
         var sounds = known.Where(f => f.kind == FileKind.Sound).ToList();
-        data.grabSound = Load<AudioClip>(sounds.FirstOrDefault(f => f.role == "base").path);
-        data.moveSounds = moveNumbers.Select(n => Sound(sounds.FirstOrDefault(f => f.role == "move" && f.number == n), data.moveSounds)).ToArray();
-        data.fallSounds = Sounds(sounds.Where(f => f.role == "fall"), data.fallSounds);
-        data.leaveSounds = Sounds(sounds.Where(f => f.role == "leave"), data.leaveSounds);
-        var others = files.Where(f => f.kind == FileKind.Sound && (!f.ok || (f.role != "move" && f.role != "fall" && f.role != "leave")));
-        data.sounds = Sounds(others, data.sounds);
+        AudioClip baseSound = Load<AudioClip>(sounds.FirstOrDefault(f => f.role == "base").path);
+        if (baseSound != null) data.baseImage.sound = baseSound;   // picked up
+        foreach (int n in moveNumbers)
+            SetSound(data.variants[moveNumbers.IndexOf(n)], Sound(sounds.FirstOrDefault(f => f.role == "move" && f.number == n), null));
+        var rest = new List<MemeSound>();
+        var fallSounds = Sounds(sounds.Where(f => f.role == "fall"), null);
+        var leaveSounds = Sounds(sounds.Where(f => f.role == "leave"), null);
+        if (fallSounds.Length > 0) { SetSound(data.fall, fallSounds[0]); rest.AddRange(fallSounds.Skip(1)); }
+        if (leaveSounds.Length > 0) { SetSound(data.leave, leaveSounds[0]); rest.AddRange(leaveSounds.Skip(1)); }
+        var others = files.Where(f => f.kind == FileKind.Sound && (!f.ok || (f.role != "move" && f.role != "fall" && f.role != "leave" && f.role != "base")));
+        rest.AddRange(Sounds(others, data.fallbackSounds));
+        // Fallback Sounds: the ones it had (set by hand too) plus the new ones from the files
+        var fallback = new List<MemeSound>(data.fallbackSounds ?? new MemeSound[0]);
+        foreach (MemeSound sound in rest)
+            if (sound != null && sound.clip != null && !fallback.Exists(f => f != null && f.clip == sound.clip)) fallback.Add(sound);
+        data.fallbackSounds = fallback.Where(x => x != null && x.clip != null).ToArray();
 
         // Painting clues (none in the folder: what it had stays)
         var hints = Numbered(known, "hint", FileKind.Video).Select(f => Load<VideoClip>(f.path)).ToList();
@@ -186,11 +202,28 @@ public static class MemeImportTool
         return data;
     }
 
-    // Its MemeData: <Prefix>_Data, or the one it had under another name (renamed, keeping every reference to it)
+    static void KeepSound(MemeImage image, MemeImage old)
+    {
+        if (image == null || old == null || image.sound != null) return;
+        image.sound = old.sound;
+        image.loop = old.loop;
+    }
+
+    static void SetSound(MemeImage image, MemeSound sound)
+    {
+        if (image == null || sound == null || sound.clip == null) return;
+        image.loop = sound.loop || (image.sound == sound.clip && image.loop);   // (a loop set by hand for that clip stays)
+        image.sound = sound.clip;
+    }
+
+    // Its MemeData: MemeData_<Folder> (the new ones), else <Prefix>_Data (the older ones, kept for the original game),
+    // else the one it had under another name (renamed, keeping every reference to it). New: MemeData_<Folder>
     static MemeData DataOf(string folder, string folderName)
     {
-        string path = $"{folder}/{PrefixOf(folderName)}_Data.asset";
+        string path = $"{folder}/MemeData_{folderName}.asset";
         MemeData data = AssetDatabase.LoadAssetAtPath<MemeData>(path);
+        if (data != null) return data;
+        data = AssetDatabase.LoadAssetAtPath<MemeData>($"{folder}/{PrefixOf(folderName)}_Data.asset");
         if (data != null) return data;
 
         string former = Files(folder).FirstOrDefault(f => f.EndsWith(".asset") && AssetDatabase.LoadAssetAtPath<MemeData>(f) != null);
@@ -213,14 +246,14 @@ public static class MemeImportTool
         if (data.variants.Count == 0) lacks.Add("no Move_01 (no Move changes)");
         if (!data.HasFall) lacks.Add("no Fall");
         if (!data.HasLeave) lacks.Add("no Leave");
-        if (data.grabSound == null) lacks.Add("no Base sound (silent when picked up)");
-        int moveSounds = Count(data.moveSounds);
-        if (moveSounds < data.variants.Count) lacks.Add($"{data.variants.Count - moveSounds} Moves without their sound");
+        if (data.BaseSound == null) lacks.Add("no Base sound (silent when picked up)");
+        int moveSounds = data.variants.Count(v => v.sound != null);
+        if (moveSounds < data.variants.Count) lacks.Add($"{data.variants.Count - moveSounds} Moves without their own sound (a fallback plays)");
         if (!data.HasPainting) lacks.Add("no Hint video (no painting: black pedestals only)");
         int videos = data.variants.Append(data.baseImage).Append(data.fall).Append(data.leave).Count(i => i != null && i.video != null);
         string text = $"[Memes] {data.title}: base + {data.variants.Count} moves" +
                       (data.HasFall ? " + fall" : "") + (data.HasLeave ? " + leave" : "") + (videos > 0 ? $" ({videos} videos)" : "") +
-                      $", {Count(data.moveSounds) + Count(data.fallSounds) + Count(data.leaveSounds) + Count(data.sounds)} sounds, " +
+                      $", {data.variants.Append(data.baseImage).Append(data.fall).Append(data.leave).Count(i => i != null && i.sound != null)} own sounds + {Count(data.fallbackSounds)} fallback, " +
                       $"{data.hints.Count} hints, {data.references.Count} references.";
         if (lacks.Count > 0) text += "\n  Lacks: " + string.Join("; ", lacks);
         if (ignored.Count > 0) text += "\n  Not used (names don't follow the convention): " + string.Join(", ", ignored);

@@ -220,7 +220,11 @@ public class PortalWindow : MonoBehaviour
         for (float t = 0f; t < 15f && player.Respawning; t += Time.deltaTime) yield return null;
         MemeChanger window = CarriedWindow;
         if (emptyOnLanding && window != null) window.SetMeme(null);
+        Arrived?.Invoke();   // the hub's pedestal comes back up (PedestalRetire)
     }
+
+    // You came back through a portal and got up in the hub
+    public static event System.Action Arrived;
 
     // Over the screen (seen from above), Edge Margin inside its edge, and at its height
     bool OnScreen(Vector3 position)
@@ -331,6 +335,7 @@ public class PortalWindow : MonoBehaviour
 
     void SetShown(bool on)
     {
+        if (renderers == null) renderers = GetComponentsInChildren<Renderer>(true);
         foreach (Renderer r in renderers) if (r != null && r.enabled != on) r.enabled = on;
         if (floor != null && floor.enabled != on) floor.enabled = on;
     }

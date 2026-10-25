@@ -1,4 +1,5 @@
 using System.Collections;
+using System.Collections.Generic;
 using UnityEngine;
 
 // Anything the player carries that holds a meme: MemeOrb (Game_Old) or MemeWindow (Game).
@@ -78,6 +79,7 @@ public class Meme : MonoBehaviour
         body = GetComponent<Rigidbody>();
         groundMask = LayerMask.GetMask("Ground");
         lastGroundY = transform.position.y;
+        ownInterpolation = body.interpolation;
         HoldOnStartIsland();
     }
 
@@ -87,35 +89,39 @@ public class Meme : MonoBehaviour
     // Keeps Its Place (MemeWindow): it stays exactly where it was placed (a tree branch…), still, until picked up
     private void HoldOnStartIsland()
     {
-        if (KeepsItsPlace) { body.isKinematic = true; body.constraints = RigidbodyConstraints.FreezeAll; }
-        if (!FindGroundBelow(20f, out RaycastHit ground)) return;
+        if (KeepsItsPlace) { AttachStill(); body.constraints = RigidbodyConstraints.FreezeAll; }
+        bool hasGround = FindGroundBelow(20f, out RaycastHit ground);   // (none: e.g. hidden inside the ground)
         Island island = transform.parent != null ? transform.parent.GetComponentInParent<Island>() : null;
-        if (island == null) island = ground.transform.GetComponentInParent<Island>();
+        if (island == null && hasGround) island = ground.transform.GetComponentInParent<Island>();
         if (island == null) return;
+        Transform under = hasGround ? ground.transform : transform.parent;
 
         if (KeepsItsPlace)   // part of its island (it goes down and up with it), where it is
         {
             if (transform.parent == null || transform.parent.GetComponentInParent<Island>() != island)
             {
-                FloatMotion floats = ground.transform.GetComponentInParent<FloatMotion>();
+                FloatMotion floats = under.GetComponentInParent<FloatMotion>();
                 transform.SetParent(floats != null ? floats.transform : island.transform, true);
             }
             lastIsland = FindParentWithTag(transform, "Isla") ?? island.gameObject;
             return;
         }
 
-        // On the ground, not floating above it
-        Collider shape = GetComponentInChildren<Collider>();
-        float pivotToBottom = shape != null ? transform.position.y - shape.bounds.min.y : 0f;
-        transform.position = ground.point + Vector3.up * (pivotToBottom + 0.02f);
+        // On the ground, not floating above it (Snaps To Ground off: exactly where it was placed)
+        if (hasGround && SnapsToGround)
+        {
+            Collider shape = GetComponentInChildren<Collider>();
+            float pivotToBottom = shape != null ? transform.position.y - shape.bounds.min.y : 0f;
+            transform.position = ground.point + Vector3.up * (pivotToBottom + 0.02f);
+        }
 
         if (transform.parent == null || transform.parent.GetComponentInParent<Island>() != island)
         {
-            FloatMotion floating = ground.transform.GetComponentInParent<FloatMotion>();
+            FloatMotion floating = under.GetComponentInParent<FloatMotion>();
             transform.SetParent(floating != null ? floating.transform : island.transform, true);
         }
 
-        body.isKinematic = true;
+        AttachStill();
         body.constraints = RigidbodyConstraints.FreezeAll;
         startIsland = island;
         lastIsland = FindParentWithTag(transform, "Isla") ?? island.gameObject;
@@ -123,6 +129,10 @@ public class Meme : MonoBehaviour
 
     // Stays still where it was placed until picked up (a representation that lies on branches, shelves…)
     protected virtual bool KeepsItsPlace => false;
+
+    // At start it is set on the ground under it (the orbs). Off (MemeWindow with physics): it rides exactly where it was
+    // placed, and once its island arrives it only falls if nothing holds it there
+    protected virtual bool SnapsToGround => true;
 
     // Its island is up and still: physics again (it settles on the ground and freezes there as usual)
     private void ReleaseWhenIslandArrives()
@@ -132,10 +142,44 @@ public class Meme : MonoBehaviour
         if (!startIsland.IsUp || startIsland.IsMoving) return;
 
         startIsland = null;
+        if (!SnapsToGround && Supported()) return;   // already resting where it was placed: it stays part of its island, still
         transform.SetParent(null, true);
         body.isKinematic = false;
+        RestoreInterpolation();
         body.constraints = RigidbodyConstraints.None;
         groundedTime = 0f;
+        OnReleasedFromIsland();
+    }
+
+    // Its island arrived: it is loose with physics now (MemeWindow: lies face up once still)
+    protected virtual void OnReleasedFromIsland() { }
+
+    // Part of something that moves (its island): kinematic and NOT interpolated. Interpolated, a kinematic body doesn't
+    // follow its parent: it stays behind or jumps (it showed far above or below where it belongs)
+    private RigidbodyInterpolation ownInterpolation;
+    private void AttachStill()
+    {
+        if (body.interpolation != RigidbodyInterpolation.None) ownInterpolation = body.interpolation;
+        body.interpolation = RigidbodyInterpolation.None;
+        body.isKinematic = true;
+    }
+
+    // With physics again: its own interpolation back
+    private void RestoreInterpolation()
+    {
+        if (ownInterpolation != RigidbodyInterpolation.None) body.interpolation = ownInterpolation;
+    }
+
+    // Its lowest point is on (or inside) the ground under it
+    private bool Supported()
+    {
+        Collider shape = GetComponentInChildren<Collider>();
+        if (shape == null) return false;
+        Bounds bounds = shape.bounds;
+        Vector3 from = new Vector3(bounds.center.x, bounds.max.y + 0.1f, bounds.center.z);   // from above it: also when half buried
+        foreach (RaycastHit hit in Physics.RaycastAll(from, Vector3.down, bounds.size.y + 0.5f, ~0, QueryTriggerInteraction.Ignore))
+            if (!hit.transform.IsChildOf(transform) && hit.point.y > bounds.min.y - 0.1f) return true;
+        return false;
     }
 
     // The nearest solid thing below that is not this meme
@@ -187,6 +231,8 @@ public class Meme : MonoBehaviour
     // Times it has been carried onto an island other than the last one (not the tutorial ones, nor the letter ones
     // unless MemeSettings' Letter Islands Unlock is on)
     protected int IslandChanges { get; set; }
+    // The course islands it has already been carried onto (each gives its Move once: going back gives nothing)
+    protected readonly HashSet<GameObject> visitedIslands = new HashSet<GameObject>();
 
     // The player is this close and it is on their screen
     protected bool PlayerSees(float distance)
@@ -205,6 +251,7 @@ public class Meme : MonoBehaviour
     {
         IsHeld = true;
         groundedTime = 0f;
+        if (MemeDock.Instance == null || !MemeDock.Instance.OnScreen(this)) RestoreInterpolation();   // (on the screen: MemeDock handles it)
         OnPickedUp();
     }
 
@@ -278,7 +325,7 @@ public class Meme : MonoBehaviour
         Transform point = LevelManager.Instance.RespawnPointOf(island);
         if (point != null) respawnPoint = point;
         if (!IsHeld) return;
-        bool counts = Unlocks(island);   // the tutorial: only a pause in the changes
+        bool counts = Unlocks(island) && visitedIslands.Add(island);   // the tutorial, the hub, an optional one, or one it already visited: only a pause in the changes
         if (counts) IslandChanges++;
         OnIslandVisited(island, counts);
     }
@@ -287,6 +334,7 @@ public class Meme : MonoBehaviour
     public static bool Unlocks(GameObject island)
     {
         if (island.name.Contains("Tutorial")) return false;
+        if (IslandRole.Of(island.transform) != IslandRole.Role.Course) return false;   // the hub, an optional course
         int separator = island.name.LastIndexOf('_');
         bool letter = separator >= 0 && island.name.Length - separator - 1 == 1 && char.IsLetter(island.name[separator + 1]);
         return !letter || Settings.letterIslandsUnlock;
@@ -432,22 +480,28 @@ public class Meme : MonoBehaviour
 
     private void FreezeWhenRestingOnGround()
     {
-        bool isResting = !IsHeld && CurrentPedestal == null && Physics.CheckSphere(transform.position, Settings.groundCheckRadius, groundMask);
+        bool isResting = !IsHeld && CurrentPedestal == null && ReadyToRest && Physics.CheckSphere(transform.position, Settings.groundCheckRadius, groundMask);
         groundedTime = isResting ? groundedTime + Time.deltaTime : 0f;
         if (groundedTime >= Settings.restDelay && body.constraints != RigidbodyConstraints.FreezeAll)
         {
             body.constraints = RigidbodyConstraints.FreezeAll;
-            StickToFloatingGround();
+            StickToGround();
         }
     }
 
-    // Resting on a floating island (FloatMotion): it becomes part of it, so it bobs with the ground instead of hovering
-    private void StickToFloatingGround()
+    // Done moving on its own (MemeWindow: once it lay down face up)
+    protected virtual bool ReadyToRest => true;
+
+    // Resting on an island (or a floating one: FloatMotion): it becomes part of it, still, so it goes down and up with
+    // it (frozen) and bobs with the ground, instead of staying in the air when its island goes down
+    private void StickToGround()
     {
         if (!Physics.Raycast(transform.position, Vector3.down, out RaycastHit ground, Settings.groundCheckRadius + 1f, ~0, QueryTriggerInteraction.Ignore)) return;
         FloatMotion floating = ground.transform.GetComponentInParent<FloatMotion>();
-        if (floating == null) return;
-        transform.SetParent(floating.transform);
-        body.isKinematic = true;   // PlayerLook turns it back to physics when picked up
+        Island island = ground.transform.GetComponentInParent<Island>();
+        if (floating == null && island == null) return;
+        bool onIsland = island != null && (floating == null || !floating.transform.IsChildOf(island.transform));   // the one nearer the ground
+        transform.SetParent(onIsland ? island.transform : floating.transform, true);
+        AttachStill();   // PlayerLook turns it back to physics when picked up
     }
 }

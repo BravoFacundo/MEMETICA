@@ -2,7 +2,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Video;
 
-// One meme: its images and sounds. An asset per meme (<Prefix>_Data in its folder), made and updated from its files
+// One meme: its images and sounds. An asset per meme (MemeData_<Folder> in its folder; older ones <Prefix>_Data), made and updated from its files
 // by Memetica > Memes > Import (Reli_Base.png, Reli_Move_01.png…, Reli_Fall.png, Reli_Leave.png, sounds with the same
 // names; see MemeImportTool). The orb in the scene (Meme_<ID>) holds one; the ID stays the orb's, so any meme can go
 // in any orb.
@@ -15,32 +15,37 @@ using UnityEngine.Video;
 // Each image can be a picture, a video, or both (the picture shows until the video's first frame, and in the editor).
 // Pictures: 1024 x 1024 PNG, the meme as big as it fits; transparent around it and the sticker border follows its shape
 // (a video has no transparency: its sticker is a rectangle).
-// Sounds: each Move its own (Move Sounds in the same order), Fall and Leave theirs; else this meme's, else MemeSettings' fallback.
+// Sounds: each image has its own, next to it (Base's plays when you pick it up). An image without one: one of the
+// Fallback Sounds at random, else Fallback Sound, else MemeSettings' fallback. Picked up with no Base sound: Fallback Sound.
 [CreateAssetMenu(fileName = "MemeData", menuName = "Memetica/Meme Data")]
 public class MemeData : ScriptableObject
 {
+    public enum VideoStart { Playing, OnPickUp }
+
+    [Header("Base")]
     [Tooltip("Its name (the axis it belongs to): Religion, Conspiracy, Mode…")]
     public string title;
-
-    [Header("Images")]
-    [Tooltip("The meme as you find it: it always comes back to this")]
+    [Tooltip("The meme as you find it: it always comes back to this. Its sound plays when you pick it up")]
     public MemeImage baseImage = new MemeImage();
-    [Tooltip("Move: the next one each time it is carried onto another island, in this order")]
-    public List<MemeImage> variants = new List<MemeImage>();
+    [Tooltip("Its videos: Playing = they play from the start. On Pick Up = still on the first frame until you pick it up")]
+    public VideoStart videoStart = VideoStart.Playing;
+
+    [Header("Variants")]
     [Tooltip("While falling into the void (or found after its meteor). Empty: nothing happens")]
     public MemeImage fall = new MemeImage();
-    [Tooltip("After you leave it, go to another island and come back. Empty: nothing happens")]
+    [Tooltip("After you leave it, go to another island and come back (or it comes back to you). Empty: nothing happens")]
     public MemeImage leave = new MemeImage();
+    [Tooltip("Move: the next one each time it is carried onto another island, in this order")]
+    public List<MemeImage> variants = new List<MemeImage>();
 
-    [Header("Sounds")]
-    [Tooltip("When you pick it up (its Base sound). It is also one of the meme's sounds")]
-    public AudioClip grabSound;
-    [Tooltip("One per Move variant, same order (empty slot: the meme's sounds)")]
-    public MemeSound[] moveSounds;
-    public MemeSound[] fallSounds;
-    public MemeSound[] leaveSounds;
-    [Tooltip("This meme's sounds: for any change with none of its own")]
-    public MemeSound[] sounds;
+    [Header("Fallback")]
+    [Tooltip("Picked up with no Base sound, and the last resort for an image without one")]
+    [UnityEngine.Serialization.FormerlySerializedAs("grabSound")] public AudioClip fallbackSound;
+    [Tooltip("For any image without its own sound: one of these at random")]
+    public MemeSound[] fallbackSounds;
+
+    // Before each image had its own sound (older MemeData): brought into the images and Fallback Sounds once
+    [SerializeField, HideInInspector] MemeSound[] moveSounds, fallSounds, leaveSounds, sounds;
 
     [Header("Painting")]
     [Tooltip("The clue videos of its paintings. Empty: it has no painting, so it goes on black (keyless) pedestals " +
@@ -52,6 +57,44 @@ public class MemeData : ScriptableObject
     public bool HasPainting => hints.Exists(h => h != null);
     public bool HasFall => MemeImage.Exists(fall);
     public bool HasLeave => MemeImage.Exists(leave);
+    // What plays when you pick it up: Base's own sound, else Fallback Sound
+    public AudioClip BaseSound => baseImage != null && baseImage.sound != null ? baseImage.sound : fallbackSound;
+
+    // The older sound lists into the images (Move N → its variant, the first Fall / Leave → theirs) and the rest into
+    // Fallback Sounds. Once, when it loads (in the editor it is saved like that)
+    void OnEnable()
+    {
+        bool old = Has(moveSounds) || Has(fallSounds) || Has(leaveSounds) || Has(sounds);
+        if (!old) return;
+        var rest = new List<MemeSound>();
+        if (fallbackSounds != null) rest.AddRange(fallbackSounds);
+        for (int i = 0; moveSounds != null && i < moveSounds.Length; i++)
+            if (i < variants.Count && Valid(moveSounds[i]) && variants[i].sound == null) Give(variants[i], moveSounds[i]);
+        Spread(fallSounds, fall, rest);
+        Spread(leaveSounds, leave, rest);
+        if (sounds != null) rest.AddRange(System.Array.FindAll(sounds, Valid));
+        fallbackSounds = rest.ToArray();
+        moveSounds = fallSounds = leaveSounds = sounds = null;
+#if UNITY_EDITOR
+        UnityEditor.EditorUtility.SetDirty(this);
+#endif
+    }
+
+    static bool Has(MemeSound[] list) => list != null && System.Array.Exists(list, Valid);
+    static bool Valid(MemeSound s) => s != null && s.clip != null;
+    static void Give(MemeImage image, MemeSound s) { image.sound = s.clip; image.loop = s.loop; }
+
+    // The first one to the image (if it has none), the others to the fallback
+    static void Spread(MemeSound[] list, MemeImage image, List<MemeSound> rest)
+    {
+        if (list == null) return;
+        foreach (MemeSound s in list)
+        {
+            if (!Valid(s)) continue;
+            if (image != null && image.sound == null && MemeImage.Exists(image)) Give(image, s);
+            else rest.Add(s);
+        }
+    }
 }
 
 // One image of a meme: a picture, a video, or both (the picture until the video shows its first frame)
@@ -60,6 +103,10 @@ public class MemeImage
 {
     public Texture2D picture;
     public VideoClip video;
+    [Tooltip("Its sound (empty: the meme's lists, then the fallback)")]
+    public AudioClip sound;
+    [Tooltip("The sound loops while this image shows")]
+    public bool loop;
 
     public static bool Exists(MemeImage image) => image != null && (image.picture != null || image.video != null);
 }

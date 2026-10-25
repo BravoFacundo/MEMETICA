@@ -53,7 +53,8 @@ public class MemeWindow : MemeChanger
     private float stillTime;
     private Coroutine lyingDown;
 
-    protected override bool KeepsItsPlace => true;
+    // Stays where it was placed; an optional meme with Use Physics: rises frozen with its island, then falls (as the orbs)
+    protected override bool KeepsItsPlace => !TryGetComponent(out DexCollectible dex) || !dex.usePhysics;
     protected override bool CanBeEmpty => true;
 
     protected override bool SetUpLook()
@@ -109,6 +110,19 @@ public class MemeWindow : MemeChanger
         stillTime = 0f;
     }
 
+    // Once still after falling, it lies down with the meme facing up. Not an optional meme (DexCollectible)
+    private bool LiesFaceUp => !TryGetComponent(out DexCollectible _);
+    protected override bool SnapsToGround => false;   // exactly where you placed it (hidden in the ground, on a branch…)
+    protected override bool ReadyToRest => !loose && lyingDown == null;   // lies face up first, then rests on its island
+
+    protected override void OnReleasedFromIsland()
+    {
+        Face(false);   // falls like a box, then lies down showing the meme
+        floating = false;
+        loose = true;
+        stillTime = 0f;
+    }
+
     protected override void OnPlaced(Pedestal pedestal)
     {
         floating = loose = false;
@@ -135,6 +149,7 @@ public class MemeWindow : MemeChanger
     // Once it has stopped moving for a moment: lies down with the meme facing up
     void WaitToLieDown()
     {
+        if (!LiesFaceUp) { loose = false; return; }   // an optional meme: it stays as it landed (you may hide it facing away)
         if (body.isKinematic || lyingDown != null) return;
         bool still = body.velocity.magnitude < 0.15f && body.angularVelocity.magnitude < 0.5f;
         stillTime = still ? stillTime + Time.deltaTime : 0f;

@@ -173,21 +173,22 @@ public static class StonePathTool
         }
 
         Vector3 a = first.transform.position, b = last.transform.position;
-        float length = path.CurveLength(a, b);
-        int count = Mathf.Max(0, Mathf.RoundToInt(length / Mathf.Max(path.spacing, 0.1f)) - 1);
+        List<float> spots = path.GenerateSpots(a, b);
+        int count = spots.Count;
         Quaternion startTurn = Quaternion.Inverse(Facing(path, a, b, 0f)) * first.transform.rotation;   // the first stone's turn, kept along the curve
 
-        // Models picked at random (never the same twice in a row, if there are more)
+        // Models picked at random (the same one never three times in a row, if there are more)
         List<int> pool = Enumerable.Range(0, path.models.Count).Where(i => path.models[i].prefab != null && path.models[i].inGenerate).ToList();
         if (pool.Count == 0) pool.Add(first.model);
-        int previous = first.model;
+        int previous = first.model, beforePrevious = -1;
 
         int index = first.transform.GetSiblingIndex() + 1 + first.shadows.Count(s => s != null && s.parent == path.transform);
         for (int i = 1; i <= count; i++)
         {
-            float t = AtDistance(path, a, b, length * i / (count + 1));
-            List<int> choices = pool.Count > 1 ? pool.Where(m => m != previous).ToList() : pool;
+            float t = spots[i - 1];
+            List<int> choices = pool.Count > 1 && previous == beforePrevious ? pool.Where(m => m != previous).ToList() : pool;
             int model = choices[Random.Range(0, choices.Count)];
+            beforePrevious = previous;
             previous = model;
 
             Vector3 position = path.CurvePoint(a, b, t) + Vector3.up * Random.Range(-path.randomHeight, path.randomHeight);
@@ -203,29 +204,7 @@ public static class StonePathTool
     }
 
     // The curve's way at t, flat
-    static Quaternion Facing(StonePath path, Vector3 a, Vector3 b, float t)
-    {
-        Vector3 way = path.CurvePoint(a, b, Mathf.Min(t + 0.01f, 1f)) - path.CurvePoint(a, b, Mathf.Max(t - 0.01f, 0f));
-        way.y = 0f;
-        return way.sqrMagnitude > 1e-6f ? Quaternion.LookRotation(way.normalized, Vector3.up) : Quaternion.identity;
-    }
-
-    // t (0-1) where the curve has gone Distance meters
-    static float AtDistance(StonePath path, Vector3 a, Vector3 b, float distance)
-    {
-        const int steps = 200;
-        float walked = 0f;
-        Vector3 previous = a;
-        for (int i = 1; i <= steps; i++)
-        {
-            Vector3 point = path.CurvePoint(a, b, i / (float)steps);
-            float step = Vector3.Distance(previous, point);
-            if (walked + step >= distance) return (i - 1 + (distance - walked) / Mathf.Max(step, 1e-6f)) / steps;
-            walked += step;
-            previous = point;
-        }
-        return 1f;
-    }
+    static Quaternion Facing(StonePath path, Vector3 a, Vector3 b, float t) => path.FacingAt(a, b, t);
 
     //---- Create Anchors
 

@@ -95,6 +95,11 @@ public class GrassField : MonoBehaviour
     // Its island is down (Lift): not drawn
     public bool Hidden { get; set; }
 
+    // A camera seeing everything from far away (OrbitView): for it the grass is drawn out to Far Distance
+    public static Camera FarCamera { get; private set; }
+    private static float farDistance;
+    public static void SetFarView(Camera camera, float distance) { FarCamera = camera; farDistance = distance; }
+
     private void DrawForCamera(Camera cam)
     {
         if (Hidden) return;
@@ -109,14 +114,22 @@ public class GrassField : MonoBehaviour
 
         Plane[] frustumPlanes = GeometryUtility.CalculateFrustumPlanes(cam);
         Vector3 camPos = cam.transform.position;
+        bool far = FarCamera != null && cam == FarCamera;
+        float fadeStart = far ? farDistance * 0.9f : shrinkStart, fadeEnd = far ? farDistance : shrinkEnd;
+        float thin = far ? 0f : thinDistance;
 
         foreach (Cell cell in cells)
         {
             Bounds bounds = hasMoved ? TransformBounds(moved, cell.bounds) : cell.bounds;
             float sqrDistance = bounds.SqrDistance(camPos);
-            if (sqrDistance > shrinkEnd * shrinkEnd) continue;
+            if (sqrDistance > fadeEnd * fadeEnd) continue;
             if (!GeometryUtility.TestPlanesAABB(frustumPlanes, bounds)) continue;
-            foreach (MaterialPropertyBlock block in cell.blocks) block.SetMatrix(FieldToWorldID, moved);
+            foreach (MaterialPropertyBlock block in cell.blocks)
+            {
+                block.SetMatrix(FieldToWorldID, moved);
+                block.SetFloat(FadeStartID, fadeStart);   // (this camera's: the far one sees it all)
+                block.SetFloat(FadeEndID, fadeEnd);
+            }
 
             // Unity culls an instanced draw by its instance positions, which are where the field was when built.
             // Giving it the moved bounds keeps it from vanishing when the island has moved (before: flickering grass)
@@ -130,7 +143,7 @@ public class GrassField : MonoBehaviour
             };
 
             // Cards were placed in random order, so drawing only the first part thins the cell evenly
-            float density = sqrDistance > thinDistance * thinDistance ? farDensity : 1f;
+            float density = sqrDistance > thin * thin ? farDensity : 1f;
             for (int i = 0; i < cell.batches.Count; i++)
             {
                 int count = Mathf.CeilToInt(cell.batches[i].Length * density);

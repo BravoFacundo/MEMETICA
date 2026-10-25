@@ -31,7 +31,11 @@ public class PedestalRetire : MonoBehaviour
     [Range(0.1f, 0.95f)] public float slamPortion = 0.6f;
     [Tooltip("Seconds it takes to slam in (short: violent)")]
     public float slamTime = 0.18f;
-    [Tooltip("Comes back up when the player lands from a respawn this close (meters). 0 = only by Restore")]
+    public enum RiseOn { PortalReturn, AnyRespawn }
+    [Tooltip("Portal Return: comes back up when you come back to the hub through a portal. Any Respawn: also when you " +
+             "land from a fall's respawn this close (Rise Radius)")]
+    public RiseOn riseOn = RiseOn.PortalReturn;
+    [Tooltip("Any Respawn: meters. 0 = only by Restore")]
     public float riseRadius = 30f;
     [Tooltip("Seconds it takes to come back up (grinding out of the ground)")]
     public float riseTime = 1.4f;
@@ -69,8 +73,13 @@ public class PedestalRetire : MonoBehaviour
         audioSource = GetComponent<AudioSource>();
     }
 
-    void OnEnable() => PlayerMove.RespawnTouchedDown += OnRespawn;
-    void OnDisable() => PlayerMove.RespawnTouchedDown -= OnRespawn;
+    void OnEnable() { PlayerMove.RespawnTouchedDown += OnRespawn; PortalWindow.Arrived += OnPortal; }
+    void OnDisable() { PlayerMove.RespawnTouchedDown -= OnRespawn; PortalWindow.Arrived -= OnPortal; }
+
+    void OnPortal()
+    {
+        if (!IsUp && mode == Mode.Slammed) Restore();
+    }
 
     void LateUpdate()
     {
@@ -98,7 +107,7 @@ public class PedestalRetire : MonoBehaviour
 
     void OnRespawn()
     {
-        if (IsUp || mode != Mode.Slammed || riseRadius <= 0f) return;
+        if (IsUp || mode != Mode.Slammed || riseOn != RiseOn.AnyRespawn || riseRadius <= 0f) return;
         PlayerMove player = FindObjectOfType<PlayerMove>();
         if (player != null && Vector3.Distance(player.transform.position, transform.position) <= riseRadius) Restore();
     }

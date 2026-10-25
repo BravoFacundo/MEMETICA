@@ -22,7 +22,10 @@ using UnityEngine.UI;
 public class HudWindow : MonoBehaviour
 {
     public static HudWindow Instance { get; private set; }
+    public static HudWindow Dex { get; private set; }
 
+    [Tooltip("The optional memes' place on the HUD (DexCollectible, e.g. MemeWindow_Dex), not your meme window's")]
+    public bool forDex;
     public RawImage meme;
     public AspectRatioFitter fitter;
     public Graphic flash;
@@ -36,6 +39,9 @@ public class HudWindow : MonoBehaviour
 
     public bool IsShown { get; private set; }
 
+    // For Dex: its Minimize or Close button (the optional meme showing sinks away right then)
+    public System.Action closed;
+
     private CanvasGroup group;
     private RectTransform rect;
     private Vector3 normalPosition;   // where its pivot is when normal (world: the canvas' space)
@@ -45,7 +51,7 @@ public class HudWindow : MonoBehaviour
 
     void Awake()
     {
-        Instance = this;
+        if (forDex) Dex = this; else Instance = this;
         group = GetComponent<CanvasGroup>();
         rect = (RectTransform)transform;
         if (maxReference != null)
@@ -65,6 +71,23 @@ public class HudWindow : MonoBehaviour
         group.alpha = on ? 1f : 0f;
         group.blocksRaycasts = on;
         group.interactable = on;
+    }
+
+    // Down off the bottom of the screen, then hidden and back in its place (an optional meme, gone: DexCollectible)
+    public IEnumerator SinkAway(float seconds)
+    {
+        Vector3 from = rect.position;
+        Vector3[] corners = new Vector3[4];
+        rect.GetWorldCorners(corners);
+        float drop = corners[1].y + 20f;   // (Overlay canvas: screen pixels) its top below the bottom edge
+        for (float t = 0f; t < seconds; t += Time.deltaTime)
+        {
+            float p = t / Mathf.Max(seconds, 0.01f);
+            rect.position = from + Vector3.down * drop * p * p;   // speeding up
+            yield return null;
+        }
+        Show(false);
+        rect.position = from;
     }
 
     // Where it is on the screen: its middle and height, 0-1 of the screen
@@ -117,6 +140,7 @@ public class HudWindow : MonoBehaviour
 
     void LetGo()
     {
+        if (forDex) { closed?.Invoke(); return; }
         if (MemeDock.Instance != null && MemeDock.Instance.Carried != null) Camera.main.GetComponent<PlayerLook>().DropObject();
     }
 

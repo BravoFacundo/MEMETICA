@@ -2,7 +2,7 @@ using UnityEngine;
 using UnityEngine.Events;
 
 // The run (Game): the virus countdown and how it ends. Your first meme also downloads a virus (a meme itself): from
-// then on (Start On) you have Minutes until it throws the blue screen. Collect every meme in the MemeDex and back it up
+// then on (Start On: the hub's pedestal going down after your first raffle) you have Minutes until it throws the blue screen. Collect every meme in the MemeDex and back it up
 // before that to win.
 //   Lose  time is up: the blue screen (Blue Screen, On Lose), then the score
 //   Win   the backup finished (Win(): the MemeDex calls it once it exists; DebugTools F9 meanwhile)
@@ -13,17 +13,23 @@ public class GameManager : MonoBehaviour
     public static GameManager Instance { get; private set; }
 
     public enum State { NotStarted, Running, Won, Lost }
-    public enum StartOn { IslandReached, Manual }
+    public enum StartOn { IslandReached, Manual, PedestalDown }
 
     [Section("Time")]
     [Tooltip("Minutes until the blue screen (the itch.io build: 30; the exhibition: 5)")]
     public float minutes = 5f;
+    public enum ScoreMode { Expo, Itch }
+    [Tooltip("Which build this is, saved with each score: runs of different builds aren't ranked together")]
+    public ScoreMode scoreMode = ScoreMode.Expo;
 
     [Section("Start")]
-    [Tooltip("Island Reached: when you first step on Start Island. Manual: when something calls StartTimer")]
-    public StartOn startOn = StartOn.IslandReached;
+    [Tooltip("Pedestal Down: when Start Pedestal goes into the ground (the hub's randomizer, after your first raffle). " +
+             "Island Reached: when you first step on Start Island. Manual: when something calls StartTimer")]
+    public StartOn startOn = StartOn.PedestalDown;
     [Tooltip("Its ID (1 → Island_1)")]
     [ShowIf(nameof(startOn), StartOn.IslandReached)] public string startIsland = "1";
+    [Tooltip("The pedestal (its PedestalRetire) whose first trip into the ground starts the countdown")]
+    [ShowIf(nameof(startOn), StartOn.PedestalDown)] public PedestalRetire startPedestal;
     public UnityEvent onStart;
 
     [Section("Lose (blue screen)")]
@@ -69,11 +75,18 @@ public class GameManager : MonoBehaviour
 
     void Update()
     {
-        if (Current == State.NotStarted && startOn == StartOn.IslandReached && OnStartIsland()) StartTimer();
+        if (Current == State.NotStarted && ShouldStart()) StartTimer();
         if (Current != State.Running || PauseMenu.GameIsPaused) return;
         TimeLeft -= Time.deltaTime;
         Elapsed += Time.deltaTime;
         if (TimeLeft <= 0f) { TimeLeft = 0f; Lose(); }
+    }
+
+    bool ShouldStart()
+    {
+        if (startOn == StartOn.IslandReached) return OnStartIsland();
+        if (startOn == StartOn.PedestalDown) return startPedestal != null && !startPedestal.IsUp;
+        return false;
     }
 
     bool OnStartIsland()

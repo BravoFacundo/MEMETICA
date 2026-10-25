@@ -1,0 +1,39 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 768287d2d584491684181bc8170d860d, type: 3}
+  m_Name: MemeData_NyanCat
+  m_EditorClassIdentifier: 
+  title: NyanCat
+  baseImage:
+    picture: {fileID: 0}
+    video: {fileID: 32900000, guid: 8b8fc2c9f9470934e8362e0be86ab569, type: 3}
+    sound: {fileID: 8300000, guid: 4a2e94f3823ec644190c2310e48e5ae9, type: 3}
+    loop: 1
+  fall:
+    picture: {fileID: 0}
+    video: {fileID: 0}
+    sound: {fileID: 0}
+    loop: 0
+  leave:
+    picture: {fileID: 0}
+    video: {fileID: 0}
+    sound: {fileID: 0}
+    loop: 0
+  variants: []
+  fallbackSound: {fileID: 0}
+  fallbackSounds: []
+  moveSounds: []
+  fallSounds: []
+  leaveSounds: []
+  sounds: []
+  hints: []
+  references: []

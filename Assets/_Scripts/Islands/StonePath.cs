@@ -30,10 +30,15 @@ public class StonePath : MonoBehaviour
     public float sHorizontal = 0f;
 
     [Section("Generate")]
-    [Tooltip("Meters between stone centers along the curve")]
-    public float spacing = 2.2f;
+    [Tooltip("Size of the stones in between: 0.5 = the first stone's size (0 = half, 1 = double). Or type Size Scale")]
+    [Range(0f, 1f)] public float size = 0.5f;
     [Tooltip("Size of the stones in between, times the size of the end stones (it goes from one to the other)")]
     public float sizeScale = 1f;
+    [Tooltip("Room between stones: 0.5 = a gap as long as a stone; lower they get closer until they overlap by half a stone " +
+             "(0); 1 = 2.5 stones of gap. Or type Spacing")]
+    [Range(0f, 1f)] public float gap = 0.5f;
+    [Tooltip("Meters between stone centers along the curve")]
+    public float spacing = 2.2f;
     [Tooltip("Degrees each stone in between turns at random (around its vertical), so it doesn't look so perfect")]
     [Range(0f, 180f)] public float randomTurn = 25f;
     [Tooltip("Meters each stone in between goes up or down at random")]
@@ -99,6 +104,17 @@ public class StonePath : MonoBehaviour
             var list = new List<PathStone>();
             foreach (Transform child in transform) if (child.TryGetComponent(out PathStone stone)) list.Add(stone);
             return list;
+        }
+    }
+
+    // Its stones rise themselves: the bridge must appear Stone By Stone (Rise From Below would show them all at once,
+    // already in place, and move only its empty root)
+    void Awake()
+    {
+        if (TryGetComponent(out Bridge b) && b.appearance != Bridge.Appearance.StoneByStone)
+        {
+            if (Application.isPlaying) Debug.LogWarning($"[StonePath] '{name}': its Bridge was {b.appearance}, set to Stone By Stone.", this);
+            b.appearance = Bridge.Appearance.StoneByStone;
         }
     }
 
@@ -172,11 +188,15 @@ public class StonePath : MonoBehaviour
 
     void Update()
     {
-        if (!Application.isPlaying || stones.Count == 0) return;
+#if UNITY_EDITOR
+        if (!Application.isPlaying) { FollowEnds(); return; }
+#endif
+        if (stones.Count == 0) return;
         Frame(out Vector3 origin, out Quaternion rotation, out float length);
 
         foreach (PathStone stone in stones)
         {
+            stone.Enforce();
             stone.Tick();
             foreach (Transform shadow in stone.shadows)   // (they float with the path too)
                 if (shadow != null && rests.ContainsKey(shadow))
@@ -192,32 +212,40 @@ public class StonePath : MonoBehaviour
     }
 
     // A moving stone that runs into the player (not under them) throws them along its way
+    // Only when it really runs into you: its colliders inside your body, moving toward you, and you aren't standing on
+    // it (it carries you). Standing on another stone right next to it is safe
     void PushPlayer(PathStone stone, Vector3 moved)
     {
         if (player == null || playerMove == null || moved.sqrMagnitude < 1e-6f || !stone.IsPresent) return;
         if (lastPush.TryGetValue(stone, out float last) && Time.time - last < 0.4f) return;
-        Bounds stoneBounds = default;
-        bool any = false;
+        Transform under = playerMove.GroundUnder;
+        if (under != null && under.IsChildOf(stone.transform)) return;   // on it: it carries you
+
+        Vector3 body = player.transform.position;
         foreach (Collider c in stone.GetComponentsInChildren<Collider>())
         {
             if (!c.enabled || c.isTrigger) continue;
-            if (!any) { stoneBounds = c.bounds; any = true; } else stoneBounds.Encapsulate(c.bounds);
+            if (!Physics.ComputePenetration(player, body, player.transform.rotation, c, c.transform.position, c.transform.rotation, out Vector3 away, out float depth)) continue;
+            if (depth < 0.04f) continue;                                    // just touching
+            Vector3 flat = new Vector3(moved.x, 0f, moved.z);
+            if (Vector3.Dot(flat, new Vector3(away.x, 0f, away.z)) <= 0f) continue;   // moving away from you
+            if (away.y > 0.7f) continue;                                    // it's under you (you're on it)
+            playerMove.Knockback(flat.normalized * pushSpeed + Vector3.up * 2f);
+            lastPush[stone] = Time.time;
+            return;
         }
-        if (!any) return;
-        stoneBounds.Expand(0.1f);
-        Bounds body = player.bounds;
-        if (!stoneBounds.Intersects(body) || body.min.y > stoneBounds.max.y - 0.15f) return;   // standing on it: it carries them
-        Vector3 push = new Vector3(moved.x, 0f, moved.z).normalized * pushSpeed + Vector3.up * 2f;
-        playerMove.Knockback(push);
-        lastPush[stone] = Time.time;
     }
 
     //---- Appearing (Bridge)
 
     // One after another from A, rising from below
+    // Rising stone by stone (its moving stones wait until it is all up)
+    public bool Appearing { get; private set; }
+
     public IEnumerator RiseWave()
     {
         Init();
+        Appearing = true;
         List<PathStone> list = stones;
         for (int i = 0; i < list.Count; i++)
         {
@@ -226,6 +254,7 @@ public class StonePath : MonoBehaviour
             if (i < list.Count - 1) yield return new WaitForSeconds(stoneGap);
         }
         while (list.Exists(s => s.IsRising)) yield return null;
+        Appearing = false;
     }
 
     // From the last one back, sinking into the void
@@ -261,6 +290,80 @@ public class StonePath : MonoBehaviour
         return Vector3.Lerp(a, b, t) + up * (arch * hump + sVertical * s) + side * (bend * hump + sHorizontal * s);
     }
 
+    // t (0-1) where the curve has gone Distance meters
+    public float AtDistance(Vector3 a, Vector3 b, float distance)
+    {
+        const int steps = 200;
+        float walked = 0f;
+        Vector3 previous = a;
+        for (int i = 1; i <= steps; i++)
+        {
+            Vector3 point = CurvePoint(a, b, i / (float)steps);
+            float step = Vector3.Distance(previous, point);
+            if (walked + step >= distance) return (i - 1 + (distance - walked) / Mathf.Max(step, 1e-6f)) / steps;
+            walked += step;
+            previous = point;
+        }
+        return 1f;
+    }
+
+    // Where Generate Stones puts the stones in between (t of each, 0-1), every Spacing meters
+    public List<float> GenerateSpots(Vector3 a, Vector3 b)
+    {
+        float length = CurveLength(a, b);
+        int count = Mathf.Max(0, Mathf.RoundToInt(length / Mathf.Max(spacing, 0.1f)) - 1);
+        var spots = new List<float>();
+        for (int i = 1; i <= count; i++) spots.Add(AtDistance(a, b, length * i / (count + 1)));
+        return spots;
+    }
+
+    // The curve's way at t, flat (the stones in between face it, turned as the first one is)
+    public Quaternion FacingAt(Vector3 a, Vector3 b, float t)
+    {
+        Vector3 way = CurvePoint(a, b, Mathf.Min(t + 0.01f, 1f)) - CurvePoint(a, b, Mathf.Max(t - 0.01f, 0f));
+        way.y = 0f;
+        return way.sqrMagnitude > 1e-6f ? Quaternion.LookRotation(way.normalized, Vector3.up) : Quaternion.identity;
+    }
+
+    // The first stone's meshes in its own space (however it is turned): their middle, their size seen from above
+    // (meters, its x and z) and their top (its y)
+    public bool Footprint(out Vector3 center, out Vector2 size, out float top)
+    {
+        center = Vector3.zero; size = Vector2.zero; top = 0f;
+        List<PathStone> list = Stones;
+        if (list.Count == 0) return false;
+        Transform stone = list[0].transform;
+        bool any = false;
+        Bounds b = default;
+        foreach (MeshFilter filter in stone.GetComponentsInChildren<MeshFilter>())
+        {
+            if (filter.sharedMesh == null) continue;
+            Matrix4x4 toStone = stone.worldToLocalMatrix * filter.transform.localToWorldMatrix;
+            Bounds mesh = filter.sharedMesh.bounds;
+            for (int i = 0; i < 8; i++)
+            {
+                Vector3 corner = toStone.MultiplyPoint3x4(mesh.center + Vector3.Scale(mesh.extents, new Vector3((i & 1) == 0 ? -1 : 1, (i & 2) == 0 ? -1 : 1, (i & 4) == 0 ? -1 : 1)));
+                if (!any) { b = new Bounds(corner, Vector3.zero); any = true; } else b.Encapsulate(corner);
+            }
+        }
+        if (!any) return false;
+        Vector3 scale = stone.lossyScale;
+        center = b.center;
+        top = b.max.y;
+        size = new Vector2(b.size.x * Mathf.Abs(scale.x), b.size.z * Mathf.Abs(scale.z));
+        return true;
+    }
+
+    // Meters the first stone covers along the path: what Gap is measured with
+    public float FirstStoneWidth()
+    {
+        List<PathStone> list = Stones;
+        if (list.Count < 2 || !Footprint(out _, out Vector2 size, out _)) return 0f;
+        Transform stone = list[0].transform;
+        Vector3 way = FacingAt(stone.position, list[list.Count - 1].transform.position, 0f) * Vector3.forward;
+        return Mathf.Abs(Vector3.Dot(way, stone.right)) * size.x + Mathf.Abs(Vector3.Dot(way, stone.forward)) * size.y;
+    }
+
     public float CurveLength(Vector3 a, Vector3 b)
     {
         float length = 0f;
@@ -275,10 +378,94 @@ public class StonePath : MonoBehaviour
     }
 
 #if UNITY_EDITOR
+    [SerializeField, HideInInspector] float lastSize = -1f, lastSizeScale = -1f, lastGap = -1f, lastSpacing = -1f;
+
     void OnValidate()
     {
         foreach (PathStone stone in GetComponentsInChildren<PathStone>(true)) stone.ApplyColor();
+        SyncSliders();
         if (!Application.isPlaying) UnityEditor.EditorApplication.delayCall += ResizeModels;   // (not inside OnValidate)
+    }
+
+    // Editing: its anchors are where its end stones are (made the first time, inside the island under each end, its
+    // floating part): move an end stone and its anchor goes with it, into the island it is now on
+    void FollowEnds()
+    {
+        if (!gameObject.scene.IsValid() || UnityEditor.EditorUtility.IsPersistent(this) || !TryGetComponent(out Bridge bridge)) return;
+        List<PathStone> list = Stones;
+        if (list.Count < 2) return;
+        Transform a = Follow(bridge, bridge.anchorA, list[0].transform, "A");
+        Transform b = Follow(bridge, bridge.anchorB, list[list.Count - 1].transform, "B");
+        if (a == bridge.anchorA && b == bridge.anchorB) return;
+        UnityEditor.Undo.RecordObject(bridge, "Stone Path Anchors");
+        bridge.anchorA = a;
+        bridge.anchorB = b;
+        UnityEditor.EditorUtility.SetDirty(bridge);
+    }
+
+    Transform Follow(Bridge bridge, Transform anchor, Transform end, string label)
+    {
+        if (anchor != null && (anchor.position - end.position).sqrMagnitude < 0.0001f) return anchor;   // (still there)
+        if (anchor != null && TakenByAnother(bridge, anchor))   // a copied path: its own anchors (sharing them, both moved it every frame)
+        {
+            Debug.Log($"[StonePath] '{name}': anchor {label} was '{anchor.name}', used by another bridge too: it gets its own.", this);
+            anchor = null;
+        }
+        Transform island = IslandUnder(end);
+        if (anchor == null)
+        {
+            if (island == null) return null;   // not over an island yet
+            anchor = new GameObject($"BridgeAnchor_{bridge.name}_{label}").transform;
+            UnityEditor.Undo.RegisterCreatedObjectUndo(anchor.gameObject, "Stone Path Anchors");
+            Debug.Log($"[StonePath] '{name}': anchor {label} made in '{island.name}' (it follows its end stone).", anchor);
+        }
+        if (island != null && anchor.parent != island) anchor.SetParent(island, true);
+        anchor.position = end.position;
+        UnityEditor.SceneManagement.EditorSceneManager.MarkSceneDirty(gameObject.scene);
+        return anchor;
+    }
+
+    // Another bridge uses it as an anchor too, and it is that one's (named after it), or neither's
+    static bool TakenByAnother(Bridge bridge, Transform anchor)
+    {
+        if (anchor.name.StartsWith($"BridgeAnchor_{bridge.name}_")) return false;   // ours: the other one lets go of it
+        foreach (Bridge other in FindObjectsOfType<Bridge>(true))
+            if (other != bridge && (other.anchorA == anchor || other.anchorB == anchor)) return true;
+        return false;
+    }
+
+    // The island (its floating part) right under an end stone
+    Transform IslandUnder(Transform end)
+    {
+        RaycastHit[] hits = Physics.RaycastAll(end.position + Vector3.up * 2f, Vector3.down, 40f, ~0, QueryTriggerInteraction.Ignore);
+        System.Array.Sort(hits, (x, y) => x.distance.CompareTo(y.distance));
+        foreach (RaycastHit hit in hits)
+        {
+            if (hit.transform.IsChildOf(transform)) continue;
+            FloatMotion floating = hit.transform.GetComponentInParent<FloatMotion>();
+            if (floating != null) return floating.transform;
+            Island island = hit.transform.GetComponentInParent<Island>();
+            if (island != null) return island.transform;
+        }
+        return null;
+    }
+
+    // The sliders and their numbers follow each other: move one, the other changes (Size: 0.5 = x1, halving / doubling
+    // at the ends; Gap: the room between stones in stone widths, 0.5 = one)
+    void SyncSliders()
+    {
+        bool first = lastSize < 0f;
+        if (first || size != lastSize) { if (!first) sizeScale = Mathf.Pow(2f, (size - 0.5f) * 2f); }
+        else if (sizeScale != lastSizeScale) size = Mathf.Clamp01(0.5f + Mathf.Log(Mathf.Max(sizeScale, 0.01f), 2f) / 2f);
+        if (first) size = Mathf.Clamp01(0.5f + Mathf.Log(Mathf.Max(sizeScale, 0.01f), 2f) / 2f);
+
+        float stone = FirstStoneWidth() * sizeScale;
+        if (stone > 0.01f)
+        {
+            if (first || (spacing != lastSpacing && gap == lastGap)) gap = Mathf.Clamp01(0.5f + (spacing / stone - 2f) / 3f);   // typed
+            else spacing = stone * (2f + 3f * (gap - 0.5f));   // the slider (or a new size): the same room, in stones
+        }
+        lastSize = size; lastSizeScale = sizeScale; lastGap = gap; lastSpacing = spacing;
     }
 
     // Each stone's look (and its shadows') at its model's Size
@@ -316,6 +503,28 @@ public class StonePath : MonoBehaviour
             Gizmos.DrawLine(previous, point);
             previous = point;
         }
+
+        // Selected: where Generate Stones would put them now (Size, Gap): each one's outline seen from above, on its top
+        if (selected && Footprint(out Vector3 center, out Vector2 size, out float top))
+        {
+            List<float> spots = GenerateSpots(a, b);
+            Transform firstStone = list[0].transform, lastStone = list[list.Count - 1].transform;
+            Quaternion startTurn = Quaternion.Inverse(FacingAt(a, b, 0f)) * firstStone.rotation;
+            Vector3 scale = firstStone.lossyScale;
+            Gizmos.color = new Color(1f, 0.85f, 0.2f, 0.8f);
+            foreach (float t in spots)
+            {
+                float ratio = Mathf.Lerp(1f, lastStone.localScale.x / Mathf.Max(firstStone.localScale.x, 1e-4f), t) * sizeScale;
+                Quaternion turn = FacingAt(a, b, t) * startTurn;
+                Vector3 at = CurvePoint(a, b, t) + turn * Vector3.Scale(new Vector3(center.x, top, center.z), scale) * ratio;
+                DrawRing(at, turn * Vector3.right * (size.x * ratio * 0.5f), turn * Vector3.forward * (size.y * ratio * 0.5f));
+            }
+            UnityEditor.Handles.Label(CurvePoint(a, b, 0.5f) + Vector3.up * 1.5f, $"Generate: {spots.Count} stones");
+        }
+
+        // An anchor far from its end stone: the ends moved since Create Anchors
+        Bridge bridge = GetComponent<Bridge>();
+        if (bridge != null) { WarnAnchor(bridge.anchorA, a, "A"); WarnAnchor(bridge.anchorB, b, "B"); }
         for (int i = 0; i < list.Count; i++)
         {
             PathStone stone = list[i];
@@ -324,6 +533,25 @@ public class StonePath : MonoBehaviour
             if (selected) UnityEditor.Handles.Label(stone.transform.position + Vector3.up * 0.6f, (i + 1).ToString());
             DrawRoute(stone, i + 1, selected);
         }
+    }
+
+    // An oval: half its width along X, half its length along Z
+    static void DrawRing(Vector3 center, Vector3 x, Vector3 z)
+    {
+        const int segments = 24;
+        for (int i = 0; i < segments; i++)
+        {
+            float u = i * Mathf.PI * 2f / segments, v = (i + 1) * Mathf.PI * 2f / segments;
+            Gizmos.DrawLine(center + x * Mathf.Cos(u) + z * Mathf.Sin(u), center + x * Mathf.Cos(v) + z * Mathf.Sin(v));
+        }
+    }
+
+    static void WarnAnchor(Transform anchor, Vector3 end, string label)
+    {
+        if (anchor == null || Vector3.Distance(anchor.position, end) < 1.5f) return;
+        Gizmos.color = Color.red;
+        Gizmos.DrawLine(anchor.position, end);
+        UnityEditor.Handles.Label(anchor.position + Vector3.up, $"Anchor {label}: not on its end stone");
     }
 
     void DrawRoute(PathStone stone, int number, bool labels)

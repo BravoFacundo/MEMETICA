@@ -16,43 +16,48 @@ MonoBehaviour:
   baseImage:
     picture: {fileID: 0}
     video: {fileID: 32900000, guid: 228f4cd5c343832419db0b315b833abe, type: 3}
-  variants:
-  - picture: {fileID: 2800000, guid: 4fd538679f69c0840b4ec13d23bb4290, type: 3}
-    video: {fileID: 0}
-  - picture: {fileID: 2800000, guid: 99a8ffcff3742524da81a7be734a4559, type: 3}
-    video: {fileID: 0}
-  - picture: {fileID: 2800000, guid: e208513eeff1cb54e903b9a7a39f7b50, type: 3}
-    video: {fileID: 0}
-  - picture: {fileID: 2800000, guid: 6fbac42f9f0747a4780d43af19a8479f, type: 3}
-    video: {fileID: 0}
-  - picture: {fileID: 2800000, guid: 252b642d72d0f99439468ca7a344639b, type: 3}
-    video: {fileID: 0}
-  - picture: {fileID: 2800000, guid: 8f0520316c566a4439252d6d8bae1390, type: 3}
-    video: {fileID: 0}
+    sound: {fileID: 0}
+    loop: 0
   fall:
     picture: {fileID: 0}
     video: {fileID: 32900000, guid: b5e4eaf405e3d6b4cb9b353636b801f2, type: 3}
+    sound: {fileID: 0}
+    loop: 0
   leave:
     picture: {fileID: 2800000, guid: e634e821cbb96664f99fb5b5adb1fc73, type: 3}
     video: {fileID: 0}
-  grabSound: {fileID: 8300000, guid: 2256b834e5395a1449386f788e414188, type: 3}
-  moveSounds:
-  - clip: {fileID: 0}
+    sound: {fileID: 8300000, guid: 9dfdcc3ca19627448ac07f8d4be81641, type: 3}
     loop: 0
-  - clip: {fileID: 0}
+  variants:
+  - picture: {fileID: 2800000, guid: 4fd538679f69c0840b4ec13d23bb4290, type: 3}
+    video: {fileID: 0}
+    sound: {fileID: 0}
     loop: 0
-  - clip: {fileID: 0}
+  - picture: {fileID: 2800000, guid: 99a8ffcff3742524da81a7be734a4559, type: 3}
+    video: {fileID: 0}
+    sound: {fileID: 0}
     loop: 0
-  - clip: {fileID: 0}
+  - picture: {fileID: 2800000, guid: e208513eeff1cb54e903b9a7a39f7b50, type: 3}
+    video: {fileID: 0}
+    sound: {fileID: 0}
     loop: 0
-  - clip: {fileID: 0}
+  - picture: {fileID: 2800000, guid: 6fbac42f9f0747a4780d43af19a8479f, type: 3}
+    video: {fileID: 0}
+    sound: {fileID: 0}
     loop: 0
-  - clip: {fileID: 0}
+  - picture: {fileID: 2800000, guid: 252b642d72d0f99439468ca7a344639b, type: 3}
+    video: {fileID: 0}
+    sound: {fileID: 0}
     loop: 0
+  - picture: {fileID: 2800000, guid: 8f0520316c566a4439252d6d8bae1390, type: 3}
+    video: {fileID: 0}
+    sound: {fileID: 0}
+    loop: 0
+  fallbackSound: {fileID: 8300000, guid: 2256b834e5395a1449386f788e414188, type: 3}
+  fallbackSounds: []
+  moveSounds: []
   fallSounds: []
-  leaveSounds:
-  - clip: {fileID: 8300000, guid: 9dfdcc3ca19627448ac07f8d4be81641, type: 3}
-    loop: 0
+  leaveSounds: []
   sounds: []
   hints: []
   references: []

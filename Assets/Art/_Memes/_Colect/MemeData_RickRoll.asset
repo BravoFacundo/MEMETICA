@@ -1,0 +1,40 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 768287d2d584491684181bc8170d860d, type: 3}
+  m_Name: MemeData_RickRoll
+  m_EditorClassIdentifier: 
+  title: RickRoll
+  baseImage:
+    picture: {fileID: 0}
+    video: {fileID: 32900000, guid: 005aa7ab4c682874b908cb8df31416b7, type: 3}
+    sound: {fileID: 8300000, guid: 8173bdc535733004ead50ef9eda4d3c1, type: 3}
+    loop: 0
+  videoStart: 1
+  fall:
+    picture: {fileID: 0}
+    video: {fileID: 0}
+    sound: {fileID: 0}
+    loop: 0
+  leave:
+    picture: {fileID: 0}
+    video: {fileID: 0}
+    sound: {fileID: 0}
+    loop: 0
+  variants: []
+  fallbackSound: {fileID: 0}
+  fallbackSounds: []
+  moveSounds: []
+  fallSounds: []
+  leaveSounds: []
+  sounds: []
+  hints: []
+  references: []

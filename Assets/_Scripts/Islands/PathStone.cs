@@ -31,6 +31,9 @@ public class PathStone : MonoBehaviour
     public List<Transform> shadows = new List<Transform>();
     [Tooltip("Where it starts in its route (0-1), so stones next to each other don't move together")]
     [Range(0f, 1f)] public float startPhase = 0f;
+    [Tooltip("Goes the other way: it rises in its place, then goes to its last point (in the time the others wait) and " +
+             "from there backwards (e.g. the middle one of three hopping together: opposite). Start Phase isn't used")]
+    public bool startAtEnd = false;
     [Tooltip("Pushes the player when it hits them (not when they stand on it)")]
     public bool pushPlayer = true;
 
@@ -94,20 +97,39 @@ public class PathStone : MonoBehaviour
         audioSource.spatialBlend = 1f;
         audioSource.minDistance = 3f;
 
-        // Its route, already Start Phase along
+        // Its route, already Start Phase along (from its last point, backwards, if Start At End)
         timer = WaitTime();
-        if (Moves) Advance(startPhase * RouteSteps * (AverageWait + MoveTime));
+        if (startAtEnd && Moves) goToEnd = true;   // (once its bridge is up: it rises in its own place)
+        else if (Moves) Advance(startPhase * RouteSteps * (AverageWait + MoveTime));
     }
 
     //---- Every frame (StonePath)
 
     public void Tick()
     {
+        Down = riseDown + fallDown;   // (hidden too: it waits down there, so it never shows a frame up in its place)
         if (!IsPresent) return;
-        if (Moves) Advance(Time.deltaTime);
-        else { From = To = 0; Progress = 0f; }
-        Down = riseDown + fallDown;
+        bool settling = rising != null || (path != null && path.Appearing);   // its bridge still rising: it waits in place
+        if (Moves && !settling && goToEnd) GoToEnd();
+        if (Moves && !settling) Advance(Time.deltaTime);
+        else if (!Moves) { From = To = 0; Progress = 0f; }
     }
+
+    // Start At End, once up: to its last point while the others wait at theirs, then on at once, backwards
+    void GoToEnd()
+    {
+        goToEnd = false;
+        To = PointCount - 1;
+        direction = -1;
+        lastShadow = PointCount - 1;
+        moving = true;
+        moveDuration = Mathf.Clamp(MoveTime, 0.05f, Mathf.Max(timer, 0.05f));   // its usual move (squeezed into the wait if longer)
+        endWait = Mathf.Max(0f, timer - moveDuration);                           // the rest of the wait, at the end
+        timer = moveDuration;
+        skipWait = true;
+    }
+    private bool goToEnd, skipWait;
+    private float endWait;
 
     // Waits at a point, moves to the next one, waits there…
     void Advance(float seconds)
@@ -115,7 +137,7 @@ public class PathStone : MonoBehaviour
         timer -= seconds;
         while (timer <= 0f)
         {
-            if (moving) { moving = false; From = To; timer += WaitTime(); }
+            if (moving) { moving = false; From = To; timer += skipWait ? endWait : WaitTime(); skipWait = false; }
             else { To = NextPoint(From); moving = true; moveDuration = MoveTime; timer += moveDuration; }
         }
         Progress = moving ? Smooth(1f - timer / moveDuration) : 0f;
@@ -134,7 +156,7 @@ public class PathStone : MonoBehaviour
                 lastShadow = lastShadow % (count - 1) + 1;
                 return lastShadow;
             case Route.Loop:
-                return (current + 1) % count;
+                return (current + (startAtEnd ? -1 : 1) + count) % count;
             default:
                 int next = Random.Range(0, count - 1);
                 return next >= current ? next + 1 : next;
@@ -212,10 +234,27 @@ public class PathStone : MonoBehaviour
     {
         if (rising != null) { StopCoroutine(rising); rising = null; }
         riseDown = present ? 0f : drop;
+        Down = riseDown + fallDown;
         SetPresent(present);
     }
 
     public bool IsRising => rising != null;
+
+    // Its island rising turns back on what it had hidden (its shadows, a stone still down): kept as they should be
+    private Renderer[] shadowRenderers;
+    public void Enforce()
+    {
+        if (shadowRenderers == null)
+        {
+            var list = new List<Renderer>();
+            foreach (Transform shadow in shadows) if (shadow != null) list.AddRange(shadow.GetComponentsInChildren<Renderer>(true));
+            shadowRenderers = list.ToArray();
+        }
+        foreach (Renderer r in shadowRenderers) if (r != null && r.enabled) r.enabled = false;
+        if (IsPresent) return;
+        foreach (Renderer r in renderers) if (r != null && r.enabled) r.enabled = false;
+        foreach (Collider c in colliders) if (c != null && c.enabled) c.enabled = false;
+    }
 
     //---- Fall
 

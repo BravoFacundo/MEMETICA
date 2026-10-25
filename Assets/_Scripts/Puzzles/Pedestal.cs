@@ -319,6 +319,8 @@ public class Pedestal : MonoBehaviour
         IsCorrect = true;
         everRight = true;
         Play(correctClip);
+        if (!KeylessPedestal && randomizer == null && CurrentMeme != null && CurrentMeme.Data != null)
+            MemeDex.Report(CurrentMeme.Data, CurrentMeme.Data.baseImage);   // a white one: its Base into the MemeDex
         if (drainMeme && !KeylessPedestal && CurrentMeme is MemeChanger window) window.SetMeme(null);   // downloaded
         if (retire != null && retire.when == PedestalRetire.When.Result && randomizer == null) retire.Retire();
         if (inOrder) LevelManager.Instance.RaiseInOrder(ControlledIslands, ControlledBridges);
