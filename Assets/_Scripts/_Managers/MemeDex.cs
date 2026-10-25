@@ -92,6 +92,7 @@ public class MemeDex : MonoBehaviour
         else
         {
             int move = meme.variants.IndexOf(image) + 1;
+            if (move > Instance.movesPerAxis) return;   // (a meme with more Moves than the dex counts: those don't count)
             if (move > 0) Instance.Unlock(new Entry { meme = meme, kind = Kind.Move, move = move });
         }
     }

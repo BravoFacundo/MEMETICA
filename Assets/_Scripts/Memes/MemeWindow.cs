@@ -262,6 +262,8 @@ public class MemeWindow : MemeChanger
 
     void Set(System.Action<MaterialPropertyBlock> change)
     {
+        if (window == null) return;
+        if (block == null) block = new MaterialPropertyBlock();   // (a change can come before its look was set up)
         window.GetPropertyBlock(block);
         change(block);
         window.SetPropertyBlock(block);

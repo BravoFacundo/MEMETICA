@@ -7,6 +7,8 @@ using UnityEngine;
 //   Fall   stepped on, it warns (shake, crack) and drops, then rises back (Bridge > Falling Platforms values)
 //   Slide  glides between its points, pausing at each one: ride it, or get pushed off the path if it hits you
 //   Hop    stays at a point for Interval seconds, then jumps quickly to the next: time your jump
+//   Blink  stays at a point for Interval seconds, shakes for Warning Time, vanishes (whoever stands on it falls) and
+//          shows up at the next point after Gap Time: it can't carry you there, only timing works
 // Its points: its place (0) and its Shadows (1, 2…: ghosts of the stone, Memetica > Level > Stone Path > Add Shadow).
 // In the Scene view stone 6's shadows are 61, 62… Move them anywhere; they float with the path and hide while playing.
 // Route: the order it goes through its points (with one shadow they are all the same: place ↔ 61).
@@ -15,7 +17,7 @@ using UnityEngine;
 [ExecuteAlways]
 public class PathStone : MonoBehaviour
 {
-    public enum Motion { None, Fall, Slide, Hop }
+    public enum Motion { None, Fall, Slide, Hop, Blink }
     public enum Route { BackAndForth, ThroughPlace, Loop, Random }
 
     [Tooltip("Its look: one of the StonePath's Models")]
@@ -23,7 +25,7 @@ public class PathStone : MonoBehaviour
     [Tooltip("None: safe (lighter). The rest: interactive (darker)")]
     public Motion motion = Motion.None;
 
-    [Section("Points", nameof(motion), Motion.Slide, Motion.Hop)]
+    [Section("Points", nameof(motion), Motion.Slide, Motion.Hop, Motion.Blink)]
     [Tooltip("Back And Forth: 0 → 61 → 62 → 61 → 0…\nThrough Place: back to its place between shadows: 61 → 0 → 62 → 0 → 61…\n" +
              "Loop: 0 → 61 → 62 → 0 → 61… (always the same way)\nRandom: any other point each time")]
     public Route route = Route.BackAndForth;
@@ -43,11 +45,21 @@ public class PathStone : MonoBehaviour
     [Tooltip("Seconds it stops at each point")]
     public float pauseTime = 0.5f;
 
-    [Section("Hop", nameof(motion), Motion.Hop)]
+    [Section("Hop", nameof(motion), Motion.Hop, Motion.Blink)]
     [Tooltip("Seconds it stays at each point: x = y fixed, else random between them")]
     public Vector2 interval = new Vector2(1.5f, 1.5f);
     [Tooltip("Seconds the jump takes")]
-    public float hopTime = 0.15f;
+    [ShowIf(nameof(motion), Motion.Hop)] public float hopTime = 0.15f;
+
+    [Section("Blink", nameof(motion), Motion.Blink)]
+    [Tooltip("Seconds it shakes before vanishing (the end of its Interval)")]
+    public float warningTime = 0.6f;
+    [Tooltip("Meters it shakes")]
+    public float blinkShake = 0.06f;
+    [Tooltip("Seconds it is gone before showing up at the next point")]
+    public float gapTime = 0.5f;
+    public AudioClip vanishClip;
+    public AudioClip appearClip;
 
     // What StonePath reads every frame: between point From and point To (0 = its place, 1.. = its shadows)
     public int From { get; private set; }
@@ -56,7 +68,7 @@ public class PathStone : MonoBehaviour
     public float Down { get; private set; }       // meters below its place (rising with the path, falling)
     public Vector3 Shake { get; private set; }    // the warning before a fall
     public bool IsPresent { get; private set; } = true;
-    public bool Moves => (motion == Motion.Slide || motion == Motion.Hop) && PointCount > 1;
+    public bool Moves => (motion == Motion.Slide || motion == Motion.Hop || motion == Motion.Blink) && PointCount > 1;
     int PointCount => 1 + shadows.Count;
 
     private enum FallState { Resting, Warning, Falling, Down, Rising }
@@ -140,7 +152,27 @@ public class PathStone : MonoBehaviour
             if (moving) { moving = false; From = To; timer += skipWait ? endWait : WaitTime(); skipWait = false; }
             else { To = NextPoint(From); moving = true; moveDuration = MoveTime; timer += moveDuration; }
         }
+        if (motion == Motion.Blink) { Blink(); return; }
         Progress = moving ? Smooth(1f - timer / moveDuration) : 0f;
+    }
+
+    // Blink: gone while "moving" (already at the next point, unseen), shaking at the end of each wait
+    private bool blinkGone;
+    void Blink()
+    {
+        Progress = moving ? 1f : 0f;
+        Shake = !moving && timer < warningTime ? Jitter() : Vector3.zero;
+        if (moving == blinkGone) return;
+        blinkGone = moving;
+        foreach (Renderer r in renderers) if (r != null) r.enabled = !blinkGone;
+        SetSolid(!blinkGone);   // whoever stands on it falls
+        Play(blinkGone ? vanishClip : appearClip);
+    }
+
+    Vector3 Jitter()
+    {
+        Vector2 j = Random.insideUnitCircle * blinkShake;
+        return new Vector3(j.x, 0f, j.y);
     }
 
     int NextPoint(int current)
@@ -166,9 +198,10 @@ public class PathStone : MonoBehaviour
     // Moves in one whole round of its route
     int RouteSteps => route == Route.BackAndForth || route == Route.ThroughPlace ? 2 * (PointCount - 1) : PointCount;
 
-    float WaitTime() => Mathf.Max(motion == Motion.Hop ? Interval() : pauseTime, 0.01f);
-    float AverageWait => motion == Motion.Hop ? (interval.x + Mathf.Max(interval.x, interval.y)) * 0.5f : pauseTime;
-    float MoveTime => Mathf.Max(motion == Motion.Hop ? hopTime : travelTime, 0.01f);
+    bool Hops => motion == Motion.Hop || motion == Motion.Blink;   // they wait Interval at each point
+    float WaitTime() => Mathf.Max(Hops ? Interval() : pauseTime, 0.01f);
+    float AverageWait => Hops ? (interval.x + Mathf.Max(interval.x, interval.y)) * 0.5f : pauseTime;
+    float MoveTime => Mathf.Max(motion == Motion.Hop ? hopTime : motion == Motion.Blink ? gapTime : travelTime, 0.01f);
     float Interval() => interval.y > interval.x ? Random.Range(interval.x, interval.y) : interval.x;
 
     static float Smooth(float p) => p * p * (3f - 2f * p);
