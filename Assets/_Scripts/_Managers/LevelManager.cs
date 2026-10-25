@@ -199,17 +199,30 @@ public class LevelManager : MonoBehaviour
     }
 #endif
 
-    // The island's respawn point nearest to a place (an island can have several: one before each part of a course), or null
+    // The island's respawn point nearest to a place (an island can have several: one before each part of a course), or null.
+    // Once an island has a RespawnPoint (component), its old ones just named RespawnPoint are ignored
     public Transform RespawnPointOf(GameObject island, Vector3 near)
     {
         if (island == null) return null;
         Island root = island.GetComponentInParent<Island>();
         Transform container = root != null ? root.transform : island.transform;
+        // Its RespawnPoints (the tool's: inside it, or kept in a level standing on it). Only if it has none: the old ones,
+        // just named RespawnPoint (Game_Old)
         Transform best = null;
         float nearest = float.MaxValue;
+        bool any = false;
+        foreach (RespawnPoint point in RespawnPoint.All)
+        {
+            if (point.OwnIsland != container) continue;
+            any = true;
+            if (!point.Active) continue;   // kept in a level that isn't up yet
+            float d = (point.transform.position - near).sqrMagnitude;
+            if (d < nearest) { nearest = d; best = point.transform; }
+        }
+        if (any) return best;
         foreach (Transform child in container.GetComponentsInChildren<Transform>(true))
         {
-            if (child.name != respawnPointName && !child.TryGetComponent(out RespawnPoint _)) continue;
+            if (child.name != respawnPointName) continue;
             float d = (child.position - near).sqrMagnitude;
             if (d < nearest) { nearest = d; best = child; }
         }

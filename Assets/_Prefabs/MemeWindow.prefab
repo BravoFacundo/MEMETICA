@@ -375,7 +375,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 67de6f4f574a4be48f7225bf0bb431ae, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  data: {fileID: 11400000, guid: e5793dcd1ab958d46bf4914eca5e12ac, type: 2}
+  data: {fileID: 0}
   reserveGroup: {fileID: 0}
   reserveSlot: 1
   afterDrop: 0

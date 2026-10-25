@@ -557,8 +557,7 @@ public class PlayerMove : MonoBehaviour
         // Facing its arrow, looking ahead: ready to try again
         if (spot != null && spot.face)
         {
-            transform.rotation = Quaternion.LookRotation(spot.Facing, Vector3.up);
-            look.LookLevel();
+            transform.rotation = Quaternion.LookRotation(spot.Facing, Vector3.up);   // (the head keeps its angle: looking down, still down)
         }
         look.ResetSmoothing();
         debugHeight = transform.position.y;

@@ -3,6 +3,9 @@
 // ground (the frame PNG of Assets/_Prefabs/MemeWindow; without it, only the screen), Size meters wide, with the live
 // view of the hub in its hole (loading in from the empty window's PNG). Its Exit: the LevelManager's Start Respawn Point (the hub), if it is a RespawnPoint.
 // Then set Open After (the target island's pedestal, PedestalRetire Swallowed). Ctrl+Z undoes it. Save the scene.
+// Under its frame, a Body like the meme window's (its shape, from the MemeWindow prefab), Body Depth meters deep: what
+// you see of it as it comes out of the ground. Deeper or shallower: the Body's Z scale.
+// Add Body to Selected Portal: the same for a portal you already made (select its root; again: it is remade).
 
 using UnityEditor;
 using UnityEditor.SceneManagement;
@@ -13,6 +16,7 @@ public static class PortalWindowTool
     const string WindowPrefabPath = "Assets/_Prefabs/MemeWindow.prefab";
     const string MaterialPath = "Assets/_Rendering/PortalScreen.mat";
     const float Width = 4.5f;   // meters
+    const float BodyDepth = 1.5f;   // meters
 
     [MenuItem("Memetica/Level/Portal/New Portal Window", false, 350)]
     static void Make()
@@ -63,6 +67,7 @@ public static class PortalWindowTool
             Transform frame = Quad("Frame", visual, frameMaterial);
             frame.localScale = new Vector3(width, height, 1f);
         }
+        AddBody(visual, width);
         Transform screen = Quad("Screen", visual, ScreenMaterial());
         screen.localPosition = new Vector3(holeCenter.x / frameSize.x * width, holeCenter.y / frameSize.y * height, 0.004f);   // (just under the frame)
         screen.localScale = new Vector3(holeSize.x / frameSize.x * width, holeSize.y / frameSize.y * height, 1f);
@@ -78,6 +83,50 @@ public static class PortalWindowTool
         Selection.activeGameObject = root;
         Debug.Log($"[Portal] Portal window on '{hit.transform.name}'" + (portal.exit != null ? $", leading to '{portal.exit.name}'" : " (set its Exit: a RespawnPoint in the hub)") +
                   ". Set Open After: the target island's pedestal.", root);
+    }
+
+    [MenuItem("Memetica/Level/Portal/Add Body to Selected Portal", false, 351)]
+    static void AddBodyToSelected()
+    {
+        int made = 0;
+        foreach (GameObject selected in Selection.gameObjects)
+        {
+            PortalWindow portal = selected.GetComponentInParent<PortalWindow>();
+            Transform visual = portal != null ? portal.transform.Find("Visual") : null;
+            Transform frame = visual != null ? visual.Find("Frame") : null;
+            if (frame == null) { Debug.LogWarning($"[Portal] '{selected.name}' isn't a portal window made by the menu (no Visual/Frame).", selected); continue; }
+            Transform old = visual.Find("Body");
+            if (old != null) Undo.DestroyObjectImmediate(old.gameObject);
+            if (AddBody(visual, frame.localScale.x) != null) made++;
+            EditorSceneManager.MarkSceneDirty(portal.gameObject.scene);
+        }
+        Debug.Log($"[Portal] Body added to {made} portal window(s).");
+    }
+
+    // The meme window's body (its mesh and look), as wide as the portal's frame, Body Depth deep, going down from the frame
+    static Transform AddBody(Transform visual, float width)
+    {
+        GameObject prefab = AssetDatabase.LoadAssetAtPath<GameObject>(WindowPrefabPath);
+        Transform source = prefab != null ? prefab.transform.Find("Window/Body") : null;
+        if (source == null || !prefab.TryGetComponent(out WindowControls controls) || controls.picture == null ||
+            !source.TryGetComponent(out MeshFilter sourceMesh) || sourceMesh.sharedMesh == null)
+        { Debug.LogWarning($"[Portal] No Window/Body in {WindowPrefabPath}: no body."); return null; }
+
+        Mesh mesh = sourceMesh.sharedMesh;
+        float k = width / Mathf.Max(controls.picture.localScale.x, 0.0001f);   // meme window → portal
+        float zScale = BodyDepth / Mathf.Max(mesh.bounds.size.z, 0.0001f);
+        Vector3 offset = (source.localPosition - controls.picture.localPosition) * k;
+
+        var body = new GameObject("Body");
+        Undo.RegisterCreatedObjectUndo(body, "Portal Body");
+        body.transform.SetParent(visual, false);
+        body.transform.SetSiblingIndex(0);
+        body.transform.localRotation = Quaternion.Euler(0f, 180f, 0f);   // its front (+Z) toward the frame, the rest down into the ground
+        body.transform.localScale = new Vector3(k, k, zScale);
+        body.transform.localPosition = new Vector3(-offset.x, offset.y, 0.001f + BodyDepth / 2f);   // its front just under the frame
+        body.AddComponent<MeshFilter>().sharedMesh = mesh;
+        body.AddComponent<MeshRenderer>().sharedMaterials = source.GetComponent<MeshRenderer>().sharedMaterials;
+        return body.transform;
     }
 
     static Transform Quad(string name, Transform parent, Material material)

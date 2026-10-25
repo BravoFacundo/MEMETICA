@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using UnityEngine;
 
 // A place where the player reappears after falling into the void. Put it on the ground (Memetica > Level > Respawn >
@@ -5,14 +6,71 @@ using UnityEngine;
 // face its arrow (its blue axis), ready to try again.
 // Several on one island: you reappear at the one nearest to where you last stood on it (a parkour course: one before
 // each hard part, facing it). The hub's one is LevelManager > Start Respawn Point.
-// It must be inside its island (any depth). Children just named RespawnPoint, without this, still work (Game_Old):
-// they reappear you from the default height, facing where you were.
+// Inside its island (any depth): it is that island's. Children just named RespawnPoint, without this, still work
+// (Game_Old): they reappear you from the default height, facing where you were.
+// Inside a level instead (not in any island), standing on an island (the hub): it is that island's, but only once its
+// level is up (any of the level's islands: its target island rises first). E.g. on the hub, facing the level's first
+// bridge: it turns with the level (its root at 0,0), so it keeps facing it. Until then the island's other ones are used.
 public class RespawnPoint : MonoBehaviour
 {
     [Tooltip("Turns you to face its arrow (blue) when you reappear")]
     public bool face = true;
     [Tooltip("Meters above it you reappear. 0 = the default (Game: the player's RespawnSlam Height; Game_Old: LevelManager's Drop Distance)")]
     public float height = 0f;
+    public static readonly List<RespawnPoint> All = new List<RespawnPoint>();
+
+    // The island it is for: the one it is inside, else the one under it (kept in its level)
+    public Transform OwnIsland { get; private set; }
+    // Kept in a level (not inside an island): that level's islands. It counts once one of them is up
+    private Island[] levelIslands;
+
+    void Awake()   // (before the islands go down and hide their ground)
+    {
+        Island inside = GetComponentInParent<Island>();
+        if (inside != null) { OwnIsland = inside.transform; return; }
+        OwnIsland = IslandUnder();
+        if (OwnIsland == null) Debug.LogWarning($"[RespawnPoint] '{name}' isn't inside an island nor on one: it won't be used.", this);
+        levelIslands = LevelIslands(transform);
+    }
+
+    void OnEnable() => All.Add(this);
+    void OnDisable() => All.Remove(this);
+
+    // It can be used now: inside its island, always; kept in a level, once the level is up
+    public bool Active
+    {
+        get
+        {
+            if (levelIslands == null) return true;
+            foreach (Island island in levelIslands)
+                if (island != null && island.IsUp && !island.IsHidden) return true;
+            return false;
+        }
+    }
+
+    // The island (its root) right under it
+    Transform IslandUnder()
+    {
+        RaycastHit[] hits = Physics.RaycastAll(transform.position + Vector3.up * 1f, Vector3.down, 20f, ~0, QueryTriggerInteraction.Ignore);
+        System.Array.Sort(hits, (a, b) => a.distance.CompareTo(b.distance));
+        foreach (RaycastHit hit in hits)
+        {
+            Island island = hit.transform.GetComponentInParent<Island>();
+            if (island != null) return island.transform;
+        }
+        return null;
+    }
+
+    // The nearest parent that holds islands (its level), or null
+    static Island[] LevelIslands(Transform point)
+    {
+        for (Transform t = point.parent; t != null; t = t.parent)
+        {
+            Island[] islands = t.GetComponentsInChildren<Island>(true);
+            if (islands.Length > 0) return islands;
+        }
+        return null;
+    }
 
     // Where you look when you reappear: its forward, level
     public Vector3 Facing
@@ -29,7 +87,8 @@ public class RespawnPoint : MonoBehaviour
     void OnDrawGizmos()
     {
         bool selected = UnityEditor.Selection.Contains(gameObject);
-        Color color = new Color(0.3f, 1f, 0.5f, selected ? 1f : 0.7f);
+        bool waits = GetComponentInParent<Island>() == null;   // (yellow: kept in a level, it waits for it to be up)
+        Color color = waits ? new Color(1f, 0.85f, 0.3f, selected ? 1f : 0.7f) : new Color(0.3f, 1f, 0.5f, selected ? 1f : 0.7f);
         Gizmos.color = color;
         Vector3 ground = transform.position + Vector3.up * 0.02f;
 
