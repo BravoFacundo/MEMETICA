@@ -22,13 +22,20 @@ public class MemeData : ScriptableObject
 {
     public enum VideoStart { Playing, OnPickUp }
 
-    [Header("Base")]
-    [Tooltip("Its name (the axis it belongs to): Religion, Conspiracy, Mode…")]
+    [Header("Meme")]
+    [Tooltip("The axis it belongs to: Religion, Conspiracy, Mode… (each image's Window Title is what its window shows)")]
     public string title;
+
+    [Header("Base")]
     [Tooltip("The meme as you find it: it always comes back to this. Its sound plays when you pick it up")]
     public MemeImage baseImage = new MemeImage();
     [Tooltip("Its videos: Playing = they play from the start. On Pick Up = still on the first frame until you pick it up")]
     public VideoStart videoStart = VideoStart.Playing;
+    [Tooltip("Every image fills the whole window (as each image's Fill)")]
+    public bool fillAll = false;
+
+    // Shown filling the window: its own Fill, or Fill All
+    public bool Fills(MemeImage image) => fillAll || (image != null && image.fill);
 
     [Header("Variants")]
     [Tooltip("While falling into the void (or found after its meteor). Empty: nothing happens")]
@@ -101,12 +108,16 @@ public class MemeData : ScriptableObject
 [System.Serializable]
 public class MemeImage
 {
+    [Tooltip("What its window's title shows while this image is on it (Trollface.png, RageGuy.jpg…). Empty: the meme's axis")]
+    public string windowTitle;
     public Texture2D picture;
     public VideoClip video;
     [Tooltip("Its sound (empty: the meme's lists, then the fallback)")]
     public AudioClip sound;
     [Tooltip("The sound loops while this image shows")]
     public bool loop;
+    [Tooltip("Fills the whole window, cutting what is left over (centered): a square meme in the wider window, without borders")]
+    public bool fill;
 
     public static bool Exists(MemeImage image) => image != null && (image.picture != null || image.video != null);
 }

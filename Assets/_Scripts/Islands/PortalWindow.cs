@@ -6,8 +6,9 @@ using UnityEngine;
 // at it from the side and you see the hub from the side), so walking onto it is stepping onto a hole.
 //   Hidden   inside the ground until its pedestal (Open After) went into the earth; then it rises showing the
 //            empty window's PNG, and the view loads in, pixelated (an old image loading), down to its Pixelate
-//   Open     stand on it (Stand Time), well inside its screen: it ripples around you and you sink into it, looking
-//            down; the pixels go away as you sink
+//   Open     jump (or step) onto the middle of its screen (Edge Margin inside): it lets you through and you sink into it,
+//            looking down, without ever standing on it; its frame and edge you can walk on. Fall In off: stand on it
+//            (Stand Time) instead. The pixels go away as you sink
 //   Through  when your eyes reach the screen you are already above the hub, seeing the same thing: no cut. Above you
 //            a window like it shows where you came from for a moment, then closes (Exit Window). You keep falling
 //            and land on the hub's respawn point (Exit) with the slam
@@ -45,7 +46,9 @@ public class PortalWindow : MonoBehaviour
     public bool fallChange = true;
     [Tooltip("The meme window you carry empties once you landed in the hub (its meme downloaded)")]
     public bool emptyOnLanding = false;
-    [Tooltip("Seconds standing on it before you sink")]
+    [Tooltip("On: in its middle you fall into it (it never holds you there). Off: you stand on it Stand Time, then sink")]
+    public bool fallIn = true;
+    [Tooltip("Fall In off: seconds standing on it before you sink")]
     public float standTime = 0.5f;
     [Tooltip("Meters inside the screen's edge you must stand (on the frame or its edge nothing happens)")]
     public float edgeMargin = 0.4f;
@@ -176,9 +179,55 @@ public class PortalWindow : MonoBehaviour
 
     bool PedestalGone() => !openAfter.gameObject.activeInHierarchy || (!openAfter.IsUp && !openAfter.IsMoving);
 
+    // Fall In: over its middle (and carrying what it needs) it doesn't hold you: you fall into it, and as your feet reach
+    // it you are going through. Not allowed: it holds you and flickers
+    private bool passThrough, wasOver;
+    private CharacterController playerBody;
+    void WatchFallIn()
+    {
+        if (playerBody == null && player != null) playerBody = player.GetComponent<CharacterController>();
+        bool over = player != null && !player.Scripted && OnScreen(player.transform.position, 4f);
+
+        // A meme window left behind comes first (MemeRecall): it takes you once it is in your hand
+        MemeRecall recall = MemeRecall.Instance;
+        bool waiting = over && recall != null && recall.bringForPortal && CarriedWindow == null && recall.BringLeftBehind();
+        bool allowed = over && !waiting && Allowed();
+        SetPassThrough(allowed);
+
+        if (over && !waiting && !allowed)   // it won't take you: flickers
+        {
+            if (!wasOver) Play(deniedClip);
+            staticAmount = Random.value < 0.2f ? 0.7f : 0.2f;
+            ripple = 0f;
+        }
+        else
+        {
+            if (!over && staticAmount > 0f) staticAmount = Mathf.MoveTowards(staticAmount, 0f, Time.deltaTime * 2f);
+            ripple = Mathf.MoveTowards(ripple, over ? 1f : 0f, Time.deltaTime * 3f);
+        }
+        wasOver = over;
+        if (allowed && FeetHeight() < 0.1f && exit != null) { SetPassThrough(false); StartCoroutine(GoThrough()); }
+    }
+
+    // Its floor lets the player through (in its middle): off while they are over it
+    void SetPassThrough(bool on)
+    {
+        if (on == passThrough || floor == null) return;
+        passThrough = on;
+        floor.enabled = !on;
+    }
+
+    // Meters from the player's feet down to the screen (along its up: it may lean)
+    float FeetHeight()
+    {
+        Vector3 feet = playerBody != null ? playerBody.bounds.center + Vector3.down * playerBody.bounds.extents.y : player.transform.position;
+        return Vector3.Dot(feet - transform.position, transform.up);
+    }
+
     // Standing on it long enough: through
     void WatchPlayer()
     {
+        if (fallIn) { WatchFallIn(); return; }
         bool on = player != null && !player.Scripted && player.isGrounded && OnScreen(player.transform.position) && StandingOnIt();
         bool before = standing > 0f;
         standing = on ? standing + Time.deltaTime : 0f;
@@ -227,14 +276,14 @@ public class PortalWindow : MonoBehaviour
     public static event System.Action Arrived;
 
     // Over the screen (seen from above), Edge Margin inside its edge, and at its height
-    bool OnScreen(Vector3 position)
+    bool OnScreen(Vector3 position, float maxHeight = 2.5f)
     {
         if (screen == null) return false;
         Vector3 local = screen.transform.InverseTransformPoint(position);
         Vector3 size = screen.transform.lossyScale;
         float marginX = edgeMargin / Mathf.Max(Mathf.Abs(size.x), 0.01f), marginY = edgeMargin / Mathf.Max(Mathf.Abs(size.y), 0.01f);
         float height = Vector3.Dot(position - transform.position, transform.up);
-        return Mathf.Abs(local.x) < 0.5f - marginX && Mathf.Abs(local.y) < 0.5f - marginY && height > -0.2f && height < 2.5f;
+        return Mathf.Abs(local.x) < 0.5f - marginX && Mathf.Abs(local.y) < 0.5f - marginY && height > -0.2f && height < maxHeight;
     }
 
     // Its floor right under you (not the island's ground beside it)
@@ -344,6 +393,7 @@ public class PortalWindow : MonoBehaviour
 
     IEnumerator GoThrough()
     {
+        float entrySpeed = player.FallSpeed;   // (jumped in: it goes on at the speed you came)
         state = State.Sinking;
         ripple = 1f;
         Play(enterClip);
@@ -352,7 +402,7 @@ public class PortalWindow : MonoBehaviour
         player.BeginScripted();
 
         // Sinking, faster and faster, the head going down to look at the screen
-        float speed = 0f, near = Mathf.Max(playerCamera.nearClipPlane * 2f, 0.08f);
+        float speed = entrySpeed, near = Mathf.Max(playerCamera.nearClipPlane * 2f, 0.08f);
         for (float t = 0f; ; t += Time.deltaTime)
         {
             float down = Mathf.Clamp01(t / Mathf.Max(lookDownTime, 0.01f));

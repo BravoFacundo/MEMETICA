@@ -6,6 +6,9 @@ using UnityEngine;
 [CreateAssetMenu(fileName = "MemeSettings", menuName = "Memetica/Meme Settings")]
 public class MemeSettings : ScriptableObject
 {
+    // The meme window's title also says which change shows ("Troll · Move 2"). Off and hidden for now: too telling
+    [HideInInspector] public bool titleShowsChange = false;
+
     [Header("Rest")]
     [Tooltip("Seconds on the ground before it freezes in place, so it doesn't roll away")]
     public float restDelay = 3f;

@@ -239,7 +239,7 @@ Transform:
   m_GameObject: {fileID: 3226923575181979654}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 1.65, z: 0}
+  m_LocalPosition: {x: 0, y: 1.75, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -5151,6 +5151,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   KeylessPedestal: 0
   KeyID: 
+  keyMeme: {fileID: 0}
+  drainMeme: 0
   ControlledIslands: []
   ControlledBridges: []
   inOrder: 0
@@ -5160,6 +5162,7 @@ MonoBehaviour:
   correctClip: {fileID: 8300000, guid: 708aa9b78c6214e49a245c4f88139d62, type: 3}
   incorrectClip: {fileID: 8300000, guid: 15c2f96a00068b0469720d72634f0a85, type: 3}
   snapClip: {fileID: 8300000, guid: 8069a62e7b897a14393029d89482ec73, type: 3}
+  snapFlyTime: 0.2
   breakClip: {fileID: 8300000, guid: f155031a589b30a4b948c6ee6eb17bfc, type: 3}
   toppleTime: 0.7
   slideAcceleration: 2.5
@@ -5282,4 +5285,4 @@ SphereCollider:
   m_Enabled: 1
   serializedVersion: 3
   m_Radius: 0.32673588
-  m_Center: {x: 0, y: 1.62, z: 0}
+  m_Center: {x: 0, y: 1.7499998, z: 0}

@@ -14,6 +14,7 @@ Shader "Memetica/MemeWindow"
         _Paper ("Background Tint", Color) = (1, 1, 1, 1)
         _Filled ("Has A Meme", Range(0, 1)) = 0
         _Margin ("Margin Around The Meme (of the height)", Range(0, 0.3)) = 0.03
+        _Fill ("Fill (cover the window, cut the rest)", Range(0, 1)) = 0
         [Header(Loading)]
         _Pixelate ("Pixelate", Range(0, 1)) = 0
         _Glow ("Glow (flash)", Range(0, 1)) = 0
@@ -34,7 +35,7 @@ Shader "Memetica/MemeWindow"
             sampler2D _MainTex, _PaperTex;
             float4 _MainTex_TexelSize, _PaperTex_ST;
             fixed4 _Paper;
-            half _Filled, _Pixelate, _Glow, _Margin;
+            half _Filled, _Pixelate, _Glow, _Margin, _Fill;
 
             struct v2f
             {
@@ -61,11 +62,14 @@ Shader "Memetica/MemeWindow"
                 fixed4 col = tex2D(_PaperTex, TRANSFORM_TEX(i.uv, _PaperTex)) * _Paper;
 
                 // The whole meme, as big as it fits inside the margin, centered
-                float2 inner = float2(1 - 2 * _Margin / i.aspect, 1 - 2 * _Margin);
+                half fill = step(0.5, _Fill);   // Fill: no margin, covering it all (the rest cut, centered)
+                float2 inner = lerp(float2(1 - 2 * _Margin / i.aspect, 1 - 2 * _Margin), float2(1, 1), fill);
                 float2 panel = (i.uv - 0.5) / max(inner, 0.01) + 0.5;
                 float panelAspect = i.aspect * inner.x / max(inner.y, 0.01);
                 float memeAspect = _MainTex_TexelSize.z / max(_MainTex_TexelSize.w, 1);
-                float2 shown = float2(min(1, memeAspect / panelAspect), min(1, panelAspect / memeAspect));
+                float2 fit = float2(min(1, memeAspect / panelAspect), min(1, panelAspect / memeAspect));
+                float2 cover = float2(max(1, memeAspect / panelAspect), max(1, panelAspect / memeAspect));
+                float2 shown = lerp(fit, cover, fill);
                 float2 uv = 0.5 + (panel - 0.5) / shown;
                 half inside = all(uv == saturate(uv));
 

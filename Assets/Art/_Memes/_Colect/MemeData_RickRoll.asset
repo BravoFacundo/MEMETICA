@@ -14,21 +14,28 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   title: RickRoll
   baseImage:
+    windowTitle: GetRickRolled.mp4
     picture: {fileID: 0}
     video: {fileID: 32900000, guid: 005aa7ab4c682874b908cb8df31416b7, type: 3}
     sound: {fileID: 8300000, guid: 8173bdc535733004ead50ef9eda4d3c1, type: 3}
-    loop: 0
+    loop: 1
+    fill: 1
   videoStart: 1
+  fillAll: 0
   fall:
+    windowTitle: 
     picture: {fileID: 0}
     video: {fileID: 0}
     sound: {fileID: 0}
     loop: 0
+    fill: 0
   leave:
+    windowTitle: 
     picture: {fileID: 0}
     video: {fileID: 0}
     sound: {fileID: 0}
     loop: 0
+    fill: 0
   variants: []
   fallbackSound: {fileID: 0}
   fallbackSounds: []

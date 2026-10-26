@@ -78,6 +78,8 @@ public class PlayerMove : MonoBehaviour
 
     private Vector3 horizontalVelocity;
     private float verticalVelocity;
+    // Meters per second it is falling now (0 going up or on the ground)
+    public float FallSpeed => Mathf.Max(0f, -verticalVelocity);
     private float airSpeed;
     private float lastGroundedTime = -99f;
     private float lastJumpPressedTime = -99f;

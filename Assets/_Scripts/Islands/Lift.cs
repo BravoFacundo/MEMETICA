@@ -62,9 +62,8 @@ public abstract class Lift : MonoBehaviour
         {
             audioSource = gameObject.AddComponent<AudioSource>();
             audioSource.playOnAwake = false;
-            audioSource.spatialBlend = 1f;
-            audioSource.minDistance = 10f;
         }
+        AudioManager.SetUp(audioSource, AudioManager.World.Lift);   // heard near, not from the next course
     }
 
     //---- Called by the LevelManager
@@ -172,7 +171,7 @@ public abstract class Lift : MonoBehaviour
 
     protected void Play(AudioClip clip)
     {
-        if (clip != null && audioSource != null) audioSource.PlayOneShot(clip);
+        if (clip != null && audioSource != null) audioSource.PlayOneShot(clip, AudioManager.WorldVolume);
     }
 
     //---- Hidden while down

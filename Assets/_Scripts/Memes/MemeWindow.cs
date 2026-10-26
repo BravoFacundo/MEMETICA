@@ -1,4 +1,5 @@
 using System.Collections;
+using TMPro;
 using UnityEngine;
 
 // Meme as a window of the game's retro OS (Game), made of your PNG layers: the frame in front (its middle
@@ -27,6 +28,7 @@ public class MemeWindow : MemeChanger
     private static readonly int PixelateId = Shader.PropertyToID("_Pixelate");
     private static readonly int GlowId = Shader.PropertyToID("_Glow");
     private static readonly int FilledId = Shader.PropertyToID("_Filled");
+    private static readonly int FillId = Shader.PropertyToID("_Fill");
 
     public enum AfterDropMode { FallFaceUp, Float }
 
@@ -45,6 +47,8 @@ public class MemeWindow : MemeChanger
     public Renderer window;
     [Tooltip("Turns the window toward the camera (on the Window child)")]
     public FaceCamera facing;
+    [Tooltip("The meme's name on its title bar (TextMeshPro: Memetica > Memes > Add Window Titles)")]
+    public TMP_Text titleText;
 
     private MaterialPropertyBlock block;
     private bool loose;          // falling freely (dropped, or after its meteor): it lies face up once still
@@ -56,12 +60,16 @@ public class MemeWindow : MemeChanger
     // Stays where it was placed; an optional meme with Use Physics: rises frozen with its island, then falls (as the orbs)
     protected override bool KeepsItsPlace => !TryGetComponent(out DexCollectible dex) || !dex.usePhysics;
     protected override bool CanBeEmpty => true;
+    protected override bool ChangesOnce => true;   // Game: each change once, Moves from the island's number (MemeChanger)
 
     protected override bool SetUpLook()
     {
         block = new MaterialPropertyBlock();
         Face(false);   // placed: as it was put
         if (window == null) { Debug.LogError($"[MemeWindow] '{name}' has no Window reference.", this); return false; }
+        // Its title over the frame from every angle: both are transparent and almost on the same plane, so by distance
+        // alone the frame was drawn over it when seen from the side
+        if (titleText is TextMeshPro worldTitle && worldTitle.TryGetComponent(out MeshRenderer titleRenderer)) titleRenderer.sortingOrder = TitleOrder;
         return true;
     }
 
@@ -210,6 +218,39 @@ public class MemeWindow : MemeChanger
     private float shownCover;
     private bool OnScreen => MemeDock.Instance != null && MemeDock.Instance.OnScreen(this);
 
+    // Its title: the image's Window Title (Trollface.png…; also the raffle's candidates), else the meme's axis (MemeData
+    // Title, else its asset's name). Title Shows Change (MemeSettings, hidden): also which change ("Troll · Move 2")
+    private string shownTitle = "";
+    string TitleOf(MemeImage image)
+    {
+        if (image != null && !string.IsNullOrEmpty(image.windowTitle)) return image.windowTitle;
+        if (Data == null) return "";
+        string title = !string.IsNullOrEmpty(Data.title) ? Data.title : Data.name.Replace("MemeData_", "");
+        if (Settings == null || !Settings.titleShowsChange || image == Data.baseImage) return title;
+        if (image == Data.fall) return title + " · Fall";
+        if (image == Data.leave) return title + " · Leave";
+        int move = Data.variants.IndexOf(image) + 1;
+        return move > 0 ? $"{title} · Move {move}" : title;
+    }
+
+    void SetTitle(string title)
+    {
+        shownTitle = title;
+        if (titleText != null && titleText.text != title) titleText.text = title;
+        if (OnScreen && HudWindow.Instance != null) HudWindow.Instance.SetTitle(title);
+    }
+
+    // Fill (MemeData): this image covers the whole window
+    const int TitleOrder = 10;   // (Order in Layer: after the frame's)
+    private bool shownFill;
+    protected override void OnImageShown(MemeImage image)
+    {
+        shownFill = Data != null && Data.Fills(image);
+        SetTitle(TitleOf(image));
+        Set(b => b.SetFloat(FillId, shownFill ? 1f : 0f));
+        if (OnScreen && HudWindow.Instance != null) HudWindow.Instance.SetFill(shownFill);
+    }
+
     protected override void ShowTexture(Texture texture)
     {
         shownTexture = texture;
@@ -220,6 +261,7 @@ public class MemeWindow : MemeChanger
     protected override void ShowEmpty()
     {
         shownTexture = null;
+        SetTitle("");
         Set(b => b.SetFloat(FilledId, 0f));
         if (OnScreen && HudWindow.Instance != null) HudWindow.Instance.SetEmpty();
     }
@@ -234,6 +276,8 @@ public class MemeWindow : MemeChanger
     public void MirrorTo(HudWindow hud)
     {
         if (hud == null) return;
+        hud.SetFill(shownFill);
+        hud.SetTitle(shownTitle);
         if (shownTexture != null) hud.SetTexture(shownTexture); else hud.SetEmpty();
         hud.SetCover(shownCover);
         hud.SetGlow(0f);

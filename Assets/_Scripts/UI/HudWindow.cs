@@ -1,5 +1,6 @@
 using System.Collections;
 using UnityEngine;
+using TMPro;
 using UnityEngine.UI;
 
 // The meme window's version on the HUD canvas (UI): what you see while you carry it. The 3D one (MemeWindow) flies
@@ -29,6 +30,8 @@ public class HudWindow : MonoBehaviour
     public RawImage meme;
     public AspectRatioFitter fitter;
     public Graphic flash;
+    [Tooltip("The meme's name on its title bar (TextMeshPro: Memetica > Memes > Add Window Titles)")]
+    public TMP_Text titleText;
 
     [Section("Maximize")]
     [Tooltip("Where and how tall it is maximized (any rect on the canvas, e.g. MaxReference). Hidden while playing")]
@@ -109,6 +112,29 @@ public class HudWindow : MonoBehaviour
     }
 
     public void SetEmpty() => meme.enabled = false;
+
+    public void SetTitle(string title)
+    {
+        if (titleText != null && titleText.text != title) titleText.text = title;
+    }
+
+    // Fill (MemeData): the meme covers the whole background, the rest cut (centered). Off: all of it inside the margin
+    private RectTransform margin;
+    private Vector2 marginMin, marginMax;
+    public void SetFill(bool on)
+    {
+        if (meme == null || fitter == null) return;
+        if (margin == null)
+        {
+            margin = meme.rectTransform.parent as RectTransform;
+            if (margin == null) return;
+            marginMin = margin.offsetMin; marginMax = margin.offsetMax;
+            if (!margin.TryGetComponent(out RectMask2D _)) margin.gameObject.AddComponent<RectMask2D>();   // (what is left over is cut)
+        }
+        fitter.aspectMode = on ? AspectRatioFitter.AspectMode.EnvelopeParent : AspectRatioFitter.AspectMode.FitInParent;
+        margin.offsetMin = on ? Vector2.zero : marginMin;
+        margin.offsetMax = on ? Vector2.zero : marginMax;
+    }
 
     // A change's cover: the meme fades out (0 clear, 1 gone)
     public void SetCover(float amount)

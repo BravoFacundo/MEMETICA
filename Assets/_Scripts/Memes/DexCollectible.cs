@@ -26,8 +26,19 @@ public class DexCollectible : MonoBehaviour
 
     private MemeWindow window;
     private bool taken, closeNow;
+    private AudioSource source;
+    private bool soundPaused;
 
     void Awake() => window = GetComponent<MemeWindow>();
+
+    // Its sound stops with the pause (its video too: MemeChanger), and while it sounds the world goes quieter
+    void Update()
+    {
+        if (source == null) return;
+        bool paused = PauseMenu.GameIsPaused;
+        if (paused != soundPaused) { soundPaused = paused; if (paused) source.Pause(); else source.UnPause(); }
+        if (source.isPlaying) AudioManager.MemeSounding();
+    }
 
     // Clicked (PlayerLook)
     public void Collect()
@@ -54,7 +65,7 @@ public class DexCollectible : MonoBehaviour
         transform.SetParent(dock.Cam.transform, true);
 
         // Its sound (its own source: cut when it goes)
-        AudioSource source = gameObject.AddComponent<AudioSource>();
+        source = gameObject.AddComponent<AudioSource>();
         source.playOnAwake = false;
         source.spatialBlend = 0f;
         AudioClip clip = window.Data != null ? window.Data.BaseSound : null;

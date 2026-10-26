@@ -202,9 +202,13 @@ public static class MemeImportTool
         return data;
     }
 
+    // What was set by hand on the image stays on reimport: its Window Title, Fill, and its sound (unless a file replaces it)
     static void KeepSound(MemeImage image, MemeImage old)
     {
-        if (image == null || old == null || image.sound != null) return;
+        if (image == null || old == null) return;
+        if (string.IsNullOrEmpty(image.windowTitle)) image.windowTitle = old.windowTitle;
+        image.fill |= old.fill;
+        if (image.sound != null) return;
         image.sound = old.sound;
         image.loop = old.loop;
     }

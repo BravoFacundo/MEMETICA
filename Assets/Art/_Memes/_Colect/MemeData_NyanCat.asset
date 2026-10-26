@@ -14,20 +14,28 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   title: NyanCat
   baseImage:
+    windowTitle: NyanCat.mov
     picture: {fileID: 0}
     video: {fileID: 32900000, guid: 8b8fc2c9f9470934e8362e0be86ab569, type: 3}
     sound: {fileID: 8300000, guid: 4a2e94f3823ec644190c2310e48e5ae9, type: 3}
     loop: 1
+    fill: 1
+  videoStart: 0
+  fillAll: 0
   fall:
+    windowTitle: 
     picture: {fileID: 0}
     video: {fileID: 0}
     sound: {fileID: 0}
     loop: 0
+    fill: 0
   leave:
+    windowTitle: 
     picture: {fileID: 0}
     video: {fileID: 0}
     sound: {fileID: 0}
     loop: 0
+    fill: 0
   variants: []
   fallbackSound: {fileID: 0}
   fallbackSounds: []

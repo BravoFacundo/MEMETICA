@@ -106,8 +106,7 @@ public class PathStone : MonoBehaviour
             foreach (Renderer r in shadow.GetComponentsInChildren<Renderer>(true)) r.enabled = false;
         audioSource = gameObject.AddComponent<AudioSource>();
         audioSource.playOnAwake = false;
-        audioSource.spatialBlend = 1f;
-        audioSource.minDistance = 3f;
+        AudioManager.SetUp(audioSource, AudioManager.World.Stone);   // heard near, not from the next course
 
         // Its route, already Start Phase along (from its last point, backwards, if Start At End)
         timer = WaitTime();
@@ -156,11 +155,12 @@ public class PathStone : MonoBehaviour
         Progress = moving ? Smooth(1f - timer / moveDuration) : 0f;
     }
 
-    // Blink: gone while "moving" (already at the next point, unseen), shaking at the end of each wait
+    // Blink: gone while "moving", still where it was (so whoever stood on it falls right there, never carried), and
+    // only once it shows up again it is at the next point. Shaking at the end of each wait
     private bool blinkGone;
     void Blink()
     {
-        Progress = moving ? 1f : 0f;
+        Progress = 0f;   // (at From: the jump happens when the wait starts at the next point, while nobody is on it)
         Shake = !moving && timer < warningTime ? Jitter() : Vector3.zero;
         if (moving == blinkGone) return;
         blinkGone = moving;
@@ -351,9 +351,22 @@ public class PathStone : MonoBehaviour
         foreach (Collider c in colliders) if (c != null) c.enabled = solid;
     }
 
+    // Several stones at once (a row blinking together) don't pile up: on time, but each a slightly different pitch, and
+    // the same sound started by other stones in the same moment comes in quieter (Max Voices at most; the rest: silent)
+    const float PitchRange = 0.08f;     // ±8%
+    const float SameMoment = 0.08f;     // seconds
+    const int MaxVoices = 3;
+    const float ExtraVolume = 0.35f;    // each one after the first
+    static readonly Dictionary<AudioClip, (float time, int count)> recent = new Dictionary<AudioClip, (float, int)>();
+
     void Play(AudioClip clip)
     {
-        if (clip != null && audioSource != null) audioSource.PlayOneShot(clip);
+        if (clip == null || audioSource == null) return;
+        int count = recent.TryGetValue(clip, out var last) && Time.time - last.time < SameMoment ? last.count + 1 : 1;
+        if (count == 1) recent[clip] = (Time.time, 1); else recent[clip] = (last.time, count);
+        if (count > MaxVoices) return;
+        audioSource.pitch = 1f + Random.Range(-PitchRange, PitchRange);
+        audioSource.PlayOneShot(clip, (count == 1 ? 1f : ExtraVolume) * AudioManager.WorldVolume);
     }
 
     // Safe ones light grey, every interactive one the same darker grey (StonePath > Look)

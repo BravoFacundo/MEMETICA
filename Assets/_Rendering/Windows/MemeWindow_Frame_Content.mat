@@ -33,6 +33,7 @@ Material:
         m_Offset: {x: 0, y: 0}
     m_Ints: []
     m_Floats:
+    - _Fill: 0
     - _Filled: 0
     - _Glow: 0
     - _Margin: 0.03

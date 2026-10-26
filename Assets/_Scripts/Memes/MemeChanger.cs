@@ -52,6 +52,7 @@ public abstract class MemeChanger : Meme
     private bool pendingNeedsAway, playerWentAway;
     private bool fallingWithPlayer;
     private bool fallSeen, leaveSeen;
+    private readonly HashSet<int> movesSeen = new HashSet<int>();   // Changes Once: the Moves already shown
     private GameObject lastFallIsland;   // the island you fell from the last time its Fall change showed   // their change happened once: they join the sweep
 
     private float cover;                // 0 clear, 1 the image is hidden
@@ -161,6 +162,7 @@ public abstract class MemeChanger : Meme
         shownUnlocked = lastVariant = 0;
         IslandChanges = 0;
         visitedIslands.Clear();
+        movesSeen.Clear();
         videoStarted = false;
         movingTime = 0f;
         nextChangeAt = Settings.firstChangeAfter;
@@ -237,6 +239,8 @@ public abstract class MemeChanger : Meme
 
     protected override void Update()
     {
+        PauseSounds(PauseMenu.GameIsPaused);
+        if (memeSource != null && memeSource.isPlaying) AudioManager.MemeSounding();   // the world goes quieter
         base.Update();
         if (!hasMeme) return;
         UpdateVideoFrame();
@@ -266,6 +270,7 @@ public abstract class MemeChanger : Meme
         if (!hasMeme) return;
         MarkEvent();
         if (!Data.HasFall) return;
+        if (ChangesOnce && fallSeen) return;   // (once)
         if (!withPlayer) { SetPending(Data.fall, false); return; }
 
         // Falling again from the same island: no Fall change (only the landing sound differs). From another one: yes
@@ -311,13 +316,42 @@ public abstract class MemeChanger : Meme
     protected override void OnIslandVisited(GameObject island, bool counts)
     {
         MarkEvent();
-        if (!hasMeme || !counts || revealRoutine != null || fallingWithPlayer) return;
+        if (!hasMeme || revealRoutine != null || fallingWithPlayer) return;
+        if (ChangesOnce) { ShowMoveOf(island); return; }
+        if (!counts) return;
         int unlocked = UnlockedVariants();
         if (unlocked < 1) return;
         int v = unlocked > shownUnlocked ? unlocked : RandomVariant(unlocked);
         shownUnlocked = unlocked;
         lastVariant = v;
         ShowChange(images[v]);
+    }
+
+    // Changes Once (Game): every change shows only once per meme (Fall, Leave, each Move), and no random mutations.
+    // The Move an island gives comes from its number: Island_11 → Move 1, Island_12 → 2, Island_13 → 3 (its last digit);
+    // the target island (a name, no number: Island_Troll) → the last Move; with a letter (Island_1A, optional) → none.
+    // The hub, the tutorial and optional islands (IslandRole) never give one. Going back: nothing again.
+    // Game_Old (MemeOrb): as before (one more for the random pick on each new island)
+    protected virtual bool ChangesOnce => false;
+
+    void ShowMoveOf(GameObject island)
+    {
+        if (island == null || !Meme.Unlocks(island)) return;
+        int moves = Mathf.Min(Data.variants.Count, MemeDex.Instance != null ? MemeDex.Instance.movesPerAxis : 4);
+        int move = MoveOf(island.name, moves);
+        if (move < 1 || move > moves || !MemeImage.Exists(Data.variants[move - 1]) || !movesSeen.Add(move)) return;
+        ShowChange(Data.variants[move - 1]);
+    }
+
+    // From its name, after the last '_': digits → the last one; only letters (more than one) → the last Move; else 0
+    public static int MoveOf(string islandName, int lastMove)
+    {
+        string id = islandName.Substring(islandName.LastIndexOf('_') + 1).Trim();
+        if (id.Length == 0) return 0;
+        bool digits = true, letters = true;
+        foreach (char c in id) { digits &= char.IsDigit(c); letters &= char.IsLetter(c); }
+        if (digits) return id[id.Length - 1] - '0';
+        return letters && id.Length > 1 ? lastMove : 0;
     }
 
     //---- Mutation
@@ -339,7 +373,7 @@ public abstract class MemeChanger : Meme
         if (!IsHeld && wasHolded) OnLetGo();
         wasHolded = IsHeld;
 
-        if (!IsHeld || mutationRoutine != null || changeRoutine != null || revealRoutine != null || fallingWithPlayer || UnlockedVariants() < 1) return;
+        if (ChangesOnce || !IsHeld || mutationRoutine != null || changeRoutine != null || revealRoutine != null || fallingWithPlayer || UnlockedVariants() < 1) return;
 
         if (delta.magnitude / Mathf.Max(Time.deltaTime, 0.0001f) > 0.5f) movingTime += Time.deltaTime; // only counts while moving
         if (movingTime >= nextChangeAt && !InGrace())
@@ -358,9 +392,11 @@ public abstract class MemeChanger : Meme
     // (on a pedestal the sweep takes over instead)
     void OnLetGo()
     {
-        StopMutationAndRestore();
+        // Game: a change showing goes on to its end (its sound too) and then back to the base, wherever you left it
+        // (a black pedestal…). Game_Old: back to the base at once
+        if (!ChangesOnce || (changeRoutine == null && revealRoutine == null)) StopMutationAndRestore();
         bool optional = MemeIsland != null && IslandRole.Of(MemeIsland.transform) == IslandRole.Role.Optional;
-        if (Data.HasLeave && CurrentPedestal == null && !optional) SetPending(Data.leave, true);   // (not in an optional course)
+        if (Data.HasLeave && CurrentPedestal == null && !optional && !(ChangesOnce && leaveSeen)) SetPending(Data.leave, true);   // (not in an optional course)
     }
 
     void StopMutationAndRestore()
@@ -471,7 +507,7 @@ public abstract class MemeChanger : Meme
             MemeDex.Report(Data, image);   // Fall, Leave or a Move: into the MemeDex
         }, coverAlreadyUp ? 0f : Settings.mistIn);
         // Fall and Leave last as long as their sound (picked up meanwhile, it goes on to the end); the rest, Variant Duration
-        bool untilSoundEnds = soundLength > 0f && (image == Data.fall || image == Data.leave);
+        bool untilSoundEnds = soundLength > 0f && (ChangesOnce || image == Data.fall || image == Data.leave);   // (Game: every change)
         yield return new WaitForSeconds(untilSoundEnds ? Mathf.Max(0f, soundLength - Settings.mistOut)
                                                        : Random.Range(Settings.variantDuration.x, Settings.variantDuration.y));
         yield return CoverSwap(() => { ShowBase(); Play(Settings.returnClip); }, Settings.mistIn);
@@ -554,6 +590,7 @@ public abstract class MemeChanger : Meme
     {
         if (clip == null || Time.time < grabSoundEnds) return;
         grabSoundEnds = Time.time + clip.length;
+        AudioManager.MemeSounding(clip.length);
         Play(clip, why);
     }
 
@@ -612,6 +649,27 @@ public abstract class MemeChanger : Meme
         PreviewInEditor(meme);
     }
 #endif
+
+    // The pause stops its video and its sounds where they are; going back, they go on from there
+    private bool soundsPaused, videoWasPlaying;
+    void PauseSounds(bool paused)
+    {
+        if (paused == soundsPaused) return;
+        soundsPaused = paused;
+        if (paused)
+        {
+            videoWasPlaying = videoPlayer != null && videoPlayer.isPlaying;
+            if (videoWasPlaying) videoPlayer.Pause();
+            if (memeSource != null) memeSource.Pause();
+            if (sfx != null) sfx.Pause();
+        }
+        else
+        {
+            if (videoWasPlaying && videoPlayer != null) videoPlayer.Play();
+            if (memeSource != null) memeSource.UnPause();
+            if (sfx != null) sfx.UnPause();
+        }
+    }
 
     // Picked up (or collected: DexCollectible): a video still on its first frame plays from there
     public void StartVideo()
