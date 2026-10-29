@@ -11,6 +11,7 @@ using UnityEngine;
 // Inside a level instead (not in any island), standing on an island (the hub): it is that island's, but only once its
 // level is up (any of the level's islands: its target island rises first). E.g. on the hub, facing the level's first
 // bridge: it turns with the level (its root at 0,0), so it keeps facing it. Until then the island's other ones are used.
+[SelectionBase]   // clicking any of its parts in the Scene view selects this
 public class RespawnPoint : MonoBehaviour
 {
     [Tooltip("Turns you to face its arrow (blue) when you reappear")]
@@ -23,6 +24,8 @@ public class RespawnPoint : MonoBehaviour
     public Transform OwnIsland { get; private set; }
     // Kept in a level (not inside an island): that level's islands. It counts once one of them is up
     private Island[] levelIslands;
+    // Kept in a level: that level's root (the PortalWindow of that level brings you back here)
+    public Transform LevelRoot { get; private set; }
 
     void Awake()   // (before the islands go down and hide their ground)
     {
@@ -30,7 +33,8 @@ public class RespawnPoint : MonoBehaviour
         if (inside != null) { OwnIsland = inside.transform; return; }
         OwnIsland = IslandUnder();
         if (OwnIsland == null) Debug.LogWarning($"[RespawnPoint] '{name}' isn't inside an island nor on one: it won't be used.", this);
-        levelIslands = LevelIslands(transform);
+        levelIslands = LevelIslands(transform, out Transform root);
+        LevelRoot = root;
     }
 
     void OnEnable() => All.Add(this);
@@ -62,12 +66,13 @@ public class RespawnPoint : MonoBehaviour
     }
 
     // The nearest parent that holds islands (its level), or null
-    static Island[] LevelIslands(Transform point)
+    static Island[] LevelIslands(Transform point, out Transform root)
     {
+        root = null;
         for (Transform t = point.parent; t != null; t = t.parent)
         {
             Island[] islands = t.GetComponentsInChildren<Island>(true);
-            if (islands.Length > 0) return islands;
+            if (islands.Length > 0) { root = t; return islands; }
         }
         return null;
     }
@@ -91,6 +96,7 @@ public class RespawnPoint : MonoBehaviour
         Color color = waits ? new Color(1f, 0.85f, 0.3f, selected ? 1f : 0.7f) : new Color(0.3f, 1f, 0.5f, selected ? 1f : 0.7f);
         Gizmos.color = color;
         Vector3 ground = transform.position + Vector3.up * 0.02f;
+        Gizmos.DrawSphere(ground + Vector3.up * 0.2f, selected ? 0.25f : 0.18f);   // (solid: click it to select it)
 
         const int segments = 24;
         for (int i = 0; i < segments; i++)

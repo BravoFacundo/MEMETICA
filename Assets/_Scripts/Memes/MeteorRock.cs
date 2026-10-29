@@ -11,6 +11,7 @@ public class MeteorRock : MonoBehaviour
     private static MemeSettings Settings => MemeSettings.Instance;
     private static Material smokeMaterial;   // copy of MemeSettings' Smoke Material
 
+    private static readonly System.Collections.Generic.Dictionary<Meme, MeteorRock> current = new System.Collections.Generic.Dictionary<Meme, MeteorRock>();
     private Meme meme;
     private GameObject model;
     private ParticleSystem smoke;
@@ -26,6 +27,7 @@ public class MeteorRock : MonoBehaviour
         go.transform.position = meme.transform.position;
         var meteor = go.AddComponent<MeteorRock>();
         meteor.meme = meme;
+        current[meme] = meteor;   // (a new meteor for the same meme: the old smoke stops)
         meteor.size = Settings.meteorRockSize;
 
         if (Settings.meteorRock != null)
@@ -69,11 +71,13 @@ public class MeteorRock : MonoBehaviour
     // then no more smoke, the last puffs rise and go away
     IEnumerator WaitAndGo()
     {
-        while (meme != null && !meme.IsHeld && meme.CurrentPedestal == null)
+        while (meme != null && meme.isActiveAndEnabled && !meme.IsHeld && meme.CurrentPedestal == null &&
+               current.TryGetValue(meme, out MeteorRock latest) && latest == this)
         {
             smoke.transform.position = SmokeSpot();
             yield return null;
         }
+        if (meme != null && current.TryGetValue(meme, out MeteorRock mine) && mine == this) current.Remove(meme);
         smoke.Stop(true, ParticleSystemStopBehavior.StopEmitting);
         Destroy(smoke.gameObject, smoke.main.startLifetime.constantMax + 1f);
         Destroy(gameObject);

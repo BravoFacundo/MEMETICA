@@ -16,11 +16,21 @@ using UnityEngine;
 // Made by Memetica > Level > Portal > New Portal Window (where the Scene view looks), inside its island.
 // The camera above the hub only draws while you are near and it can be seen.
 [DefaultExecutionOrder(1000)]   // after the player and its camera moved this frame
+[SelectionBase]   // clicking any of its parts in the Scene view selects this
 public class PortalWindow : MonoBehaviour
 {
     [Section("Where It Leads")]
     [Tooltip("Where you land in the hub (a RespawnPoint: you look toward its arrow)")]
     public RespawnPoint exit;
+    [Tooltip("Come out at its level's own respawn point on the hub (the RespawnPoint kept in the level, not in an island), " +
+             "if it has one: you see where you came from. Off, or none: Exit")]
+    public bool exitAtLevelRespawn = true;
+    public enum ExitLook { PointsArrow, Opposite, SpinPlatform }
+    [Tooltip("Which way the other side faces (what you see through the window and where you look coming out): the " +
+             "spin platform (the hub's AimPlatform: your next goal), the opposite of Exit's arrow, or its arrow")]
+    public ExitLook exitLook = ExitLook.SpinPlatform;
+    [Tooltip("Coming out, you turn to face that way while your head looks up (whichever way you went in)")]
+    public bool turnToExit = true;
     [Tooltip("Meters above Exit you come out of the window (and fall from)")]
     public float exitHeight = 10f;
 
@@ -133,6 +143,8 @@ public class PortalWindow : MonoBehaviour
         sfx = MakeSource(false, 1f);
         flat = MakeSource(false, 0f);
 
+        if (exitAtLevelRespawn) UseLevelRespawn();
+        if (exit != null) exitFacing = FacingOf(exit);
         if (exit == null) { Debug.LogWarning($"[Portal] '{name}' has no Exit (a RespawnPoint in the hub).", this); }
         if (openAfter != null) Hide();
         else { state = State.Open; staticAmount = 0f; pixels = pixelate; StartHum(); }
@@ -145,6 +157,21 @@ public class PortalWindow : MonoBehaviour
         if (view != null) Destroy(view.gameObject);
         if (backView != null) Destroy(backView.gameObject);
         if (exitRoot != null) Destroy(exitRoot.gameObject);
+    }
+
+    // Its level's respawn point kept in the level (the one on the hub facing the level): the deepest level holding it
+    void UseLevelRespawn()
+    {
+        RespawnPoint best = null;
+        int bestDepth = -1;
+        foreach (RespawnPoint point in RespawnPoint.All)
+        {
+            if (point.LevelRoot == null || !transform.IsChildOf(point.LevelRoot)) continue;
+            int depth = 0;
+            for (Transform t = point.LevelRoot; t != null; t = t.parent) depth++;
+            if (depth > bestDepth) { bestDepth = depth; best = point; }
+        }
+        if (best != null) exit = best;
     }
 
     //---- Every frame
@@ -298,7 +325,23 @@ public class PortalWindow : MonoBehaviour
     //---- The view: a camera above the hub, where yours would be if this were a hole into that sky
 
     Vector3 ExitPosition => exit.transform.position + Vector3.up * exitHeight;
-    Quaternion ExitRotation => Quaternion.LookRotation(exit.Facing, Vector3.down);   // its face looks down at the hub
+    Quaternion ExitRotation => Quaternion.LookRotation(ExitFacing, Vector3.down);   // its face looks down at the hub
+
+    // Where the other side looks (Exit Look), level
+    private Vector3 exitFacing;
+    Vector3 ExitFacing => exitFacing.sqrMagnitude > 0.001f ? exitFacing : exit.Facing;
+
+    Vector3 FacingOf(RespawnPoint point)
+    {
+        if (exitLook == ExitLook.PointsArrow) return point.Facing;
+        if (exitLook == ExitLook.SpinPlatform)
+        {
+            AimPlatform spin = FindObjectOfType<AimPlatform>();
+            Vector3 toSpin = spin != null ? Vector3.ProjectOnPlane(spin.transform.position - point.transform.position, Vector3.up) : Vector3.zero;
+            if (toSpin.sqrMagnitude > 0.01f) return toSpin.normalized;
+        }
+        return -point.Facing;
+    }
 
     Vector3 MapPoint(Vector3 p) => ExitPosition + ExitRotation * (Flip * (Quaternion.Inverse(transform.rotation) * (p - transform.position)));
     Quaternion MapRotation(Quaternion r) => ExitRotation * Flip * Quaternion.Inverse(transform.rotation) * r;
@@ -419,7 +462,7 @@ public class PortalWindow : MonoBehaviour
         // Through: the same view, from above the hub
         Vector3 body = MapPoint(player.transform.position);
         Vector3 facing = Vector3.ProjectOnPlane(MapRotation(player.transform.rotation) * Vector3.forward, Vector3.up);
-        player.FallFrom(body, Quaternion.LookRotation(facing.sqrMagnitude > 1e-4f ? facing.normalized : exit.Facing, Vector3.up), speed, exit.transform);
+        player.FallFrom(body, Quaternion.LookRotation(facing.sqrMagnitude > 1e-4f ? facing.normalized : ExitFacing, Vector3.up), speed, exit.transform);
         if (outClip != null) flat.PlayOneShot(outClip);
         if (fallChange && CarriedWindow != null) player.AnnounceFall();   // the window you carry: its Fall change
         StartCoroutine(AfterLanding());
@@ -432,12 +475,15 @@ public class PortalWindow : MonoBehaviour
         // Looking up again while you fall (landing first: the slam takes the head from there)
         landed = false;
         PlayerMove.RespawnTouchedDown += OnLanded;
+        Quaternion fromTurn = player.transform.rotation, toTurn = Quaternion.LookRotation(ExitFacing, Vector3.up);
         for (float t = 0f; t < lookUpTime && !landed; t += Time.deltaTime)
         {
             float p = 1f - t / lookUpTime;
             look.SetPose(p * p, 0f, 0f);
+            if (turnToExit) player.transform.rotation = Quaternion.Slerp(fromTurn, toTurn, Mathf.SmoothStep(0f, 1f, 1f - p));   // turning to face it
             yield return null;
         }
+        if (turnToExit) player.transform.rotation = toTurn;   // (landed first: the slam hides the rest of the turn)
         PlayerMove.RespawnTouchedDown -= OnLanded;
         RespawnSlam slam = player.GetComponent<RespawnSlam>();
         if (landed && slam != null && slam.isActiveAndEnabled) yield break;   // (it locks and frees you itself)

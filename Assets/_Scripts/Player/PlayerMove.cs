@@ -266,12 +266,13 @@ public class PlayerMove : MonoBehaviour
     private void UpdateHorizontalVelocity()
     {
         if (Time.time < knockbackUntil) return;   // being thrown: no steering for a moment
-        Vector3 input = InputLocked ? Vector3.zero : transform.right * Input.GetAxis("Horizontal") + transform.forward * Input.GetAxis("Vertical");
+        Vector2 move = GameInput.Move;   // keys or left stick (GameInput: a drifting gamepad never walks you)
+        Vector3 input = InputLocked ? Vector3.zero : transform.right * move.x + transform.forward * move.y;
         input = Vector3.ClampMagnitude(input, 1f);   // diagonal is not faster
 
         if (isGrounded)
         {
-            airSpeed = Input.GetKey(KeyCode.LeftShift) ? runSpeed : walkSpeed;
+            airSpeed = GameInput.Run ? runSpeed : walkSpeed;
             horizontalVelocity = input * airSpeed;
         }
         else
@@ -283,7 +284,7 @@ public class PlayerMove : MonoBehaviour
 
     private void UpdateVerticalVelocity()
     {
-        if (Input.GetKeyDown(KeyCode.Space) && !InputLocked) lastJumpPressedTime = Time.time;
+        if (GameInput.JumpDown && !InputLocked) lastJumpPressedTime = Time.time;
 
         // Standing: no push into the ground (SnapToGround keeps it on it). Before: pressed down at 2 m/s every frame,
         // the controller crept a few mm per frame into the ground and got popped out 8 cm every ~10 frames

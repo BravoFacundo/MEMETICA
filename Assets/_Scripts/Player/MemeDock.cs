@@ -52,7 +52,7 @@ public class MemeDock : MonoBehaviour
 
     void Update()
     {
-        if (!PauseMenu.GameIsPaused && Input.GetKeyDown(key) && Carried != null) look.DropObject();
+        if (!PauseMenu.GameIsPaused && (Input.GetKeyDown(key) || GameInput.DropDown) && Carried != null) look.DropObject();
     }
 
     //---- In the hand (PlayerLook)

@@ -19,6 +19,7 @@ using UnityEngine;
 // With a PedestalRetire it is used once: right and its meme taken off, it goes into the ground (inactive) until it
 // comes back (or for good).
 [RequireComponent(typeof(AudioSource), typeof(SphereCollider))]
+[SelectionBase]   // clicking any of its parts in the Scene view selects this
 public class Pedestal : MonoBehaviour
 {
     [Section("Key")]

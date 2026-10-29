@@ -19,6 +19,8 @@ public class PlayerLook : MonoBehaviour
     public bool playerCanLook = true;   // the game starts looking (tutorial popups no longer block it)
     [Tooltip("Base sensitivity: the value at the middle of the settings slider (the slider scales it x0.25 to x4)")]
     public float mouseSensitivity = 3f;
+    [Tooltip("Gamepad: degrees per second the right stick turns you, all the way (the settings slider scales it too)")]
+    public float padLookSpeed = 160f;
     private float sensitivityMultiplier = 1f;   // from the settings window
     private float sensitivityReduction = 1;
     private float xRotation = 0f;
@@ -132,8 +134,9 @@ public class PlayerLook : MonoBehaviour
     private void MovePlayerView()
     {
         float sensitivity = mouseSensitivity * sensitivityMultiplier / sensitivityReduction;
-        float mouseX = Input.GetAxis("Mouse X") * sensitivity;
-        float mouseY = Input.GetAxis("Mouse Y") * sensitivity;
+        Vector2 stick = GameInput.LookStick * (padLookSpeed * sensitivityMultiplier / sensitivityReduction * Time.deltaTime);
+        float mouseX = GameInput.Mouse.x * sensitivity + stick.x;
+        float mouseY = GameInput.Mouse.y * sensitivity + stick.y;
 
         xRotation -= mouseY;
         xRotation = Mathf.Clamp(xRotation, -90f, 90f);
@@ -147,10 +150,7 @@ public class PlayerLook : MonoBehaviour
 
     private void ZoomOnPlayerView()
     {
-        if (Input.GetMouseButtonDown(1))
-            isZooming = true;
-        else if (Input.GetMouseButtonUp(1))
-            isZooming = false;
+        isZooming = GameInput.ZoomHeld;   // right click or a left trigger, held
 
         playerCamera.fieldOfView = Mathf.Lerp(playerCamera.fieldOfView, isZooming ? zoomFOV : defaultFOV, Time.deltaTime * zoomingSpeed);
         sensitivityReduction = isZooming ? 10 : 1;
@@ -169,7 +169,7 @@ public class PlayerLook : MonoBehaviour
         DexCollectible dex = LookingAtMeme ? hit.transform.GetComponentInParent<DexCollectible>() : null;
         CanGrabLooked = LookingAtMeme && (heldObject == null || dex != null);
 
-        if (Input.GetMouseButtonDown(0))
+        if (GameInput.GrabDown)
         {
             if (dex != null) dex.Collect();   // an optional meme: to its own HUD place, your hand stays as it is
             else if (heldObject == null) { if (LookingAtMeme) PickUpObject(hit.transform.gameObject); }

@@ -35,8 +35,10 @@ public class RespawnSlam : MonoBehaviour
     public float shake = 0.12f;
 
     [Section("Sounds")]
-    [Tooltip("One of them, at random (never the same twice in a row), on impact")]
-    public AudioClip[] sounds;
+    [Tooltip("Landing: one of them, at random (never the same twice in a row), on impact")]
+    [UnityEngine.Serialization.FormerlySerializedAs("sounds")] public AudioClip[] landingSounds;
+    [Tooltip("Falling: one of them, at random, as you start falling into the void (or out of a portal); cut on impact")]
+    public AudioClip[] fallingSounds;
     [Range(0f, 1f)] public float volume = 1f;
 
     private PlayerMove move;
@@ -51,6 +53,26 @@ public class RespawnSlam : MonoBehaviour
         source = gameObject.AddComponent<AudioSource>();
         source.playOnAwake = false;
         source.spatialBlend = 0f;   // your own fall: in your head
+        fallSource = gameObject.AddComponent<AudioSource>();
+        fallSource.playOnAwake = false;
+        fallSource.spatialBlend = 0f;
+    }
+
+    // Falling (into the void, or the respawn / portal fall until you touch down): its sound, once per fall
+    private AudioSource fallSource;
+    private bool wasFalling;
+    private int lastFall = -1;
+    void Update()
+    {
+        bool falling = (move.FallingIntoVoid || move.Respawning) && landing == null;
+        if (falling && !wasFalling && fallingSounds != null && fallingSounds.Length > 0)
+        {
+            int i = Random.Range(0, fallingSounds.Length);
+            if (fallingSounds.Length > 1 && i == lastFall) i = (i + 1) % fallingSounds.Length;
+            lastFall = i;
+            if (fallingSounds[i] != null) { fallSource.clip = fallingSounds[i]; fallSource.volume = volume; fallSource.Play(); }
+        }
+        wasFalling = falling;
     }
 
     void Start() => look = Camera.main.GetComponent<PlayerLook>();
@@ -70,6 +92,7 @@ public class RespawnSlam : MonoBehaviour
 
     void Land()
     {
+        if (fallSource != null) fallSource.Stop();   // the landing sound takes over
         if (landing != null) StopCoroutine(landing);
         landing = StartCoroutine(Landing());
     }
@@ -125,11 +148,11 @@ public class RespawnSlam : MonoBehaviour
 
     void PlaySound()
     {
-        if (sounds == null || sounds.Length == 0) return;
-        int i = Random.Range(0, sounds.Length);
-        if (sounds.Length > 1 && i == lastSound) i = (i + 1) % sounds.Length;
+        if (landingSounds == null || landingSounds.Length == 0) return;
+        int i = Random.Range(0, landingSounds.Length);
+        if (landingSounds.Length > 1 && i == lastSound) i = (i + 1) % landingSounds.Length;
         lastSound = i;
-        if (sounds[i] != null) source.PlayOneShot(sounds[i], volume);
+        if (landingSounds[i] != null) source.PlayOneShot(landingSounds[i], volume);
     }
 
     static float EaseOutBack(float p)

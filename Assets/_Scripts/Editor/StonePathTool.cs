@@ -334,6 +334,22 @@ public static class StonePathTool
 
     //---- Enabled only with a stone path selected
 
+    // Every bridge's anchors (stone paths and the rest) get a small sphere you can see and click (AnchorMarker)
+    [MenuItem(Menu + "Mark Bridge Anchors", false, 335)]
+    static void MarkAnchors()
+    {
+        int made = 0;
+        foreach (Bridge bridge in Object.FindObjectsOfType<Bridge>(true))
+            foreach (Transform anchor in new[] { bridge.anchorA, bridge.anchorB })
+                if (anchor != null && !anchor.TryGetComponent(out AnchorMarker _))
+                {
+                    Undo.AddComponent<AnchorMarker>(anchor.gameObject);
+                    EditorSceneManager.MarkSceneDirty(anchor.gameObject.scene);
+                    made++;
+                }
+        Debug.Log($"[StonePath] {made} bridge anchor(s) marked (an orange sphere: click it to select it).");
+    }
+
     [MenuItem(Menu + "Generate Stones", true)]
     [MenuItem(Menu + "Create Anchors", true)]
     [MenuItem(Menu + "Sort Stones", true)]

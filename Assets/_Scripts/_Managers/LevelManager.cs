@@ -35,6 +35,15 @@ public class LevelManager : MonoBehaviour
     [Tooltip("Pedestals with In Order: seconds between one thing arriving and the next one starting")]
     public float sequenceGap = 0.3f;
 
+    [Section("Platforms")]
+    [Tooltip("Speed of every stone's motion and fall (Slide, Hop, Blink, Fall): under 1 slower and easier, over 1 faster " +
+             "and harder. It can change while playing (an admin console: LevelManager.SetPlatformSpeed)")]
+    [Range(0.25f, 2f)] public float platformSpeed = 1f;
+
+    // The stones read it every frame (1 without a LevelManager)
+    public static float PlatformSpeed => Instance != null ? Mathf.Max(Instance.platformSpeed, 0.01f) : 1f;
+    public static void SetPlatformSpeed(float speed) { if (Instance != null) Instance.platformSpeed = Mathf.Clamp(speed, 0.25f, 2f); }
+
     [Section("Debug", Closed = true)]
     [Tooltip("Scene view: a shadow of each island and bridge where it waits hidden, and the line you fall from above each RespawnPoint")]
     public bool showDropGizmos = true;

@@ -17,6 +17,7 @@ using UnityEngine;
 [ExecuteAlways]
 [DefaultExecutionOrder(-5)]   // after FloatMotion moved the islands, before the player follows the stones
 [RequireComponent(typeof(Bridge))]
+[SelectionBase]   // clicking any of its parts in the Scene view selects this
 public class StonePath : MonoBehaviour
 {
     [Section("Curve")]
@@ -64,6 +65,22 @@ public class StonePath : MonoBehaviour
     public bool tint = true;
     public Color safeColor = new Color(0.85f, 0.85f, 0.85f);
     public Color interactiveColor = new Color(0.55f, 0.55f, 0.58f);
+    [Tooltip("Stones that slide or hop leave a trail while they move, so you can read where they go (not Blink: it jumps)")]
+    public bool trails = true;
+    [Tooltip("Seconds the trail lasts behind the stone")]
+    public float trailSeconds = 1f;
+    [Tooltip("Meters wide at the stone (it thins to nothing)")]
+    public float trailThickness = 0.9f;
+    [Tooltip("Meters below the stone's middle it comes out (inside the model, so only the part behind it shows)")]
+    public float trailDrop = 0.25f;
+    public Color trailTint = new Color(0.3f, 0.3f, 0.32f, 0.6f);   // the dark grey of the moving stones
+    [Tooltip("Fall stones: the color they pulse to while warning (stepped on, about to drop)")]
+    public Color crackColor = new Color(0.35f, 0.2f, 0.15f);
+    [Tooltip("Fall stones: cracks that appear on top while warning (a PNG with transparency, e.g. Art/Textures/Decal_CrackedStone). Empty: none")]
+    public Texture2D crackDecal;
+    [Tooltip("Fall stones: pieces that break off as they drop (small rock prefabs, e.g. _Prefabs/Effects/RockDebriesSmall). Empty: none")]
+    public GameObject[] fallDebris;
+    public int fallDebrisCount = 5;
 
     [Section("Appearance (stone by stone)")]
     [Tooltip("Seconds each stone takes to rise")]
@@ -74,6 +91,8 @@ public class StonePath : MonoBehaviour
     public float overshoot = 0.3f;
     [Tooltip("Meters below its place a stone waits hidden")]
     public float riseDrop = 15f;
+    [Tooltip("Once all are up: seconds between one moving stone starting its motion and the next, in order (0: all at once)")]
+    public float startGap = 0.35f;
     [Tooltip("Seconds each stone takes to sink when the bridge goes away")]
     public float sinkTime = 0.7f;
     public AudioClip stoneRiseClip;
@@ -238,8 +257,8 @@ public class StonePath : MonoBehaviour
 
     //---- Appearing (Bridge)
 
-    // One after another from A, rising from below
-    // Rising stone by stone (its moving stones wait until it is all up)
+    // One after another from A, rising from below. Once all are up, its moving stones start their motion one after
+    // another, in the same order (Start Gap): first the path appears, then it comes alive
     public bool Appearing { get; private set; }
 
     public IEnumerator RiseWave()
@@ -247,6 +266,7 @@ public class StonePath : MonoBehaviour
         Init();
         Appearing = true;
         List<PathStone> list = stones;
+        foreach (PathStone stone in list) stone.Started = !stone.Moves;   // (the moving ones wait for their turn)
         for (int i = 0; i < list.Count; i++)
         {
             list[i].Rise(riseTime, overshoot, riseDrop);
@@ -255,6 +275,15 @@ public class StonePath : MonoBehaviour
         }
         while (list.Exists(s => s.IsRising)) yield return null;
         Appearing = false;
+
+        bool first = true;
+        foreach (PathStone stone in list)
+        {
+            if (stone.Started) continue;
+            if (!first && startGap > 0f) yield return new WaitForSeconds(startGap);
+            stone.Started = true;
+            first = false;
+        }
     }
 
     // From the last one back, sinking into the void
@@ -389,13 +418,24 @@ public class StonePath : MonoBehaviour
 
     // Editing: its anchors are where its end stones are (made the first time, inside the island under each end, its
     // floating part): move an end stone and its anchor goes with it, into the island it is now on
+    // Only when an end stone moved (or an anchor is missing): an anchor moved by hand stays where you put it, and nothing
+    // is touched (or marked unsaved) while you aren't moving the ends
+    [System.NonSerialized] private Vector3 lastEndA, lastEndB;
+    [System.NonSerialized] private bool endsKnown;
+
     void FollowEnds()
     {
         if (!gameObject.scene.IsValid() || UnityEditor.EditorUtility.IsPersistent(this) || !TryGetComponent(out Bridge bridge)) return;
         List<PathStone> list = Stones;
         if (list.Count < 2) return;
-        Transform a = Follow(bridge, bridge.anchorA, list[0].transform, "A");
-        Transform b = Follow(bridge, bridge.anchorB, list[list.Count - 1].transform, "B");
+        Vector3 endA = list[0].transform.position, endB = list[list.Count - 1].transform.position;
+        if (!endsKnown) { endsKnown = true; lastEndA = endA; lastEndB = endB; }   // (just loaded: as they are)
+        bool movedA = (endA - lastEndA).sqrMagnitude > 1e-6f || bridge.anchorA == null;
+        bool movedB = (endB - lastEndB).sqrMagnitude > 1e-6f || bridge.anchorB == null;
+        lastEndA = endA; lastEndB = endB;
+        if (!movedA && !movedB) return;
+        Transform a = movedA ? Follow(bridge, bridge.anchorA, list[0].transform, "A") : bridge.anchorA;
+        Transform b = movedB ? Follow(bridge, bridge.anchorB, list[list.Count - 1].transform, "B") : bridge.anchorB;
         if (a == bridge.anchorA && b == bridge.anchorB) return;
         UnityEditor.Undo.RecordObject(bridge, "Stone Path Anchors");
         bridge.anchorA = a;

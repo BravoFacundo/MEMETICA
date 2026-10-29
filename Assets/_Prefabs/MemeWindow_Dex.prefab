@@ -98,7 +98,7 @@ GameObject:
   - component: {fileID: 2182700330342510938}
   - component: {fileID: 7368252041600449344}
   m_Layer: 0
-  m_Name: MemeDex_Window
+  m_Name: MemeWindow_Dex
   m_TagString: Meme
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -586,7 +586,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: 0.0979, y: 0.2641}
+  m_AnchoredPosition: {x: 0.1, y: 0.2641}
   m_SizeDelta: {x: 0.3768, y: 0.0526}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!23 &4990046279187551813

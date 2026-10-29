@@ -10,7 +10,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 768287d2d584491684181bc8170d860d, type: 3}
-  m_Name: Mode_Data
+  m_Name: MemeData_94_Fashion
   m_EditorClassIdentifier: 
   title: Fashion
   baseImage:

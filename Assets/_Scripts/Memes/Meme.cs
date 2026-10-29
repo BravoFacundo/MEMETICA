@@ -16,6 +16,7 @@ using UnityEngine;
 // Object name: Meme_<ID> (e.g. Meme_3Aa). Pedestals compare their Key ID with that ID: the ID is the orb's place in
 // the level, the meme in it (MemeData) can be any. Data: a fixed one, or a spare from a MemeGroup (Reserve Slot).
 [RequireComponent(typeof(Rigidbody))]
+[SelectionBase]   // clicking any of its parts in the Scene view selects this
 public class Meme : MonoBehaviour
 {
     public const string NamePrefix = "Meme_";
@@ -51,6 +52,7 @@ public class Meme : MonoBehaviour
     private static PlayerMove player;
     private static readonly System.Collections.Generic.List<Meme> all = new System.Collections.Generic.List<Meme>();
     private float lastGroundY;
+    private float lastIslandY;   // the last island ground under it (a safety net: far below it, it is lost)
 
     // "Meme_3Aa" → "3Aa". Everything after the first "_", so old names ("Orb_3Aa") still work
     public static string IDOf(GameObject meme)
@@ -78,9 +80,12 @@ public class Meme : MonoBehaviour
         Data = reserveGroup != null ? reserveGroup.Reserve(reserveSlot) ?? data : data;
         body = GetComponent<Rigidbody>();
         groundMask = LayerMask.GetMask("Ground");
-        lastGroundY = transform.position.y;
+        lastGroundY = lastIslandY = transform.position.y;
         ownInterpolation = body.interpolation;
         HoldOnStartIsland();
+        homeParent = transform.parent;
+        homePosition = transform.localPosition;
+        homeRotation = transform.localRotation;
     }
 
     // On an island in the scene (its child, or resting on it): put down on its ground and held still, part of the island,
@@ -216,6 +221,62 @@ public class Meme : MonoBehaviour
         FreezeWhenRestingOnGround();
         TrackGround();
         CheckFall();
+        CheckLost();
+        IgnorePlayer();
+    }
+
+    // The player never stands on a meme nor gets pushed up by one (dropping the window and jumping on it broke the
+    // parkour): their collisions are ignored. Again every frame, because Unity forgets it when a collider is turned
+    // off and on (carried, on a pedestal, a meteor…). Grabbing still works (it is a ray)
+    private static CharacterController playerBody;
+    private static float nextPlayerLookup;
+    private Collider[] ownColliders;
+    private void IgnorePlayer()
+    {
+        if (playerBody == null)
+        {
+            if (Time.time < nextPlayerLookup) return;
+            nextPlayerLookup = Time.time + 1f;
+            PlayerMove player = FindObjectOfType<PlayerMove>();
+            if (player == null || !player.TryGetComponent(out playerBody)) return;
+        }
+        if (ownColliders == null) ownColliders = GetComponentsInChildren<Collider>(true);
+        foreach (Collider c in ownColliders)
+            if (c != null && c.enabled && !c.isTrigger) Physics.IgnoreCollision(playerBody, c, true);
+    }
+
+    // Instead of coming back as a meteor, it goes back where it was placed (an optional meme, DexCollectible)
+    protected virtual bool ReturnsHome => false;
+    private Transform homeParent;
+    private Vector3 homePosition;
+    private Quaternion homeRotation;
+
+    private void GoHome()
+    {
+        body.velocity = Vector3.zero;
+        body.angularVelocity = Vector3.zero;
+        AttachStill();
+        body.constraints = RigidbodyConstraints.FreezeAll;
+        startIsland = null;
+        transform.SetParent(homeParent, false);
+        transform.localPosition = homePosition;
+        transform.localRotation = homeRotation;
+        lastGroundY = lastIslandY = transform.position.y;
+    }
+
+    // Safety net: far below the last island it was on (whatever kept it from respawning: it fell onto something down
+    // there, or it was stuck), it comes back as a meteor. Says why in the console
+    private void CheckLost()
+    {
+        if (IsHeld || CurrentPedestal != null || meteor != null || LevelManager.Instance == null) return;
+        if (MemeRecall.Instance != null && MemeRecall.Instance.IsBringing) return;   // (flying to you)
+        float below = lastIslandY - transform.position.y;
+        if (below < LevelManager.Instance.dropDistance + 5f) return;
+        string on = Physics.Raycast(transform.position, Vector3.down, out RaycastHit hit, 3f, ~0, QueryTriggerInteraction.Ignore) ? hit.collider.name : "nothing";
+        Debug.LogWarning($"[Meme] '{name}' is {below:F0} m below its last island (kinematic {body.isKinematic}, constraints {body.constraints}, " +
+                         $"parent '{(transform.parent != null ? transform.parent.name : "none")}', on '{on}', last ground {lastGroundY:F1}): respawning it.", this);
+        lastGroundY = transform.position.y + LevelManager.Instance.dropDistance;   // (Respawn's own checks)
+        Respawn();
     }
 
     // In the hand, the player's fall is its fall too (it travels with them)
@@ -309,6 +370,7 @@ public class Meme : MonoBehaviour
 
         if (!Physics.Raycast(transform.position, Vector3.down, out RaycastHit hit, 5f, ~0, QueryTriggerInteraction.Ignore)) return;
         lastGroundY = hit.point.y;
+        if (FindParentWithTag(hit.transform, "Isla") != null || hit.transform.GetComponentInParent<Island>() != null) lastIslandY = hit.point.y;
         if (hit.transform == lastGroundHit) return;   // still over the same thing
         lastGroundHit = hit.transform;
 
@@ -356,6 +418,8 @@ public class Meme : MonoBehaviour
     {
         // Its island went down meanwhile (invisible, nothing to land on): to the start
         if (Lift.IsHiddenAt(respawnPoint)) { respawnPoint = LevelManager.Instance.startRespawnPoint; lastIsland = null; lastGroundHit = null; }
+        if (respawnPoint == null) { Debug.LogWarning($"[Meme] '{name}' fell but has no respawn point (and no Start Respawn Point in the LevelManager).", this); return; }
+        if (ReturnsHome) { GoHome(); return; }
         if (respawnPoint == null || meteor != null) return;
         meteor = StartCoroutine(MeteorFall());
     }
@@ -411,7 +475,7 @@ public class Meme : MonoBehaviour
         body.isKinematic = false;
         body.constraints = RigidbodyConstraints.None;
         body.velocity = (landing - start).normalized * 2f;   // a little roll after the hit
-        lastGroundY = landing.y;
+        lastGroundY = lastIslandY = landing.y;
         groundedTime = 0f;
         trail.emitting = false;
         OnFell(false);

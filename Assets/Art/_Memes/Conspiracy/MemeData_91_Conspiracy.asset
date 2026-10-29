@@ -10,49 +10,63 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 768287d2d584491684181bc8170d860d, type: 3}
-  m_Name: Cons_Data
+  m_Name: MemeData_91_Conspiracy
   m_EditorClassIdentifier: 
   title: Conspiracy
   baseImage:
+    windowTitle: Illuminati.jpg
     picture: {fileID: 2800000, guid: e76bb6124c1c98347b365b3c85e3ea2c, type: 3}
     video: {fileID: 0}
     sound: {fileID: 0}
     loop: 0
+    fill: 0
+  videoStart: 0
+  fillAll: 0
   fall:
+    windowTitle: ALIENS!.png
     picture: {fileID: 2800000, guid: 5016f003add5a1b478eff00bc693be6d, type: 3}
     video: {fileID: 0}
     sound: {fileID: 8300000, guid: f7a68b2c49764c245a6690353d27e214, type: 3}
     loop: 0
+    fill: 0
   leave:
+    windowTitle: 
     picture: {fileID: 2800000, guid: 1755d3d45307dcc40b12a5717e78c6ba, type: 3}
     video: {fileID: 0}
     sound: {fileID: 8300000, guid: 4984eb64a9753c947b6f02f48b140ae9, type: 3}
     loop: 0
+    fill: 1
   variants:
-  - picture: {fileID: 2800000, guid: 1178209fbb6cb4d468a40d1fe1e2cef6, type: 3}
+  - windowTitle: 
+    picture: {fileID: 2800000, guid: 1178209fbb6cb4d468a40d1fe1e2cef6, type: 3}
     video: {fileID: 0}
     sound: {fileID: 8300000, guid: d85c97f74900a114694052705337c34a, type: 3}
     loop: 0
-  - picture: {fileID: 2800000, guid: bfb27ed6b9bade648b941f075ca6e218, type: 3}
+    fill: 0
+  - windowTitle: 
+    picture: {fileID: 2800000, guid: bfb27ed6b9bade648b941f075ca6e218, type: 3}
     video: {fileID: 0}
     sound: {fileID: 0}
     loop: 0
-  - picture: {fileID: 2800000, guid: 6935aa4a307bf0a4799b3c4764e8aa19, type: 3}
+    fill: 0
+  - windowTitle: 
+    picture: {fileID: 2800000, guid: 6935aa4a307bf0a4799b3c4764e8aa19, type: 3}
     video: {fileID: 0}
     sound: {fileID: 8300000, guid: c31e3b536107c5e4fbf5e4fcfec412f3, type: 3}
     loop: 0
-  - picture: {fileID: 2800000, guid: 6a7edc7e95520404887f87a6ce235df3, type: 3}
+    fill: 0
+  - windowTitle: 
+    picture: {fileID: 2800000, guid: 6a7edc7e95520404887f87a6ce235df3, type: 3}
     video: {fileID: 0}
     sound: {fileID: 8300000, guid: 43c7f4a1bf78d6945becce00fc3849d4, type: 3}
     loop: 0
-  - picture: {fileID: 2800000, guid: b2da94c5abcd0074bb184e3c25d5f93d, type: 3}
+    fill: 0
+  - windowTitle: 
+    picture: {fileID: 2800000, guid: b2da94c5abcd0074bb184e3c25d5f93d, type: 3}
     video: {fileID: 0}
     sound: {fileID: 0}
     loop: 0
-  - picture: {fileID: 2800000, guid: 220b7903ea6dd77419df2a552cf06b27, type: 3}
-    video: {fileID: 0}
-    sound: {fileID: 8300000, guid: b4ef2618e149afc44808fe15a8a17bff, type: 3}
-    loop: 0
+    fill: 0
   fallbackSound: {fileID: 8300000, guid: ff1303f059277f348ae9bc0f9e7f5bd4, type: 3}
   fallbackSounds: []
   moveSounds: []

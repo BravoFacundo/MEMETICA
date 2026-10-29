@@ -105,6 +105,14 @@ public class DebugTools : MonoBehaviour
         pendingStart = -1;
         selectedStart = Mathf.Max(index, 0);
         if (index >= 0 && index < starts.Length) StartCoroutine(ApplyStart(starts[index]));
+        if (AllIslandsUp) StartCoroutine(AllBridgesUp());
+    }
+
+    // All Islands Up: the bridges too (and their stones), once everything started
+    System.Collections.IEnumerator AllBridgesUp()
+    {
+        yield return null;
+        foreach (Bridge bridge in FindObjectsOfType<Bridge>()) bridge.SnapUp();
     }
 
     void Update()

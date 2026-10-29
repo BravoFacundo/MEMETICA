@@ -10,7 +10,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 768287d2d584491684181bc8170d860d, type: 3}
-  m_Name: MemeData_TrollFace
+  m_Name: MemeData_01_TrollFace
   m_EditorClassIdentifier: 
   title: TrollFace
   baseImage:
@@ -54,7 +54,7 @@ MonoBehaviour:
     video: {fileID: 0}
     sound: {fileID: 8300000, guid: f985da15fd5633242b25be6acabc792a, type: 3}
     loop: 0
-    fill: 0
+    fill: 1
   - windowTitle: Reportado maquinola
     picture: {fileID: 2800000, guid: a2ad197ef92c8aa42ab706a389b77ea7, type: 3}
     video: {fileID: 0}

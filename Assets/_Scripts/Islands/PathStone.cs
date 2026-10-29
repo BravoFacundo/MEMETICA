@@ -15,6 +15,7 @@ using UnityEngine;
 // Its look is a child, Model: one of the StonePath's Models, picked here (Model).
 // StonePath places it every frame (its place on the path + what it is doing now), so it floats with the islands.
 [ExecuteAlways]
+[SelectionBase]   // clicking any of its parts in the Scene view selects this
 public class PathStone : MonoBehaviour
 {
     public enum Motion { None, Fall, Slide, Hop, Blink }
@@ -68,6 +69,8 @@ public class PathStone : MonoBehaviour
     public float Down { get; private set; }       // meters below its place (rising with the path, falling)
     public Vector3 Shake { get; private set; }    // the warning before a fall
     public bool IsPresent { get; private set; } = true;
+    // Its motion may run (StonePath's rise wave: the moving stones start one after another once the path is up)
+    public bool Started { get; set; } = true;
     public bool Moves => (motion == Motion.Slide || motion == Motion.Hop || motion == Motion.Blink) && PointCount > 1;
     int PointCount => 1 + shadows.Count;
 
@@ -108,6 +111,8 @@ public class PathStone : MonoBehaviour
         audioSource.playOnAwake = false;
         AudioManager.SetUp(audioSource, AudioManager.World.Stone);   // heard near, not from the next course
 
+        if (Moves && motion != Motion.Blink && path != null && path.trails) MakeTrail();
+
         // Its route, already Start Phase along (from its last point, backwards, if Start At End)
         timer = WaitTime();
         if (startAtEnd && Moves) goToEnd = true;   // (once its bridge is up: it rises in its own place)
@@ -119,11 +124,47 @@ public class PathStone : MonoBehaviour
     public void Tick()
     {
         Down = riseDown + fallDown;   // (hidden too: it waits down there, so it never shows a frame up in its place)
+        bool settling = rising != null || (path != null && path.Appearing) || !Started;   // its bridge still rising, or not its turn: it waits in place
+        SetTrail(IsPresent && !settling && fallState == FallState.Resting);
         if (!IsPresent) return;
-        bool settling = rising != null || (path != null && path.Appearing);   // its bridge still rising: it waits in place
         if (Moves && !settling && goToEnd) GoToEnd();
-        if (Moves && !settling) Advance(Time.deltaTime);
+        if (Moves && !settling) Advance(Time.deltaTime * LevelManager.PlatformSpeed);   // (Platform Speed: the whole route, waits too)
         else if (!Moves) { From = To = 0; Progress = 0f; }
+    }
+
+    //---- Trail (StonePath > Look: only while it is up and moving its route)
+
+    private TrailRenderer trail;
+    private static Material trailMaterial;
+
+    void MakeTrail()
+    {
+        var holder = new GameObject("Trail").transform;   // a bit down, inside the model
+        holder.SetParent(transform, false);
+        holder.position = transform.position + Vector3.down * path.trailDrop;
+        trail = holder.gameObject.AddComponent<TrailRenderer>();
+        if (trailMaterial == null) trailMaterial = new Material(Shader.Find("Sprites/Default")) { name = "StoneTrail" };
+        trail.sharedMaterial = trailMaterial;
+        trail.time = path.trailSeconds;
+        trail.minVertexDistance = 0.1f;
+        trail.widthMultiplier = path.trailThickness;
+        trail.widthCurve = AnimationCurve.Linear(0f, 1f, 1f, 0f);
+        Color tint = path.trailTint;
+        var gradient = new Gradient();
+        gradient.SetKeys(new[] { new GradientColorKey(tint, 0f), new GradientColorKey(tint, 1f) },
+                         new[] { new GradientAlphaKey(tint.a, 0f), new GradientAlphaKey(0f, 1f) });
+        trail.colorGradient = gradient;
+        trail.shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.Off;
+        trail.receiveShadows = false;
+        trail.emitting = false;
+    }
+
+    // On: it starts fresh (no line from where it rose or waited hidden)
+    void SetTrail(bool on)
+    {
+        if (trail == null || trail.emitting == on) return;
+        if (on) trail.Clear();
+        trail.emitting = on;
     }
 
     // Start At End, once up: to its last point while the others wait at theirs, then on at once, backwards
@@ -212,7 +253,7 @@ public class PathStone : MonoBehaviour
     {
         IsPresent = present;
         foreach (Renderer r in renderers) if (r != null) r.enabled = present;
-        SetSolid(present && fallState != FallState.Falling && fallState != FallState.Down);
+        SetSolid(present && fallState == FallState.Resting);
     }
 
     // From Drop meters below to its place, passing it a little (Overshoot) and settling
@@ -309,10 +350,11 @@ public class PathStone : MonoBehaviour
         Play(s.crackClip);
         if (s.cameraShakeAmount > 0f && Camera.main != null && Camera.main.TryGetComponent(out PlayerLook look))
             look.StartCoroutine(look.ShakeTheCamera(0.15f, s.cameraShakeAmount));
-        for (float t = 0f; t < s.warningTime; t += Time.deltaTime)
+        for (float t = 0f; t < s.warningTime; t += Time.deltaTime * LevelManager.PlatformSpeed)
         {
             Vector2 jitter = Random.insideUnitCircle * s.shakeAmount;
             Shake = new Vector3(jitter.x, 0f, jitter.y);
+            Crack(Mathf.Clamp01(t / Mathf.Max(s.warningTime * 0.6f, 0.01f)));   // the cracks open up
             yield return null;
         }
         Shake = Vector3.zero;
@@ -320,26 +362,31 @@ public class PathStone : MonoBehaviour
         fallState = FallState.Falling;
         SetSolid(false);   // whoever is on it falls through
         Play(s.fallClip);
+        if (path != null && path.fallDebris != null && path.fallDebris.Length > 0)
+            DebrisBurst.Spawn(path.fallDebris, path.fallDebrisCount, transform.position, Vector3.down, 2f, 0.6f);
         float speed = 0f;
         while (fallDown < depth)
         {
-            speed = Mathf.Min(speed + s.fallAcceleration * Time.deltaTime, s.maxFallSpeed);
+            speed = Mathf.Min(speed + s.fallAcceleration * Time.deltaTime, s.maxFallSpeed);   // (the drop itself: real gravity)
             fallDown = Mathf.Min(fallDown + speed * Time.deltaTime, depth);
             yield return null;
         }
 
         fallState = FallState.Down;
-        yield return new WaitForSeconds(s.returnDelay);
+        for (float t = 0f; t < s.returnDelay; t += Time.deltaTime * LevelManager.PlatformSpeed) yield return null;
 
         fallState = FallState.Rising;
-        SetSolid(true);
+        Crack(0f);
         Play(s.riseClip);
         while (fallDown > 0f)
         {
-            fallDown = Mathf.MoveTowards(fallDown, 0f, s.riseSpeed * Time.deltaTime);
+            fallDown = Mathf.MoveTowards(fallDown, 0f, s.riseSpeed * LevelManager.PlatformSpeed * Time.deltaTime);
             yield return null;
         }
+        while (PlayerInside()) yield return null;   // someone inside it (jumped on it while it rose): solid once they are out
+        SetSolid(true);   // only once back in its place (rising, it never catches someone falling)
         fallState = FallState.Resting;
+        ApplyColor();   // its own color again
         falling = null;
     }
 
@@ -367,6 +414,89 @@ public class PathStone : MonoBehaviour
         if (count > MaxVoices) return;
         audioSource.pitch = 1f + Random.Range(-PitchRange, PitchRange);
         audioSource.PlayOneShot(clip, (count == 1 ? 1f : ExtraVolume) * AudioManager.WorldVolume);
+    }
+
+    // Cracks (StonePath > Crack Decal), 0 none, 1 fully cracked. On the stone's own material when it is Memetica/Stone
+    // (the cracks are part of the stone, at any size); else a flat quad over the model
+    private Renderer crack;
+    private static Material crackMaterial;
+    private static readonly int CrackId = Shader.PropertyToID("_Crack"), CrackTexId = Shader.PropertyToID("_CrackTex"),
+                                CrackFitId = Shader.PropertyToID("_CrackFit");
+    private float crackTurn = -1f;   // (< 0: not picked yet)
+    void Crack(float amount)
+    {
+        if (path == null || path.crackDecal == null) return;
+        bool onMaterial = false;
+        var stoneBlock = new MaterialPropertyBlock();
+        foreach (Renderer r in renderers)
+        {
+            if (r == null || r is TrailRenderer || r.sharedMaterial == null || !r.sharedMaterial.HasProperty(CrackId)) continue;
+            r.GetPropertyBlock(stoneBlock);
+            stoneBlock.SetTexture(CrackTexId, path.crackDecal);
+            stoneBlock.SetFloat(CrackId, amount);
+            if (crackTurn < 0f) crackTurn = Random.Range(0f, Mathf.PI * 2f);   // each stone its own way
+            Vector3 middle = r.bounds.center - r.transform.position;   // its top's middle from the model's origin
+            stoneBlock.SetVector(CrackFitId, new Vector4(middle.x, Mathf.Min(r.bounds.size.x, r.bounds.size.z), middle.z, crackTurn));
+            r.SetPropertyBlock(stoneBlock);
+            onMaterial = true;
+        }
+        if (onMaterial) return;
+        if (crack == null)
+        {
+            if (amount <= 0f) return;
+            Bounds b = default;
+            bool any = false;
+            foreach (Renderer r in renderers) if (r != null && !(r is TrailRenderer)) { if (!any) { b = r.bounds; any = true; } else b.Encapsulate(r.bounds); }
+            if (!any) return;
+            GameObject quad = GameObject.CreatePrimitive(PrimitiveType.Quad);
+            quad.name = "Cracks";
+            Destroy(quad.GetComponent<Collider>());
+            quad.transform.SetPositionAndRotation(new Vector3(b.center.x, b.max.y + 0.01f, b.center.z), Quaternion.Euler(90f, Random.Range(0f, 360f), 0f));
+            float size = Mathf.Min(b.size.x, b.size.z);
+            quad.transform.localScale = new Vector3(size, size, 1f);
+            quad.transform.SetParent(transform, true);
+            if (crackMaterial == null) crackMaterial = new Material(Shader.Find("Sprites/Default")) { name = "StoneCracks" };
+            crack = quad.GetComponent<Renderer>();
+            crack.sharedMaterial = crackMaterial;
+            crack.shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.Off;
+        }
+        crack.enabled = amount > 0f;
+        var block = new MaterialPropertyBlock();
+        block.SetTexture("_MainTex", path.crackDecal);
+        block.SetColor("_Color", new Color(1f, 1f, 1f, amount));
+        crack.SetPropertyBlock(block);
+    }
+
+    // The player overlaps the stone's look (made solid now, they would be stuck inside it)
+    private static CharacterController playerBody;
+    bool PlayerInside()
+    {
+        if (playerBody == null)
+        {
+            PlayerMove player = FindObjectOfType<PlayerMove>();
+            if (player == null || !player.TryGetComponent(out playerBody)) return false;
+        }
+        Bounds stone = default;
+        bool any = false;
+        foreach (Renderer r in renderers)
+            if (r != null && !(r is TrailRenderer)) { if (!any) { stone = r.bounds; any = true; } else stone.Encapsulate(r.bounds); }
+        if (!any) return false;
+        stone.Expand(0.1f);
+        return stone.Intersects(playerBody.bounds);
+    }
+
+    // Its look in this color now (the warning before a fall)
+    void Tint(Color color)
+    {
+        if (path == null || !path.tint) return;
+        var block = new MaterialPropertyBlock();
+        foreach (Renderer r in renderers)
+        {
+            if (r == null || r is TrailRenderer) continue;
+            r.GetPropertyBlock(block);
+            block.SetColor("_Color", color);
+            r.SetPropertyBlock(block);
+        }
     }
 
     // Safe ones light grey, every interactive one the same darker grey (StonePath > Look)

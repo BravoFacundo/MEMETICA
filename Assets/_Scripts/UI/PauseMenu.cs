@@ -46,7 +46,7 @@ public class PauseMenu : MonoBehaviour
 
     void Update()
     {
-        if (Input.GetKeyDown(KeyCode.Escape) || Input.GetKeyDown(KeyCode.P))
+        if (GameInput.PauseDown)   // Esc, P or a gamepad's Start
         {
             if (GameIsPaused) Resume();
             else Pause();

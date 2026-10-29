@@ -328,8 +328,9 @@ public abstract class MemeChanger : Meme
     }
 
     // Changes Once (Game): every change shows only once per meme (Fall, Leave, each Move), and no random mutations.
-    // The Move an island gives comes from its number: Island_11 → Move 1, Island_12 → 2, Island_13 → 3 (its last digit);
-    // the target island (a name, no number: Island_Troll) → the last Move; with a letter (Island_1A, optional) → none.
+    // The Move an island gives comes from its number: Island_11 → Move 1, Island_12 → 2, Island_13 → 3 (its last digit).
+    // The target island is named as the meme's axis (MemeData > Meme > Title: TrollFace → Island_TrollFace; case and
+    // spaces don't matter) → the last Move. Any other name (Island_HUB, Island_Tutorial, Island_1A optional) → none.
     // The hub, the tutorial and optional islands (IslandRole) never give one. Going back: nothing again.
     // Game_Old (MemeOrb): as before (one more for the random pick on each new island)
     protected virtual bool ChangesOnce => false;
@@ -338,20 +339,26 @@ public abstract class MemeChanger : Meme
     {
         if (island == null || !Meme.Unlocks(island)) return;
         int moves = Mathf.Min(Data.variants.Count, MemeDex.Instance != null ? MemeDex.Instance.movesPerAxis : 4);
-        int move = MoveOf(island.name, moves);
+        int move = IsTarget(island.name) ? moves : MoveOf(island.name);
         if (move < 1 || move > moves || !MemeImage.Exists(Data.variants[move - 1]) || !movesSeen.Add(move)) return;
         ShowChange(Data.variants[move - 1]);
     }
 
-    // From its name, after the last '_': digits → the last one; only letters (more than one) → the last Move; else 0
-    public static int MoveOf(string islandName, int lastMove)
+    // Named as its axis: Island_<Title>
+    bool IsTarget(string islandName)
+    {
+        if (Data == null || string.IsNullOrEmpty(Data.title)) return false;
+        string id = islandName.Substring(islandName.LastIndexOf('_') + 1);
+        return string.Equals(id.Replace(" ", ""), Data.title.Replace(" ", ""), System.StringComparison.OrdinalIgnoreCase);
+    }
+
+    // From its name, after the last '_': only digits → the last one; anything else → 0 (none)
+    public static int MoveOf(string islandName)
     {
         string id = islandName.Substring(islandName.LastIndexOf('_') + 1).Trim();
         if (id.Length == 0) return 0;
-        bool digits = true, letters = true;
-        foreach (char c in id) { digits &= char.IsDigit(c); letters &= char.IsLetter(c); }
-        if (digits) return id[id.Length - 1] - '0';
-        return letters && id.Length > 1 ? lastMove : 0;
+        foreach (char c in id) if (!char.IsDigit(c)) return 0;
+        return id[id.Length - 1] - '0';
     }
 
     //---- Mutation

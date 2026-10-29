@@ -120,7 +120,8 @@ public class MemeWindow : MemeChanger
 
     // Once still after falling, it lies down with the meme facing up. Not an optional meme (DexCollectible)
     private bool LiesFaceUp => !TryGetComponent(out DexCollectible _);
-    protected override bool SnapsToGround => false;   // exactly where you placed it (hidden in the ground, on a branch…)
+    protected override bool SnapsToGround => false;
+    protected override bool ReturnsHome => TryGetComponent(out DexCollectible _);   // an optional meme never meteors: back where you hid it   // exactly where you placed it (hidden in the ground, on a branch…)
     protected override bool ReadyToRest => !loose && lyingDown == null;   // lies face up first, then rests on its island
 
     protected override void OnReleasedFromIsland()

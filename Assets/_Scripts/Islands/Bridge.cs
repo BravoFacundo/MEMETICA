@@ -13,6 +13,7 @@ using UnityEngine.Serialization;
 // With a BridgeBend, the bridge bends between them so its ends stay on the islands while they float.
 //   Stone By Stone   a stone path (StonePath): its stones rise from the void one after another, from A to B
 // It also owns the settings of its falling platforms (each platform can override them).
+[SelectionBase]   // clicking any of its parts in the Scene view selects this
 public class Bridge : Lift
 {
     // Numbers fixed: they are what the scene saves (1 was Swing Up, removed)
