@@ -68,7 +68,9 @@ public class DexCollectible : MonoBehaviour
         source = gameObject.AddComponent<AudioSource>();
         source.playOnAwake = false;
         source.spatialBlend = 0f;
-        AudioClip clip = window.Data != null ? window.Data.BaseSound : null;
+        bool videoSound = window.Data != null && window.Data.baseImage != null && window.Data.baseImage.videoSound && window.Data.baseImage.video != null;
+        if (videoSound) { window.ForceVideoSound = true; window.RestartVideo(); }   // its video's own sound
+        AudioClip clip = window.Data != null && !videoSound ? window.Data.BaseSound : null;
         if (clip != null) { source.clip = clip; source.loop = window.Data.baseImage != null && window.Data.baseImage.loop; source.Play(); }
         if (unlockClip != null) source.PlayOneShot(unlockClip);
 
@@ -119,7 +121,7 @@ public class DexCollectible : MonoBehaviour
     {
         if (showFor == ShowFor.Fixed || window.Data == null) return showTime;
         float content = 0f;
-        AudioClip sound = window.Data.BaseSound;
+        AudioClip sound = window.Data.baseImage != null && window.Data.baseImage.videoSound ? null : window.Data.BaseSound;
         if (sound != null) content = sound.length;
         else if (window.Data.baseImage != null && window.Data.baseImage.video != null) content = (float)window.Data.baseImage.video.length;
         if (content <= 0f) return showTime;

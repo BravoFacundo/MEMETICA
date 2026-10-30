@@ -101,7 +101,7 @@ public class DebugTools : MonoBehaviour
 
     void Start()
     {
-        int index = pendingStart >= 0 ? pendingStart : startAt;
+        int index = pendingStart >= 0 ? pendingStart : LevelManager.FromMenu ? -1 : startAt;   // from the menu: its tutorial popup decides
         pendingStart = -1;
         selectedStart = Mathf.Max(index, 0);
         if (index >= 0 && index < starts.Length) StartCoroutine(ApplyStart(starts[index]));

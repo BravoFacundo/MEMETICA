@@ -3,9 +3,14 @@ using System.IO;
 using UnityEngine;
 
 // Every run that was saved (the score screen, the MemeDex and the menu's screen saver read it): who (a name nobody else
-// has: FACU001, FACU002…), when, which build (Mode: expo / itch, their times differ), won or not, how long, and which
-// memes, in the order they were unlocked (how many: memes.Count). Best first: more memes, then won, then faster.
-// Only runs with a name are saved (no name: no score).
+// has: FACU001, FACU002…), when, which build (Mode: expo / itch, their times differ), won or not, how long, how many
+// falls into the void (RunStats: the portal's way back doesn't count) and which memes, in the order they were unlocked
+// (how many: memes.Count, of Total). Only runs with a name are saved (no name: no score).
+// Orders (the score screen's filter, each either way; the categories they make):
+//   Best      more memes, then less time (default)
+//   Memes     more memes first: Perfect Completion (all of them) at the top
+//   Falls     fewer falls first: Flawless (0 falls) at the top, then more memes, then less time
+//   Time      less time first: Speedrun, then more memes
 // A file next to the game's other saved data (Application.persistentDataPath/scores.json): it stays between plays on
 // that computer (the exhibition PC keeps everyone's).
 public static class ScoreBoard
@@ -18,8 +23,28 @@ public static class ScoreBoard
         public string mode;      // GameManager's Score Mode: runs of different builds don't mix
         public bool won;
         public float seconds;    // played
+        public int falls;        // into the void (RunStats)
+        public int total;        // memes there were to unlock (the MemeDex then)
         public List<string> memes = new List<string>();   // MemeDex keys, in unlock order
         public int Count => memes.Count;
+
+        public bool Flawless => falls == 0;
+        public bool Perfect => total > 0 && Count >= total;
+    }
+
+    public enum Order { Best, Memes, Falls, Time }
+
+    // These runs in that order (Ascending: the other way round), ties broken by the rest
+    public static List<Run> Sorted(List<Run> runs, Order by, bool ascending = false)
+    {
+        var sorted = new List<Run>(runs);
+        System.Comparison<Run> best = (a, b) => a.Count != b.Count ? b.Count.CompareTo(a.Count) : a.seconds.CompareTo(b.seconds);
+        System.Comparison<Run> compare = best;
+        if (by == Order.Falls) compare = (a, b) => a.falls != b.falls ? a.falls.CompareTo(b.falls) : best(a, b);
+        else if (by == Order.Time) compare = (a, b) => a.seconds != b.seconds ? a.seconds.CompareTo(b.seconds) : b.Count.CompareTo(a.Count);
+        if (ascending) { System.Comparison<Run> forward = compare; compare = (a, b) => forward(b, a); }
+        sorted.Sort(compare);
+        return sorted;
     }
 
     [System.Serializable]
@@ -27,7 +52,7 @@ public static class ScoreBoard
 
     static string FilePath => Path.Combine(Application.persistentDataPath, "scores.json");
 
-    // Every run (of that build, if given), best first
+    // Every run (of that build, if given), best first (Order.Best)
     public static List<Run> Load(GameManager.ScoreMode? mode = null) => Load(mode.HasValue ? mode.Value.ToString() : null);
 
     static List<Run> Load(string mode)
@@ -39,10 +64,7 @@ public static class ScoreBoard
         }
         catch (System.Exception e) { Debug.LogWarning($"[ScoreBoard] Couldn't read {FilePath}: {e.Message}"); }
         if (!string.IsNullOrEmpty(mode)) runs.RemoveAll(r => r.mode != mode);
-        runs.Sort((a, b) => a.Count != b.Count ? b.Count.CompareTo(a.Count)
-                          : a.won != b.won ? b.won.CompareTo(a.won)
-                          : a.seconds.CompareTo(b.seconds));
-        return runs;
+        return Sorted(runs, Order.Best);
     }
 
     // Adds a run. Returns its place (1 = best)

@@ -118,6 +118,8 @@ public class MemeImage
     public bool loop;
     [Tooltip("Fills the whole window, cutting what is left over (centered): a square meme in the wider window, without borders")]
     public bool fill;
+    [Tooltip("A video: its own sound plays (instead of Sound and the fallback sounds). The base's only while you carry it")]
+    public bool videoSound;
 
     public static bool Exists(MemeImage image) => image != null && (image.picture != null || image.video != null);
 }

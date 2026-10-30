@@ -19,6 +19,11 @@ public class UIManager : MonoBehaviour
     public string oldGameScene = "Game_Old";
     public string menuScene = "Menu";
 
+    [Header("Tutorial")]
+    [Tooltip("Shown when a Play icon opens a game: does it skip the tutorial? Its buttons: Yes → UIManager.StartWithoutTutorial, " +
+             "No → UIManager.StartWithTutorial. Empty: the games start with the tutorial")]
+    public GameObject tutorialPopup;
+
     [Header("Carga")]
     [Tooltip("Segundos mínimos de carga, aunque el juego cargue antes")]
     public float minLoadingTime = 1.5f;
@@ -26,6 +31,7 @@ public class UIManager : MonoBehaviour
     public float quitDelay = 2f;
 
     private bool loading;
+    private string pendingScene;   // the game the tutorial popup is asking about
 
     // F9 switches English / Spanish anytime, also in the build (handy at the exhibition)
     private void Update()
@@ -35,17 +41,32 @@ public class UIManager : MonoBehaviour
 
     // ---------- Íconos ----------
 
-    public void PlayGame()
-    {
-        if (loading) return;   // evita cargar dos veces si se hace doble clic de más
-        StartCoroutine(LoadScene(gameScene));
-    }
+    public void PlayGame() => AskTutorial(gameScene);
 
     // Button_Play inside the Recycle Bin window
-    public void PlayOldGame()
+    public void PlayOldGame() => AskTutorial(oldGameScene);
+
+    // ---------- Tutorial popup ----------
+
+    // The popup asks first (without one: straight in, with the tutorial)
+    void AskTutorial(string sceneName)
     {
-        if (loading) return;
-        StartCoroutine(LoadScene(oldGameScene));
+        if (loading) return;   // evita cargar dos veces si se hace doble clic de más
+        pendingScene = sceneName;
+        if (tutorialPopup != null) OpenWindow(tutorialPopup);
+        else StartGame(false);
+    }
+
+    // The popup's buttons
+    public void StartWithTutorial() => StartGame(false);
+    public void StartWithoutTutorial() => StartGame(true);
+
+    void StartGame(bool skipTutorial)
+    {
+        if (loading || string.IsNullOrEmpty(pendingScene)) return;
+        if (tutorialPopup != null) tutorialPopup.SetActive(false);
+        LevelManager.SkipFromMenu = skipTutorial;   // the game scene's LevelManager reads it when it starts
+        StartCoroutine(LoadScene(pendingScene));
     }
 
     // Used by the pause window (Game → Menu)

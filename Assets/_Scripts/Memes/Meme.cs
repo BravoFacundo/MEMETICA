@@ -245,6 +245,9 @@ public class Meme : MonoBehaviour
             if (c != null && c.enabled && !c.isTrigger) Physics.IgnoreCollision(playerBody, c, true);
     }
 
+    // Instead of coming back as a meteor, back to the player's hand (MemeWindow). False: the meteor
+    protected virtual bool ComesBackToPlayer() => false;
+
     // Instead of coming back as a meteor, it goes back where it was placed (an optional meme, DexCollectible)
     protected virtual bool ReturnsHome => false;
     private Transform homeParent;
@@ -352,6 +355,19 @@ public class Meme : MonoBehaviour
     protected virtual void OnPlaced(Pedestal pedestal) { }
     protected virtual void OnRemovedFromPedestal(Pedestal pedestal) { }
 
+    // Put down at a spot, lying still there as if it had been dropped and settled (LevelManager: the tutorial skipped)
+    public void PlaceAt(Vector3 position, Quaternion rotation, Transform respawn)
+    {
+        if (IsHeld) return;
+        if (!body.isKinematic) { body.velocity = Vector3.zero; body.angularVelocity = Vector3.zero; }
+        transform.SetParent(null, true);
+        transform.SetPositionAndRotation(position, rotation);
+        AttachStill();
+        StickToGround();   // part of the island under it (it floats with it)
+        lastGroundY = lastIslandY = position.y;
+        if (respawn != null) SetRespawn(respawn);
+    }
+
     // Sets the respawn by hand. The elevator uses it for the memes riding it
     public void SetRespawn(Transform point)
     {
@@ -420,6 +436,7 @@ public class Meme : MonoBehaviour
         if (Lift.IsHiddenAt(respawnPoint)) { respawnPoint = LevelManager.Instance.startRespawnPoint; lastIsland = null; lastGroundHit = null; }
         if (respawnPoint == null) { Debug.LogWarning($"[Meme] '{name}' fell but has no respawn point (and no Start Respawn Point in the LevelManager).", this); return; }
         if (ReturnsHome) { GoHome(); return; }
+        if (ComesBackToPlayer()) return;   // (Game: the meme window flies back to your hand, no meteor)
         if (respawnPoint == null || meteor != null) return;
         meteor = StartCoroutine(MeteorFall());
     }

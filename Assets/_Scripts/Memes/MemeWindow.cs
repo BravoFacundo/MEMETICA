@@ -75,6 +75,7 @@ public class MemeWindow : MemeChanger
 
     protected override void Update()
     {
+        if (comingBack && TryComeBack()) comingBack = false;
         base.Update();
         if (IsHeld || CurrentPedestal != null) return;
         if (floating) { transform.position = floatAnchor + Vector3.up * (Mathf.Sin(Time.time * 2f) * floatBob); return; }
@@ -121,7 +122,28 @@ public class MemeWindow : MemeChanger
     // Once still after falling, it lies down with the meme facing up. Not an optional meme (DexCollectible)
     private bool LiesFaceUp => !TryGetComponent(out DexCollectible _);
     protected override bool SnapsToGround => false;
-    protected override bool ReturnsHome => TryGetComponent(out DexCollectible _);   // an optional meme never meteors: back where you hid it   // exactly where you placed it (hidden in the ground, on a branch…)
+    protected override bool ReturnsHome => TryGetComponent(out DexCollectible _);   // an optional meme never meteors: back where you hid it
+
+    // Game: no meteor. Fallen into the void (or lost far below): it flies back to your hand
+    // (Never the meteor in Game: if it can't come right now, it waits still and tries again every frame)
+    protected override bool ComesBackToPlayer()
+    {
+        body.velocity = Vector3.zero;
+        if (TryComeBack()) { comingBack = false; return true; }
+        comingBack = true;
+        body.isKinematic = true;   // (still, not falling forever meanwhile)
+        return true;
+    }
+
+    private bool comingBack;
+    bool TryComeBack()
+    {
+        if (MemeRecall.Instance != null && MemeRecall.Instance.BringNow(this)) return true;
+        PlayerLook look = FindObjectOfType<PlayerLook>();
+        if (look == null || look.heldObject != null) return false;
+        look.Grab(gameObject, 0.6f);
+        return true;
+    }   // exactly where you placed it (hidden in the ground, on a branch…)
     protected override bool ReadyToRest => !loose && lyingDown == null;   // lies face up first, then rests on its island
 
     protected override void OnReleasedFromIsland()

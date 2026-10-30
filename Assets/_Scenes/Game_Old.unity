@@ -7330,7 +7330,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 3707322068011324572, guid: f089c2499c1cbb0498c51e07e1b33566, type: 3}
       propertyPath: m_Center.y
-      value: 1.6500001
+      value: 1.75
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
@@ -19538,6 +19538,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   popup: {fileID: 2098463500}
   hideOnExit: 1
+  closeWithX: 0
+  onlyOnce: 1
 --- !u!43 &172682719
 Mesh:
   m_ObjectHideFlags: 0
@@ -27152,6 +27154,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d0fdc15fca067f94687789a67dbb202d, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  towardCamera: 1
+  cameraUp: 0
 --- !u!114 &270262297
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -27812,6 +27816,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d0fdc15fca067f94687789a67dbb202d, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  towardCamera: 1
+  cameraUp: 0
 --- !u!114 &306690106
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -28412,7 +28418,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 3707322068011324572, guid: f089c2499c1cbb0498c51e07e1b33566, type: 3}
       propertyPath: m_Center.y
-      value: 1.6499999
+      value: 1.75
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
@@ -41414,15 +41420,15 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 3707322068011324572, guid: f089c2499c1cbb0498c51e07e1b33566, type: 3}
       propertyPath: m_Center.x
-      value: -0.0000005238848
+      value: -0.00000022587788
       objectReference: {fileID: 0}
     - target: {fileID: 3707322068011324572, guid: f089c2499c1cbb0498c51e07e1b33566, type: 3}
       propertyPath: m_Center.y
-      value: 1.6500002
+      value: 1.7500002
       objectReference: {fileID: 0}
     - target: {fileID: 3707322068011324572, guid: f089c2499c1cbb0498c51e07e1b33566, type: 3}
       propertyPath: m_Center.z
-      value: -0.00000086869284
+      value: 0.0000012512261
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
@@ -46692,6 +46698,7 @@ MonoBehaviour:
   gameScene: Game
   oldGameScene: Game_Old
   menuScene: Menu
+  tutorialPopup: {fileID: 0}
   minLoadingTime: 1.5
   quitDelay: 2
 --- !u!1 &400044549
@@ -54650,6 +54657,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   popup: {fileID: 1922644735}
   hideOnExit: 1
+  closeWithX: 0
+  onlyOnce: 1
 --- !u!1 &479473758
 GameObject:
   m_ObjectHideFlags: 0
@@ -55323,6 +55332,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   onHover: 3
   doubleClick: 0
+  hintOnSingleClick: 1
   onClick:
     m_PersistentCalls:
       m_Calls:
@@ -60931,15 +60941,15 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 3707322068011324572, guid: f089c2499c1cbb0498c51e07e1b33566, type: 3}
       propertyPath: m_Center.x
-      value: -0.00000024438478
+      value: -0.0000001371402
       objectReference: {fileID: 0}
     - target: {fileID: 3707322068011324572, guid: f089c2499c1cbb0498c51e07e1b33566, type: 3}
       propertyPath: m_Center.y
-      value: 1.6500001
+      value: 1.7500001
       objectReference: {fileID: 0}
     - target: {fileID: 3707322068011324572, guid: f089c2499c1cbb0498c51e07e1b33566, type: 3}
       propertyPath: m_Center.z
-      value: 0.0000006130973
+      value: -0.0000005637458
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
@@ -69356,6 +69366,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   onHover: 3
   doubleClick: 0
+  hintOnSingleClick: 1
   onClick:
     m_PersistentCalls:
       m_Calls:
@@ -70804,7 +70815,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 1}
   m_AnchorMax: {x: 0, y: 1}
-  m_AnchoredPosition: {x: -761, y: 83}
+  m_AnchoredPosition: {x: -611, y: 167}
   m_SizeDelta: {x: 596, y: 253}
   m_Pivot: {x: 0, y: 1}
 --- !u!114 &639813142
@@ -71477,6 +71488,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   popup: {fileID: 8321183725978197128}
   hideOnExit: 1
+  closeWithX: 0
+  onlyOnce: 1
 --- !u!1 &666064419
 GameObject:
   m_ObjectHideFlags: 0
@@ -71867,7 +71880,7 @@ RectTransform:
   m_Father: {fileID: 1989543485}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
-  m_AnchorMax: {x: 0, y: 1}
+  m_AnchorMax: {x: 0, y: 0}
   m_AnchoredPosition: {x: 0, y: 0}
   m_SizeDelta: {x: 10, y: 0}
   m_Pivot: {x: 0.5, y: 0.5}
@@ -81080,7 +81093,7 @@ RectTransform:
   m_Father: {fileID: 744227268}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
-  m_AnchorMax: {x: 0, y: 1}
+  m_AnchorMax: {x: 0, y: 0}
   m_AnchoredPosition: {x: 0, y: 0}
   m_SizeDelta: {x: 10, y: 0}
   m_Pivot: {x: 0.5, y: 0.5}
@@ -92645,7 +92658,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 3707322068011324572, guid: f089c2499c1cbb0498c51e07e1b33566, type: 3}
       propertyPath: m_Center.y
-      value: 1.65
+      value: 1.7499999
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
@@ -92709,6 +92722,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   onHover: 4
   doubleClick: 0
+  hintOnSingleClick: 1
   onClick:
     m_PersistentCalls:
       m_Calls: []
@@ -100388,7 +100402,7 @@ RectTransform:
   m_Father: {fileID: 766437015}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
-  m_AnchorMax: {x: 0, y: 1}
+  m_AnchorMax: {x: 0, y: 0}
   m_AnchoredPosition: {x: 0.000030517578, y: -8.479992}
   m_SizeDelta: {x: 27, y: 47}
   m_Pivot: {x: 0.5, y: 0.06}
@@ -100406,6 +100420,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   onHover: 3
   doubleClick: 0
+  hintOnSingleClick: 1
   onClick:
     m_PersistentCalls:
       m_Calls: []
@@ -114701,15 +114716,15 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 3707322068011324572, guid: f089c2499c1cbb0498c51e07e1b33566, type: 3}
       propertyPath: m_Center.x
-      value: 0.0000009891421
+      value: -0.0000006953875
       objectReference: {fileID: 0}
     - target: {fileID: 3707322068011324572, guid: f089c2499c1cbb0498c51e07e1b33566, type: 3}
       propertyPath: m_Center.y
-      value: 1.65
+      value: 1.75
       objectReference: {fileID: 0}
     - target: {fileID: 3707322068011324572, guid: f089c2499c1cbb0498c51e07e1b33566, type: 3}
       propertyPath: m_Center.z
-      value: 0.0000000062088175
+      value: 0.00000029802322
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
@@ -114969,7 +114984,7 @@ RectTransform:
   m_Father: {fileID: 2078378670}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
-  m_AnchorMax: {x: 0, y: 1}
+  m_AnchorMax: {x: 0, y: 0}
   m_AnchoredPosition: {x: 0, y: 0}
   m_SizeDelta: {x: 10, y: 0}
   m_Pivot: {x: 0.5, y: 0.5}
@@ -129630,6 +129645,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   popup: {fileID: 829714642}
   hideOnExit: 1
+  closeWithX: 0
+  onlyOnce: 1
 --- !u!1 &1107781551 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 1805616374771646444, guid: 94c51fd839663604fa1027f8f1329fe2, type: 3}
@@ -134846,15 +134863,15 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 3707322068011324572, guid: f089c2499c1cbb0498c51e07e1b33566, type: 3}
       propertyPath: m_Center.x
-      value: 0.00000025719714
+      value: -0.0000011607088
       objectReference: {fileID: 0}
     - target: {fileID: 3707322068011324572, guid: f089c2499c1cbb0498c51e07e1b33566, type: 3}
       propertyPath: m_Center.y
-      value: 1.65
+      value: 1.75
       objectReference: {fileID: 0}
     - target: {fileID: 3707322068011324572, guid: f089c2499c1cbb0498c51e07e1b33566, type: 3}
       propertyPath: m_Center.z
-      value: 0.0000011996203
+      value: -0.0000006661262
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
@@ -135480,7 +135497,7 @@ RectTransform:
   m_Father: {fileID: 1784862267}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
-  m_AnchorMax: {x: 0, y: 1}
+  m_AnchorMax: {x: 0, y: 0}
   m_AnchoredPosition: {x: 0, y: 0}
   m_SizeDelta: {x: 10, y: 0}
   m_Pivot: {x: 0.5, y: 0.5}
@@ -144009,7 +144026,7 @@ RectTransform:
   m_Father: {fileID: 934059893}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
-  m_AnchorMax: {x: 0, y: 1}
+  m_AnchorMax: {x: 0, y: 0}
   m_AnchoredPosition: {x: 0.000030517578, y: -8.479992}
   m_SizeDelta: {x: 27, y: 47}
   m_Pivot: {x: 0.5, y: 0.06}
@@ -144027,6 +144044,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   onHover: 3
   doubleClick: 0
+  hintOnSingleClick: 1
   onClick:
     m_PersistentCalls:
       m_Calls: []
@@ -144929,6 +144947,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ae081e2bcf8a921479f3c751059d8293, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  alwaysFramed: 1
   marginPixels: 10
   hiddenScale: 1.06
   duration: 0.15
@@ -146116,6 +146135,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   onHover: 4
   doubleClick: 0
+  hintOnSingleClick: 1
   onClick:
     m_PersistentCalls:
       m_Calls: []
@@ -156474,7 +156494,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!224 &1433697216
 RectTransform:
   m_ObjectHideFlags: 0
@@ -156502,7 +156522,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: -74, y: 360}
+  m_AnchoredPosition: {x: -71, y: 326}
   m_SizeDelta: {x: 746, y: 815}
   m_Pivot: {x: 0, y: 1}
 --- !u!114 &1433697217
@@ -158900,6 +158920,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   onHover: 4
   doubleClick: 0
+  hintOnSingleClick: 1
   onClick:
     m_PersistentCalls:
       m_Calls: []
@@ -160134,6 +160155,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   onHover: 4
   doubleClick: 0
+  hintOnSingleClick: 1
   onClick:
     m_PersistentCalls:
       m_Calls: []
@@ -161099,6 +161121,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   popup: {fileID: 1536451646}
   hideOnExit: 1
+  closeWithX: 0
+  onlyOnce: 1
 --- !u!65 &1562933357
 BoxCollider:
   m_ObjectHideFlags: 0
@@ -163172,6 +163196,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   onHover: 3
   doubleClick: 0
+  hintOnSingleClick: 1
   onClick:
     m_PersistentCalls:
       m_Calls:
@@ -169672,6 +169697,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   onHover: 3
   doubleClick: 0
+  hintOnSingleClick: 1
   onClick:
     m_PersistentCalls:
       m_Calls:
@@ -176342,7 +176368,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 3707322068011324572, guid: f089c2499c1cbb0498c51e07e1b33566, type: 3}
       propertyPath: m_Center.y
-      value: 1.65
+      value: 1.7499998
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
@@ -176688,6 +176714,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   onHover: 4
   doubleClick: 0
+  hintOnSingleClick: 1
   onClick:
     m_PersistentCalls:
       m_Calls: []
@@ -177138,12 +177165,13 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   enabledInBuild: 0
-  startAt: 1
+  startAt: -1
   flySpeed: 10
   flyFastSpeed: 30
-  fastElevators: 1
+  fastElevators: 0
   fastElevatorSpeed: 6.35
   allIslandsUp: 0
+  logMemeSounds: 0
   starts:
   - name: 
     spawnPoint: {fileID: 902804681}
@@ -182464,7 +182492,7 @@ RectTransform:
   m_Father: {fileID: 1948928829}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
-  m_AnchorMax: {x: 0, y: 1}
+  m_AnchorMax: {x: 0, y: 0}
   m_AnchoredPosition: {x: 0.000030517578, y: -8.479992}
   m_SizeDelta: {x: 27, y: 47}
   m_Pivot: {x: 0.5, y: 0.06}
@@ -182482,6 +182510,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   onHover: 3
   doubleClick: 0
+  hintOnSingleClick: 1
   onClick:
     m_PersistentCalls:
       m_Calls: []
@@ -182909,15 +182938,15 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 3707322068011324572, guid: f089c2499c1cbb0498c51e07e1b33566, type: 3}
       propertyPath: m_Center.x
-      value: 0.0000006339767
+      value: 0.00000019360965
       objectReference: {fileID: 0}
     - target: {fileID: 3707322068011324572, guid: f089c2499c1cbb0498c51e07e1b33566, type: 3}
       propertyPath: m_Center.y
-      value: 1.65
+      value: 1.75
       objectReference: {fileID: 0}
     - target: {fileID: 3707322068011324572, guid: f089c2499c1cbb0498c51e07e1b33566, type: 3}
       propertyPath: m_Center.z
-      value: 0.0000005941158
+      value: 0.00000078725094
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
@@ -193753,6 +193782,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d0fdc15fca067f94687789a67dbb202d, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  towardCamera: 1
+  cameraUp: 0
 --- !u!114 &1893306331
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -197630,7 +197661,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 3707322068011324572, guid: f089c2499c1cbb0498c51e07e1b33566, type: 3}
       propertyPath: m_Center.y
-      value: 1.6499999
+      value: 1.7500001
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
@@ -198342,7 +198373,12 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   mixer: {fileID: 24100000, guid: edc7c8f8554cfad488b31b89d90046f7, type: 2}
   musicSource: {fileID: 0}
+  sfxGroup: {fileID: 0}
+  musicGroup: {fileID: 0}
   menuMusic: {fileID: 0}
+  stoneRange: {x: 4, y: 30}
+  liftRange: {x: 10, y: 70}
+  duckVolume: 0.35
 --- !u!1001 &2073039551
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -200126,6 +200162,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   popup: {fileID: 415802006}
   hideOnExit: 1
+  closeWithX: 0
+  onlyOnce: 1
 --- !u!65 &2107861280
 BoxCollider:
   m_ObjectHideFlags: 0
@@ -200231,7 +200269,7 @@ RectTransform:
   m_Father: {fileID: 1099445594}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
-  m_AnchorMax: {x: 0, y: 1}
+  m_AnchorMax: {x: 0, y: 0}
   m_AnchoredPosition: {x: 0.000030517578, y: -8.479992}
   m_SizeDelta: {x: 27, y: 47}
   m_Pivot: {x: 0.5, y: 0.06}
@@ -200249,6 +200287,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   onHover: 3
   doubleClick: 0
+  hintOnSingleClick: 1
   onClick:
     m_PersistentCalls:
       m_Calls: []
@@ -200593,6 +200632,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d0fdc15fca067f94687789a67dbb202d, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  towardCamera: 1
+  cameraUp: 0
 --- !u!1 &2125168366
 GameObject:
   m_ObjectHideFlags: 0
@@ -201020,6 +201061,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   onHover: 3
   doubleClick: 0
+  hintOnSingleClick: 1
   onClick:
     m_PersistentCalls:
       m_Calls:
@@ -201244,11 +201286,18 @@ MonoBehaviour:
   liftLowerDuration: 2.5
   liftOvershoot: 0.4
   sequenceGap: 0.3
+  platformSpeed: 1
   showDropGizmos: 1
   startRespawnPoint: {fileID: 1866690998}
   activateOnPlay:
   - {fileID: 1229787486}
   endingDuration: 10
+  skipTutorial: 1
+  skipElevator: {fileID: 1639568607}
+  skipLookAt: {fileID: 1770942441}
+  skipMeme: {fileID: 0}
+  skipMemeDistance: 4
+  skipFadeTime: 2
   islandPrefix: Island_
   bridgePrefix: Bridge_
   elevatorPrefix: Elevator_
@@ -214133,6 +214182,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   KeylessPedestal: 1
   KeyID: 
+  keyMeme: {fileID: 0}
+  drainMeme: 0
   ControlledIslands: []
   ControlledBridges:
   - Tutorial
@@ -214143,6 +214194,7 @@ MonoBehaviour:
   correctClip: {fileID: 8300000, guid: 708aa9b78c6214e49a245c4f88139d62, type: 3}
   incorrectClip: {fileID: 8300000, guid: 15c2f96a00068b0469720d72634f0a85, type: 3}
   snapClip: {fileID: 8300000, guid: 8069a62e7b897a14393029d89482ec73, type: 3}
+  snapFlyTime: 0.2
   breakClip: {fileID: 0}
   toppleTime: 1.1
   slideAcceleration: 2.5
@@ -217313,7 +217365,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 3707322068011324572, guid: f089c2499c1cbb0498c51e07e1b33566, type: 3}
       propertyPath: m_Center.y
-      value: 1.6499969
+      value: 1.7500001
       objectReference: {fileID: 0}
     - target: {fileID: 3707322068011324572, guid: f089c2499c1cbb0498c51e07e1b33566, type: 3}
       propertyPath: m_Center.z

@@ -12,6 +12,9 @@ public class PauseMenu : MonoBehaviour
     public static bool Framed = false;
 
     [Header("Frame Effect")]
+    [Tooltip("The frame and its margin always on (a black frame blends with the CRT's glass). Off: only while paused, " +
+             "with the transition")]
+    public bool alwaysFramed = true;
     [Tooltip("Margin on each side while paused, in frame pixels (the frame border is 10)")]
     public float marginPixels = 10f;
     [Tooltip("Frame scale when hidden: big enough to push its border off screen")]
@@ -41,7 +44,7 @@ public class PauseMenu : MonoBehaviour
         GameIsPaused = false;
         Framed = false;
         Time.timeScale = 1f;
-        ApplyFrame(0f);
+        ApplyFrame(alwaysFramed ? 1f : 0f);
     }
 
     void Update()
@@ -104,7 +107,7 @@ public class PauseMenu : MonoBehaviour
 
     private void AnimateFrame()
     {
-        float target = GameIsPaused || Framed ? 1f : 0f;
+        float target = alwaysFramed || GameIsPaused || Framed ? 1f : 0f;
         if (Mathf.Approximately(frameAmount, target)) return;
 
         // Unscaled time: the game is frozen while paused

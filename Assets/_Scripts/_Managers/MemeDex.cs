@@ -134,6 +134,8 @@ public class MemeDex : MonoBehaviour
             mode = GameManager.Instance != null ? GameManager.Instance.scoreMode.ToString() : "",
             won = GameManager.Instance != null && GameManager.Instance.Current == GameManager.State.Won,
             seconds = GameManager.Instance != null ? GameManager.Instance.Elapsed : 0f,
+            falls = RunStats.Falls,
+            total = Total,
         };
         foreach (Entry entry in Order) run.memes.Add(entry.Key);
         return run;

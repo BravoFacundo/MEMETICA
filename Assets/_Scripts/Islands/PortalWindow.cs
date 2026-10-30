@@ -437,6 +437,7 @@ public class PortalWindow : MonoBehaviour
     IEnumerator GoThrough()
     {
         float entrySpeed = player.FallSpeed;   // (jumped in: it goes on at the speed you came)
+        Vector3 carry = player.HorizontalVelocity;   // and the way you were going: the portal doesn't stop you
         state = State.Sinking;
         ripple = 1f;
         Play(enterClip);
@@ -453,7 +454,7 @@ public class PortalWindow : MonoBehaviour
             material.SetFloat("_Scanlines", Mathf.Lerp(scanlines, 0f, down));   // fade out: you are almost there
             pixels = Mathf.Lerp(pixelate, 0f, down);
             speed += sinkAcceleration * Time.deltaTime;
-            player.transform.position += Vector3.down * speed * Time.deltaTime;
+            player.transform.position += (Vector3.down * speed + carry) * Time.deltaTime;
             float eyes = Vector3.Dot(playerCamera.transform.position - transform.position, transform.up);
             if (eyes <= near) break;
             yield return null;
@@ -462,7 +463,8 @@ public class PortalWindow : MonoBehaviour
         // Through: the same view, from above the hub
         Vector3 body = MapPoint(player.transform.position);
         Vector3 facing = Vector3.ProjectOnPlane(MapRotation(player.transform.rotation) * Vector3.forward, Vector3.up);
-        player.FallFrom(body, Quaternion.LookRotation(facing.sqrMagnitude > 1e-4f ? facing.normalized : ExitFacing, Vector3.up), speed, exit.transform);
+        Vector3 carried = Vector3.ProjectOnPlane(MapRotation(Quaternion.identity) * carry, Vector3.up).normalized * carry.magnitude;   // the same way, on the other side
+        player.FallFrom(body, Quaternion.LookRotation(facing.sqrMagnitude > 1e-4f ? facing.normalized : ExitFacing, Vector3.up), speed, exit.transform, carried);
         if (outClip != null) flat.PlayOneShot(outClip);
         if (fallChange && CarriedWindow != null) player.AnnounceFall();   // the window you carry: its Fall change
         StartCoroutine(AfterLanding());

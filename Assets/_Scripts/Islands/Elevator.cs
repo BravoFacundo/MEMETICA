@@ -58,7 +58,7 @@ public class Elevator : MonoBehaviour
     void Start()
     {
         if (locks != null) locks.SetActive(false);
-        if (rideOnStart) StartRide();
+        if (rideOnStart && !LevelManager.SkippingTutorial) StartRide();   // tutorial skipped: no intro ride
     }
 
     // Only once per game
@@ -141,6 +141,14 @@ public class Elevator : MonoBehaviour
             if (p != null && respawn != null && p.TryGetComponent(out Meme meme)) meme.SetRespawn(respawn);
         if (locks != null) locks.SetActive(false);
         if (pedestal != null) StartCoroutine(BreakPedestalOnceMemeIsTaken());
+    }
+
+    // Tutorial skipped (LevelManager): its pedestal is gone from the start
+    public void RemovePedestal()
+    {
+        if (pedestal == null) return;
+        StopAllCoroutines();   // (its "break when the meme is taken": docked, nothing else runs here)
+        pedestal.gameObject.SetActive(false);
     }
 
     // Docked, it becomes part of whatever holds its Dock Point (a floating part of the island bobs it along)

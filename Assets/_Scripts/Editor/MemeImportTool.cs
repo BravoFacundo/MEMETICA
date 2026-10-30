@@ -208,6 +208,7 @@ public static class MemeImportTool
         if (image == null || old == null) return;
         if (string.IsNullOrEmpty(image.windowTitle)) image.windowTitle = old.windowTitle;
         image.fill |= old.fill;
+        image.videoSound |= old.videoSound;
         if (image.sound != null) return;
         image.sound = old.sound;
         image.loop = old.loop;

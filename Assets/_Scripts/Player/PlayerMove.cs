@@ -59,6 +59,8 @@ public class PlayerMove : MonoBehaviour
 
     // Falling with nothing below: it will reappear (the meme in the hand turns into its Fall change on the way down)
     public static event System.Action VoidFallStarted;
+    // Fell into the void and reappeared (a fall for the score: RunStats). Not the portal's way back
+    public static event System.Action VoidRespawned;
     // After that fall and the respawn, it touches the ground (RespawnSlam lands you on your face here)
     public static event System.Action RespawnTouchedDown;
     // Back in play after the respawn: touched the ground, or got up after the slam (the meme in the hand goes back)
@@ -137,7 +139,7 @@ public class PlayerMove : MonoBehaviour
             UpdateHorizontalVelocity();
             UpdateVerticalVelocity();
 
-            CollisionFlags flags = characterController.Move((horizontalVelocity + Vector3.up * verticalVelocity) * Time.deltaTime);
+            CollisionFlags flags = characterController.Move((horizontalVelocity + slideOff + Vector3.up * verticalVelocity) * Time.deltaTime);
             if ((flags & CollisionFlags.Above) != 0 && verticalVelocity > 0f) verticalVelocity = 0f;   // bumped the ceiling
             LogStep("Move");
 
@@ -192,11 +194,68 @@ public class PlayerMove : MonoBehaviour
     // What the player stands on and measures: everything but itself and the props (PhysicsLayers: solid only for memes)
     private int SolidMask => ~(1 << gameObject.layer | PhysicsLayers.PropsMask);
 
+    // Memes and obstacles are never ground: you can't stand or jump on them (dropping the window and jumping on it broke
+    // the parkour; Meme also makes the player's body pass through them). On an obstacle you slide off (Obstacle)
+    static bool IsMeme(Collider c) => c != null && (c.attachedRigidbody != null ? c.attachedRigidbody.GetComponent<Meme>() != null : c.GetComponentInParent<Meme>() != null)
+                                      || (c != null && c.GetComponentInParent<Obstacle>() != null);
+    private static readonly Collider[] overlaps = new Collider[16];
+    private static readonly RaycastHit[] castHits = new RaycastHit[16];
+
+    static bool SolidSphere(Vector3 position, float radius, int mask)
+    {
+        int count = Physics.OverlapSphereNonAlloc(position, radius, overlaps, mask, QueryTriggerInteraction.Ignore);
+        for (int i = 0; i < count; i++) if (!IsMeme(overlaps[i])) return true;
+        return false;
+    }
+
+    // As Physics.SphereCast down, skipping memes (and what it starts inside of, as SphereCast does)
+    static bool CastDown(Vector3 origin, float radius, float distance, int mask, out RaycastHit hit)
+    {
+        hit = default;
+        int count = Physics.SphereCastNonAlloc(origin, radius, Vector3.down, castHits, distance, mask, QueryTriggerInteraction.Ignore);
+        float nearest = float.MaxValue;
+        for (int i = 0; i < count; i++)
+        {
+            RaycastHit h = castHits[i];
+            if (h.distance <= 0f && h.point == Vector3.zero) continue;   // started inside it
+            if (h.distance >= nearest || IsMeme(h.collider)) continue;
+            nearest = h.distance;
+            hit = h;
+        }
+        return nearest < float.MaxValue;
+    }
+
+    // Standing on an obstacle (its top): pushed off it this frame
+    private Vector3 slideOff;
+
+    bool ObstacleUnder(out Obstacle obstacle, out Vector3 point)
+    {
+        obstacle = null; point = default;
+        float radius = characterController.radius * 0.9f;
+        Vector3 origin = transform.position + characterController.center;
+        float reach = characterController.height * 0.5f - radius + 0.3f;
+        if (!Physics.SphereCast(origin, radius, Vector3.down, out RaycastHit hit, reach, SolidMask, QueryTriggerInteraction.Ignore)) return false;
+        obstacle = hit.collider.GetComponentInParent<Obstacle>();
+        point = hit.point;
+        return obstacle != null;
+    }
+
+    // What it moves sideways now (the portal keeps it through)
+    public Vector3 HorizontalVelocity => horizontalVelocity;
+
     private void UpdateGrounded()
     {
         int mask = onlyGroundLayer ? groundMask.value : SolidMask;   // never the player itself nor props
-        bool sphereHit = Physics.CheckSphere(groundCheck.position, groundDistance, mask, QueryTriggerInteraction.Ignore);
+        bool sphereHit = SolidSphere(groundCheck.position, groundDistance, mask);
         isGrounded = onlyGroundLayer ? sphereHit : sphereHit || characterController.isGrounded;
+        slideOff = Vector3.zero;
+        if (!sphereHit && characterController.isGrounded && ObstacleUnder(out Obstacle obstacle, out Vector3 point))
+        {
+            isGrounded = false;   // resting on an obstacle: not ground, you slide off it
+            Vector3 away = Vector3.ProjectOnPlane(transform.position - obstacle.transform.position, Vector3.up);
+            if (away.sqrMagnitude < 0.01f) away = transform.forward;
+            slideOff = away.normalized * obstacle.slideSpeed;
+        }
         isGrounded &= verticalVelocity <= 0.01f;   // going up after a jump is never grounded
 
         if (isGrounded) lastGroundedTime = Time.time;
@@ -215,7 +274,7 @@ public class PlayerMove : MonoBehaviour
         float lift = 0.1f;
         Vector3 bottomSphere = transform.position + characterController.center + Vector3.down * (characterController.height * 0.5f - radius);
         float reach = lift + characterController.skinWidth + groundSnapDistance;
-        if (!Physics.SphereCast(bottomSphere + Vector3.up * lift, radius, Vector3.down, out RaycastHit hit, reach, SolidMask, QueryTriggerInteraction.Ignore)) return;
+        if (!CastDown(bottomSphere + Vector3.up * lift, radius, reach, SolidMask, out RaycastHit hit)) return;
         if (Vector3.Angle(hit.normal, Vector3.up) > characterController.slopeLimit) return;
 
         // Down to resting distance: the controller keeps Skin Width from the ground, measured along the slope
@@ -252,7 +311,7 @@ public class PlayerMove : MonoBehaviour
         float castRadius = characterController.radius * 0.9f;
         float toFeet = characterController.height * 0.5f - castRadius;
         Vector3 origin = transform.position + characterController.center;
-        if (!Physics.SphereCast(origin, castRadius, Vector3.down, out RaycastHit hit, toFeet + 0.3f + characterController.skinWidth, SolidMask, QueryTriggerInteraction.Ignore)) return;
+        if (!CastDown(origin, castRadius, toFeet + 0.3f + characterController.skinWidth, SolidMask, out RaycastHit hit)) return;
         if (hit.normal.y < 0.7f) return;
 
         groundTurns = hit.transform.GetComponentInParent<AimPlatform>() != null;
@@ -413,13 +472,13 @@ public class PlayerMove : MonoBehaviour
     public void AnnounceFall() => VoidFallStarted?.Invoke();
 
     // Comes out there, falling at Speed: it lands as from a respawn (RespawnSlam), and that point is its respawn now
-    public void FallFrom(Vector3 position, Quaternion rotation, float speed, Transform respawn)
+    public void FallFrom(Vector3 position, Quaternion rotation, float speed, Transform respawn, Vector3 carry = default)
     {
         transform.SetParent(null);
         transform.SetPositionAndRotation(position, rotation);
         characterController.enabled = true;
         Scripted = false;
-        horizontalVelocity = Vector3.zero;
+        horizontalVelocity = new Vector3(carry.x, 0f, carry.z);   // (a portal: the momentum you went in with)
         verticalVelocity = -speed;
         movingGround = null;
         lastGroundHit = null;
@@ -523,6 +582,7 @@ public class PlayerMove : MonoBehaviour
 
     private void Respawn()
     {
+        VoidRespawned?.Invoke();
         // Its island went down meanwhile (invisible, nothing to land on): back to the start
         if (respawnPoint == null || Lift.IsHiddenAt(respawnPoint))
         {

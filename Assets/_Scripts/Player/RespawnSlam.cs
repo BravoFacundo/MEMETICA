@@ -41,6 +41,11 @@ public class RespawnSlam : MonoBehaviour
     public AudioClip[] fallingSounds;
     [Range(0f, 1f)] public float volume = 1f;
 
+    [Section("Every Fall")]
+    [Tooltip("Meters fallen (from the highest point) from which any fall, not only into the void, is heard (its falling " +
+             "sound) and lands with the slam and its landing sound. 0: only falls into the void")]
+    public float bigFallHeight = 6f;
+
     private PlayerMove move;
     private PlayerLook look;
     private AudioSource source;
@@ -58,21 +63,42 @@ public class RespawnSlam : MonoBehaviour
         fallSource.spatialBlend = 0f;
     }
 
-    // Falling (into the void, or the respawn / portal fall until you touch down): its sound, once per fall
+    // Every time you leave the ground a falling sound starts, muted. It is turned up once it is a real fall: into the void,
+    // the respawn or portal fall, or Big Fall Height meters down. So you hear it already going (its end), not starting
+    // and cut at once. Touching down: a big fall lands with the slam and its sound; a small one just stops it, unheard
     private AudioSource fallSource;
-    private bool wasFalling;
+    private bool airborne, loud;
+    private float topY;
     private int lastFall = -1;
     void Update()
     {
-        bool falling = (move.FallingIntoVoid || move.Respawning) && landing == null;
-        if (falling && !wasFalling && fallingSounds != null && fallingSounds.Length > 0)
+        bool respawnFall = move.FallingIntoVoid || move.Respawning;
+        bool inAir = landing == null && (respawnFall || (!move.isGrounded && !move.Scripted));
+        if (inAir)
         {
-            int i = Random.Range(0, fallingSounds.Length);
-            if (fallingSounds.Length > 1 && i == lastFall) i = (i + 1) % fallingSounds.Length;
-            lastFall = i;
-            if (fallingSounds[i] != null) { fallSource.clip = fallingSounds[i]; fallSource.volume = volume; fallSource.Play(); }
+            if (!airborne) { airborne = true; loud = false; topY = transform.position.y; StartFallSound(); }
+            topY = Mathf.Max(topY, transform.position.y);
+            if (respawnFall || (bigFallHeight > 0f && topY - transform.position.y >= bigFallHeight)) loud = true;
+            fallSource.volume = loud ? volume : 0f;
         }
-        wasFalling = falling;
+        else if (airborne && landing == null)   // touched down (a respawn lands through RespawnTouchedDown instead)
+        {
+            airborne = false;
+            if (loud) Land();
+            else fallSource.Stop();
+        }
+    }
+
+    void StartFallSound()
+    {
+        if (fallingSounds == null || fallingSounds.Length == 0) return;
+        int i = Random.Range(0, fallingSounds.Length);
+        if (fallingSounds.Length > 1 && i == lastFall) i = (i + 1) % fallingSounds.Length;
+        lastFall = i;
+        if (fallingSounds[i] == null) return;
+        fallSource.clip = fallingSounds[i];
+        fallSource.volume = 0f;   // (muted until it is a real fall)
+        fallSource.Play();
     }
 
     void Start() => look = Camera.main.GetComponent<PlayerLook>();
@@ -92,6 +118,7 @@ public class RespawnSlam : MonoBehaviour
 
     void Land()
     {
+        airborne = false;
         if (fallSource != null) fallSource.Stop();   // the landing sound takes over
         if (landing != null) StopCoroutine(landing);
         landing = StartCoroutine(Landing());

@@ -119,6 +119,15 @@ public class MemeRecall : MonoBehaviour
     // Your hands are free (and you stand on something)
     bool FreeToCome(bool onGround) => look.heldObject == null && !player.Scripted && !player.Respawning && (!onGround || player.isGrounded);
 
+    // Right now, whatever it is doing (it fell into the void, or got lost: Meme): flies to your hand. False: it can't
+    public bool BringNow(MemeWindow window)
+    {
+        if (flying != null) return true;
+        if (window == null || window.IsHeld || !window.gameObject.activeInHierarchy || window.TryGetComponent(out DexCollectible _)) return false;
+        flying = StartCoroutine(Fly(window));
+        return true;
+    }
+
     bool CanCome(MemeWindow window)
     {
         if (window == null || window.IsHeld || !window.gameObject.activeInHierarchy) return false;

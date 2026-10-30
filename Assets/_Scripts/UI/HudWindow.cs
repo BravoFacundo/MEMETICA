@@ -166,7 +166,7 @@ public class HudWindow : MonoBehaviour
 
     void LetGo()
     {
-        if (forDex) { closed?.Invoke(); return; }
+        if (forDex) { Denied(); return; }   // an optional meme can't be let go nor minimized: it goes away on its own
         if (MemeDock.Instance != null && MemeDock.Instance.Carried != null) Camera.main.GetComponent<PlayerLook>().DropObject();
     }
 

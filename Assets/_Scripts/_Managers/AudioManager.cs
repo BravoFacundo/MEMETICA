@@ -1,7 +1,9 @@
 // General sound. Goes in Managers > AudioManager.
 // - Menu music: plays on start and fades out when entering the game (UIManager asks for it).
-// - Volumes: the settings window sliders drive the mixer's exposed parameters
-//   MasterVolume, MusicVolume and SfxVolume (names must match exactly in MainMixer).
+// - Volumes: the settings window sliders. Master turns everything (the AudioListener: also sounds that don't go through
+//   the mixer); Music and Sfx drive the mixer's exposed MusicVolume and SfxVolume. Every AudioSource without a mixer
+//   group (most are made by the scripts: memes, stones, the player…) is sent to Sfx Group on its own, every half
+//   second; Music Source to Music Group. The groups are found in the mixer by name (Sfx / SFX, Music) if left empty.
 // - World sounds (Game): the stones (PathStone) and the islands and bridges rising (Lift) are heard at full volume
 //   near you and fade to nothing farther away (Stone Range, Lift Range: the next course isn't heard), and they go
 //   quieter while a meme sounds (Duck Volume). Without an AudioManager in the scene: the default values.
@@ -25,6 +27,10 @@ public class AudioManager : MonoBehaviour
     [Header("Music")]
     [Tooltip("AudioSource with its Output on the mixer's Music group")]
     public AudioSource musicSource;
+
+    [Header("Mixer Groups (empty: found by name)")]
+    public AudioMixerGroup sfxGroup;
+    public AudioMixerGroup musicGroup;
     public AudioClip menuMusic;
 
     [Space(10)]
@@ -43,6 +49,8 @@ public class AudioManager : MonoBehaviour
 
     void Start()
     {
+        FindGroups();
+        RouteSources();
         ApplySettings();
         GameSettings.Changed += ApplySettings;
         if (menuMusic != null) PlayMusic(menuMusic);
@@ -53,8 +61,9 @@ public class AudioManager : MonoBehaviour
     // Saved volumes → mixer (on start and whenever the settings window changes them)
     void ApplySettings()
     {
+        AudioListener.volume = GameSettings.MasterVolume;   // everything, routed or not
         if (mixer == null) return;
-        SetVolume(MasterParam, GameSettings.MasterVolume);
+        SetVolume(MasterParam, 1f);                         // (Master is the listener's: not twice)
         SetVolume(MusicParam, GameSettings.MusicVolume);
         SetVolume(SfxParam, GameSettings.SfxVolume);
     }
@@ -74,6 +83,38 @@ public class AudioManager : MonoBehaviour
         if (musicSource == null) return;   // nothing to fade
         StopAllCoroutines();
         StartCoroutine(FadeOut(duration));
+    }
+
+    //---- Routing: every sound through the mixer, so the Music and Sfx sliders reach it
+
+    private float nextRoute;
+    void Update()
+    {
+        if (Time.unscaledTime < nextRoute) return;
+        nextRoute = Time.unscaledTime + 0.5f;
+        RouteSources();
+    }
+
+    void FindGroups()
+    {
+        if (mixer == null) return;
+        if (sfxGroup == null) sfxGroup = First("Sfx") ?? First("SFX") ?? First("Effects");
+        if (musicGroup == null) musicGroup = First("Music");
+        if (sfxGroup == null) Debug.LogWarning("[AudioManager] No Sfx group in the mixer: the Sfx slider won't reach the game's sounds.", this);
+    }
+
+    AudioMixerGroup First(string groupName)
+    {
+        AudioMixerGroup[] found = mixer.FindMatchingGroups(groupName);
+        return found != null && found.Length > 0 ? found[0] : null;
+    }
+
+    void RouteSources()
+    {
+        if (musicSource != null && musicGroup != null && musicSource.outputAudioMixerGroup == null) musicSource.outputAudioMixerGroup = musicGroup;
+        if (sfxGroup == null) return;
+        foreach (AudioSource source in FindObjectsOfType<AudioSource>(true))
+            if (source.outputAudioMixerGroup == null && source != musicSource) source.outputAudioMixerGroup = sfxGroup;
     }
 
     //---- World sounds

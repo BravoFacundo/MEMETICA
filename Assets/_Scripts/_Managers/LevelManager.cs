@@ -2,6 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Text.RegularExpressions;
 using UnityEngine;
+using UnityEngine.UI;
 
 // Todo lo general del nivel. Va en Managers > LevelManager.
 // - Drop Distance: one distance for heights and falls (before: Top Y / Bottom Y, Fall Distance; MasterPivot, LimiteCaida, Cage)
@@ -56,6 +57,29 @@ public class LevelManager : MonoBehaviour
     [Tooltip("Seconds the islands fall before the game closes")]
     public float endingDuration = 10f;
 
+    [Section("Skip Tutorial")]
+    [Tooltip("Start without the tutorial: inside Skip Elevator, already docked at the hub, the meme on the floor in front of " +
+             "you, facing the hub's pedestal. The menu's popup decides it; this one is used when pressing Play in this scene. " +
+             "A DebugTools start (Start At) wins over it")]
+    public bool skipTutorial = false;
+    [Tooltip("The elevator from the tutorial to the hub (Elevator_Tutorial_02). Empty: the first one that doesn't ride on start")]
+    public Elevator skipElevator;
+    [Tooltip("What you face (the hub's spinning pedestal). Empty: the GameManager's Start Pedestal")]
+    public Transform skipLookAt;
+    [Tooltip("The meme you start with (Meme Window or orb). Empty: the one riding Skip Elevator")]
+    public Meme skipMeme;
+    [Tooltip("Meters in front of you where it lies")]
+    public float skipMemeDistance = 1.5f;
+    [Tooltip("Seconds the screen takes to fade in from black (it hides the setting up)")]
+    public float skipFadeTime = 1f;
+
+    // Set by the menu's tutorial popup before loading the scene (null: this scene's Skip Tutorial)
+    public static bool? SkipFromMenu;
+    // This game started without the tutorial (the intro elevator reads it: no ride)
+    public static bool SkippingTutorial { get; private set; }
+    // This scene was opened from the menu (its popup chose): DebugTools' Start At doesn't apply
+    public static bool FromMenu { get; private set; }
+
     [Section("Names (Type_ID)", Closed = true)]
     public string islandPrefix = "Island_";
     public string bridgePrefix = "Bridge_";
@@ -76,6 +100,150 @@ public class LevelManager : MonoBehaviour
         foreach (Island i in FindObjectsOfType<Island>()) islands[NormalizeName(i.name)] = i;
         foreach (Bridge b in FindObjectsOfType<Bridge>()) bridges[NormalizeName(b.name)] = b;
         foreach (Elevator e in FindObjectsOfType<Elevator>()) elevators[NormalizeName(e.name)] = e;
+
+        // Before the elevators' Start (the intro one doesn't ride). Coming from the menu, its popup decides (DebugTools'
+        // Start At is ignored); pressing Play in the scene, a DebugTools start wins over Skip Tutorial
+        FromMenu = SkipFromMenu.HasValue;
+        SkippingTutorial = SkipFromMenu ?? skipTutorial;
+        SkipFromMenu = null;
+        DebugTools debug = FindObjectOfType<DebugTools>();
+        if (!FromMenu && debug != null && debug.enabled && debug.startAt >= 0) SkippingTutorial = false;
+    }
+
+    void Start()
+    {
+        if (SkippingTutorial) StartCoroutine(SkipTutorial(Blackout()));
+    }
+
+    void OnDestroy()
+    {
+        if (Instance == this) SkippingTutorial = FromMenu = false;
+    }
+
+    // ---------- Skip Tutorial ----------
+
+    IEnumerator SkipTutorial(CanvasGroup fade)
+    {
+        yield return null;   // the player, islands, elevators and memes set themselves up first
+
+        Elevator elevator = skipElevator != null ? skipElevator : HubElevator();
+        PlayerMove player = FindObjectOfType<PlayerMove>();
+        if (elevator == null || elevator.dockPoint == null || player == null)
+        {
+            Debug.LogWarning("[LevelManager] Skip Tutorial: no Skip Elevator (with a Dock Point) or no player: starting with the tutorial's start.", this);
+            yield return FadeIn(fade);
+            yield break;
+        }
+        Meme meme = skipMeme != null ? skipMeme : PassengerMeme(elevator);
+        Pedestal holder = meme != null ? meme.CurrentPedestal : null;
+
+        // The elevator at the hub, as if it had arrived
+        elevator.DockInstantly();
+        yield return null;
+        Island hub = elevator.dockPoint.GetComponentInParent<Island>();
+        Transform respawn = hub != null ? RespawnPointOf(hub.gameObject, elevator.transform.position) : null;
+
+        // Its pedestal is gone from the start (the meme off it first)
+        if (meme != null && holder != null && holder == elevator.pedestal)
+        {
+            meme.transform.SetParent(null, true);
+            meme.RemoveFromPedestal(holder);
+        }
+        elevator.RemovePedestal();
+
+        // You, standing on its floor, facing the hub's pedestal, looking straight ahead
+        CharacterController body = player.GetComponent<CharacterController>();
+        Vector3 floor = FloorUnder(elevator.transform.position + Vector3.up * 2f, player.transform, meme, out Vector3 hit) ? hit : elevator.transform.position;
+        float feet = body != null ? body.height * 0.5f - body.center.y + body.skinWidth + 0.05f : 1f;
+        Transform spot = new GameObject("SkipTutorialSpot").transform;
+        spot.position = floor + Vector3.up * feet;
+        player.TeleportTo(spot);
+        if (respawn != null) { player.SetRespawn(respawn); Destroy(spot.gameObject); }
+
+        Transform target = skipLookAt;
+        if (target == null && GameManager.Instance != null && GameManager.Instance.startPedestal != null) target = GameManager.Instance.startPedestal.transform;
+        Vector3 facing = target != null ? target.position - player.transform.position : elevator.transform.forward;
+        facing.y = 0f;
+        if (facing.sqrMagnitude < 0.001f) facing = Vector3.forward;
+        facing.Normalize();
+        player.transform.rotation = Quaternion.LookRotation(facing, Vector3.up);
+        PlayerLook look = Camera.main != null ? Camera.main.GetComponent<PlayerLook>() : null;
+        if (look != null) { look.LookLevel(); look.ResetSmoothing(); }
+
+        // The meme on the floor in front of you
+        if (meme != null)
+        {
+            if (holder != null && holder != elevator.pedestal) holder.Break();   // (another pedestal: it lets it go next frame)
+            Vector3 place = player.transform.position + facing * skipMemeDistance;
+            meme.transform.SetParent(null, true);
+            meme.transform.position = place;   // off its pedestal: it lets it go next frame
+            yield return null;
+            if (FloorUnder(place + Vector3.up * 2f, player.transform, meme, out Vector3 ground))
+            {
+                Collider shape = meme.GetComponentInChildren<Collider>();
+                float lift = shape != null ? meme.transform.position.y - shape.bounds.min.y : 0.5f;
+                place = ground + Vector3.up * (lift + 0.02f);
+            }
+            meme.PlaceAt(place, Quaternion.LookRotation(facing, Vector3.up), respawn);   // its front to you
+        }
+
+        yield return new WaitForSecondsRealtime(0.2f);
+        yield return FadeIn(fade);
+        Debug.Log($"[LevelManager] Tutorial skipped: in '{elevator.name}'" + (meme != null ? $", '{meme.name}' in front" : ", no meme") + ".", this);
+    }
+
+    // The first elevator that doesn't ride on start (the one from the tutorial to the hub)
+    Elevator HubElevator()
+    {
+        foreach (Elevator e in FindObjectsOfType<Elevator>()) if (!e.rideOnStart && e.dockPoint != null) return e;
+        return null;
+    }
+
+    // The meme riding it (its passengers, or on its pedestal)
+    static Meme PassengerMeme(Elevator elevator)
+    {
+        foreach (Transform p in elevator.passengers) if (p != null && p.TryGetComponent(out Meme m)) return m;
+        if (elevator.pedestal != null && elevator.pedestal.MemeObject != null) return elevator.pedestal.MemeObject.GetComponent<Meme>();
+        return null;
+    }
+
+    // The ground under a point (not the player nor the meme)
+    static bool FloorUnder(Vector3 from, Transform player, Meme meme, out Vector3 point)
+    {
+        point = from;
+        float nearest = float.MaxValue;
+        foreach (RaycastHit h in Physics.RaycastAll(from, Vector3.down, 10f, ~0, QueryTriggerInteraction.Ignore))
+        {
+            if (h.transform.IsChildOf(player) || (meme != null && h.transform.IsChildOf(meme.transform))) continue;
+            if (h.distance < nearest) { nearest = h.distance; point = h.point; }
+        }
+        return nearest < float.MaxValue;
+    }
+
+    // Black over everything (it hides the setting up), then FadeIn
+    static CanvasGroup Blackout()
+    {
+        var go = new GameObject("SkipTutorialFade", typeof(Canvas), typeof(CanvasGroup), typeof(Image));
+        var canvas = go.GetComponent<Canvas>();
+        canvas.renderMode = RenderMode.ScreenSpaceOverlay;
+        canvas.sortingOrder = 1000;
+        go.GetComponent<Image>().color = Color.black;
+        go.GetComponent<Image>().raycastTarget = false;
+        var group = go.GetComponent<CanvasGroup>();
+        group.alpha = 1f;
+        group.blocksRaycasts = group.interactable = false;
+        return group;
+    }
+
+    IEnumerator FadeIn(CanvasGroup fade)
+    {
+        if (fade == null) yield break;
+        for (float t = 0f; t < skipFadeTime; t += Time.unscaledDeltaTime)
+        {
+            fade.alpha = 1f - Mathf.SmoothStep(0f, 1f, t / Mathf.Max(skipFadeTime, 0.01f));
+            yield return null;
+        }
+        Destroy(fade.gameObject);
     }
 
     // ---------- Lo que piden los pedestales ----------

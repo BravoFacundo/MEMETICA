@@ -196,4 +196,3 @@ MonoBehaviour:
   worldRange: 6
   playerLook: {fileID: 0}
   fovMargin: 1
-  hudCamera: {fileID: 0}

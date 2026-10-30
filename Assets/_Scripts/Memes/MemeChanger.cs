@@ -241,6 +241,7 @@ public abstract class MemeChanger : Meme
     {
         PauseSounds(PauseMenu.GameIsPaused);
         if (memeSource != null && memeSource.isPlaying) AudioManager.MemeSounding();   // the world goes quieter
+        UpdateVideoSound();
         base.Update();
         if (!hasMeme) return;
         UpdateVideoFrame();
@@ -260,7 +261,11 @@ public abstract class MemeChanger : Meme
         StartVideo();
         if (grabHeard) { grabHeard = false; return; }   // just won in the raffle: its sound was already heard
         if (pendingImage != null && (!pendingNeedsAway || playerWentAway)) return;   // a change about to show (its own sound): not both at once
-        if (hasMeme && changeRoutine == null && revealRoutine == null) PlayGrab(Data.BaseSound);
+        if (hasMeme && changeRoutine == null && revealRoutine == null)
+        {
+            if (BaseImage != null && BaseImage.videoSound && BaseImage.video != null) RestartVideo();   // its video's sound, from the start
+            else PlayGrab(Data.BaseSound);
+        }
     }
 
     // Fell into the void. With you: it turns into its Fall change as soon as nothing is below you, and stays so the
@@ -557,6 +562,7 @@ public abstract class MemeChanger : Meme
     // else its Fallback Sound; else MemeSettings' fallback. Returns its length (0: none, or a loop)
     float PlayChange(MemeImage image)
     {
+        if (image.video != null && image.videoSound) { memeSource.Stop(); return (float)image.video.length; }   // its video's own sound
         MemeSound sound = image.sound != null ? new MemeSound { clip = image.sound, loop = image.loop }   // its own, next to it
                         : Pick(Data.fallbackSounds)
                         ?? (Data.fallbackSound != null ? new MemeSound { clip = Data.fallbackSound } : null);
@@ -696,7 +702,14 @@ public abstract class MemeChanger : Meme
 
         if (image.video == null) { if (videoPlayer != null) videoPlayer.Stop(); return; }
         if (videoPlayer == null) videoPlayer = CreateVideoPlayer();
-        if (videoPlayer.clip != image.video) videoPlayer.clip = image.video;
+        VideoAudioOutputMode audio = image.videoSound ? VideoAudioOutputMode.AudioSource : VideoAudioOutputMode.None;
+        if (videoPlayer.clip != image.video || videoPlayer.audioOutputMode != audio)
+        {
+            videoPlayer.Stop();
+            videoPlayer.clip = image.video;
+            videoPlayer.audioOutputMode = audio;
+            if (image.videoSound) { videoPlayer.EnableAudioTrack(0, true); videoPlayer.SetTargetAudioSource(0, videoAudio); }
+        }
         videoPlayer.Play();
     }
 
@@ -719,7 +732,30 @@ public abstract class MemeChanger : Meme
         player.renderMode = VideoRenderMode.APIOnly;
         player.audioOutputMode = VideoAudioOutputMode.None;
         player.skipOnDrop = true;
+        videoAudio = gameObject.AddComponent<AudioSource>();   // its own sound (MemeImage Video Sound)
+        videoAudio.playOnAwake = false; videoAudio.spatialBlend = 1f; videoAudio.minDistance = 4f;
         return player;
+    }
+
+    // Video Sound: the video's own sound. Heard during a change, or the base while you carry it (or ForceVideoSound:
+    // DexCollectible); else muted (a meme lying around doesn't play its video's sound all the time)
+    private AudioSource videoAudio;
+    public bool ForceVideoSound { get; set; }
+    bool VideoHeard => shown != BaseImage || IsHeld || ForceVideoSound;
+
+    void UpdateVideoSound()
+    {
+        if (videoAudio == null) return;
+        videoAudio.mute = !VideoHeard;
+        if (!videoAudio.mute && videoAudio.isPlaying) AudioManager.MemeSounding();   // the world goes quieter
+    }
+
+    // From its start (the video's own sound with it): picked up with a Video Sound base, collected (DexCollectible)
+    public void RestartVideo()
+    {
+        if (videoPlayer == null || shown == null || shown.video == null) return;
+        videoPlayer.time = 0;
+        videoPlayer.Play();
     }
 
     // Back to the base image: a looping change sound stops with it
