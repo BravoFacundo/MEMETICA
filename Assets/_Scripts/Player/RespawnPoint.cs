@@ -31,6 +31,8 @@ public class RespawnPoint : MonoBehaviour
     {
         Island inside = GetComponentInParent<Island>();
         if (inside != null) { OwnIsland = inside.transform; return; }
+        Transform tagged = TaggedIsland(transform);   // an island with only the Isla tag (the tutorial's)
+        if (tagged != null) { OwnIsland = tagged; return; }
         OwnIsland = IslandUnder();
         if (OwnIsland == null) Debug.LogWarning($"[RespawnPoint] '{name}' isn't inside an island nor on one: it won't be used.", this);
         levelIslands = LevelIslands(transform, out Transform root);
@@ -61,7 +63,16 @@ public class RespawnPoint : MonoBehaviour
         {
             Island island = hit.transform.GetComponentInParent<Island>();
             if (island != null) return island.transform;
+            Transform tagged = TaggedIsland(hit.transform);
+            if (tagged != null) return tagged;
         }
+        return null;
+    }
+
+    // The nearest parent (or itself) tagged Isla, as the player finds islands (PlayerMove.FindParentWithTag), or null
+    public static Transform TaggedIsland(Transform t)
+    {
+        for (Transform p = t.parent; p != null; p = p.parent) if (p.CompareTag("Isla")) return p;
         return null;
     }
 

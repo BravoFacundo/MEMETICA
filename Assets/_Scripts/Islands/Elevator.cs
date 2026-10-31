@@ -52,8 +52,29 @@ public class Elevator : MonoBehaviour
     [Tooltip("Pedestal on the elevator: stops working during the ride and topples when its orb is taken")]
     public Pedestal pedestal;
 
+    [Header("Return (Game)")]
+    [Tooltip("Once docked and you stepped off it, it rides back to where it started, empty (the hub stays clear). " +
+             "A meme still on it comes to your hand first")]
+    public bool returnWhenLeft = false;
+    [Tooltip("Seconds after you stepped off it")]
+    public float returnDelay = 1f;
+    [Tooltip("Meters from it that count as off it too (also standing on anything else does)")]
+    public float leaveDistance = 6f;
+
     public bool IsRiding { get; private set; }
+    // At its Dock Point: after its ride (Rode In) or placed there at once (DebugTools)
+    public bool Docked { get; private set; }
+    public bool RodeIn { get; private set; }
     bool used;
+    Coroutine breakWatch;   // its pedestal breaks or sinks when its meme is taken
+    Transform homeParent;   // where it started (Return)
+    Vector3 homeLocal;
+
+    void Awake()   // (before a DebugTools start docks it)
+    {
+        homeParent = transform.parent;
+        homeLocal = homeParent != null ? homeParent.InverseTransformPoint(transform.position) : transform.position;
+    }
 
     void Start()
     {
@@ -123,7 +144,9 @@ public class Elevator : MonoBehaviour
         for (int i = 0; i < ridePopups.Length; i++) if (shown[i]) SetPopup(ridePopups[i].popup, false);
 
         IsRiding = false;
-        if (pedestal != null && pedestalMeme != null) StartCoroutine(BreakPedestalWhenMemeTaken(pedestalMeme));
+        Docked = RodeIn = true;
+        if (pedestal != null && pedestalMeme != null) breakWatch = StartCoroutine(BreakPedestalWhenMemeTaken(pedestalMeme));
+        if (returnWhenLeft) StartCoroutine(ReturnWhenLeft());
     }
 
     // Debug: as if it had already arrived, without the player (DebugTools starts)
@@ -140,15 +163,91 @@ public class Elevator : MonoBehaviour
         foreach (Transform p in passengers)
             if (p != null && respawn != null && p.TryGetComponent(out Meme meme)) meme.SetRespawn(respawn);
         if (locks != null) locks.SetActive(false);
-        if (pedestal != null) StartCoroutine(BreakPedestalOnceMemeIsTaken());
+        Docked = true;
+        if (pedestal != null) breakWatch = StartCoroutine(BreakPedestalOnceMemeIsTaken());
+        if (returnWhenLeft) StartCoroutine(ReturnWhenLeft());
     }
 
     // Tutorial skipped (LevelManager): its pedestal is gone from the start
     public void RemovePedestal()
     {
         if (pedestal == null) return;
-        StopAllCoroutines();   // (its "break when the meme is taken": docked, nothing else runs here)
+        if (breakWatch != null) StopCoroutine(breakWatch);   // (its "break when the meme is taken")
+        breakWatch = null;
         pedestal.gameObject.SetActive(false);
+    }
+
+    //---- Return (Game)
+
+    // Waits until you are off it a moment, hands you a meme left on it, and rides back home
+    IEnumerator ReturnWhenLeft()
+    {
+        PlayerMove player = FindObjectOfType<PlayerMove>();
+        if (player == null) yield break;
+        float offSince = -1f;
+        while (true)
+        {
+            bool? off = PlayerOff(player);
+            if (off == false) offSince = -1f;
+            else if (off == true && offSince < 0f) offSince = Time.time;
+            if (offSince >= 0f && Time.time - offSince >= returnDelay) break;
+            yield return null;
+        }
+
+        // A meme left on it (on its pedestal, or lying on it) comes to your hand (hands full: it waits a little)
+        var sent = new System.Collections.Generic.List<Meme>();
+        for (float waited = 0f; waited < 5f; waited += Time.deltaTime)
+        {
+            Meme left = MemeLeftOn(sent);
+            if (left == null) break;
+            if (SendToPlayer(left)) sent.Add(left);   // (on its way: not asked again)
+            yield return null;
+        }
+
+        yield return RideHome();
+    }
+
+    // Off it: standing on something else, or far. In the air near it: no answer (null)
+    bool? PlayerOff(PlayerMove player)
+    {
+        Vector3 d = player.transform.position - transform.position;
+        d.y = 0f;
+        if (d.magnitude > leaveDistance) return true;
+        if (!Physics.Raycast(player.transform.position, Vector3.down, out RaycastHit ground, 2.5f, ~0, QueryTriggerInteraction.Ignore)) return null;
+        return !ground.transform.IsChildOf(transform);
+    }
+
+    Meme MemeLeftOn(System.Collections.Generic.List<Meme> sent)
+    {
+        foreach (Meme meme in GetComponentsInChildren<Meme>())
+            if (!meme.IsHeld && !sent.Contains(meme)) return meme;
+        return null;
+    }
+
+    static bool SendToPlayer(Meme meme)
+    {
+        if (meme is MemeWindow window && MemeRecall.Instance != null && MemeRecall.Instance.BringNow(window)) return true;
+        PlayerLook look = FindObjectOfType<PlayerLook>();
+        if (look == null || look.heldObject != null) return false;
+        look.Grab(meme.gameObject, 0.6f);
+        return true;
+    }
+
+    // The way it came, backwards (the same curve), to where it started
+    IEnumerator RideHome()
+    {
+        IsRiding = true;
+        Docked = false;
+        transform.SetParent(homeParent, true);
+        for (float t = 0f; t < 1f; )
+        {
+            t = Mathf.Min(1f, t + Time.deltaTime * DebugTools.ElevatorSpeed / Mathf.Max(rideDuration, 0.01f));
+            Vector3 home = homeParent != null ? homeParent.TransformPoint(homeLocal) : homeLocal;
+            ControlPoints(home, dockPoint.position, out Vector3 p1, out Vector3 p2);
+            transform.position = Bezier(dockPoint.position, p2, p1, home, t * t * (3f - 2f * t));
+            yield return null;
+        }
+        IsRiding = false;
     }
 
     // Docked, it becomes part of whatever holds its Dock Point (a floating part of the island bobs it along)
@@ -229,6 +328,8 @@ public class Elevator : MonoBehaviour
         while ((meme == null || !meme.IsHeld) && Vector3.Distance(memeObject.transform.position, startPos) < 1f)
             yield return null;
 
-        pedestal.Break();
+        // With a PedestalRetire (Swallowed): it sinks into the ground and is gone, as the end pedestals. Without: it topples
+        if (pedestal.TryGetComponent(out PedestalRetire retire)) retire.Retire();
+        else pedestal.Break();
     }
 }

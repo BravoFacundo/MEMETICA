@@ -59,6 +59,10 @@ public class MemeRecall : MonoBehaviour
     private MemeWindow[] windows = new MemeWindow[0];
     private float nextSearch;
     private Transform lastPlace;
+    // Not brought (Far, Bring When Leaving) until picked up once: the tutorial skipped leaves it on the floor in front of you
+    private readonly System.Collections.Generic.HashSet<MemeWindow> waitingPickUp = new System.Collections.Generic.HashSet<MemeWindow>();
+
+    public void WaitForPickUp(MemeWindow window) { if (window != null) waitingPickUp.Add(window); }
 
     void Awake() => Instance = this;
 
@@ -74,6 +78,7 @@ public class MemeRecall : MonoBehaviour
 
     void Update()
     {
+        if (waitingPickUp.Count > 0) waitingPickUp.RemoveWhere(w => w == null || w.IsHeld);   // picked up: as always from now on
         if (flying != null || player == null || look == null || MemeDock.Instance == null) return;
         if (Time.time >= nextSearch) { windows = FindObjectsOfType<MemeWindow>(); nextSearch = Time.time + 2f; }
         bool free = FreeToCome(false);
@@ -132,6 +137,7 @@ public class MemeRecall : MonoBehaviour
     {
         if (window == null || window.IsHeld || !window.gameObject.activeInHierarchy) return false;
         if (window.TryGetComponent(out DexCollectible _)) return false;   // an optional meme: not yours
+        if (waitingPickUp.Contains(window)) return false;   // (not picked up yet: it waits where it was put)
         if (window.TryGetComponent(out Rigidbody body) && !body.isKinematic && body.velocity.sqrMagnitude > 1f) return false;   // still falling
         Pedestal pedestal = window.CurrentPedestal;
         if (pedestal == null || HoldsTheWay(pedestal)) return true;   // (a black one: LeftBehind decides)

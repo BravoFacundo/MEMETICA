@@ -78,6 +78,21 @@ public class MemeRandomizer : MonoBehaviour
     [Tooltip("When each part happens, added up for each axis (seconds from placing the meme)")]
     [ReadOnlyField, TextArea(2, 12)] public string timeline;
 
+    [Section("Snap & Stand (on its platform)")]
+    [Tooltip("Carrying a meme this close to the platform's middle (meters, flat), it snaps in by itself (MemeRecall's " +
+             "Snap In Range). 0: the usual reach from the pedestal. A bit less than the platform's radius: only once you are on it")]
+    public float snapRadius = 0f;
+    [Tooltip("When the raffle starts you walk by yourself to Stand Point, facing the pedestal: you see the raffle, then " +
+             "the platform turns you toward your way")]
+    public bool walkToStand = true;
+    [Tooltip("Where you end up (a child of the platform). Empty: Stand Distance behind the pedestal, opposite the " +
+             "platform's front: once it turns, you look past the pedestal at your way")]
+    public Transform standPoint;
+    [Tooltip("Meters from the pedestal where you stand (no Stand Point)")]
+    public float standDistance = 1f;
+    [Tooltip("Meters per second of that walk (slow: you see yourself taken there)")]
+    public float standWalkSpeed = 1.5f;
+
     [Section("After The Raffle")]
     [Tooltip("The player can't walk (only look around) from the raffle until its first bridge starts")]
     public bool lockPlayer = true;
@@ -194,6 +209,7 @@ public class MemeRandomizer : MonoBehaviour
 
         // You stay on the platform from the raffle until your way starts (Lock Player)
         Hold(true);
+        if (walkToStand) StartCoroutine(WalkToStand());
         raffling = true;
         yield return window.Raffle(left.ConvertAll(a => a.meme), winner.meme, raffleTime, tickClip, winClip);
         raffling = false;
@@ -211,6 +227,56 @@ public class MemeRandomizer : MonoBehaviour
         if (!lockPlayer) return;
         if (held == null) held = FindObjectOfType<PlayerMove>();
         if (held != null) held.InputLocked = on;
+    }
+
+    // Snap Radius: you (the camera) are close enough to the platform's middle
+    public bool InSnapArea(Vector3 position)
+    {
+        Vector3 d = position - Middle;
+        d.y = 0f;
+        return d.magnitude <= snapRadius;
+    }
+
+    Vector3 Middle => platform != null ? platform.transform.position : transform.position;
+
+    // An inevitable little walk to Stand Point, turning to face the pedestal (you can't steer meanwhile)
+    IEnumerator WalkToStand()
+    {
+        PlayerMove player = FindObjectOfType<PlayerMove>();
+        if (player == null) yield break;
+        PlayerLook look = FindObjectOfType<PlayerLook>();
+        if (look != null) look.LookLocked = true;
+        Vector3 start = player.transform.position;
+
+        player.AutoWalkSpeed = standWalkSpeed;
+        for (float time = 0f; time < 8f; time += Time.deltaTime)
+        {
+            Vector3 stand = StandPosition(player.transform.position);   // (it turns with the platform)
+            player.AutoWalkTo = stand;
+            Vector3 to = stand - player.transform.position;
+            to.y = 0f;
+            Vector3 face = transform.position - player.transform.position;
+            face.y = 0f;
+            if (face.sqrMagnitude > 0.01f)
+                player.transform.rotation = Quaternion.RotateTowards(player.transform.rotation, Quaternion.LookRotation(face, Vector3.up), 240f * Time.deltaTime);
+            bool facing = face.sqrMagnitude <= 0.01f || Vector3.Angle(player.transform.forward, face) < 2f;
+            if (to.magnitude < 0.05f && facing) break;
+            yield return null;
+        }
+        player.AutoWalkTo = null;
+        if (look != null) look.LookLocked = false;   // (you can look around again; walking waits for your way)
+        Debug.Log($"[MemeRandomizer] Walked you {Vector3.Distance(start, player.transform.position):F1} m to the stand point ({Vector3.ProjectOnPlane(StandPosition(player.transform.position) - player.transform.position, Vector3.up).magnitude:F2} m left).", this);
+    }
+
+    // Stand Point, or behind the pedestal opposite the platform's front (it turns with it); no platform: on your side
+    Vector3 StandPosition(Vector3 from)
+    {
+        if (standPoint != null) return standPoint.position;
+        Vector3 pedestal = transform.position;
+        Vector3 away = platform != null ? -platform.Front : from - pedestal;
+        away.y = 0f;
+        if (away.sqrMagnitude < 0.01f) away = -transform.forward;
+        return pedestal + away.normalized * standDistance;
     }
 
     // The meme taken off while it raffles (the pedestal stops it): free again
@@ -305,6 +371,19 @@ public class MemeRandomizer : MonoBehaviour
     {
         AimPlatform aim = GetComponentInParent<AimPlatform>();
         if (aim == null) return;
+        if (snapRadius > 0f)   // Snap Radius: a circle around the platform's middle
+        {
+            Gizmos.color = new Color(0.4f, 1f, 0.6f);
+            Vector3 c = aim.transform.position + Vector3.up * 0.1f;
+            for (int i = 0; i < 48; i++)
+            {
+                float a = i * Mathf.PI * 2f / 48f, b = (i + 1) * Mathf.PI * 2f / 48f;
+                Gizmos.DrawLine(c + new Vector3(Mathf.Cos(a), 0f, Mathf.Sin(a)) * snapRadius, c + new Vector3(Mathf.Cos(b), 0f, Mathf.Sin(b)) * snapRadius);
+            }
+        }
+        Gizmos.color = new Color(0.4f, 1f, 0.6f);   // where you will stand
+        Vector3 stand = standPoint != null ? standPoint.position : transform.position - aim.Front * standDistance;
+        Gizmos.DrawWireSphere(new Vector3(stand.x, transform.position.y, stand.z), 0.4f);
         LevelManager level = FindObjectOfType<LevelManager>();
         string prefix = level != null ? level.islandPrefix : "Island_";
         Gizmos.color = new Color(1f, 0.6f, 0.2f);

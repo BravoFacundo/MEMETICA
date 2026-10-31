@@ -70,6 +70,9 @@ public class PlayerMove : MonoBehaviour
     public bool FallingIntoVoid { get; private set; }
     // On: walking and jumping keys do nothing (gravity and moving ground still do), e.g. RespawnSlam getting up
     public bool InputLocked { get; set; }
+    // A walk it does by itself (MemeRandomizer: to its stand point), whatever InputLocked says. Null: none
+    public Vector3? AutoWalkTo { get; set; }
+    public float AutoWalkSpeed { get; set; } = 1.5f;
 
     // The island it stepped on last (null before any)
     public GameObject CurrentIsland => lastIsland;
@@ -328,6 +331,15 @@ public class PlayerMove : MonoBehaviour
         Vector2 move = GameInput.Move;   // keys or left stick (GameInput: a drifting gamepad never walks you)
         Vector3 input = InputLocked ? Vector3.zero : transform.right * move.x + transform.forward * move.y;
         input = Vector3.ClampMagnitude(input, 1f);   // diagonal is not faster
+
+        if (AutoWalkTo.HasValue && isGrounded)   // walked there by the game (it moves with the ground like any walk)
+        {
+            Vector3 to = AutoWalkTo.Value - transform.position;
+            to.y = 0f;
+            float speed = Mathf.Min(AutoWalkSpeed, to.magnitude / Mathf.Max(Time.deltaTime, 0.001f));   // (no overshoot)
+            horizontalVelocity = to.sqrMagnitude > 0.0001f ? to.normalized * speed : Vector3.zero;
+            return;
+        }
 
         if (isGrounded)
         {

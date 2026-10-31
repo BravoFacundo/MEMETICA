@@ -5112,6 +5112,7 @@ GameObject:
   - component: {fileID: 3226923575914045670}
   - component: {fileID: 6429361867974928861}
   - component: {fileID: 3707322068011324572}
+  - component: {fileID: 2703313924515926382}
   m_Layer: 0
   m_Name: Pedestal
   m_TagString: Untagged
@@ -5286,3 +5287,25 @@ SphereCollider:
   serializedVersion: 3
   m_Radius: 0.32673588
   m_Center: {x: 0, y: 1.7499998, z: 0}
+--- !u!114 &2703313924515926382
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3226923575914045668}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d3e7440e5bd54dd1a36718671091454a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  like: {fileID: 21300000, guid: b357b2ba3719d1e4bb091d8c6d7312e3, type: 3}
+  dislike: {fileID: 21300000, guid: d3695cc19e802e240b7bf8f01b5b7882, type: 3}
+  question: {fileID: 21300000, guid: b670d545611307b4983bae8f4d1ae3d4, type: 3}
+  height: -0.25
+  size: 0.16
+  spread: 0.5
+  riseSpeed: 0.5
+  lifetime: 1.3
+  burst: 5
+  questionRate: 3

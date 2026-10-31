@@ -135,6 +135,7 @@ public class LevelManager : MonoBehaviour
             yield break;
         }
         Meme meme = skipMeme != null ? skipMeme : PassengerMeme(elevator);
+        if (meme != null && !meme.gameObject.activeSelf) meme.gameObject.SetActive(true);   // (hidden until delivered: MemeDelivery)
         Pedestal holder = meme != null ? meme.CurrentPedestal : null;
 
         // The elevator at the hub, as if it had arrived
@@ -185,6 +186,7 @@ public class LevelManager : MonoBehaviour
                 place = ground + Vector3.up * (lift + 0.02f);
             }
             meme.PlaceAt(place, Quaternion.LookRotation(facing, Vector3.up), respawn);   // its front to you
+            if (meme is MemeWindow window && MemeRecall.Instance != null) MemeRecall.Instance.WaitForPickUp(window);   // (it stays until you take it)
         }
 
         yield return new WaitForSecondsRealtime(0.2f);
@@ -378,11 +380,32 @@ public class LevelManager : MonoBehaviour
 
     // The island's respawn point nearest to a place (an island can have several: one before each part of a course), or null.
     // Once an island has a RespawnPoint (component), its old ones just named RespawnPoint are ignored
+    // An island with none at all (an elevator docked on the tutorial island): the ones of the island it is part of
     public Transform RespawnPointOf(GameObject island, Vector3 near)
     {
         if (island == null) return null;
         Island root = island.GetComponentInParent<Island>();
         Transform container = root != null ? root.transform : island.transform;
+        for (int i = 0; container != null && i < 4; i++)
+        {
+            Transform found = RespawnPointIn(container, near, out bool has);
+            if (has) return found;
+            container = OuterIsland(container);
+        }
+        return null;
+    }
+
+    // The island (Island, or tagged Isla) that holds this one, or null
+    static Transform OuterIsland(Transform island)
+    {
+        for (Transform p = island.parent; p != null; p = p.parent)
+            if (p.CompareTag("Isla") || p.GetComponent<Island>() != null) return p;
+        return null;
+    }
+
+    // Has: it has respawn points (maybe none usable now)
+    Transform RespawnPointIn(Transform container, Vector3 near, out bool has)
+    {
         // Its RespawnPoints (the tool's: inside it, or kept in a level standing on it). Only if it has none: the old ones,
         // just named RespawnPoint (Game_Old)
         Transform best = null;
@@ -396,6 +419,7 @@ public class LevelManager : MonoBehaviour
             float d = (point.transform.position - near).sqrMagnitude;
             if (d < nearest) { nearest = d; best = point.transform; }
         }
+        has = any;
         if (any) return best;
         foreach (Transform child in container.GetComponentsInChildren<Transform>(true))
         {
@@ -403,6 +427,7 @@ public class LevelManager : MonoBehaviour
             float d = (child.position - near).sqrMagnitude;
             if (d < nearest) { nearest = d; best = child; }
         }
+        has = best != null;
         return best;
     }
 

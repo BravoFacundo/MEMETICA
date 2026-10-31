@@ -85,6 +85,7 @@ public class Pedestal : MonoBehaviour
     GameObject releasedMeme;   // just taken off: not snapped again until it leaves the trigger
     MemeRandomizer randomizer;
     PedestalRetire retire;
+    PedestalReactions reactions;   // like / question / dislike icons (optional)
     bool seating;              // the meme window flying from the HUD to the socket
     RigidbodyInterpolation seatedInterpolation = RigidbodyInterpolation.Interpolate;   // what it had before (given back when let go)
 
@@ -99,6 +100,7 @@ public class Pedestal : MonoBehaviour
         particles = socket != null ? socket.GetComponent<ParticleSystem>() : null;
         randomizer = GetComponent<MemeRandomizer>();
         retire = GetComponent<PedestalRetire>();
+        reactions = GetComponent<PedestalReactions>();
         ApplyVisual();
         SyncTrigger();
     }
@@ -138,6 +140,7 @@ public class Pedestal : MonoBehaviour
         MemeRecall assist = MemeRecall.Instance;
         if (assist == null || !assist.AutoSnaps) return false;
         if (everRight && !(randomizer != null && retire != null)) return false;   // (a randomizer that goes down: every round it is back up)
+        if (randomizer != null && randomizer.snapRadius > 0f) return randomizer.InSnapArea(look.transform.position);   // on its platform
         float radius = trigger.radius * Mathf.Max(transform.lossyScale.x, transform.lossyScale.y, transform.lossyScale.z);
         if (Vector3.Distance(look.transform.position, socket.position) > look.pickUpRange + radius) return false;
         if (randomizer != null) return true;
@@ -155,6 +158,14 @@ public class Pedestal : MonoBehaviour
         if (!Usable || HasMeme || !other.CompareTag("Meme") || other.gameObject == releasedMeme) return;
         if (look.heldObject == other.gameObject) return;
         Snap(other.gameObject);
+    }
+
+    // A meme brought by a script (MemeDelivery): seated as if it had been placed. False if it can't take it now
+    public bool Receive(GameObject memeObject)
+    {
+        if (!Usable || HasMeme || memeObject == null) return false;
+        Snap(memeObject);
+        return true;
     }
 
     // The camera looks at the zone (the sphere around the Socket), within reach
@@ -205,7 +216,7 @@ public class Pedestal : MonoBehaviour
             if (body.interpolation != RigidbodyInterpolation.None) seatedInterpolation = body.interpolation;
             body.interpolation = RigidbodyInterpolation.None;   // (interpolated, it lags behind a pedestal that moves)
         }
-        if (particles != null) particles.Play();
+        if (particles != null && reactions == null) particles.Play();   // (the reactions replace the old sparks)
 
         MemeObject = memeObject;
         CurrentMeme = memeObject.GetComponent<Meme>();
@@ -239,6 +250,7 @@ public class Pedestal : MonoBehaviour
     {
         releasedMeme = MemeObject;   // not snapped again until it leaves the zone
         if (evaluating != null) StopCoroutine(evaluating);
+        Think(false);
         bool lowerBridges = randomizer == null && (KeylessPedestal || Fits(MemeObject));   // the randomizer's way stays
         bool done = IsCorrect;
 
@@ -268,6 +280,7 @@ public class Pedestal : MonoBehaviour
         // Randomizer: the raffle, then right (its axis' way already rose)
         if (randomizer != null)
         {
+            Think(true);
             yield return randomizer.Draw(CurrentMeme);
             SetCorrect();
             yield break;
@@ -277,6 +290,7 @@ public class Pedestal : MonoBehaviour
         if (IsGrouped)
         {
             Play(chargeClip, true);
+            Think(true);   // waiting for the rest of the group
             yield return new WaitForSeconds(Length(chargeClip));
             CompleteGroupIfFull();
             yield break;
@@ -286,6 +300,7 @@ public class Pedestal : MonoBehaviour
         if (KeylessPedestal) { SetCorrect(); yield break; }
 
         // Blanco: barrido de imágenes mientras carga, después decide
+        Think(true);
         if (CurrentMeme != null) CurrentMeme.Sweep(Length(chargeClip));
         yield return new WaitForSeconds(Length(chargeClip));
 
@@ -320,6 +335,7 @@ public class Pedestal : MonoBehaviour
         IsCorrect = true;
         everRight = true;
         Play(correctClip);
+        if (reactions != null) reactions.Like();
         if (!KeylessPedestal && randomizer == null && CurrentMeme != null && CurrentMeme.Data != null)
             MemeDex.Report(CurrentMeme.Data, CurrentMeme.Data.baseImage);   // a white one: its Base into the MemeDex
         if (drainMeme && !KeylessPedestal && CurrentMeme is MemeChanger window) window.SetMeme(null);   // downloaded
@@ -336,6 +352,7 @@ public class Pedestal : MonoBehaviour
     void SetIncorrect()
     {
         Play(incorrectClip);
+        if (reactions != null) reactions.Dislike();
         LowerBridges();
         if (CurrentMeme != null) CurrentMeme.OnPedestalResult(this, false);
     }
@@ -371,6 +388,9 @@ public class Pedestal : MonoBehaviour
         rb.isKinematic = false;
         rb.AddForce(transform.forward * 100f + transform.up * 300f);
     }
+
+    // Question marks while it thinks (PedestalReactions)
+    void Think(bool on) { if (reactions != null) reactions.Think(on); }
 
     void Play(AudioClip clip, bool loop = false)
     {
@@ -457,6 +477,7 @@ public class Pedestal : MonoBehaviour
         seating = false;
         trigger.enabled = false;
         if (particles != null) particles.Stop();
+        Think(false);
         foreach (Collider c in GetComponentsInChildren<Collider>()) c.enabled = false;
         transform.SetParent(null, true);   // not riding the elevator any more
 

@@ -267,17 +267,21 @@ public class Meme : MonoBehaviour
         lastGroundY = lastIslandY = transform.position.y;
     }
 
-    // Safety net: far below the last island it was on (whatever kept it from respawning: it fell onto something down
-    // there, or it was stuck), it comes back as a meteor. Says why in the console
+    // Safety net: far from the player (farther than the void: Drop Distance and a bit) and not resting on an island
+    // (falling, or stuck on something down there), it comes back (a meteor, or to your hand in Game). By distance to the
+    // player, not by height: some areas (the tutorial) are far below the islands. Says why in the console
     private void CheckLost()
     {
         if (IsHeld || CurrentPedestal != null || meteor != null || LevelManager.Instance == null) return;
         if (MemeRecall.Instance != null && MemeRecall.Instance.IsBringing) return;   // (flying to you)
-        float below = lastIslandY - transform.position.y;
-        if (below < LevelManager.Instance.dropDistance + 5f) return;
+        if (CurrentPlayer == null) return;
+        float away = Vector3.Distance(CurrentPlayer.transform.position, transform.position);
+        if (away < LevelManager.Instance.dropDistance + 5f) return;
+        bool onIsland = transform.parent != null && (transform.parent.GetComponentInParent<Island>() != null || transform.parent.GetComponentInParent<FloatMotion>() != null);
+        if (onIsland || body.isKinematic) return;   // left on an island, or held still somewhere (its home, waiting to come back): not lost
         string on = Physics.Raycast(transform.position, Vector3.down, out RaycastHit hit, 3f, ~0, QueryTriggerInteraction.Ignore) ? hit.collider.name : "nothing";
-        Debug.LogWarning($"[Meme] '{name}' is {below:F0} m below its last island (kinematic {body.isKinematic}, constraints {body.constraints}, " +
-                         $"parent '{(transform.parent != null ? transform.parent.name : "none")}', on '{on}', last ground {lastGroundY:F1}): respawning it.", this);
+        Debug.LogWarning($"[Meme] '{name}' is {away:F0} m from the player, not on an island (kinematic {body.isKinematic}, constraints {body.constraints}, " +
+                         $"parent '{(transform.parent != null ? transform.parent.name : "none")}', on '{on}', last ground {lastGroundY:F1}, last island {lastIslandY:F1}): respawning it.", this);
         lastGroundY = transform.position.y + LevelManager.Instance.dropDistance;   // (Respawn's own checks)
         Respawn();
     }
