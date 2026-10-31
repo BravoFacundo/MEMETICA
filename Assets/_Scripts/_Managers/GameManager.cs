@@ -4,8 +4,10 @@ using UnityEngine.Events;
 // The run (Game): the virus countdown and how it ends. Your first meme also downloads a virus (a meme itself): from
 // then on (Start On: the hub's pedestal going down after your first raffle) you have Minutes until it throws the blue screen. Collect every meme in the MemeDex and back it up
 // before that to win.
-//   Lose  time is up: the blue screen (Blue Screen, On Lose), then the score
-//   Win   the backup finished (Win(): the MemeDex calls it once it exists; DebugTools F9 meanwhile)
+//   Lose  time is up: the blue screen (Blue Screen) for a moment, then the End Screen (On Lose)
+//   Win   the backup finished (Win(): the MemeDex calls it once it exists; DebugTools F9 meanwhile): the End Screen
+// End Screen is one window for both: its Win Only / Lose Only parts (titles, texts, pictures) show for that result.
+// Without an End Screen: the old separate Blue Screen / Win Screen.
 // When it ends the player stops (only the cursor moves, for the screens). The HUD shows the time with a VirusClock.
 // Goes in Managers > GameManager. Without it (Game_Old) there is no countdown.
 public class GameManager : MonoBehaviour
@@ -32,9 +34,20 @@ public class GameManager : MonoBehaviour
     [ShowIf(nameof(startOn), StartOn.PedestalDown)] public PedestalRetire startPedestal;
     public UnityEvent onStart;
 
+    [Section("End Screen (win and lose)")]
+    [Tooltip("One window for both results (on a canvas over everything). Empty: the old Blue Screen / Win Screen")]
+    public GameObject endScreen;
+    [Tooltip("Parts of it shown only when you win (e.g. its 'Backup complete' title)")]
+    public GameObject[] winOnly;
+    [Tooltip("Parts of it shown only when you lose (e.g. its 'Your memes are gone' title)")]
+    public GameObject[] loseOnly;
+
     [Section("Lose (blue screen)")]
-    [Tooltip("Shown when time is up (your blue screen, on a canvas over everything)")]
+    [Tooltip("Shown when time is up (your blue screen, on a canvas over everything). With an End Screen: only for " +
+             "Blue Screen Seconds, then the End Screen")]
     public GameObject blueScreen;
+    [Tooltip("With an End Screen: seconds the blue screen stays before it")]
+    public float blueScreenSeconds = 3f;
     public AudioClip loseClip;
     public UnityEvent onLose;
 
@@ -62,6 +75,7 @@ public class GameManager : MonoBehaviour
         TimeLeft = minutes * 60f;
         if (blueScreen != null) blueScreen.SetActive(false);
         if (winScreen != null) winScreen.SetActive(false);
+        if (endScreen != null) endScreen.SetActive(false);
     }
 
     void Start()
@@ -136,8 +150,23 @@ public class GameManager : MonoBehaviour
         if (player != null) player.InputLocked = true;
         PlayerLook look = FindObjectOfType<PlayerLook>();
         if (look != null) look.LookLocked = true;   // only the cursor moves (RetroCursor: free once it ended), for the screens
-        if (screen != null) screen.SetActive(true);
         if (clip != null) source.PlayOneShot(clip);
+        if (endScreen == null) { if (screen != null) screen.SetActive(true); return; }   // (the old separate screens)
+
+        bool won = state == State.Won;
+        foreach (GameObject part in winOnly) if (part != null) part.SetActive(won);
+        foreach (GameObject part in loseOnly) if (part != null) part.SetActive(!won);
+        if (!won && blueScreen != null) StartCoroutine(BlueScreenThenEnd());
+        else endScreen.SetActive(true);
+    }
+
+    // Lose: the blue screen a moment, then the End Screen over it
+    System.Collections.IEnumerator BlueScreenThenEnd()
+    {
+        blueScreen.SetActive(true);
+        yield return new WaitForSecondsRealtime(blueScreenSeconds);
+        endScreen.SetActive(true);
+        endScreen.transform.SetAsLastSibling();
     }
 
     void SetState(State state)
