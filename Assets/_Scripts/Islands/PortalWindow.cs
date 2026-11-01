@@ -29,10 +29,21 @@ public class PortalWindow : MonoBehaviour
     [Tooltip("Which way the other side faces (what you see through the window and where you look coming out): the " +
              "spin platform (the hub's AimPlatform: your next goal), the opposite of Exit's arrow, or its arrow")]
     public ExitLook exitLook = ExitLook.SpinPlatform;
-    [Tooltip("Coming out, you turn to face that way while your head looks up (whichever way you went in)")]
+    [Tooltip("The other side turns with you: whichever way you walk in or look, the window shows the hub as you will " +
+             "come out, facing Exit Look (the spin platform), and you come out exactly like that, no turn. Off: the " +
+             "window is a fixed hole, you come out facing the way you went in")]
+    public bool alignToYou = true;
+    [Tooltip("Coming out, you turn to face that way while your head looks up (whichever way you went in). With Align " +
+             "To You there is nothing left to turn")]
     public bool turnToExit = true;
     [Tooltip("Meters above Exit you come out of the window (and fall from)")]
     public float exitHeight = 10f;
+    [Tooltip("While this portal rises (its view still loading, so you don't see it), the hub's spin platform " +
+             "(AimPlatform) turns its back to where you land: you can climb onto it from there (its front's side " +
+             "doesn't block you). Not done by then (a portal open from the start): while you fall into the hub")]
+    public bool turnPlatformToYou = true;
+    [Tooltip("Seconds that turn takes (0: at the platform's own Turn Speed)")]
+    public float platformTurnTime = 1.2f;
 
     [Section("Opening")]
     [Tooltip("It rises once this pedestal went into the earth (the target island's, Swallowed). Empty: open from the start")]
@@ -343,8 +354,20 @@ public class PortalWindow : MonoBehaviour
         return -point.Facing;
     }
 
-    Vector3 MapPoint(Vector3 p) => ExitPosition + ExitRotation * (Flip * (Quaternion.Inverse(transform.rotation) * (p - transform.position)));
-    Quaternion MapRotation(Quaternion r) => ExitRotation * Flip * Quaternion.Inverse(transform.rotation) * r;
+    Vector3 MapPoint(Vector3 p) => ExitPosition + ExitRotation * (Flip * (Quaternion.Inverse(Source) * (p - transform.position)));
+    Quaternion MapRotation(Quaternion r) => ExitRotation * Flip * Quaternion.Inverse(Source) * r;
+
+    // This side, as it maps onto the other: the window itself, or (Align To You) turned on its face to where you look,
+    // so your way in always becomes Exit Look's way out
+    Quaternion Source
+    {
+        get
+        {
+            if (!alignToYou || player == null) return transform.rotation;
+            Vector3 along = Vector3.ProjectOnPlane(player.transform.forward, transform.up);
+            return along.sqrMagnitude > 1e-4f ? Quaternion.LookRotation(along.normalized, transform.up) : transform.rotation;
+        }
+    }
 
     void UpdateView()
     {
@@ -398,6 +421,7 @@ public class PortalWindow : MonoBehaviour
         staticAmount = 1f;
         pixels = 1f;
         Play(riseClip);
+        if (turnPlatformToYou) StartCoroutine(TurnPlatform());   // while it rises: ready before you go through
         for (float t = 0f; t < riseTime; t += Time.deltaTime)
         {
             float p = t / riseTime;
@@ -417,6 +441,15 @@ public class PortalWindow : MonoBehaviour
         }
         staticAmount = 0f;
         pixels = pixelate;
+    }
+
+    // The hub's spin platform turns its back to Exit (waits if it is still turning toward the island)
+    IEnumerator TurnPlatform()
+    {
+        AimPlatform spin = FindObjectOfType<AimPlatform>();
+        if (spin == null || exit == null) yield break;
+        while (spin.IsTurning) yield return null;
+        spin.BackTo(exit.transform.position, platformTurnTime);
     }
 
     void Place(float depth, Vector3 jitter = default)
@@ -466,6 +499,11 @@ public class PortalWindow : MonoBehaviour
         Vector3 carried = Vector3.ProjectOnPlane(MapRotation(Quaternion.identity) * carry, Vector3.up).normalized * carry.magnitude;   // the same way, on the other side
         player.FallFrom(body, Quaternion.LookRotation(facing.sqrMagnitude > 1e-4f ? facing.normalized : ExitFacing, Vector3.up), speed, exit.transform, carried);
         if (outClip != null) flat.PlayOneShot(outClip);
+        if (turnPlatformToYou)   // (turned while it rose: it doesn't move again)
+        {
+            AimPlatform spin = FindObjectOfType<AimPlatform>();
+            if (spin != null && !spin.IsTurning) spin.BackTo(exit.transform.position, platformTurnTime);
+        }
         if (fallChange && CarriedWindow != null) player.AnnounceFall();   // the window you carry: its Fall change
         StartCoroutine(AfterLanding());
         if (exitWindow) StartCoroutine(ExitWindow());

@@ -35,6 +35,9 @@ public class RetroCursor : MonoBehaviour
     public List<CursorStyle> styles = new List<CursorStyle>();
 
     [Header("Free cursor while playing (Game only)")]
+    [Tooltip("Off for now: Free Key does nothing while playing (the window buttons, maximize… wait for a later version). " +
+             "The Menu, the pause and the end screen still have the free cursor")]
+    public bool freeWhilePlaying = false;
     [Tooltip("Hold it to free the cursor while playing")]
     public KeyCode freeKey = KeyCode.LeftControl;
     [Tooltip("Meters away a window in the world can be clicked")]
@@ -79,13 +82,14 @@ public class RetroCursor : MonoBehaviour
     void Update()
     {
         bool ended = GameManager.Instance != null && GameManager.Instance.Ended;   // the blue screen / win screen: click on them
-        Mode wanted = playerLook == null || PauseMenu.GameIsPaused || ended || Input.GetKey(freeKey) ? Mode.Free : Mode.Crosshair;
+        bool freeHeld = freeWhilePlaying && Input.GetKey(freeKey);
+        Mode wanted = playerLook == null || PauseMenu.GameIsPaused || ended || freeHeld || ModalPopup.Open ? Mode.Free : Mode.Crosshair;   // (a modal popup: the arrow)
         bool paused = PauseMenu.GameIsPaused;
         if (!modeStarted || wanted != CurrentMode || paused != wasPaused) ApplyMode(wanted);   // the pause also locks / frees it
         wasPaused = paused;
 
         if (playerLook == null || PauseMenu.GameIsPaused) return;   // Menu / pause: the UI buttons set the icon
-        if (CurrentMode == Mode.Crosshair) SetState(AimState());
+        if (CurrentMode == Mode.Crosshair) SetState(MemeRandomizer.Busy ? CursorState.Hidden : AimState());   // (raffling, the platform turning: no aim)
         else UpdateWindows();
     }
 

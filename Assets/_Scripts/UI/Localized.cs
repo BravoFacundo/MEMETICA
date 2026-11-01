@@ -27,14 +27,14 @@ public class Localized : MonoBehaviour
 
     private void OnEnable()
     {
-        GameSettings.Changed += ApplyLanguage;
+        SettingsManager.Changed += ApplyLanguage;
         ApplyLanguage();
     }
-    private void OnDisable() => GameSettings.Changed -= ApplyLanguage;
+    private void OnDisable() => SettingsManager.Changed -= ApplyLanguage;
 
     private void ApplyLanguage()
     {
-        bool isSpanish = GameSettings.Language == GameLanguage.Spanish;
+        bool isSpanish = SettingsManager.Language == GameLanguage.Spanish;
 
         if (text != null && !string.IsNullOrEmpty(spanish)) text.text = isSpanish ? spanish : english;
 

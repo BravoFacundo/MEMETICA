@@ -33,6 +33,8 @@ public class PlayerLook : MonoBehaviour
     [Section("Hold Memes")]
     public bool canHold = true;
     public float pickUpRange = 2.5f;
+    [Tooltip("Debug: each click to grab says in the Console what it hit and what you hold")]
+    public bool logGrabs = false;
     public float moveForce = 250;
     [Tooltip("The held meme never gets closer to the camera than this (meters), so it doesn't hit your face or cross the near clip plane")]
     public float minHoldDistance = 0.6f;
@@ -101,10 +103,10 @@ public class PlayerLook : MonoBehaviour
 
         // Sensitivity comes from the saved settings and follows the settings window
         ApplySettings();
-        GameSettings.Changed += ApplySettings;
+        SettingsManager.Changed += ApplySettings;
     }
 
-    void OnDestroy() => GameSettings.Changed -= ApplySettings;
+    void OnDestroy() => SettingsManager.Changed -= ApplySettings;
 
     // Physics forces go in FixedUpdate: same pull at any frame rate (before: Update, stronger at high FPS)
     void FixedUpdate()
@@ -113,7 +115,7 @@ public class PlayerLook : MonoBehaviour
         PullHeldObject();
         KeepHeldObjectOffFace();
     }
-    void ApplySettings() => sensitivityMultiplier = GameSettings.MouseSensitivityMultiplier;
+    void ApplySettings() => sensitivityMultiplier = SettingsManager.MouseSensitivityMultiplier;
     
     void Update()
     {        
@@ -160,8 +162,12 @@ public class PlayerLook : MonoBehaviour
 
     private void UpdateHeldMeme()
     {
-        if (PauseMenu.GameIsPaused || !canHold) return;   // no grabbing while paused (clicking the pause window) or riding an elevator
-        if (CursorFree) { LookingAtMeme = CanGrabLooked = false; return; }   // the click is the cursor's (RetroCursor)
+        if (PauseMenu.GameIsPaused || ModalPopup.Open || !canHold)
+        {
+            if (logGrabs && GameInput.GrabDown) Debug.Log($"[PlayerLook] Click ignored: paused {PauseMenu.GameIsPaused}, modal popup {ModalPopup.Open}, can hold {canHold}", this);
+            return;
+        }   // no grabbing while paused, a modal popup is up (its click closes it) or riding an elevator
+        if (CursorFree) { if (logGrabs && GameInput.GrabDown) Debug.Log("[PlayerLook] Click ignored: free cursor", this); LookingAtMeme = CanGrabLooked = false; return; }   // the click is the cursor's (RetroCursor)
 
         // Ignora triggers: si no, la zona del pedestal (que envuelve al meme) tapa el rayo
         LookingAtMeme = Physics.Raycast(transform.position, transform.forward, out RaycastHit hit, pickUpRange, ~PhysicsLayers.PropsMask, QueryTriggerInteraction.Ignore)
@@ -171,6 +177,8 @@ public class PlayerLook : MonoBehaviour
 
         if (GameInput.GrabDown)
         {
+            if (logGrabs) Debug.Log($"[PlayerLook] Click: looking at '{(hit.transform != null ? hit.transform.name : "nothing")}' " +
+                                    $"(tag {(hit.transform != null ? hit.transform.tag : "-")}, {hit.distance:F1} m of {pickUpRange}), holding '{(heldObject != null ? heldObject.name : "nothing")}', dex {dex != null}", this);
             if (dex != null) dex.Collect();   // an optional meme: to its own HUD place, your hand stays as it is
             else if (heldObject == null) { if (LookingAtMeme) PickUpObject(hit.transform.gameObject); }
             else if (dropping == null) DropObject();
@@ -402,6 +410,13 @@ public class PlayerLook : MonoBehaviour
     void ApplyCameraOffset() => transform.localPosition = cameraRestPosition + Vector3.up * (cameraLag - poseDip) + shakeOffset;
 
     //---- Pose
+
+    // Degrees the head looks down (up: negative), as the mouse leaves it. Set: turned there (a scripted look)
+    public float Pitch
+    {
+        get => xRotation;
+        set { xRotation = Mathf.Clamp(value, -90f, 90f); ApplyRotation(); }
+    }
 
     // Looking straight ahead (a respawn facing its course)
     public void LookLevel()

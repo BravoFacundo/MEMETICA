@@ -128,7 +128,8 @@ public class PathStone : MonoBehaviour
         SetTrail(IsPresent && !settling && fallState == FallState.Resting);
         if (!IsPresent) return;
         if (Moves && !settling && goToEnd) GoToEnd();
-        if (Moves && !settling) Advance(Time.deltaTime * LevelManager.PlatformSpeed);   // (Platform Speed: the whole route, waits too)
+        float idle = path != null ? path.SpeedFactor : 1f;   // (its path's Idle Speed: the same for all its stones)
+        if (Moves && !settling) Advance(Time.deltaTime * LevelManager.PlatformSpeed * idle);   // (Platform Speed: the whole route, waits too)
         else if (!Moves) { From = To = 0; Progress = 0f; }
     }
 

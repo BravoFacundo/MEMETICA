@@ -15,7 +15,7 @@ public class GameManager : MonoBehaviour
     public static GameManager Instance { get; private set; }
 
     public enum State { NotStarted, Running, Won, Lost }
-    public enum StartOn { IslandReached, Manual, PedestalDown }
+    public enum StartOn { IslandReached, Manual, PedestalDown, VirusAlert }
 
     [Section("Time")]
     [Tooltip("Minutes until the blue screen (the itch.io build: 30; the exhibition: 5)")]
@@ -25,8 +25,10 @@ public class GameManager : MonoBehaviour
     public ScoreMode scoreMode = ScoreMode.Expo;
 
     [Section("Start")]
-    [Tooltip("Pedestal Down: when Start Pedestal goes into the ground (the hub's randomizer, after your first raffle). " +
-             "Island Reached: when you first step on Start Island. Manual: when something calls StartTimer")]
+    [Tooltip("Virus Alert: once the first raffle's way rose, the Virus Alert window shows (you stay still) and the " +
+             "countdown starts when it closes. Pedestal Down: when Start Pedestal goes into the ground (the hub's " +
+             "randomizer, after your first raffle). Island Reached: when you first step on Start Island. Manual: when " +
+             "something calls StartTimer")]
     public StartOn startOn = StartOn.PedestalDown;
     [Tooltip("Its ID (1 → Island_1)")]
     [ShowIf(nameof(startOn), StartOn.IslandReached)] public string startIsland = "1";
@@ -41,6 +43,18 @@ public class GameManager : MonoBehaviour
     public GameObject[] winOnly;
     [Tooltip("Parts of it shown only when you lose (e.g. its 'Your memes are gone' title)")]
     public GameObject[] loseOnly;
+
+    [Section("Virus Alert (Start On: Virus Alert)")]
+    [Tooltip("The window 'Virus detected' (on a canvas, outside the HUD group): hidden until then. Set, it is what " +
+             "starts the countdown, whatever Start On says")]
+    public GameObject virusAlert;
+    [Tooltip("Optional: a text of it with {min} where the minutes go ('...se borrará en {min} minutos'): it writes Minutes")]
+    public TMPro.TMP_Text virusMinutesText;
+    [Tooltip("Seconds after the way started rising before it shows")]
+    public float alertDelay = 1f;
+    [Tooltip("Seconds it stays at least: the game stops until it is clicked after that (ModalPopup: 'Click to start')")]
+    public float alertMinTime = 1.5f;
+    public AudioClip alertClip;
 
     [Section("Lose (blue screen)")]
     [Tooltip("Shown when time is up (your blue screen, on a canvas over everything). With an End Screen: only for " +
@@ -76,6 +90,31 @@ public class GameManager : MonoBehaviour
         if (blueScreen != null) blueScreen.SetActive(false);
         if (winScreen != null) winScreen.SetActive(false);
         if (endScreen != null) endScreen.SetActive(false);
+        if (virusAlert != null) virusAlert.SetActive(false);
+    }
+
+    void OnEnable() => MemeRandomizer.WayOpened += OnWayOpened;
+    void OnDisable() => MemeRandomizer.WayOpened -= OnWayOpened;
+
+    //---- Virus Alert: the first way rose → the window, you stay still → closed: the countdown
+
+    private bool alerting;
+    void OnWayOpened()
+    {
+        if ((startOn != StartOn.VirusAlert && virusAlert == null) || Current != State.NotStarted || alerting) return;
+        StartCoroutine(VirusAlert());
+    }
+
+    System.Collections.IEnumerator VirusAlert()
+    {
+        alerting = true;
+        yield return new WaitForSeconds(alertDelay);
+        if (virusMinutesText != null) virusMinutesText.text = virusMinutesText.text.Replace("{min}", Mathf.RoundToInt(minutes).ToString());
+        if (alertClip != null) source.PlayOneShot(alertClip);
+        bool closed = false;
+        ModalPopup.Show(virusAlert, () => closed = true, alertMinTime);   // the game stops until clicked
+        StartTimer();   // the clock shows with it, stopped (time is frozen): it runs once clicked
+        while (!closed) yield return null;
     }
 
     void Start()
@@ -98,6 +137,7 @@ public class GameManager : MonoBehaviour
 
     bool ShouldStart()
     {
+        if (virusAlert != null) return false;   // a Virus Alert set: it starts the countdown (whatever Start On says)
         if (startOn == StartOn.IslandReached) return OnStartIsland();
         if (startOn == StartOn.PedestalDown) return startPedestal != null && !startPedestal.IsUp;
         return false;

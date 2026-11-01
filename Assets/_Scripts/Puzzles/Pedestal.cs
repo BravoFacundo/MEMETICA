@@ -142,10 +142,20 @@ public class Pedestal : MonoBehaviour
         if (everRight && !(randomizer != null && retire != null)) return false;   // (a randomizer that goes down: every round it is back up)
         if (randomizer != null && randomizer.snapRadius > 0f) return randomizer.InSnapArea(look.transform.position);   // on its platform
         float radius = trigger.radius * Mathf.Max(transform.lossyScale.x, transform.lossyScale.y, transform.lossyScale.z);
-        if (Vector3.Distance(look.transform.position, socket.position) > look.pickUpRange + radius) return false;
+        bool inRange = Vector3.Distance(look.transform.position, socket.position) <= look.pickUpRange + radius;
+        if (KeylessPedestal && randomizer == null)   // a black one: only when you bring it in, not when you pick it up already near it
+        {
+            bool entering = inRange && !(rangeMeme == inHand && rangeWas);
+            rangeMeme = inHand;
+            rangeWas = inRange;
+            return entering && assist.snapOnBlack;
+        }
+        if (!inRange) return false;
         if (randomizer != null) return true;
-        return !KeylessPedestal && keyMeme != null && Fits(inHand);
+        return keyMeme != null && Fits(inHand);
     }
+    GameObject rangeMeme;   // (black ones: the meme in your hand was already in range last frame)
+    bool rangeWas;
     bool everRight;   // it was right once (no more auto snapping)
 
     // Takes memes: not broken, and not in the ground (PedestalRetire)

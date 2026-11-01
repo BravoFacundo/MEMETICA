@@ -38,6 +38,8 @@ public class Elevator : MonoBehaviour
         [Range(0f, 1f)] public float showAt = 0.1f;
         [Tooltip("When it disappears, as a fraction of the ride")]
         [Range(0f, 1f)] public float hideAt = 0.5f;
+        [Tooltip("It stops the ride (and the game) until clicked: 'Click to continue' (Hide At unused)")]
+        public bool modal;
     }
 
     [Header("Tutorial")]
@@ -141,7 +143,7 @@ public class Elevator : MonoBehaviour
             if (p != null && respawn != null && p.TryGetComponent(out Meme meme)) meme.SetRespawn(respawn);
         if (hold != null) hold.canHold = true;
         if (locks != null) locks.SetActive(false);
-        for (int i = 0; i < ridePopups.Length; i++) if (shown[i]) SetPopup(ridePopups[i].popup, false);
+        for (int i = 0; i < ridePopups.Length; i++) if (shown[i] && !ridePopups[i].modal) SetPopup(ridePopups[i].popup, false);
 
         IsRiding = false;
         Docked = RodeIn = true;
@@ -265,6 +267,11 @@ public class Elevator : MonoBehaviour
     {
         for (int i = 0; i < ridePopups.Length; i++)
         {
+            if (ridePopups[i].modal)   // once, and the ride waits for its click
+            {
+                if (!shown[i] && t >= ridePopups[i].showAt) { shown[i] = true; ModalPopup.Show(ridePopups[i].popup); }
+                continue;
+            }
             bool visible = t >= ridePopups[i].showAt && t < ridePopups[i].hideAt;
             if (visible == shown[i]) continue;
             shown[i] = visible;

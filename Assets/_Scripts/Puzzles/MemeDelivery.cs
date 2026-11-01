@@ -28,6 +28,13 @@ public class MemeDelivery : MonoBehaviour
     [Tooltip("Seconds the fall takes (speeding up)")]
     public float fallTime = 0.5f;
 
+    [Header("First Pick Up")]
+    [Tooltip("Shown the first time you pick the meme up (also with the tutorial skipped): it stops the game until " +
+             "clicked (ModalPopup). E.g. 'With this window you can see your memes…'")]
+    public GameObject pickUpPopup;
+    [Tooltip("Seconds after picking it up before it shows (e.g. to see the bridge go down first)")]
+    public float pickUpPopupDelay = 0f;
+
     [Header("Feel")]
     public AudioClip appearClip;
     [Range(0f, 1f)] public float volume = 1f;
@@ -47,12 +54,25 @@ public class MemeDelivery : MonoBehaviour
         meme.gameObject.SetActive(false);
     }
 
+    private bool pickedUp;
+
     void Update()
     {
+        if (!pickedUp && meme != null && meme.IsHeld)   // the first time in your hand: its popup
+        {
+            pickedUp = true;
+            if (pickUpPopup != null) StartCoroutine(ShowPickUpPopup());
+        }
         if (done || !afterElevator.Docked) return;
         done = true;
         if (afterElevator.RodeIn) StartCoroutine(Deliver());
         else SeatNow();   // docked at once (DebugTools): no show
+    }
+
+    IEnumerator ShowPickUpPopup()
+    {
+        if (pickUpPopupDelay > 0f) yield return new WaitForSeconds(pickUpPopupDelay);
+        ModalPopup.Show(pickUpPopup);
     }
 
     void SeatNow()

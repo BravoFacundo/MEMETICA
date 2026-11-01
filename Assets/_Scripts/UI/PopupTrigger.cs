@@ -15,6 +15,8 @@ public class PopupTrigger : MonoBehaviour
     public bool closeWithX = false;
     [Tooltip("Close With X: shown only the first time")]
     public bool onlyOnce = true;
+    [Tooltip("It stops the game until clicked ('Click to continue'), the first time you come in only")]
+    public bool modal = false;
 
     bool inside;
     bool shown;
@@ -33,6 +35,7 @@ public class PopupTrigger : MonoBehaviour
     {
         if (inside || !IsPlayer(other)) return;
         inside = true;
+        if (modal) { if (!shown) { shown = true; ModalPopup.Show(popup); } return; }
         if (closeWithX && onlyOnce && shown) return;
         shown = true;
         if (TutorialManager.Instance != null) TutorialManager.Instance.Show(popup, closeWithX);
@@ -42,6 +45,7 @@ public class PopupTrigger : MonoBehaviour
     {
         if (!inside || !IsPlayer(other)) return;
         inside = false;
+        if (modal) return;   // (closed by its click)
         if (hideOnExit && !closeWithX && TutorialManager.Instance != null) TutorialManager.Instance.Hide(popup);
     }
 

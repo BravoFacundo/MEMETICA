@@ -268,7 +268,8 @@ public class MemeWindow : MemeChanger
     private bool shownFill;
     protected override void OnImageShown(MemeImage image)
     {
-        shownFill = Data != null && Data.Fills(image);
+        MemeData owner = ImageOwner != null ? ImageOwner : Data;   // (raffling: the candidate's own Fill)
+        shownFill = owner != null ? owner.Fills(image) : image != null && image.fill;
         SetTitle(TitleOf(image));
         Set(b => b.SetFloat(FillId, shownFill ? 1f : 0f));
         if (OnScreen && HudWindow.Instance != null) HudWindow.Instance.SetFill(shownFill);

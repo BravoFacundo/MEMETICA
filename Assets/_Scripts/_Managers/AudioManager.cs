@@ -1,5 +1,9 @@
 // General sound. Goes in Managers > AudioManager.
-// - Menu music: plays on start and fades out when entering the game (UIManager asks for it).
+// - Music: each scene's own, looped from the start (Menu: its theme; Game / Game_Old: the same one in the background,
+//   at Music Level). It fades out when changing scene (UIManager asks for it). The settings' Music slider turns it
+//   down or off (mixer's Music group). It makes its own source.
+// - Ambience: the scene's background loop (Menu: the wind), 2D, on the Sfx group (the Sfx slider). It fades out with
+//   the music. It makes its own source.
 // - Volumes: the settings window sliders. Master turns everything (the AudioListener: also sounds that don't go through
 //   the mixer); Music and Sfx drive the mixer's exposed MusicVolume and SfxVolume. Every AudioSource without a mixer
 //   group (most are made by the scripts: memes, stones, the player…) is sent to Sfx Group on its own, every half
@@ -11,36 +15,47 @@
 using System.Collections;
 using UnityEngine;
 using UnityEngine.Audio;
+using UnityEngine.Serialization;
 
 public class AudioManager : MonoBehaviour
 {
     public static AudioManager Instance { get; private set; }
 
-    [Header("Mixer")]
+    [Section("Mixer")]
     public AudioMixer mixer;
+    [Tooltip("Empty: found in the mixer by name (Music)")]
+    public AudioMixerGroup musicGroup;
+    [Tooltip("Empty: found in the mixer by name (Sfx / SFX / Effects)")]
+    public AudioMixerGroup sfxGroup;
 
     const string MasterParam = "MasterVolume";
     const string MusicParam = "MusicVolume";
     const string SfxParam = "SfxVolume";
 
-    [Space(10)]
-    [Header("Music")]
-    [Tooltip("AudioSource with its Output on the mixer's Music group")]
-    public AudioSource musicSource;
+    [Section("Music")]
+    [Tooltip("This scene's music, looped from the start (Menu and Game: MainTheme). Empty: no music here")]
+    [FormerlySerializedAs("menuMusic")] public AudioClip music;
+    [Tooltip("Its level in this scene before the slider (Game: lower, so it stays in the background)")]
+    [Range(0f, 1f)] public float musicLevel = 1f;
+    [Tooltip("The music's volume while a meme sounds (so the meme is heard), then back up")]
+    [Range(0f, 1f)] public float musicDuck = 0.4f;
 
-    [Header("Mixer Groups (empty: found by name)")]
-    public AudioMixerGroup sfxGroup;
-    public AudioMixerGroup musicGroup;
-    public AudioClip menuMusic;
+    [Section("Ambience")]
+    [Tooltip("This scene's background loop (Menu: the wind), heard everywhere (2D). Empty: none")]
+    public AudioClip ambience;
+    [Tooltip("Its level before the slider (the Sfx slider turns it)")]
+    [Range(0f, 1f)] public float ambienceLevel = 0.6f;
 
-    [Space(10)]
-    [Header("World Sounds (Game)")]
+    [Section("World Sounds (Game)", Closed = true)]
     [Tooltip("Stones: meters at full volume (x) and from where they aren't heard (y)")]
     public Vector2 stoneRange = DefaultStoneRange;
     [Tooltip("Islands and bridges rising: meters at full volume (x) and from where they aren't heard (y)")]
     public Vector2 liftRange = DefaultLiftRange;
     [Tooltip("Their volume while a meme sounds (so the meme is heard)")]
     [Range(0f, 1f)] public float duckVolume = DefaultDuck;
+
+    // Made here when there is a clip for them (2D, heard everywhere, each on its mixer group)
+    private AudioSource musicSource, ambienceSource;
 
     static readonly Vector2 DefaultStoneRange = new Vector2(4f, 30f), DefaultLiftRange = new Vector2(10f, 70f);
     const float DefaultDuck = 0.35f;
@@ -50,22 +65,25 @@ public class AudioManager : MonoBehaviour
     void Start()
     {
         FindGroups();
+        if (music != null) musicSource = MakeSource(musicGroup, "Music");
+        if (ambience != null) ambienceSource = MakeSource(sfxGroup, "Sfx");
         RouteSources();
         ApplySettings();
-        GameSettings.Changed += ApplySettings;
-        if (menuMusic != null) PlayMusic(menuMusic);
+        SettingsManager.Changed += ApplySettings;
+        if (music != null) PlayMusic(music);
+        if (ambience != null) PlayAmbience(ambience);
     }
 
-    void OnDestroy() => GameSettings.Changed -= ApplySettings;
+    void OnDestroy() => SettingsManager.Changed -= ApplySettings;
 
     // Saved volumes → mixer (on start and whenever the settings window changes them)
     void ApplySettings()
     {
-        AudioListener.volume = GameSettings.MasterVolume;   // everything, routed or not
+        AudioListener.volume = SettingsManager.MasterVolume;   // everything, routed or not
         if (mixer == null) return;
         SetVolume(MasterParam, 1f);                         // (Master is the listener's: not twice)
-        SetVolume(MusicParam, GameSettings.MusicVolume);
-        SetVolume(SfxParam, GameSettings.SfxVolume);
+        SetVolume(MusicParam, SettingsManager.MusicVolume);
+        SetVolume(SfxParam, SettingsManager.SfxVolume);
     }
 
     public void PlayMusic(AudioClip clip)
@@ -74,25 +92,55 @@ public class AudioManager : MonoBehaviour
         StopAllCoroutines();
         musicSource.clip = clip;
         musicSource.loop = true;
-        musicSource.volume = 1f;
+        musicSource.volume = musicLevel;
         musicSource.Play();
+        fading = false;
     }
 
+    public void PlayAmbience(AudioClip clip)
+    {
+        if (ambienceSource == null) return;
+        ambienceSource.clip = clip;
+        ambienceSource.loop = true;
+        ambienceSource.volume = ambienceLevel;
+        ambienceSource.Play();
+    }
+
+    // Changing scene (UIManager): the music and the ambience fade out together
     public void FadeOutMusic(float duration)
     {
-        if (musicSource == null) return;   // nothing to fade
+        if (musicSource == null && ambienceSource == null) return;   // nothing to fade
         StopAllCoroutines();
-        StartCoroutine(FadeOut(duration));
+        fading = true;
+        if (musicSource != null) StartCoroutine(FadeOut(musicSource, duration));
+        if (ambienceSource != null) StartCoroutine(FadeOut(ambienceSource, duration));
     }
 
     //---- Routing: every sound through the mixer, so the Music and Sfx sliders reach it
 
     private float nextRoute;
+    private bool fading;
     void Update()
     {
+        // The music steps back while a meme sounds
+        if (musicSource != null && musicSource.isPlaying && !fading)
+            musicSource.volume = Mathf.MoveTowards(musicSource.volume, musicLevel * (Time.unscaledTime < memeUntil ? musicDuck : 1f), 2f * Time.unscaledDeltaTime);
+
         if (Time.unscaledTime < nextRoute) return;
         nextRoute = Time.unscaledTime + 0.5f;
         RouteSources();
+    }
+
+    // Its own source, flat (2D, heard everywhere), on that group so its slider reaches it
+    AudioSource MakeSource(AudioMixerGroup group, string groupName)
+    {
+        AudioSource source = gameObject.AddComponent<AudioSource>();
+        source.playOnAwake = false;
+        source.spatialBlend = 0f;
+        source.ignoreListenerPause = true;   // (it goes on in the pause, like in the Menu)
+        source.outputAudioMixerGroup = group;
+        if (group == null) Debug.LogWarning($"[AudioManager] No {groupName} group in the mixer: the {groupName} slider won't reach it.", this);
+        return source;
     }
 
     void FindGroups()
@@ -114,7 +162,7 @@ public class AudioManager : MonoBehaviour
         if (musicSource != null && musicGroup != null && musicSource.outputAudioMixerGroup == null) musicSource.outputAudioMixerGroup = musicGroup;
         if (sfxGroup == null) return;
         foreach (AudioSource source in FindObjectsOfType<AudioSource>(true))
-            if (source.outputAudioMixerGroup == null && source != musicSource) source.outputAudioMixerGroup = sfxGroup;
+            if (source.outputAudioMixerGroup == null && source != musicSource) source.outputAudioMixerGroup = sfxGroup;   // (the ambience too)
     }
 
     //---- World sounds
@@ -164,15 +212,15 @@ public class AudioManager : MonoBehaviour
         mixer.SetFloat(exposedParam, Mathf.Log10(Mathf.Clamp(value01, 0.0001f, 1f)) * 20f);
     }
 
-    IEnumerator FadeOut(float duration)
+    IEnumerator FadeOut(AudioSource source, float duration)
     {
-        float startVolume = musicSource.volume;
+        float startVolume = source.volume;
         for (float t = 0f; t < duration; t += Time.unscaledDeltaTime)
         {
-            musicSource.volume = Mathf.Lerp(startVolume, 0f, t / duration);
+            source.volume = Mathf.Lerp(startVolume, 0f, t / duration);
             yield return null;
         }
-        musicSource.volume = 0f;
-        musicSource.Stop();
+        source.volume = 0f;
+        source.Stop();
     }
 }

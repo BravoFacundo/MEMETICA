@@ -31,3 +31,19 @@ public class ShowIfAttribute : Attribute
 
 [AttributeUsage(AttributeTargets.Field)]
 public class ReadOnlyFieldAttribute : Attribute { }
+
+// A scene picked by dragging its file in the Inspector (drawn by _Editor/SceneFieldDrawer): it keeps the scene's name,
+// which is what SceneManager loads, and follows it if the scene is renamed. The scene must be in File > Build Settings.
+//   public SceneField menuScene = new SceneField("Menu");   →   SceneManager.LoadScene(menuScene)
+[Serializable]
+public class SceneField
+{
+    [UnityEngine.SerializeField] private UnityEngine.Object sceneAsset;   // the scene file (only used in the Editor)
+    [UnityEngine.SerializeField] private string sceneName;
+
+    public SceneField(string name) { sceneName = name; }
+
+    public string Name => sceneName;
+    public static implicit operator string(SceneField scene) => scene != null ? scene.sceneName : null;
+    public override string ToString() => sceneName;
+}

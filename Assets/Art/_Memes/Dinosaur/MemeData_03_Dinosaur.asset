@@ -1,0 +1,78 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 768287d2d584491684181bc8170d860d, type: 3}
+  m_Name: MemeData_03_Dinosaur
+  m_EditorClassIdentifier: 
+  title: Dinosaur
+  baseImage:
+    windowTitle: Philosoraptor
+    picture: {fileID: 2800000, guid: 7a1e8b2403ab3d44188442a82f9e92d7, type: 3}
+    video: {fileID: 0}
+    sound: {fileID: 8300000, guid: b6ff5e90d85bfed42a6d3922743b217c, type: 3}
+    loop: 0
+    fill: 1
+    videoSound: 0
+  videoStart: 0
+  fillAll: 1
+  fall:
+    windowTitle: Firanofaurio Fex
+    picture: {fileID: 2800000, guid: 557b3854674494f42abbdd710069de80, type: 3}
+    video: {fileID: 0}
+    sound: {fileID: 8300000, guid: 0ba4c76928a801a459a3561b190da9fb, type: 3}
+    loop: 0
+    fill: 1
+    videoSound: 0
+  leave:
+    windowTitle: Remember...
+    picture: {fileID: 0}
+    video: {fileID: 32900000, guid: fc18e88e6b084bb408a2f9971c045a36, type: 3}
+    sound: {fileID: 0}
+    loop: 0
+    fill: 1
+    videoSound: 1
+  variants:
+  - windowTitle: Me desmayo
+    picture: {fileID: 0}
+    video: {fileID: 32900000, guid: 26eb0669a8f2e284487a6a4ad2e59413, type: 3}
+    sound: {fileID: 0}
+    loop: 0
+    fill: 1
+    videoSound: 1
+  - windowTitle: Internet Explorer
+    picture: {fileID: 2800000, guid: 58278352a024f194ab261116c9ac3f18, type: 3}
+    video: {fileID: 0}
+    sound: {fileID: 8300000, guid: 9a91de75d41579744b7b6061abef38eb, type: 3}
+    loop: 0
+    fill: 1
+    videoSound: 0
+  - windowTitle: DinoFart.mp3
+    picture: {fileID: 2800000, guid: a282c7929da4ab549a1fcc7be590b2d2, type: 3}
+    video: {fileID: 0}
+    sound: {fileID: 8300000, guid: 9050face78e06624eb2d2e78f0c4bfdf, type: 3}
+    loop: 0
+    fill: 1
+    videoSound: 0
+  - windowTitle: MinasanKonichiwa
+    picture: {fileID: 0}
+    video: {fileID: 32900000, guid: 203cfe8ae9243e54d87ad759a67c5b57, type: 3}
+    sound: {fileID: 0}
+    loop: 0
+    fill: 1
+    videoSound: 1
+  fallbackSound: {fileID: 0}
+  fallbackSounds: []
+  moveSounds: []
+  fallSounds: []
+  leaveSounds: []
+  sounds: []
+  hints: []
+  references: []

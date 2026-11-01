@@ -192,6 +192,7 @@ MonoBehaviour:
     sprite: {fileID: 21300000, guid: 06d581cfe3b61f444be5c26e75962220, type: 3}
   - state: 4
     sprite: {fileID: 21300000, guid: 96288778ae6c44142969dd81ef511e33, type: 3}
+  freeWhilePlaying: 0
   freeKey: 306
   worldRange: 6
   playerLook: {fileID: 0}

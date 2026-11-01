@@ -15,7 +15,7 @@ C:/Users/Facu/Documents/.Unity Projects/Educational/MEMETICA
 -logFile
 Logs/AssetImportWorker0.log
 -srvPort
-62537
+54408
 Successfully changed project path to: C:/Users/Facu/Documents/.Unity Projects/Educational/MEMETICA
 C:/Users/Facu/Documents/.Unity Projects/Educational/MEMETICA
 [UnityMemory] Configuration Parameters - Can be set up in boot.config
@@ -49,17 +49,17 @@ C:/Users/Facu/Documents/.Unity Projects/Educational/MEMETICA
     "memorysetup-temp-allocator-size-cloud-worker=32768"
     "memorysetup-temp-allocator-size-gi-baking-worker=262144"
     "memorysetup-temp-allocator-size-gfx=262144"
-Player connection [14676]  Target information:
+Player connection [10288]  Target information:
 
-Player connection [14676]  * "[IP] 192.168.0.5 [Port] 0 [Flags] 2 [Guid] 1263996375 [EditorId] 1263996375 [Version] 1048832 [Id] WindowsEditor(7,DESKTOP-I66MB6P) [Debug] 1 [PackageName] WindowsEditor [ProjectName] Editor" 
+Player connection [10288]  * "[IP] 192.168.0.5 [Port] 0 [Flags] 2 [Guid] 961183755 [EditorId] 961183755 [Version] 1048832 [Id] WindowsEditor(7,DESKTOP-I66MB6P) [Debug] 1 [PackageName] WindowsEditor [ProjectName] Editor" 
 
-Player connection [14676]  * "[IP] 25.73.102.107 [Port] 0 [Flags] 2 [Guid] 1263996375 [EditorId] 1263996375 [Version] 1048832 [Id] WindowsEditor(7,DESKTOP-I66MB6P) [Debug] 1 [PackageName] WindowsEditor [ProjectName] Editor" 
+Player connection [10288]  * "[IP] 25.73.102.107 [Port] 0 [Flags] 2 [Guid] 961183755 [EditorId] 961183755 [Version] 1048832 [Id] WindowsEditor(7,DESKTOP-I66MB6P) [Debug] 1 [PackageName] WindowsEditor [ProjectName] Editor" 
 
-Player connection [14676] Host joined multi-casting on [225.0.0.222:54997]...
-Player connection [14676] Host joined alternative multi-casting on [225.0.0.222:34997]...
+Player connection [10288] Host joined multi-casting on [225.0.0.222:54997]...
+Player connection [10288] Host joined alternative multi-casting on [225.0.0.222:34997]...
 Input System module state changed to: Initialized.
 [PhysX] Initialized MultithreadedTaskDispatcher with 4 workers.
-Refreshing native plugins compatible for Editor in 81.13 ms, found 1 plugins.
+Refreshing native plugins compatible for Editor in 12.25 ms, found 1 plugins.
 Preloading 0 native plugins for Editor in 0.00 ms.
 Initialize engine version: 2022.3.62f3 (96770f904ca7)
 [Subsystems] Discovering subsystems at path C:/Program Files/Unity/Hub/Editor/2022.3.62f3-x86_64/Editor/Data/Resources/UnitySubsystems
@@ -75,44 +75,44 @@ Initialize mono
 Mono path[0] = 'C:/Program Files/Unity/Hub/Editor/2022.3.62f3-x86_64/Editor/Data/Managed'
 Mono path[1] = 'C:/Program Files/Unity/Hub/Editor/2022.3.62f3-x86_64/Editor/Data/MonoBleedingEdge/lib/mono/unityjit-win32'
 Mono config path = 'C:/Program Files/Unity/Hub/Editor/2022.3.62f3-x86_64/Editor/Data/MonoBleedingEdge/etc'
-Using monoOptions --debugger-agent=transport=dt_socket,embedding=1,server=y,suspend=n,address=127.0.0.1:56040
+Using monoOptions --debugger-agent=transport=dt_socket,embedding=1,server=y,suspend=n,address=127.0.0.1:56844
 Begin MonoManager ReloadAssembly
 Registering precompiled unity dll's ...
 Register platform support module: C:/Program Files/Unity/Hub/Editor/2022.3.62f3-x86_64/Editor/Data/PlaybackEngines/WindowsStandaloneSupport/UnityEditor.WindowsStandalone.Extensions.dll
-Registered in 0.025783 seconds.
-- Loaded All Assemblies, in  1.467 seconds
+Registered in 0.023301 seconds.
+- Loaded All Assemblies, in  0.587 seconds
 Native extension for WindowsStandalone target not found
 Mono: successfully reloaded assembly
-- Finished resetting the current domain, in  0.448 seconds
-Domain Reload Profiling: 1910ms
-	BeginReloadAssembly (1018ms)
+- Finished resetting the current domain, in  0.420 seconds
+Domain Reload Profiling: 1001ms
+	BeginReloadAssembly (176ms)
 		ExecutionOrderSort (0ms)
 		DisableScriptedObjects (0ms)
 		BackupInstance (0ms)
 		ReleaseScriptingObjects (0ms)
 		CreateAndSetChildDomain (1ms)
-	RebuildCommonClasses (50ms)
-	RebuildNativeTypeToScriptingClass (15ms)
-	initialDomainReloadingComplete (117ms)
-	LoadAllAssembliesAndSetupDomain (261ms)
-		LoadAssemblies (1012ms)
+	RebuildCommonClasses (43ms)
+	RebuildNativeTypeToScriptingClass (14ms)
+	initialDomainReloadingComplete (116ms)
+	LoadAllAssembliesAndSetupDomain (232ms)
+		LoadAssemblies (170ms)
 		RebuildTransferFunctionScriptingTraits (0ms)
-		AnalyzeDomain (258ms)
-			TypeCache.Refresh (256ms)
-				TypeCache.ScanAssembly (236ms)
+		AnalyzeDomain (229ms)
+			TypeCache.Refresh (227ms)
+				TypeCache.ScanAssembly (207ms)
 			ScanForSourceGeneratedMonoScriptInfo (0ms)
 			ResolveRequiredComponents (1ms)
-	FinalizeReload (449ms)
+	FinalizeReload (421ms)
 		ReleaseScriptCaches (0ms)
 		RebuildScriptCaches (0ms)
-		SetupLoadedEditorAssemblies (378ms)
+		SetupLoadedEditorAssemblies (343ms)
 			LogAssemblyErrors (0ms)
-			InitializePlatformSupportModulesInManaged (24ms)
-			SetLoadedEditorAssemblies (15ms)
+			InitializePlatformSupportModulesInManaged (20ms)
+			SetLoadedEditorAssemblies (12ms)
 			RefreshPlugins (0ms)
 			BeforeProcessingInitializeOnLoad (4ms)
-			ProcessInitializeOnLoadAttributes (254ms)
-			ProcessInitializeOnLoadMethodAttributes (80ms)
+			ProcessInitializeOnLoadAttributes (233ms)
+			ProcessInitializeOnLoadMethodAttributes (74ms)
 			AfterProcessingInitializeOnLoad (0ms)
 			EditorAssembliesLoaded (0ms)
 		ExecutionOrderSort2 (0ms)
@@ -121,50 +121,50 @@ Domain Reload Profiling: 1910ms
 Worker process is ready to serve import requests
 Caller must complete domain reload
 Begin MonoManager ReloadAssembly
-- Loaded All Assemblies, in  2.035 seconds
+- Loaded All Assemblies, in  0.774 seconds
 Native extension for WindowsStandalone target not found
 Mono: successfully reloaded assembly
-- Finished resetting the current domain, in  0.760 seconds
-Domain Reload Profiling: 2785ms
-	BeginReloadAssembly (309ms)
+- Finished resetting the current domain, in  0.694 seconds
+Domain Reload Profiling: 1459ms
+	BeginReloadAssembly (238ms)
 		ExecutionOrderSort (0ms)
-		DisableScriptedObjects (13ms)
+		DisableScriptedObjects (8ms)
 		BackupInstance (0ms)
 		ReleaseScriptingObjects (0ms)
-		CreateAndSetChildDomain (32ms)
-	RebuildCommonClasses (43ms)
-	RebuildNativeTypeToScriptingClass (13ms)
-	initialDomainReloadingComplete (66ms)
-	LoadAllAssembliesAndSetupDomain (1592ms)
-		LoadAssemblies (1683ms)
+		CreateAndSetChildDomain (30ms)
+	RebuildCommonClasses (47ms)
+	RebuildNativeTypeToScriptingClass (15ms)
+	initialDomainReloadingComplete (71ms)
+	LoadAllAssembliesAndSetupDomain (394ms)
+		LoadAssemblies (437ms)
 		RebuildTransferFunctionScriptingTraits (0ms)
 		AnalyzeDomain (106ms)
-			TypeCache.Refresh (83ms)
-				TypeCache.ScanAssembly (69ms)
-			ScanForSourceGeneratedMonoScriptInfo (17ms)
-			ResolveRequiredComponents (5ms)
-	FinalizeReload (761ms)
+			TypeCache.Refresh (81ms)
+				TypeCache.ScanAssembly (66ms)
+			ScanForSourceGeneratedMonoScriptInfo (19ms)
+			ResolveRequiredComponents (6ms)
+	FinalizeReload (695ms)
 		ReleaseScriptCaches (0ms)
 		RebuildScriptCaches (0ms)
-		SetupLoadedEditorAssemblies (555ms)
+		SetupLoadedEditorAssemblies (499ms)
 			LogAssemblyErrors (0ms)
-			InitializePlatformSupportModulesInManaged (17ms)
-			SetLoadedEditorAssemblies (6ms)
+			InitializePlatformSupportModulesInManaged (18ms)
+			SetLoadedEditorAssemblies (5ms)
 			RefreshPlugins (0ms)
-			BeforeProcessingInitializeOnLoad (166ms)
-			ProcessInitializeOnLoadAttributes (291ms)
-			ProcessInitializeOnLoadMethodAttributes (52ms)
-			AfterProcessingInitializeOnLoad (23ms)
+			BeforeProcessingInitializeOnLoad (133ms)
+			ProcessInitializeOnLoadAttributes (265ms)
+			ProcessInitializeOnLoadMethodAttributes (56ms)
+			AfterProcessingInitializeOnLoad (22ms)
 			EditorAssembliesLoaded (0ms)
 		ExecutionOrderSort2 (0ms)
 		AwakeInstancesAfterBackupRestoration (9ms)
-Launched and connected shader compiler UnityShaderCompiler.exe after 0.11 seconds
-Refreshing native plugins compatible for Editor in 5.40 ms, found 1 plugins.
+Launched and connected shader compiler UnityShaderCompiler.exe after 0.05 seconds
+Refreshing native plugins compatible for Editor in 6.04 ms, found 1 plugins.
 Preloading 0 native plugins for Editor in 0.00 ms.
-Unloading 1876 Unused Serialized files (Serialized files now loaded: 0)
-Unloading 26 unused Assets / (345.3 KB). Loaded Objects now: 2373.
-Memory consumption went from 116.4 MB to 116.1 MB.
-Total: 3.766900 ms (FindLiveObjects: 0.184300 ms CreateObjectMapping: 0.070500 ms MarkObjects: 3.298300 ms  DeleteObjects: 0.212600 ms)
+Unloading 1881 Unused Serialized files (Serialized files now loaded: 0)
+Unloading 26 unused Assets / (344.7 KB). Loaded Objects now: 2378.
+Memory consumption went from 116.5 MB to 116.2 MB.
+Total: 4.265200 ms (FindLiveObjects: 0.209300 ms CreateObjectMapping: 0.091200 ms MarkObjects: 3.762500 ms  DeleteObjects: 0.201200 ms)
 
 AssetImportParameters requested are different than current active one (requested -> active):
   custom:video-decoder-webm-vp8: 9c59270c3fd7afecdb556c50c9e8de78 -> 
@@ -180,13 +180,131 @@ AssetImportParameters requested are different than current active one (requested
   custom:audio-encoder-webm-vorbis: bf7c407c2cedff20999df2af8eb42d56 -> 
   custom:container-muxer-webm: aa71ff27fc2769a1b78a27578f13a17b -> 
 ========================================================================
+Received Import Request.
+  Time since last request: 29946.039816 seconds.
+  path: Assets/_Scenes/Game.unity
+  artifactKey: Guid(8898672d3f6b92b4eb477ba3a003e905) Importer(815301076,1909f56bfc062723c751e8b465ee728b)
+Start importing Assets/_Scenes/Game.unity using Guid(8898672d3f6b92b4eb477ba3a003e905) Importer(815301076,1909f56bfc062723c751e8b465ee728b) [PhysX] Initialized MultithreadedTaskDispatcher with 4 workers.
+ -> (artifact id: 'e4976ac007f01a91af6e7a9d1d3363e8') in 0.003264 seconds
+Number of updated asset objects reloaded before import = 0
+Number of asset objects unloaded after import = 0
+========================================================================
+Received Import Request.
+  Time since last request: 54.984749 seconds.
+  path: Assets/Art/UI/Desktop/Window_PopUp_EndGame_Eng.png
+  artifactKey: Guid(70fff6be446d9014382f197c42dfd0f6) Importer(815301076,1909f56bfc062723c751e8b465ee728b)
+Start importing Assets/Art/UI/Desktop/Window_PopUp_EndGame_Eng.png using Guid(70fff6be446d9014382f197c42dfd0f6) Importer(815301076,1909f56bfc062723c751e8b465ee728b) [PhysX] Initialized MultithreadedTaskDispatcher with 4 workers.
+[PhysX] Initialized MultithreadedTaskDispatcher with 4 workers.
+ -> (artifact id: 'fc110b8878a0a1effb6a2a616df7fc00') in 0.087037 seconds
+Number of updated asset objects reloaded before import = 0
+Number of asset objects unloaded after import = 2
+========================================================================
+Received Import Request.
+  Time since last request: 3.340169 seconds.
+  path: Assets/Art/UI/Desktop/Window_PopUp_EndGame_Eng-1.png
+  artifactKey: Guid(172bd78717e610749af268a31d0f125e) Importer(815301076,1909f56bfc062723c751e8b465ee728b)
+Start importing Assets/Art/UI/Desktop/Window_PopUp_EndGame_Eng-1.png using Guid(172bd78717e610749af268a31d0f125e) Importer(815301076,1909f56bfc062723c751e8b465ee728b) [PhysX] Initialized MultithreadedTaskDispatcher with 4 workers.
+[PhysX] Initialized MultithreadedTaskDispatcher with 4 workers.
+ -> (artifact id: '5acda530db031affb636cec8d69cb320') in 0.013947 seconds
+Number of updated asset objects reloaded before import = 0
+Number of asset objects unloaded after import = 2
+========================================================================
+Received Import Request.
+  Time since last request: 4.478807 seconds.
+  path: Assets/Art/UI/Desktop/Window_PopUp_EndGame_Esp.png
+  artifactKey: Guid(172bd78717e610749af268a31d0f125e) Importer(815301076,1909f56bfc062723c751e8b465ee728b)
+Start importing Assets/Art/UI/Desktop/Window_PopUp_EndGame_Esp.png using Guid(172bd78717e610749af268a31d0f125e) Importer(815301076,1909f56bfc062723c751e8b465ee728b) [PhysX] Initialized MultithreadedTaskDispatcher with 4 workers.
+[PhysX] Initialized MultithreadedTaskDispatcher with 4 workers.
+ -> (artifact id: '460f0df8321c60b3bc1f4ae0b1fc5fde') in 0.007789 seconds
+Number of updated asset objects reloaded before import = 0
+Number of asset objects unloaded after import = 2
+========================================================================
+Received Import Request.
+  Time since last request: 4.541419 seconds.
+  path: Assets/Art/UI/Desktop/Window_PopUp_EndGame_Eng.png
+  artifactKey: Guid(70fff6be446d9014382f197c42dfd0f6) Importer(815301076,1909f56bfc062723c751e8b465ee728b)
+Start importing Assets/Art/UI/Desktop/Window_PopUp_EndGame_Eng.png using Guid(70fff6be446d9014382f197c42dfd0f6) Importer(815301076,1909f56bfc062723c751e8b465ee728b) [PhysX] Initialized MultithreadedTaskDispatcher with 4 workers.
+[PhysX] Initialized MultithreadedTaskDispatcher with 4 workers.
+ -> (artifact id: '402a7691315d17ca1e339d8669b6bbd6') in 0.075471 seconds
+Number of updated asset objects reloaded before import = 0
+Number of asset objects unloaded after import = 3
+========================================================================
+Received Import Request.
+  Time since last request: 704.727223 seconds.
+  path: Assets/Art/UI/Window_Timer.png
+  artifactKey: Guid(d7d960e8ba1748c48bbc1ce8426a02a5) Importer(815301076,1909f56bfc062723c751e8b465ee728b)
+Start importing Assets/Art/UI/Window_Timer.png using Guid(d7d960e8ba1748c48bbc1ce8426a02a5) Importer(815301076,1909f56bfc062723c751e8b465ee728b) [PhysX] Initialized MultithreadedTaskDispatcher with 4 workers.
+[PhysX] Initialized MultithreadedTaskDispatcher with 4 workers.
+ -> (artifact id: '0b45f599558be8bc9dc5604ba195f091') in 0.019335 seconds
+Number of updated asset objects reloaded before import = 0
+Number of asset objects unloaded after import = 3
+========================================================================
+Received Import Request.
+  Time since last request: 10.592361 seconds.
+  path: Assets/Art/UI/Window_Score.png
+  artifactKey: Guid(2c6ffd1aa9469614b82e124942d721b3) Importer(815301076,1909f56bfc062723c751e8b465ee728b)
+Start importing Assets/Art/UI/Window_Score.png using Guid(2c6ffd1aa9469614b82e124942d721b3) Importer(815301076,1909f56bfc062723c751e8b465ee728b) [PhysX] Initialized MultithreadedTaskDispatcher with 4 workers.
+[PhysX] Initialized MultithreadedTaskDispatcher with 4 workers.
+ -> (artifact id: 'b80e6d1e6bbb3fd5652f9c14ab58185b') in 0.024733 seconds
+Number of updated asset objects reloaded before import = 0
+Number of asset objects unloaded after import = 2
+========================================================================
+Received Import Request.
+  Time since last request: 3.684972 seconds.
+  path: Assets/Art/UI/Window_Score.png
+  artifactKey: Guid(2c6ffd1aa9469614b82e124942d721b3) Importer(815301076,1909f56bfc062723c751e8b465ee728b)
+Start importing Assets/Art/UI/Window_Score.png using Guid(2c6ffd1aa9469614b82e124942d721b3) Importer(815301076,1909f56bfc062723c751e8b465ee728b) [PhysX] Initialized MultithreadedTaskDispatcher with 4 workers.
+[PhysX] Initialized MultithreadedTaskDispatcher with 4 workers.
+ -> (artifact id: '56caec0ac3b8b46f27de41ad91187150') in 0.051877 seconds
+Number of updated asset objects reloaded before import = 0
+Number of asset objects unloaded after import = 3
+========================================================================
 Received Prepare
-Refreshing native plugins compatible for Editor in 5.09 ms, found 1 plugins.
+Caller must complete domain reload
+Begin MonoManager ReloadAssembly
+- Loaded All Assemblies, in  1.659 seconds
+Native extension for WindowsStandalone target not found
+Mono: successfully reloaded assembly
+- Finished resetting the current domain, in  0.993 seconds
+Domain Reload Profiling: 2640ms
+	BeginReloadAssembly (1053ms)
+		ExecutionOrderSort (0ms)
+		DisableScriptedObjects (571ms)
+		BackupInstance (0ms)
+		ReleaseScriptingObjects (0ms)
+		CreateAndSetChildDomain (76ms)
+	RebuildCommonClasses (65ms)
+	RebuildNativeTypeToScriptingClass (17ms)
+	initialDomainReloadingComplete (112ms)
+	LoadAllAssembliesAndSetupDomain (398ms)
+		LoadAssemblies (726ms)
+		RebuildTransferFunctionScriptingTraits (0ms)
+		AnalyzeDomain (17ms)
+			TypeCache.Refresh (9ms)
+				TypeCache.ScanAssembly (0ms)
+			ScanForSourceGeneratedMonoScriptInfo (0ms)
+			ResolveRequiredComponents (7ms)
+	FinalizeReload (994ms)
+		ReleaseScriptCaches (0ms)
+		RebuildScriptCaches (0ms)
+		SetupLoadedEditorAssemblies (737ms)
+			LogAssemblyErrors (0ms)
+			InitializePlatformSupportModulesInManaged (15ms)
+			SetLoadedEditorAssemblies (5ms)
+			RefreshPlugins (0ms)
+			BeforeProcessingInitializeOnLoad (239ms)
+			ProcessInitializeOnLoadAttributes (395ms)
+			ProcessInitializeOnLoadMethodAttributes (57ms)
+			AfterProcessingInitializeOnLoad (25ms)
+			EditorAssembliesLoaded (0ms)
+		ExecutionOrderSort2 (0ms)
+		AwakeInstancesAfterBackupRestoration (23ms)
+Refreshing native plugins compatible for Editor in 9.84 ms, found 1 plugins.
 Preloading 0 native plugins for Editor in 0.00 ms.
-Unloading 5 Unused Serialized files (Serialized files now loaded: 0)
-Unloading 5 unused Assets / (299.0 KB). Loaded Objects now: 2373.
-Memory consumption went from 75.7 MB to 75.4 MB.
-Total: 3.226400 ms (FindLiveObjects: 0.188600 ms CreateObjectMapping: 0.075100 ms MarkObjects: 2.884900 ms  DeleteObjects: 0.076800 ms)
+Unloading 1824 Unused Serialized files (Serialized files now loaded: 0)
+Unloading 14 unused Assets / (313.7 KB). Loaded Objects now: 2395.
+Memory consumption went from 107.7 MB to 107.4 MB.
+Total: 4.018700 ms (FindLiveObjects: 0.340400 ms CreateObjectMapping: 0.458000 ms MarkObjects: 3.126200 ms  DeleteObjects: 0.093100 ms)
 
 Prepare: number of updated asset objects reloaded= 0
 AssetImportParameters requested are different than current active one (requested -> active):
@@ -202,3 +320,874 @@ AssetImportParameters requested are different than current active one (requested
   custom:container-demuxer-webm: 4f35f7cbe854078d1ac9338744f61a02 -> 
   custom:audio-encoder-webm-vorbis: bf7c407c2cedff20999df2af8eb42d56 -> 
   custom:container-muxer-webm: aa71ff27fc2769a1b78a27578f13a17b -> 
+========================================================================
+Received Prepare
+Caller must complete domain reload
+Begin MonoManager ReloadAssembly
+- Loaded All Assemblies, in  0.687 seconds
+Native extension for WindowsStandalone target not found
+Mono: successfully reloaded assembly
+- Finished resetting the current domain, in  0.972 seconds
+Domain Reload Profiling: 1650ms
+	BeginReloadAssembly (222ms)
+		ExecutionOrderSort (0ms)
+		DisableScriptedObjects (18ms)
+		BackupInstance (0ms)
+		ReleaseScriptingObjects (0ms)
+		CreateAndSetChildDomain (31ms)
+	RebuildCommonClasses (43ms)
+	RebuildNativeTypeToScriptingClass (14ms)
+	initialDomainReloadingComplete (51ms)
+	LoadAllAssembliesAndSetupDomain (348ms)
+		LoadAssemblies (470ms)
+		RebuildTransferFunctionScriptingTraits (0ms)
+		AnalyzeDomain (11ms)
+			TypeCache.Refresh (5ms)
+				TypeCache.ScanAssembly (0ms)
+			ScanForSourceGeneratedMonoScriptInfo (0ms)
+			ResolveRequiredComponents (6ms)
+	FinalizeReload (973ms)
+		ReleaseScriptCaches (0ms)
+		RebuildScriptCaches (0ms)
+		SetupLoadedEditorAssemblies (484ms)
+			LogAssemblyErrors (0ms)
+			InitializePlatformSupportModulesInManaged (13ms)
+			SetLoadedEditorAssemblies (5ms)
+			RefreshPlugins (0ms)
+			BeforeProcessingInitializeOnLoad (127ms)
+			ProcessInitializeOnLoadAttributes (259ms)
+			ProcessInitializeOnLoadMethodAttributes (50ms)
+			AfterProcessingInitializeOnLoad (29ms)
+			EditorAssembliesLoaded (1ms)
+		ExecutionOrderSort2 (0ms)
+		AwakeInstancesAfterBackupRestoration (18ms)
+Refreshing native plugins compatible for Editor in 5.13 ms, found 1 plugins.
+Preloading 0 native plugins for Editor in 0.00 ms.
+Unloading 1825 Unused Serialized files (Serialized files now loaded: 0)
+Unloading 14 unused Assets / (313.8 KB). Loaded Objects now: 2399.
+Memory consumption went from 108.0 MB to 107.6 MB.
+Total: 4.737500 ms (FindLiveObjects: 0.396900 ms CreateObjectMapping: 0.122800 ms MarkObjects: 4.122300 ms  DeleteObjects: 0.094600 ms)
+
+Prepare: number of updated asset objects reloaded= 0
+AssetImportParameters requested are different than current active one (requested -> active):
+  custom:video-decoder-webm-vp8: 9c59270c3fd7afecdb556c50c9e8de78 -> 
+  custom:SearchIndexIgnoredProperties: e643bd26f0fe6173181afceb89e7c659 -> 
+  custom:container-demuxer-ogg: 62fdf1f143b41e24485cea50d1cbac27 -> 
+  custom:AudioImporter_EditorPlatform: d09bf68614088b80899f8185d706f6e7 -> 
+  custom:video-decoder-ogg-theora: a1e56fd34408186e4bbccfd4996cb3dc -> 
+  custom:framework-win-MediaFoundation: 216162199b28c13a410421893ffa2e32 -> 
+  custom:video-encoder-webm-vp8: eb34c28f22e8b96e1ab97ce403110664 -> 
+  custom:audio-decoder-ogg-vorbis: bf7c407c2cedff20999df2af8eb42d56 -> 
+  custom:CustomObjectIndexerAttribute: 9a22284fe3817be447336de3de66b15e -> 
+  custom:container-demuxer-webm: 4f35f7cbe854078d1ac9338744f61a02 -> 
+  custom:audio-encoder-webm-vorbis: bf7c407c2cedff20999df2af8eb42d56 -> 
+  custom:container-muxer-webm: aa71ff27fc2769a1b78a27578f13a17b -> 
+========================================================================
+Received Import Request.
+  Time since last request: 899.923636 seconds.
+  path: Assets/Art/_Memes/_Colect/Agache conocelo.mp4
+  artifactKey: Guid(4fd88811e2f38f44088852cb52b5a8f8) Importer(815301076,1909f56bfc062723c751e8b465ee728b)
+Start importing Assets/Art/_Memes/_Colect/Agache conocelo.mp4 using Guid(4fd88811e2f38f44088852cb52b5a8f8) Importer(815301076,1909f56bfc062723c751e8b465ee728b) [PhysX] Initialized MultithreadedTaskDispatcher with 4 workers.
+ -> (artifact id: '0b999b2087240ee29a1836c047165d0d') in 0.014663 seconds
+Number of updated asset objects reloaded before import = 0
+Number of asset objects unloaded after import = 1
+========================================================================
+Received Import Request.
+  Time since last request: 10.895754 seconds.
+  path: Assets/Art/_Memes/_Colect/MemeData_13.asset
+  artifactKey: Guid(4a0c20bd08acdb143a4eaaef02c28c46) Importer(815301076,1909f56bfc062723c751e8b465ee728b)
+Start importing Assets/Art/_Memes/_Colect/MemeData_13.asset using Guid(4a0c20bd08acdb143a4eaaef02c28c46) Importer(815301076,1909f56bfc062723c751e8b465ee728b) [PhysX] Initialized MultithreadedTaskDispatcher with 4 workers.
+ -> (artifact id: 'b055220dad161bc61db7e9e101125934') in 0.004252 seconds
+Number of updated asset objects reloaded before import = 0
+Number of asset objects unloaded after import = 1
+========================================================================
+Received Import Request.
+  Time since last request: 14.790450 seconds.
+  path: Assets/Art/_Memes/_Colect/MemeData_14_.asset
+  artifactKey: Guid(4a0c20bd08acdb143a4eaaef02c28c46) Importer(815301076,1909f56bfc062723c751e8b465ee728b)
+Start importing Assets/Art/_Memes/_Colect/MemeData_14_.asset using Guid(4a0c20bd08acdb143a4eaaef02c28c46) Importer(815301076,1909f56bfc062723c751e8b465ee728b) [PhysX] Initialized MultithreadedTaskDispatcher with 4 workers.
+ -> (artifact id: 'a0926bb09c419dc6fba301a1c6d4642b') in 0.001505 seconds
+Number of updated asset objects reloaded before import = 0
+Number of asset objects unloaded after import = 1
+========================================================================
+Received Import Request.
+  Time since last request: 10.036696 seconds.
+  path: Assets/Art/_Memes/_Colect/MemeData_14_Marcelo.asset
+  artifactKey: Guid(4a0c20bd08acdb143a4eaaef02c28c46) Importer(815301076,1909f56bfc062723c751e8b465ee728b)
+Start importing Assets/Art/_Memes/_Colect/MemeData_14_Marcelo.asset using Guid(4a0c20bd08acdb143a4eaaef02c28c46) Importer(815301076,1909f56bfc062723c751e8b465ee728b) [PhysX] Initialized MultithreadedTaskDispatcher with 4 workers.
+ -> (artifact id: '4bc920da5e861c5fe8d798ec149b8b66') in 0.001399 seconds
+Number of updated asset objects reloaded before import = 0
+Number of asset objects unloaded after import = 1
+========================================================================
+Received Import Request.
+  Time since last request: 8.690595 seconds.
+  path: Assets/Art/_Memes/_Colect/incredible perturbado .mp4
+  artifactKey: Guid(0465f79ace16dc04695fb468c8d236b2) Importer(815301076,1909f56bfc062723c751e8b465ee728b)
+Start importing Assets/Art/_Memes/_Colect/incredible perturbado .mp4 using Guid(0465f79ace16dc04695fb468c8d236b2) Importer(815301076,1909f56bfc062723c751e8b465ee728b) [PhysX] Initialized MultithreadedTaskDispatcher with 4 workers.
+ -> (artifact id: '00000000000000000000000000000000') in 0.001196 seconds
+Import Error Code:(4)
+Message: Build asset version error: assets/art/_memes/_colect/incredible perturbado .mp4 in SourceAssetDB has modification time of '2026-10-31T17:28:05.3024906Z' while content on disk has modification time of '2026-10-31T18:41:41.1936672Z'
+  ERROR: Build asset version error: assets/art/_memes/_colect/incredible perturbado .mp4 in SourceAssetDB has modification time of '2026-10-31T17:28:05.3024906Z' while content on disk has modification time of '2026-10-31T18:41:41.1936672Z'
+Number of updated asset objects reloaded before import = 0
+Number of asset objects unloaded after import = 0
+========================================================================
+Received Import Request.
+  Time since last request: 0.016254 seconds.
+  path: Assets/Art/_Memes/_Colect/incredible perturbado .mp4
+  artifactKey: Guid(0465f79ace16dc04695fb468c8d236b2) Importer(815301076,1909f56bfc062723c751e8b465ee728b)
+Start importing Assets/Art/_Memes/_Colect/incredible perturbado .mp4 using Guid(0465f79ace16dc04695fb468c8d236b2) Importer(815301076,1909f56bfc062723c751e8b465ee728b) [PhysX] Initialized MultithreadedTaskDispatcher with 4 workers.
+ -> (artifact id: '00000000000000000000000000000000') in 0.001123 seconds
+Import Error Code:(4)
+Message: Build asset version error: assets/art/_memes/_colect/incredible perturbado .mp4 in SourceAssetDB has modification time of '2026-10-31T17:28:05.3024906Z' while content on disk has modification time of '2026-10-31T18:41:41.1936672Z'
+  ERROR: Build asset version error: assets/art/_memes/_colect/incredible perturbado .mp4 in SourceAssetDB has modification time of '2026-10-31T17:28:05.3024906Z' while content on disk has modification time of '2026-10-31T18:41:41.1936672Z'
+Number of updated asset objects reloaded before import = 0
+Number of asset objects unloaded after import = 0
+========================================================================
+Received Import Request.
+  Time since last request: 0.016387 seconds.
+  path: Assets/Art/_Memes/_Colect/incredible perturbado .mp4
+  artifactKey: Guid(0465f79ace16dc04695fb468c8d236b2) Importer(815301076,1909f56bfc062723c751e8b465ee728b)
+Start importing Assets/Art/_Memes/_Colect/incredible perturbado .mp4 using Guid(0465f79ace16dc04695fb468c8d236b2) Importer(815301076,1909f56bfc062723c751e8b465ee728b) [PhysX] Initialized MultithreadedTaskDispatcher with 4 workers.
+ -> (artifact id: '00000000000000000000000000000000') in 0.001290 seconds
+Import Error Code:(4)
+Message: Build asset version error: assets/art/_memes/_colect/incredible perturbado .mp4 in SourceAssetDB has modification time of '2026-10-31T17:28:05.3024906Z' while content on disk has modification time of '2026-10-31T18:41:41.1936672Z'
+  ERROR: Build asset version error: assets/art/_memes/_colect/incredible perturbado .mp4 in SourceAssetDB has modification time of '2026-10-31T17:28:05.3024906Z' while content on disk has modification time of '2026-10-31T18:41:41.1936672Z'
+Number of updated asset objects reloaded before import = 0
+Number of asset objects unloaded after import = 0
+========================================================================
+Received Import Request.
+  Time since last request: 0.040842 seconds.
+  path: Assets/Art/_Memes/_Colect/incredible perturbado .mp4
+  artifactKey: Guid(0465f79ace16dc04695fb468c8d236b2) Importer(815301076,1909f56bfc062723c751e8b465ee728b)
+Start importing Assets/Art/_Memes/_Colect/incredible perturbado .mp4 using Guid(0465f79ace16dc04695fb468c8d236b2) Importer(815301076,1909f56bfc062723c751e8b465ee728b) [PhysX] Initialized MultithreadedTaskDispatcher with 4 workers.
+ -> (artifact id: '00000000000000000000000000000000') in 0.001339 seconds
+Import Error Code:(4)
+Message: Build asset version error: assets/art/_memes/_colect/incredible perturbado .mp4 in SourceAssetDB has modification time of '2026-10-31T17:28:05.3024906Z' while content on disk has modification time of '2026-10-31T18:41:41.1936672Z'
+  ERROR: Build asset version error: assets/art/_memes/_colect/incredible perturbado .mp4 in SourceAssetDB has modification time of '2026-10-31T17:28:05.3024906Z' while content on disk has modification time of '2026-10-31T18:41:41.1936672Z'
+Number of updated asset objects reloaded before import = 0
+Number of asset objects unloaded after import = 0
+========================================================================
+Received Import Request.
+  Time since last request: 0.986094 seconds.
+  path: Assets/Art/_Memes/_Colect/incredible perturbado .mp4
+  artifactKey: Guid(0465f79ace16dc04695fb468c8d236b2) Importer(815301076,1909f56bfc062723c751e8b465ee728b)
+Start importing Assets/Art/_Memes/_Colect/incredible perturbado .mp4 using Guid(0465f79ace16dc04695fb468c8d236b2) Importer(815301076,1909f56bfc062723c751e8b465ee728b) [PhysX] Initialized MultithreadedTaskDispatcher with 4 workers.
+ -> (artifact id: '00000000000000000000000000000000') in 0.001268 seconds
+Import Error Code:(4)
+Message: Build asset version error: assets/art/_memes/_colect/incredible perturbado .mp4 in SourceAssetDB has modification time of '2026-10-31T17:28:05.3024906Z' while content on disk has modification time of '2026-10-31T18:41:41.1936672Z'
+  ERROR: Build asset version error: assets/art/_memes/_colect/incredible perturbado .mp4 in SourceAssetDB has modification time of '2026-10-31T17:28:05.3024906Z' while content on disk has modification time of '2026-10-31T18:41:41.1936672Z'
+Number of updated asset objects reloaded before import = 0
+Number of asset objects unloaded after import = 0
+========================================================================
+Received Import Request.
+  Time since last request: 0.079467 seconds.
+  path: Assets/Art/_Memes/_Colect/incredible perturbado .mp4
+  artifactKey: Guid(0465f79ace16dc04695fb468c8d236b2) Importer(815301076,1909f56bfc062723c751e8b465ee728b)
+Start importing Assets/Art/_Memes/_Colect/incredible perturbado .mp4 using Guid(0465f79ace16dc04695fb468c8d236b2) Importer(815301076,1909f56bfc062723c751e8b465ee728b) [PhysX] Initialized MultithreadedTaskDispatcher with 4 workers.
+ -> (artifact id: '00000000000000000000000000000000') in 0.001342 seconds
+Import Error Code:(4)
+Message: Build asset version error: assets/art/_memes/_colect/incredible perturbado .mp4 in SourceAssetDB has modification time of '2026-10-31T17:28:05.3024906Z' while content on disk has modification time of '2026-10-31T18:41:41.1936672Z'
+  ERROR: Build asset version error: assets/art/_memes/_colect/incredible perturbado .mp4 in SourceAssetDB has modification time of '2026-10-31T17:28:05.3024906Z' while content on disk has modification time of '2026-10-31T18:41:41.1936672Z'
+Number of updated asset objects reloaded before import = 0
+Number of asset objects unloaded after import = 0
+========================================================================
+Received Import Request.
+  Time since last request: 0.075024 seconds.
+  path: Assets/Art/_Memes/_Colect/incredible perturbado .mp4
+  artifactKey: Guid(0465f79ace16dc04695fb468c8d236b2) Importer(815301076,1909f56bfc062723c751e8b465ee728b)
+Start importing Assets/Art/_Memes/_Colect/incredible perturbado .mp4 using Guid(0465f79ace16dc04695fb468c8d236b2) Importer(815301076,1909f56bfc062723c751e8b465ee728b) [PhysX] Initialized MultithreadedTaskDispatcher with 4 workers.
+ -> (artifact id: '00000000000000000000000000000000') in 0.001194 seconds
+Import Error Code:(4)
+Message: Build asset version error: assets/art/_memes/_colect/incredible perturbado .mp4 in SourceAssetDB has modification time of '2026-10-31T17:28:05.3024906Z' while content on disk has modification time of '2026-10-31T18:41:41.1936672Z'
+  ERROR: Build asset version error: assets/art/_memes/_colect/incredible perturbado .mp4 in SourceAssetDB has modification time of '2026-10-31T17:28:05.3024906Z' while content on disk has modification time of '2026-10-31T18:41:41.1936672Z'
+Number of updated asset objects reloaded before import = 0
+Number of asset objects unloaded after import = 0
+========================================================================
+Received Import Request.
+  Time since last request: 0.074093 seconds.
+  path: Assets/Art/_Memes/_Colect/incredible perturbado .mp4
+  artifactKey: Guid(0465f79ace16dc04695fb468c8d236b2) Importer(815301076,1909f56bfc062723c751e8b465ee728b)
+Start importing Assets/Art/_Memes/_Colect/incredible perturbado .mp4 using Guid(0465f79ace16dc04695fb468c8d236b2) Importer(815301076,1909f56bfc062723c751e8b465ee728b) [PhysX] Initialized MultithreadedTaskDispatcher with 4 workers.
+ -> (artifact id: '00000000000000000000000000000000') in 0.001244 seconds
+Import Error Code:(4)
+Message: Build asset version error: assets/art/_memes/_colect/incredible perturbado .mp4 in SourceAssetDB has modification time of '2026-10-31T17:28:05.3024906Z' while content on disk has modification time of '2026-10-31T18:41:41.1936672Z'
+  ERROR: Build asset version error: assets/art/_memes/_colect/incredible perturbado .mp4 in SourceAssetDB has modification time of '2026-10-31T17:28:05.3024906Z' while content on disk has modification time of '2026-10-31T18:41:41.1936672Z'
+Number of updated asset objects reloaded before import = 0
+Number of asset objects unloaded after import = 0
+========================================================================
+Received Import Request.
+  Time since last request: 0.072545 seconds.
+  path: Assets/Art/_Memes/_Colect/incredible perturbado .mp4
+  artifactKey: Guid(0465f79ace16dc04695fb468c8d236b2) Importer(815301076,1909f56bfc062723c751e8b465ee728b)
+Start importing Assets/Art/_Memes/_Colect/incredible perturbado .mp4 using Guid(0465f79ace16dc04695fb468c8d236b2) Importer(815301076,1909f56bfc062723c751e8b465ee728b) [PhysX] Initialized MultithreadedTaskDispatcher with 4 workers.
+ -> (artifact id: '00000000000000000000000000000000') in 0.001307 seconds
+Import Error Code:(4)
+Message: Build asset version error: assets/art/_memes/_colect/incredible perturbado .mp4 in SourceAssetDB has modification time of '2026-10-31T17:28:05.3024906Z' while content on disk has modification time of '2026-10-31T18:41:41.1936672Z'
+  ERROR: Build asset version error: assets/art/_memes/_colect/incredible perturbado .mp4 in SourceAssetDB has modification time of '2026-10-31T17:28:05.3024906Z' while content on disk has modification time of '2026-10-31T18:41:41.1936672Z'
+Number of updated asset objects reloaded before import = 0
+Number of asset objects unloaded after import = 0
+========================================================================
+Received Import Request.
+  Time since last request: 0.086159 seconds.
+  path: Assets/Art/_Memes/_Colect/incredible perturbado .mp4
+  artifactKey: Guid(0465f79ace16dc04695fb468c8d236b2) Importer(815301076,1909f56bfc062723c751e8b465ee728b)
+Start importing Assets/Art/_Memes/_Colect/incredible perturbado .mp4 using Guid(0465f79ace16dc04695fb468c8d236b2) Importer(815301076,1909f56bfc062723c751e8b465ee728b) [PhysX] Initialized MultithreadedTaskDispatcher with 4 workers.
+ -> (artifact id: '00000000000000000000000000000000') in 0.001193 seconds
+Import Error Code:(4)
+Message: Build asset version error: assets/art/_memes/_colect/incredible perturbado .mp4 in SourceAssetDB has modification time of '2026-10-31T17:28:05.3024906Z' while content on disk has modification time of '2026-10-31T18:41:41.1936672Z'
+  ERROR: Build asset version error: assets/art/_memes/_colect/incredible perturbado .mp4 in SourceAssetDB has modification time of '2026-10-31T17:28:05.3024906Z' while content on disk has modification time of '2026-10-31T18:41:41.1936672Z'
+Number of updated asset objects reloaded before import = 0
+Number of asset objects unloaded after import = 0
+========================================================================
+Received Import Request.
+  Time since last request: 0.065051 seconds.
+  path: Assets/Art/_Memes/_Colect/incredible perturbado .mp4
+  artifactKey: Guid(0465f79ace16dc04695fb468c8d236b2) Importer(815301076,1909f56bfc062723c751e8b465ee728b)
+Start importing Assets/Art/_Memes/_Colect/incredible perturbado .mp4 using Guid(0465f79ace16dc04695fb468c8d236b2) Importer(815301076,1909f56bfc062723c751e8b465ee728b) [PhysX] Initialized MultithreadedTaskDispatcher with 4 workers.
+ -> (artifact id: '00000000000000000000000000000000') in 0.001264 seconds
+Import Error Code:(4)
+Message: Build asset version error: assets/art/_memes/_colect/incredible perturbado .mp4 in SourceAssetDB has modification time of '2026-10-31T17:28:05.3024906Z' while content on disk has modification time of '2026-10-31T18:41:41.1936672Z'
+  ERROR: Build asset version error: assets/art/_memes/_colect/incredible perturbado .mp4 in SourceAssetDB has modification time of '2026-10-31T17:28:05.3024906Z' while content on disk has modification time of '2026-10-31T18:41:41.1936672Z'
+Number of updated asset objects reloaded before import = 0
+Number of asset objects unloaded after import = 0
+========================================================================
+Received Import Request.
+  Time since last request: 0.080437 seconds.
+  path: Assets/Art/_Memes/_Colect/incredible perturbado .mp4
+  artifactKey: Guid(0465f79ace16dc04695fb468c8d236b2) Importer(815301076,1909f56bfc062723c751e8b465ee728b)
+Start importing Assets/Art/_Memes/_Colect/incredible perturbado .mp4 using Guid(0465f79ace16dc04695fb468c8d236b2) Importer(815301076,1909f56bfc062723c751e8b465ee728b) [PhysX] Initialized MultithreadedTaskDispatcher with 4 workers.
+ -> (artifact id: '00000000000000000000000000000000') in 0.001234 seconds
+Import Error Code:(4)
+Message: Build asset version error: assets/art/_memes/_colect/incredible perturbado .mp4 in SourceAssetDB has modification time of '2026-10-31T17:28:05.3024906Z' while content on disk has modification time of '2026-10-31T18:41:41.1936672Z'
+  ERROR: Build asset version error: assets/art/_memes/_colect/incredible perturbado .mp4 in SourceAssetDB has modification time of '2026-10-31T17:28:05.3024906Z' while content on disk has modification time of '2026-10-31T18:41:41.1936672Z'
+Number of updated asset objects reloaded before import = 0
+Number of asset objects unloaded after import = 0
+========================================================================
+Received Import Request.
+  Time since last request: 0.069024 seconds.
+  path: Assets/Art/_Memes/_Colect/incredible perturbado .mp4
+  artifactKey: Guid(0465f79ace16dc04695fb468c8d236b2) Importer(815301076,1909f56bfc062723c751e8b465ee728b)
+Start importing Assets/Art/_Memes/_Colect/incredible perturbado .mp4 using Guid(0465f79ace16dc04695fb468c8d236b2) Importer(815301076,1909f56bfc062723c751e8b465ee728b) [PhysX] Initialized MultithreadedTaskDispatcher with 4 workers.
+ -> (artifact id: '00000000000000000000000000000000') in 0.001247 seconds
+Import Error Code:(4)
+Message: Build asset version error: assets/art/_memes/_colect/incredible perturbado .mp4 in SourceAssetDB has modification time of '2026-10-31T17:28:05.3024906Z' while content on disk has modification time of '2026-10-31T18:41:41.1936672Z'
+  ERROR: Build asset version error: assets/art/_memes/_colect/incredible perturbado .mp4 in SourceAssetDB has modification time of '2026-10-31T17:28:05.3024906Z' while content on disk has modification time of '2026-10-31T18:41:41.1936672Z'
+Number of updated asset objects reloaded before import = 0
+Number of asset objects unloaded after import = 0
+========================================================================
+Received Import Request.
+  Time since last request: 0.066619 seconds.
+  path: Assets/Art/_Memes/_Colect/incredible perturbado .mp4
+  artifactKey: Guid(0465f79ace16dc04695fb468c8d236b2) Importer(815301076,1909f56bfc062723c751e8b465ee728b)
+Start importing Assets/Art/_Memes/_Colect/incredible perturbado .mp4 using Guid(0465f79ace16dc04695fb468c8d236b2) Importer(815301076,1909f56bfc062723c751e8b465ee728b) [PhysX] Initialized MultithreadedTaskDispatcher with 4 workers.
+ -> (artifact id: '00000000000000000000000000000000') in 0.001229 seconds
+Import Error Code:(4)
+Message: Build asset version error: assets/art/_memes/_colect/incredible perturbado .mp4 in SourceAssetDB has modification time of '2026-10-31T17:28:05.3024906Z' while content on disk has modification time of '2026-10-31T18:41:41.1936672Z'
+  ERROR: Build asset version error: assets/art/_memes/_colect/incredible perturbado .mp4 in SourceAssetDB has modification time of '2026-10-31T17:28:05.3024906Z' while content on disk has modification time of '2026-10-31T18:41:41.1936672Z'
+Number of updated asset objects reloaded before import = 0
+Number of asset objects unloaded after import = 0
+========================================================================
+Received Import Request.
+  Time since last request: 0.065452 seconds.
+  path: Assets/Art/_Memes/_Colect/incredible perturbado .mp4
+  artifactKey: Guid(0465f79ace16dc04695fb468c8d236b2) Importer(815301076,1909f56bfc062723c751e8b465ee728b)
+Start importing Assets/Art/_Memes/_Colect/incredible perturbado .mp4 using Guid(0465f79ace16dc04695fb468c8d236b2) Importer(815301076,1909f56bfc062723c751e8b465ee728b) [PhysX] Initialized MultithreadedTaskDispatcher with 4 workers.
+ -> (artifact id: '00000000000000000000000000000000') in 0.001224 seconds
+Import Error Code:(4)
+Message: Build asset version error: assets/art/_memes/_colect/incredible perturbado .mp4 in SourceAssetDB has modification time of '2026-10-31T17:28:05.3024906Z' while content on disk has modification time of '2026-10-31T18:41:41.1936672Z'
+  ERROR: Build asset version error: assets/art/_memes/_colect/incredible perturbado .mp4 in SourceAssetDB has modification time of '2026-10-31T17:28:05.3024906Z' while content on disk has modification time of '2026-10-31T18:41:41.1936672Z'
+Number of updated asset objects reloaded before import = 0
+Number of asset objects unloaded after import = 0
+========================================================================
+Received Import Request.
+  Time since last request: 0.064628 seconds.
+  path: Assets/Art/_Memes/_Colect/incredible perturbado .mp4
+  artifactKey: Guid(0465f79ace16dc04695fb468c8d236b2) Importer(815301076,1909f56bfc062723c751e8b465ee728b)
+Start importing Assets/Art/_Memes/_Colect/incredible perturbado .mp4 using Guid(0465f79ace16dc04695fb468c8d236b2) Importer(815301076,1909f56bfc062723c751e8b465ee728b) [PhysX] Initialized MultithreadedTaskDispatcher with 4 workers.
+ -> (artifact id: '00000000000000000000000000000000') in 0.001243 seconds
+Import Error Code:(4)
+Message: Build asset version error: assets/art/_memes/_colect/incredible perturbado .mp4 in SourceAssetDB has modification time of '2026-10-31T17:28:05.3024906Z' while content on disk has modification time of '2026-10-31T18:41:41.1936672Z'
+  ERROR: Build asset version error: assets/art/_memes/_colect/incredible perturbado .mp4 in SourceAssetDB has modification time of '2026-10-31T17:28:05.3024906Z' while content on disk has modification time of '2026-10-31T18:41:41.1936672Z'
+Number of updated asset objects reloaded before import = 0
+Number of asset objects unloaded after import = 0
+========================================================================
+Received Import Request.
+  Time since last request: 0.065318 seconds.
+  path: Assets/Art/_Memes/_Colect/incredible perturbado .mp4
+  artifactKey: Guid(0465f79ace16dc04695fb468c8d236b2) Importer(815301076,1909f56bfc062723c751e8b465ee728b)
+Start importing Assets/Art/_Memes/_Colect/incredible perturbado .mp4 using Guid(0465f79ace16dc04695fb468c8d236b2) Importer(815301076,1909f56bfc062723c751e8b465ee728b) [PhysX] Initialized MultithreadedTaskDispatcher with 4 workers.
+ -> (artifact id: '00000000000000000000000000000000') in 0.001516 seconds
+Import Error Code:(4)
+Message: Build asset version error: assets/art/_memes/_colect/incredible perturbado .mp4 in SourceAssetDB has modification time of '2026-10-31T17:28:05.3024906Z' while content on disk has modification time of '2026-10-31T18:41:41.1936672Z'
+  ERROR: Build asset version error: assets/art/_memes/_colect/incredible perturbado .mp4 in SourceAssetDB has modification time of '2026-10-31T17:28:05.3024906Z' while content on disk has modification time of '2026-10-31T18:41:41.1936672Z'
+Number of updated asset objects reloaded before import = 0
+Number of asset objects unloaded after import = 0
+========================================================================
+Received Import Request.
+  Time since last request: 0.064314 seconds.
+  path: Assets/Art/_Memes/_Colect/incredible perturbado .mp4
+  artifactKey: Guid(0465f79ace16dc04695fb468c8d236b2) Importer(815301076,1909f56bfc062723c751e8b465ee728b)
+Start importing Assets/Art/_Memes/_Colect/incredible perturbado .mp4 using Guid(0465f79ace16dc04695fb468c8d236b2) Importer(815301076,1909f56bfc062723c751e8b465ee728b) [PhysX] Initialized MultithreadedTaskDispatcher with 4 workers.
+ -> (artifact id: '00000000000000000000000000000000') in 0.001485 seconds
+Import Error Code:(4)
+Message: Build asset version error: assets/art/_memes/_colect/incredible perturbado .mp4 in SourceAssetDB has modification time of '2026-10-31T17:28:05.3024906Z' while content on disk has modification time of '2026-10-31T18:41:41.1936672Z'
+  ERROR: Build asset version error: assets/art/_memes/_colect/incredible perturbado .mp4 in SourceAssetDB has modification time of '2026-10-31T17:28:05.3024906Z' while content on disk has modification time of '2026-10-31T18:41:41.1936672Z'
+Number of updated asset objects reloaded before import = 0
+Number of asset objects unloaded after import = 0
+========================================================================
+Received Import Request.
+  Time since last request: 0.067553 seconds.
+  path: Assets/Art/_Memes/_Colect/incredible perturbado .mp4
+  artifactKey: Guid(0465f79ace16dc04695fb468c8d236b2) Importer(815301076,1909f56bfc062723c751e8b465ee728b)
+Start importing Assets/Art/_Memes/_Colect/incredible perturbado .mp4 using Guid(0465f79ace16dc04695fb468c8d236b2) Importer(815301076,1909f56bfc062723c751e8b465ee728b) [PhysX] Initialized MultithreadedTaskDispatcher with 4 workers.
+ -> (artifact id: '00000000000000000000000000000000') in 0.001194 seconds
+Import Error Code:(4)
+Message: Build asset version error: assets/art/_memes/_colect/incredible perturbado .mp4 in SourceAssetDB has modification time of '2026-10-31T17:28:05.3024906Z' while content on disk has modification time of '2026-10-31T18:41:41.1936672Z'
+  ERROR: Build asset version error: assets/art/_memes/_colect/incredible perturbado .mp4 in SourceAssetDB has modification time of '2026-10-31T17:28:05.3024906Z' while content on disk has modification time of '2026-10-31T18:41:41.1936672Z'
+Number of updated asset objects reloaded before import = 0
+Number of asset objects unloaded after import = 0
+========================================================================
+Received Import Request.
+  Time since last request: 0.067897 seconds.
+  path: Assets/Art/_Memes/_Colect/incredible perturbado .mp4
+  artifactKey: Guid(0465f79ace16dc04695fb468c8d236b2) Importer(815301076,1909f56bfc062723c751e8b465ee728b)
+Start importing Assets/Art/_Memes/_Colect/incredible perturbado .mp4 using Guid(0465f79ace16dc04695fb468c8d236b2) Importer(815301076,1909f56bfc062723c751e8b465ee728b) [PhysX] Initialized MultithreadedTaskDispatcher with 4 workers.
+ -> (artifact id: '00000000000000000000000000000000') in 0.001229 seconds
+Import Error Code:(4)
+Message: Build asset version error: assets/art/_memes/_colect/incredible perturbado .mp4 in SourceAssetDB has modification time of '2026-10-31T17:28:05.3024906Z' while content on disk has modification time of '2026-10-31T18:41:41.1936672Z'
+  ERROR: Build asset version error: assets/art/_memes/_colect/incredible perturbado .mp4 in SourceAssetDB has modification time of '2026-10-31T17:28:05.3024906Z' while content on disk has modification time of '2026-10-31T18:41:41.1936672Z'
+Number of updated asset objects reloaded before import = 0
+Number of asset objects unloaded after import = 0
+========================================================================
+Received Import Request.
+  Time since last request: 0.065507 seconds.
+  path: Assets/Art/_Memes/_Colect/incredible perturbado .mp4
+  artifactKey: Guid(0465f79ace16dc04695fb468c8d236b2) Importer(815301076,1909f56bfc062723c751e8b465ee728b)
+Start importing Assets/Art/_Memes/_Colect/incredible perturbado .mp4 using Guid(0465f79ace16dc04695fb468c8d236b2) Importer(815301076,1909f56bfc062723c751e8b465ee728b) [PhysX] Initialized MultithreadedTaskDispatcher with 4 workers.
+ -> (artifact id: '00000000000000000000000000000000') in 0.001228 seconds
+Import Error Code:(4)
+Message: Build asset version error: assets/art/_memes/_colect/incredible perturbado .mp4 in SourceAssetDB has modification time of '2026-10-31T17:28:05.3024906Z' while content on disk has modification time of '2026-10-31T18:41:41.1936672Z'
+  ERROR: Build asset version error: assets/art/_memes/_colect/incredible perturbado .mp4 in SourceAssetDB has modification time of '2026-10-31T17:28:05.3024906Z' while content on disk has modification time of '2026-10-31T18:41:41.1936672Z'
+Number of updated asset objects reloaded before import = 0
+Number of asset objects unloaded after import = 0
+========================================================================
+Received Import Request.
+  Time since last request: 0.428257 seconds.
+  path: Assets/Art/_Memes/_Colect/incredible perturbado.mp4
+  artifactKey: Guid(0465f79ace16dc04695fb468c8d236b2) Importer(815301076,1909f56bfc062723c751e8b465ee728b)
+Start importing Assets/Art/_Memes/_Colect/incredible perturbado.mp4 using Guid(0465f79ace16dc04695fb468c8d236b2) Importer(815301076,1909f56bfc062723c751e8b465ee728b) [PhysX] Initialized MultithreadedTaskDispatcher with 4 workers.
+ -> (artifact id: '175e14ab801c8883ab7fe79952d4f9b8') in 0.001337 seconds
+Number of updated asset objects reloaded before import = 0
+Number of asset objects unloaded after import = 1
+========================================================================
+Received Import Request.
+  Time since last request: 27.029502 seconds.
+  path: Assets/Art/_Memes/_Colect/MemeData_14_Marcelo 1.asset
+  artifactKey: Guid(3919e173daff90042a357880c3901e0d) Importer(815301076,1909f56bfc062723c751e8b465ee728b)
+Start importing Assets/Art/_Memes/_Colect/MemeData_14_Marcelo 1.asset using Guid(3919e173daff90042a357880c3901e0d) Importer(815301076,1909f56bfc062723c751e8b465ee728b) [PhysX] Initialized MultithreadedTaskDispatcher with 4 workers.
+ -> (artifact id: '89813dc51ea412e860eee386c5e22a51') in 0.001735 seconds
+Number of updated asset objects reloaded before import = 0
+Number of asset objects unloaded after import = 2
+========================================================================
+Received Import Request.
+  Time since last request: 9.033254 seconds.
+  path: Assets/Art/_Memes/_Colect/MemeData_15_asd.asset
+  artifactKey: Guid(3919e173daff90042a357880c3901e0d) Importer(815301076,1909f56bfc062723c751e8b465ee728b)
+Start importing Assets/Art/_Memes/_Colect/MemeData_15_asd.asset using Guid(3919e173daff90042a357880c3901e0d) Importer(815301076,1909f56bfc062723c751e8b465ee728b) [PhysX] Initialized MultithreadedTaskDispatcher with 4 workers.
+ -> (artifact id: '6d9321b007e364e73e10a4d992b52c75') in 0.001925 seconds
+Number of updated asset objects reloaded before import = 0
+Number of asset objects unloaded after import = 2
+========================================================================
+Received Import Request.
+  Time since last request: 0.112162 seconds.
+  path: Assets/Art/_Memes/_Colect/MemeData_13_Pefeto.png
+  artifactKey: Guid(c736537ce3d1705469acd9e05474f2f8) Importer(815301076,1909f56bfc062723c751e8b465ee728b)
+Start importing Assets/Art/_Memes/_Colect/MemeData_13_Pefeto.png using Guid(c736537ce3d1705469acd9e05474f2f8) Importer(815301076,1909f56bfc062723c751e8b465ee728b) [PhysX] Initialized MultithreadedTaskDispatcher with 4 workers.
+[PhysX] Initialized MultithreadedTaskDispatcher with 4 workers.
+ -> (artifact id: '0d8797a3f3ed760c2807eabfda3c70ed') in 0.044124 seconds
+Number of updated asset objects reloaded before import = 0
+Number of asset objects unloaded after import = 2
+========================================================================
+Received Import Request.
+  Time since last request: 1.705571 seconds.
+  path: Assets/Art/_Memes/_Colect/coffindance.mp4
+  artifactKey: Guid(319f007ea4ff39a42bb8fe26e50b2e5f) Importer(815301076,1909f56bfc062723c751e8b465ee728b)
+Start importing Assets/Art/_Memes/_Colect/coffindance.mp4 using Guid(319f007ea4ff39a42bb8fe26e50b2e5f) Importer(815301076,1909f56bfc062723c751e8b465ee728b) [PhysX] Initialized MultithreadedTaskDispatcher with 4 workers.
+ -> (artifact id: '0068b18f310a0e8c3131163a458a6e69') in 0.001602 seconds
+Number of updated asset objects reloaded before import = 0
+Number of asset objects unloaded after import = 1
+========================================================================
+Received Import Request.
+  Time since last request: 2.516370 seconds.
+  path: Assets/Art/_Memes/_Colect/MemeImage_11_RickRoll.mp4
+  artifactKey: Guid(005aa7ab4c682874b908cb8df31416b7) Importer(815301076,1909f56bfc062723c751e8b465ee728b)
+Start importing Assets/Art/_Memes/_Colect/MemeImage_11_RickRoll.mp4 using Guid(005aa7ab4c682874b908cb8df31416b7) Importer(815301076,1909f56bfc062723c751e8b465ee728b) [PhysX] Initialized MultithreadedTaskDispatcher with 4 workers.
+ -> (artifact id: 'c5e572a4bcfab98b1f88a62f7f489635') in 0.001346 seconds
+Number of updated asset objects reloaded before import = 0
+Number of asset objects unloaded after import = 1
+========================================================================
+Received Import Request.
+  Time since last request: 6.373812 seconds.
+  path: Assets/Art/_Memes/_Colect/MemeData_15_CoffinDance.asset
+  artifactKey: Guid(3919e173daff90042a357880c3901e0d) Importer(815301076,1909f56bfc062723c751e8b465ee728b)
+Start importing Assets/Art/_Memes/_Colect/MemeData_15_CoffinDance.asset using Guid(3919e173daff90042a357880c3901e0d) Importer(815301076,1909f56bfc062723c751e8b465ee728b) [PhysX] Initialized MultithreadedTaskDispatcher with 4 workers.
+ -> (artifact id: 'ae0021d40f580542866df99238f71a3a') in 0.001888 seconds
+Number of updated asset objects reloaded before import = 0
+Number of asset objects unloaded after import = 2
+========================================================================
+Received Import Request.
+  Time since last request: 16.768410 seconds.
+  path: Assets/Art/_Memes/_Colect/MemeData_15_CoffinDance.asset
+  artifactKey: Guid(3919e173daff90042a357880c3901e0d) Importer(815301076,1909f56bfc062723c751e8b465ee728b)
+Start importing Assets/Art/_Memes/_Colect/MemeData_15_CoffinDance.asset using Guid(3919e173daff90042a357880c3901e0d) Importer(815301076,1909f56bfc062723c751e8b465ee728b) [PhysX] Initialized MultithreadedTaskDispatcher with 4 workers.
+ -> (artifact id: '431e3c9782316af58d7fc948733462f7') in 0.001963 seconds
+Number of updated asset objects reloaded before import = 0
+Number of asset objects unloaded after import = 2
+========================================================================
+Received Import Request.
+  Time since last request: 3.042839 seconds.
+  path: Assets/Art/_Memes/_Colect/MemeSound_13_Pefeto.mp3
+  artifactKey: Guid(3e7f352f5839bfd4db2d62459dd6ae13) Importer(815301076,1909f56bfc062723c751e8b465ee728b)
+Start importing Assets/Art/_Memes/_Colect/MemeSound_13_Pefeto.mp3 using Guid(3e7f352f5839bfd4db2d62459dd6ae13) Importer(815301076,1909f56bfc062723c751e8b465ee728b) [PhysX] Initialized MultithreadedTaskDispatcher with 4 workers.
+[PhysX] Initialized MultithreadedTaskDispatcher with 4 workers.
+ -> (artifact id: 'fd700e9d3b55345d7bbecfbde7a75995') in 0.073075 seconds
+Number of updated asset objects reloaded before import = 0
+Number of asset objects unloaded after import = 2
+========================================================================
+Received Import Request.
+  Time since last request: 10.022111 seconds.
+  path: Assets/Art/_Memes/_Colect/MemeData_15_CoffinDance 1.asset
+  artifactKey: Guid(c14fae9a2c882154b9f94450486ea872) Importer(815301076,1909f56bfc062723c751e8b465ee728b)
+Start importing Assets/Art/_Memes/_Colect/MemeData_15_CoffinDance 1.asset using Guid(c14fae9a2c882154b9f94450486ea872) Importer(815301076,1909f56bfc062723c751e8b465ee728b) [PhysX] Initialized MultithreadedTaskDispatcher with 4 workers.
+ -> (artifact id: '54863944021c99628fc4531369718e8d') in 0.001755 seconds
+Number of updated asset objects reloaded before import = 0
+Number of asset objects unloaded after import = 2
+========================================================================
+Received Import Request.
+  Time since last request: 8.165223 seconds.
+  path: Assets/Art/_Memes/_Colect/MemeData_16_Dross.asset
+  artifactKey: Guid(c14fae9a2c882154b9f94450486ea872) Importer(815301076,1909f56bfc062723c751e8b465ee728b)
+Start importing Assets/Art/_Memes/_Colect/MemeData_16_Dross.asset using Guid(c14fae9a2c882154b9f94450486ea872) Importer(815301076,1909f56bfc062723c751e8b465ee728b) [PhysX] Initialized MultithreadedTaskDispatcher with 4 workers.
+ -> (artifact id: '712f1f8c72f088ca1249c8b9f7d3bb82') in 0.001992 seconds
+Number of updated asset objects reloaded before import = 0
+Number of asset objects unloaded after import = 2
+========================================================================
+Received Import Request.
+  Time since last request: 3.955174 seconds.
+  path: Assets/Art/_Memes/_Colect/dross.mp4
+  artifactKey: Guid(3a8441497abd8af49b50274ba6918c5b) Importer(815301076,1909f56bfc062723c751e8b465ee728b)
+Start importing Assets/Art/_Memes/_Colect/dross.mp4 using Guid(3a8441497abd8af49b50274ba6918c5b) Importer(815301076,1909f56bfc062723c751e8b465ee728b) [PhysX] Initialized MultithreadedTaskDispatcher with 4 workers.
+ -> (artifact id: '8e1bfe3eea7ba373b7795c70b310618f') in 0.002036 seconds
+Number of updated asset objects reloaded before import = 0
+Number of asset objects unloaded after import = 1
+========================================================================
+Received Import Request.
+  Time since last request: 335.748962 seconds.
+  path: Assets/Art/_Memes/_Colect/MemeData_16_Dross.asset
+  artifactKey: Guid(c14fae9a2c882154b9f94450486ea872) Importer(815301076,1909f56bfc062723c751e8b465ee728b)
+Start importing Assets/Art/_Memes/_Colect/MemeData_16_Dross.asset using Guid(c14fae9a2c882154b9f94450486ea872) Importer(815301076,1909f56bfc062723c751e8b465ee728b) [PhysX] Initialized MultithreadedTaskDispatcher with 4 workers.
+ -> (artifact id: 'd4b4f458091d948f79daf0e56347e991') in 0.002020 seconds
+Number of updated asset objects reloaded before import = 0
+Number of asset objects unloaded after import = 2
+========================================================================
+Received Import Request.
+  Time since last request: 0.683300 seconds.
+  path: Assets/Art/_Memes/_Colect/MemeData_16_Dross 1.asset
+  artifactKey: Guid(d7574726351c8ee41b5d0c8343fec5dc) Importer(815301076,1909f56bfc062723c751e8b465ee728b)
+Start importing Assets/Art/_Memes/_Colect/MemeData_16_Dross 1.asset using Guid(d7574726351c8ee41b5d0c8343fec5dc) Importer(815301076,1909f56bfc062723c751e8b465ee728b) [PhysX] Initialized MultithreadedTaskDispatcher with 4 workers.
+ -> (artifact id: '3cafcfcc76f0e9ab0257ff779ef1aa98') in 0.001731 seconds
+Number of updated asset objects reloaded before import = 0
+Number of asset objects unloaded after import = 2
+========================================================================
+Received Import Request.
+  Time since last request: 9.307972 seconds.
+  path: Assets/Art/_Memes/_Colect/MemeData_17_asdas.asset
+  artifactKey: Guid(d7574726351c8ee41b5d0c8343fec5dc) Importer(815301076,1909f56bfc062723c751e8b465ee728b)
+Start importing Assets/Art/_Memes/_Colect/MemeData_17_asdas.asset using Guid(d7574726351c8ee41b5d0c8343fec5dc) Importer(815301076,1909f56bfc062723c751e8b465ee728b) [PhysX] Initialized MultithreadedTaskDispatcher with 4 workers.
+ -> (artifact id: '36907545bc832bc2c952f623acd11b69') in 0.002589 seconds
+Number of updated asset objects reloaded before import = 0
+Number of asset objects unloaded after import = 2
+========================================================================
+Received Import Request.
+  Time since last request: 7.142121 seconds.
+  path: Assets/Art/_Memes/_Colect/MemeData_17_LoveMe.asset
+  artifactKey: Guid(d7574726351c8ee41b5d0c8343fec5dc) Importer(815301076,1909f56bfc062723c751e8b465ee728b)
+Start importing Assets/Art/_Memes/_Colect/MemeData_17_LoveMe.asset using Guid(d7574726351c8ee41b5d0c8343fec5dc) Importer(815301076,1909f56bfc062723c751e8b465ee728b) [PhysX] Initialized MultithreadedTaskDispatcher with 4 workers.
+ -> (artifact id: 'e2938760afc074d9a933f5932298c4fc') in 0.002125 seconds
+Number of updated asset objects reloaded before import = 0
+Number of asset objects unloaded after import = 2
+========================================================================
+Received Import Request.
+  Time since last request: 14.085249 seconds.
+  path: Assets/Art/_Memes/_Colect/Loveme.mp4
+  artifactKey: Guid(b7b6f8daf43e8bd468307c78b3badcce) Importer(815301076,1909f56bfc062723c751e8b465ee728b)
+Start importing Assets/Art/_Memes/_Colect/Loveme.mp4 using Guid(b7b6f8daf43e8bd468307c78b3badcce) Importer(815301076,1909f56bfc062723c751e8b465ee728b) [PhysX] Initialized MultithreadedTaskDispatcher with 4 workers.
+ -> (artifact id: '13d0fd53a246ad9df61cf9fb7d66487c') in 0.001748 seconds
+Number of updated asset objects reloaded before import = 0
+Number of asset objects unloaded after import = 1
+========================================================================
+Received Import Request.
+  Time since last request: 2.355077 seconds.
+  path: Assets/Art/_Memes/_Colect/MemeData_17_LoveMe.asset
+  artifactKey: Guid(d7574726351c8ee41b5d0c8343fec5dc) Importer(815301076,1909f56bfc062723c751e8b465ee728b)
+Start importing Assets/Art/_Memes/_Colect/MemeData_17_LoveMe.asset using Guid(d7574726351c8ee41b5d0c8343fec5dc) Importer(815301076,1909f56bfc062723c751e8b465ee728b) [PhysX] Initialized MultithreadedTaskDispatcher with 4 workers.
+ -> (artifact id: '5971ec9a0c787213b121b509a9089cdf') in 0.001702 seconds
+Number of updated asset objects reloaded before import = 0
+Number of asset objects unloaded after import = 2
+========================================================================
+Received Prepare
+Caller must complete domain reload
+Begin MonoManager ReloadAssembly
+- Loaded All Assemblies, in  0.750 seconds
+Native extension for WindowsStandalone target not found
+Mono: successfully reloaded assembly
+- Finished resetting the current domain, in  0.949 seconds
+Domain Reload Profiling: 1690ms
+	BeginReloadAssembly (221ms)
+		ExecutionOrderSort (0ms)
+		DisableScriptedObjects (17ms)
+		BackupInstance (0ms)
+		ReleaseScriptingObjects (0ms)
+		CreateAndSetChildDomain (33ms)
+	RebuildCommonClasses (43ms)
+	RebuildNativeTypeToScriptingClass (14ms)
+	initialDomainReloadingComplete (49ms)
+	LoadAllAssembliesAndSetupDomain (415ms)
+		LoadAssemblies (535ms)
+		RebuildTransferFunctionScriptingTraits (0ms)
+		AnalyzeDomain (12ms)
+			TypeCache.Refresh (5ms)
+				TypeCache.ScanAssembly (0ms)
+			ScanForSourceGeneratedMonoScriptInfo (0ms)
+			ResolveRequiredComponents (6ms)
+	FinalizeReload (950ms)
+		ReleaseScriptCaches (0ms)
+		RebuildScriptCaches (0ms)
+		SetupLoadedEditorAssemblies (441ms)
+			LogAssemblyErrors (0ms)
+			InitializePlatformSupportModulesInManaged (13ms)
+			SetLoadedEditorAssemblies (5ms)
+			RefreshPlugins (0ms)
+			BeforeProcessingInitializeOnLoad (117ms)
+			ProcessInitializeOnLoadAttributes (235ms)
+			ProcessInitializeOnLoadMethodAttributes (49ms)
+			AfterProcessingInitializeOnLoad (22ms)
+			EditorAssembliesLoaded (0ms)
+		ExecutionOrderSort2 (0ms)
+		AwakeInstancesAfterBackupRestoration (31ms)
+Refreshing native plugins compatible for Editor in 5.59 ms, found 1 plugins.
+Preloading 0 native plugins for Editor in 0.00 ms.
+Unloading 1824 Unused Serialized files (Serialized files now loaded: 0)
+Unloading 14 unused Assets / (313.7 KB). Loaded Objects now: 2409.
+Memory consumption went from 107.8 MB to 107.5 MB.
+Total: 4.824000 ms (FindLiveObjects: 0.218300 ms CreateObjectMapping: 0.230500 ms MarkObjects: 4.144600 ms  DeleteObjects: 0.229500 ms)
+
+Prepare: number of updated asset objects reloaded= 0
+AssetImportParameters requested are different than current active one (requested -> active):
+  custom:video-decoder-webm-vp8: 9c59270c3fd7afecdb556c50c9e8de78 -> 
+  custom:SearchIndexIgnoredProperties: e643bd26f0fe6173181afceb89e7c659 -> 
+  custom:container-demuxer-ogg: 62fdf1f143b41e24485cea50d1cbac27 -> 
+  custom:AudioImporter_EditorPlatform: d09bf68614088b80899f8185d706f6e7 -> 
+  custom:video-decoder-ogg-theora: a1e56fd34408186e4bbccfd4996cb3dc -> 
+  custom:framework-win-MediaFoundation: 216162199b28c13a410421893ffa2e32 -> 
+  custom:video-encoder-webm-vp8: eb34c28f22e8b96e1ab97ce403110664 -> 
+  custom:audio-decoder-ogg-vorbis: bf7c407c2cedff20999df2af8eb42d56 -> 
+  custom:CustomObjectIndexerAttribute: 9a22284fe3817be447336de3de66b15e -> 
+  custom:container-demuxer-webm: 4f35f7cbe854078d1ac9338744f61a02 -> 
+  custom:audio-encoder-webm-vorbis: bf7c407c2cedff20999df2af8eb42d56 -> 
+  custom:container-muxer-webm: aa71ff27fc2769a1b78a27578f13a17b -> 
+========================================================================
+Received Prepare
+Caller must complete domain reload
+Begin MonoManager ReloadAssembly
+- Loaded All Assemblies, in  0.704 seconds
+Native extension for WindowsStandalone target not found
+Mono: successfully reloaded assembly
+- Finished resetting the current domain, in  1.115 seconds
+Domain Reload Profiling: 1811ms
+	BeginReloadAssembly (299ms)
+		ExecutionOrderSort (0ms)
+		DisableScriptedObjects (23ms)
+		BackupInstance (0ms)
+		ReleaseScriptingObjects (0ms)
+		CreateAndSetChildDomain (54ms)
+	RebuildCommonClasses (44ms)
+	RebuildNativeTypeToScriptingClass (14ms)
+	initialDomainReloadingComplete (49ms)
+	LoadAllAssembliesAndSetupDomain (289ms)
+		LoadAssemblies (412ms)
+		RebuildTransferFunctionScriptingTraits (0ms)
+		AnalyzeDomain (28ms)
+			TypeCache.Refresh (13ms)
+				TypeCache.ScanAssembly (5ms)
+			ScanForSourceGeneratedMonoScriptInfo (8ms)
+			ResolveRequiredComponents (6ms)
+	FinalizeReload (1116ms)
+		ReleaseScriptCaches (0ms)
+		RebuildScriptCaches (0ms)
+		SetupLoadedEditorAssemblies (497ms)
+			LogAssemblyErrors (0ms)
+			InitializePlatformSupportModulesInManaged (13ms)
+			SetLoadedEditorAssemblies (5ms)
+			RefreshPlugins (0ms)
+			BeforeProcessingInitializeOnLoad (134ms)
+			ProcessInitializeOnLoadAttributes (273ms)
+			ProcessInitializeOnLoadMethodAttributes (50ms)
+			AfterProcessingInitializeOnLoad (21ms)
+			EditorAssembliesLoaded (0ms)
+		ExecutionOrderSort2 (0ms)
+		AwakeInstancesAfterBackupRestoration (17ms)
+Refreshing native plugins compatible for Editor in 5.37 ms, found 1 plugins.
+Preloading 0 native plugins for Editor in 0.00 ms.
+Unloading 1826 Unused Serialized files (Serialized files now loaded: 0)
+Unloading 14 unused Assets / (313.8 KB). Loaded Objects now: 2414.
+Memory consumption went from 108.1 MB to 107.8 MB.
+Total: 3.903800 ms (FindLiveObjects: 0.257800 ms CreateObjectMapping: 0.160700 ms MarkObjects: 3.384200 ms  DeleteObjects: 0.099900 ms)
+
+Prepare: number of updated asset objects reloaded= 0
+AssetImportParameters requested are different than current active one (requested -> active):
+  custom:video-decoder-webm-vp8: 9c59270c3fd7afecdb556c50c9e8de78 -> 
+  custom:SearchIndexIgnoredProperties: e643bd26f0fe6173181afceb89e7c659 -> 
+  custom:container-demuxer-ogg: 62fdf1f143b41e24485cea50d1cbac27 -> 
+  custom:AudioImporter_EditorPlatform: d09bf68614088b80899f8185d706f6e7 -> 
+  custom:video-decoder-ogg-theora: a1e56fd34408186e4bbccfd4996cb3dc -> 
+  custom:framework-win-MediaFoundation: 216162199b28c13a410421893ffa2e32 -> 
+  custom:video-encoder-webm-vp8: eb34c28f22e8b96e1ab97ce403110664 -> 
+  custom:audio-decoder-ogg-vorbis: bf7c407c2cedff20999df2af8eb42d56 -> 
+  custom:CustomObjectIndexerAttribute: 9a22284fe3817be447336de3de66b15e -> 
+  custom:container-demuxer-webm: 4f35f7cbe854078d1ac9338744f61a02 -> 
+  custom:scripting/monoscript/fileName/DebugLock.cs: 6f65af47f76f407e79e0a000b29c7e0b -> 
+  custom:audio-encoder-webm-vorbis: bf7c407c2cedff20999df2af8eb42d56 -> 
+  custom:scripting/precompiled-assembly-types:Assembly-CSharp: 5055e3ee10f928ef097a995c1af1766e -> f155d116374a8d88e31df9d1f86a4abd
+  custom:container-muxer-webm: aa71ff27fc2769a1b78a27578f13a17b -> 
+========================================================================
+Received Prepare
+Caller must complete domain reload
+Begin MonoManager ReloadAssembly
+- Loaded All Assemblies, in  0.753 seconds
+Native extension for WindowsStandalone target not found
+Mono: successfully reloaded assembly
+- Finished resetting the current domain, in  0.959 seconds
+Domain Reload Profiling: 1703ms
+	BeginReloadAssembly (224ms)
+		ExecutionOrderSort (0ms)
+		DisableScriptedObjects (18ms)
+		BackupInstance (0ms)
+		ReleaseScriptingObjects (0ms)
+		CreateAndSetChildDomain (32ms)
+	RebuildCommonClasses (44ms)
+	RebuildNativeTypeToScriptingClass (14ms)
+	initialDomainReloadingComplete (49ms)
+	LoadAllAssembliesAndSetupDomain (413ms)
+		LoadAssemblies (536ms)
+		RebuildTransferFunctionScriptingTraits (0ms)
+		AnalyzeDomain (12ms)
+			TypeCache.Refresh (5ms)
+				TypeCache.ScanAssembly (0ms)
+			ScanForSourceGeneratedMonoScriptInfo (0ms)
+			ResolveRequiredComponents (6ms)
+	FinalizeReload (960ms)
+		ReleaseScriptCaches (0ms)
+		RebuildScriptCaches (0ms)
+		SetupLoadedEditorAssemblies (461ms)
+			LogAssemblyErrors (0ms)
+			InitializePlatformSupportModulesInManaged (13ms)
+			SetLoadedEditorAssemblies (5ms)
+			RefreshPlugins (0ms)
+			BeforeProcessingInitializeOnLoad (117ms)
+			ProcessInitializeOnLoadAttributes (228ms)
+			ProcessInitializeOnLoadMethodAttributes (56ms)
+			AfterProcessingInitializeOnLoad (42ms)
+			EditorAssembliesLoaded (0ms)
+		ExecutionOrderSort2 (0ms)
+		AwakeInstancesAfterBackupRestoration (18ms)
+Refreshing native plugins compatible for Editor in 6.15 ms, found 1 plugins.
+Preloading 0 native plugins for Editor in 0.00 ms.
+Unloading 1826 Unused Serialized files (Serialized files now loaded: 0)
+Unloading 14 unused Assets / (313.8 KB). Loaded Objects now: 2418.
+Memory consumption went from 108.1 MB to 107.8 MB.
+Total: 6.184200 ms (FindLiveObjects: 0.218700 ms CreateObjectMapping: 0.073600 ms MarkObjects: 5.621100 ms  DeleteObjects: 0.269400 ms)
+
+Prepare: number of updated asset objects reloaded= 0
+AssetImportParameters requested are different than current active one (requested -> active):
+  custom:video-decoder-webm-vp8: 9c59270c3fd7afecdb556c50c9e8de78 -> 
+  custom:SearchIndexIgnoredProperties: e643bd26f0fe6173181afceb89e7c659 -> 
+  custom:container-demuxer-ogg: 62fdf1f143b41e24485cea50d1cbac27 -> 
+  custom:AudioImporter_EditorPlatform: d09bf68614088b80899f8185d706f6e7 -> 
+  custom:video-decoder-ogg-theora: a1e56fd34408186e4bbccfd4996cb3dc -> 
+  custom:framework-win-MediaFoundation: 216162199b28c13a410421893ffa2e32 -> 
+  custom:video-encoder-webm-vp8: eb34c28f22e8b96e1ab97ce403110664 -> 
+  custom:audio-decoder-ogg-vorbis: bf7c407c2cedff20999df2af8eb42d56 -> 
+  custom:CustomObjectIndexerAttribute: 9a22284fe3817be447336de3de66b15e -> 
+  custom:container-demuxer-webm: 4f35f7cbe854078d1ac9338744f61a02 -> 
+  custom:scripting/monoscript/fileName/DebugLock.cs: 6f65af47f76f407e79e0a000b29c7e0b -> 
+  custom:audio-encoder-webm-vorbis: bf7c407c2cedff20999df2af8eb42d56 -> 
+  custom:scripting/precompiled-assembly-types:Assembly-CSharp: 5055e3ee10f928ef097a995c1af1766e -> f155d116374a8d88e31df9d1f86a4abd
+  custom:container-muxer-webm: aa71ff27fc2769a1b78a27578f13a17b -> 
+========================================================================
+Received Prepare
+Caller must complete domain reload
+Begin MonoManager ReloadAssembly
+- Loaded All Assemblies, in  0.711 seconds
+Native extension for WindowsStandalone target not found
+Mono: successfully reloaded assembly
+- Finished resetting the current domain, in  0.959 seconds
+Domain Reload Profiling: 1662ms
+	BeginReloadAssembly (221ms)
+		ExecutionOrderSort (0ms)
+		DisableScriptedObjects (18ms)
+		BackupInstance (0ms)
+		ReleaseScriptingObjects (0ms)
+		CreateAndSetChildDomain (31ms)
+	RebuildCommonClasses (42ms)
+	RebuildNativeTypeToScriptingClass (14ms)
+	initialDomainReloadingComplete (50ms)
+	LoadAllAssembliesAndSetupDomain (375ms)
+		LoadAssemblies (481ms)
+		RebuildTransferFunctionScriptingTraits (0ms)
+		AnalyzeDomain (26ms)
+			TypeCache.Refresh (7ms)
+				TypeCache.ScanAssembly (0ms)
+			ScanForSourceGeneratedMonoScriptInfo (1ms)
+			ResolveRequiredComponents (17ms)
+	FinalizeReload (960ms)
+		ReleaseScriptCaches (0ms)
+		RebuildScriptCaches (0ms)
+		SetupLoadedEditorAssemblies (439ms)
+			LogAssemblyErrors (0ms)
+			InitializePlatformSupportModulesInManaged (14ms)
+			SetLoadedEditorAssemblies (5ms)
+			RefreshPlugins (0ms)
+			BeforeProcessingInitializeOnLoad (119ms)
+			ProcessInitializeOnLoadAttributes (230ms)
+			ProcessInitializeOnLoadMethodAttributes (50ms)
+			AfterProcessingInitializeOnLoad (21ms)
+			EditorAssembliesLoaded (1ms)
+		ExecutionOrderSort2 (0ms)
+		AwakeInstancesAfterBackupRestoration (27ms)
+Refreshing native plugins compatible for Editor in 5.45 ms, found 1 plugins.
+Preloading 0 native plugins for Editor in 0.00 ms.
+Unloading 1826 Unused Serialized files (Serialized files now loaded: 0)
+Unloading 14 unused Assets / (313.8 KB). Loaded Objects now: 2422.
+Memory consumption went from 108.1 MB to 107.8 MB.
+Total: 3.467100 ms (FindLiveObjects: 0.194900 ms CreateObjectMapping: 0.070300 ms MarkObjects: 3.111000 ms  DeleteObjects: 0.090000 ms)
+
+Prepare: number of updated asset objects reloaded= 0
+AssetImportParameters requested are different than current active one (requested -> active):
+  custom:video-decoder-webm-vp8: 9c59270c3fd7afecdb556c50c9e8de78 -> 
+  custom:SearchIndexIgnoredProperties: e643bd26f0fe6173181afceb89e7c659 -> 
+  custom:container-demuxer-ogg: 62fdf1f143b41e24485cea50d1cbac27 -> 
+  custom:AudioImporter_EditorPlatform: d09bf68614088b80899f8185d706f6e7 -> 
+  custom:video-decoder-ogg-theora: a1e56fd34408186e4bbccfd4996cb3dc -> 
+  custom:framework-win-MediaFoundation: 216162199b28c13a410421893ffa2e32 -> 
+  custom:video-encoder-webm-vp8: eb34c28f22e8b96e1ab97ce403110664 -> 
+  custom:audio-decoder-ogg-vorbis: bf7c407c2cedff20999df2af8eb42d56 -> 
+  custom:CustomObjectIndexerAttribute: 9a22284fe3817be447336de3de66b15e -> 
+  custom:container-demuxer-webm: 4f35f7cbe854078d1ac9338744f61a02 -> 
+  custom:scripting/monoscript/fileName/DebugLock.cs: 6f65af47f76f407e79e0a000b29c7e0b -> 
+  custom:audio-encoder-webm-vorbis: bf7c407c2cedff20999df2af8eb42d56 -> 
+  custom:scripting/precompiled-assembly-types:Assembly-CSharp: 5055e3ee10f928ef097a995c1af1766e -> f155d116374a8d88e31df9d1f86a4abd
+  custom:container-muxer-webm: aa71ff27fc2769a1b78a27578f13a17b -> 
+========================================================================
+Received Prepare
+Caller must complete domain reload
+Begin MonoManager ReloadAssembly
+- Loaded All Assemblies, in  0.746 seconds
+Native extension for WindowsStandalone target not found
+Mono: successfully reloaded assembly
+- Finished resetting the current domain, in  1.230 seconds
+Domain Reload Profiling: 1967ms
+	BeginReloadAssembly (226ms)
+		ExecutionOrderSort (0ms)
+		DisableScriptedObjects (18ms)
+		BackupInstance (0ms)
+		ReleaseScriptingObjects (0ms)
+		CreateAndSetChildDomain (31ms)
+	RebuildCommonClasses (43ms)
+	RebuildNativeTypeToScriptingClass (14ms)
+	initialDomainReloadingComplete (50ms)
+	LoadAllAssembliesAndSetupDomain (404ms)
+		LoadAssemblies (527ms)
+		RebuildTransferFunctionScriptingTraits (0ms)
+		AnalyzeDomain (13ms)
+			TypeCache.Refresh (6ms)
+				TypeCache.ScanAssembly (0ms)
+			ScanForSourceGeneratedMonoScriptInfo (0ms)
+			ResolveRequiredComponents (6ms)
+	FinalizeReload (1231ms)
+		ReleaseScriptCaches (0ms)
+		RebuildScriptCaches (0ms)
+		SetupLoadedEditorAssemblies (706ms)
+			LogAssemblyErrors (0ms)
+			InitializePlatformSupportModulesInManaged (13ms)
+			SetLoadedEditorAssemblies (5ms)
+			RefreshPlugins (0ms)
+			BeforeProcessingInitializeOnLoad (130ms)
+			ProcessInitializeOnLoadAttributes (468ms)
+			ProcessInitializeOnLoadMethodAttributes (67ms)
+			AfterProcessingInitializeOnLoad (22ms)
+			EditorAssembliesLoaded (0ms)
+		ExecutionOrderSort2 (0ms)
+		AwakeInstancesAfterBackupRestoration (20ms)
+Refreshing native plugins compatible for Editor in 4.45 ms, found 1 plugins.
+Preloading 0 native plugins for Editor in 0.00 ms.
+Unloading 1826 Unused Serialized files (Serialized files now loaded: 0)
+Unloading 14 unused Assets / (313.8 KB). Loaded Objects now: 2426.
+Memory consumption went from 108.1 MB to 107.8 MB.
+Total: 3.008500 ms (FindLiveObjects: 0.189600 ms CreateObjectMapping: 0.072800 ms MarkObjects: 2.656300 ms  DeleteObjects: 0.088600 ms)
+
+Prepare: number of updated asset objects reloaded= 0
+AssetImportParameters requested are different than current active one (requested -> active):
+  custom:video-decoder-webm-vp8: 9c59270c3fd7afecdb556c50c9e8de78 -> 
+  custom:SearchIndexIgnoredProperties: e643bd26f0fe6173181afceb89e7c659 -> 
+  custom:container-demuxer-ogg: 62fdf1f143b41e24485cea50d1cbac27 -> 
+  custom:AudioImporter_EditorPlatform: d09bf68614088b80899f8185d706f6e7 -> 
+  custom:video-decoder-ogg-theora: a1e56fd34408186e4bbccfd4996cb3dc -> 
+  custom:framework-win-MediaFoundation: 216162199b28c13a410421893ffa2e32 -> 
+  custom:video-encoder-webm-vp8: eb34c28f22e8b96e1ab97ce403110664 -> 
+  custom:audio-decoder-ogg-vorbis: bf7c407c2cedff20999df2af8eb42d56 -> 
+  custom:CustomObjectIndexerAttribute: 9a22284fe3817be447336de3de66b15e -> 
+  custom:container-demuxer-webm: 4f35f7cbe854078d1ac9338744f61a02 -> 
+  custom:scripting/monoscript/fileName/DebugLock.cs: 6f65af47f76f407e79e0a000b29c7e0b -> 
+  custom:audio-encoder-webm-vorbis: bf7c407c2cedff20999df2af8eb42d56 -> 
+  custom:scripting/precompiled-assembly-types:Assembly-CSharp: 5055e3ee10f928ef097a995c1af1766e -> f155d116374a8d88e31df9d1f86a4abd
+  custom:container-muxer-webm: aa71ff27fc2769a1b78a27578f13a17b -> 
+========================================================================
+Received Prepare
+Refreshing native plugins compatible for Editor in 5.15 ms, found 1 plugins.
+Preloading 0 native plugins for Editor in 0.00 ms.
+Unloading 5 Unused Serialized files (Serialized files now loaded: 0)
+Unloading 5 unused Assets / (298.9 KB). Loaded Objects now: 2426.
+Memory consumption went from 80.0 MB to 79.7 MB.
+Total: 4.182700 ms (FindLiveObjects: 0.211800 ms CreateObjectMapping: 0.158700 ms MarkObjects: 3.732600 ms  DeleteObjects: 0.078500 ms)
+
+Prepare: number of updated asset objects reloaded= 0
+AssetImportParameters requested are different than current active one (requested -> active):
+  custom:video-decoder-webm-vp8: 9c59270c3fd7afecdb556c50c9e8de78 -> 
+  custom:SearchIndexIgnoredProperties: e643bd26f0fe6173181afceb89e7c659 -> 
+  custom:container-demuxer-ogg: 62fdf1f143b41e24485cea50d1cbac27 -> 
+  custom:AudioImporter_EditorPlatform: d09bf68614088b80899f8185d706f6e7 -> 
+  custom:video-decoder-ogg-theora: a1e56fd34408186e4bbccfd4996cb3dc -> 
+  custom:framework-win-MediaFoundation: 216162199b28c13a410421893ffa2e32 -> 
+  custom:video-encoder-webm-vp8: eb34c28f22e8b96e1ab97ce403110664 -> 
+  custom:audio-decoder-ogg-vorbis: bf7c407c2cedff20999df2af8eb42d56 -> 
+  custom:CustomObjectIndexerAttribute: 9a22284fe3817be447336de3de66b15e -> 
+  custom:container-demuxer-webm: 4f35f7cbe854078d1ac9338744f61a02 -> 
+  custom:scripting/monoscript/fileName/DebugLock.cs: 6f65af47f76f407e79e0a000b29c7e0b -> 
+  custom:audio-encoder-webm-vorbis: bf7c407c2cedff20999df2af8eb42d56 -> 
+  custom:scripting/precompiled-assembly-types:Assembly-CSharp: 5055e3ee10f928ef097a995c1af1766e -> f155d116374a8d88e31df9d1f86a4abd
+  custom:container-muxer-webm: aa71ff27fc2769a1b78a27578f13a17b -> 
+========================================================================
+Received Import Request.
+  Time since last request: 24710.587226 seconds.
+  path: Assets/_Scenes/Game_Old.unity
+  artifactKey: Guid(e7519bc308ac1c74192663fda617eeea) Importer(815301076,1909f56bfc062723c751e8b465ee728b)
+Start importing Assets/_Scenes/Game_Old.unity using Guid(e7519bc308ac1c74192663fda617eeea) Importer(815301076,1909f56bfc062723c751e8b465ee728b) [PhysX] Initialized MultithreadedTaskDispatcher with 4 workers.
+ -> (artifact id: 'aa25bfdfef44f7a0c5489e2dc3e8804b') in 0.062456 seconds
+Number of updated asset objects reloaded before import = 0
+Number of asset objects unloaded after import = 0
+========================================================================
+Received Prepare
+Caller must complete domain reload
+Begin MonoManager ReloadAssembly
+- Loaded All Assemblies, in  3.407 seconds

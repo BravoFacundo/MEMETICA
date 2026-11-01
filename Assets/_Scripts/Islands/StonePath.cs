@@ -103,6 +103,21 @@ public class StonePath : MonoBehaviour
     [Tooltip("Speed a moving stone pushes the player at when it hits them (m/s)")]
     public float pushSpeed = 7f;
 
+    [Section("Idle Speed (nobody on it)")]
+    [Tooltip("Its moving stones go this many times faster while you aren't on the path, so you don't wait long for them. " +
+             "1: off. All its stones change together: they never get out of step")]
+    [Range(1f, 4f)] public float idleSpeed = 1f;
+    [Tooltip("Seconds since you last stood on any of its MOVING stones before they speed up (the still ones are where " +
+             "you wait for them: they stay fast while you are there). Jumping from one to another, or a jump that lands " +
+             "back on it, doesn't count as leaving")]
+    public float idleDelay = 3f;
+    [Tooltip("Seconds to go from normal to fast or back: smooth, never a jolt under your feet")]
+    public float speedRamp = 1f;
+
+    // How much faster its moving stones go now (Idle Speed): the same for all of them, read in the same frame
+    public float SpeedFactor { get; private set; } = 1f;
+    private float lastOnPath = -100f;
+
     struct Rest { public float t; public Vector2 side; public Quaternion rotation; }
 
     private Bridge bridge;
@@ -211,6 +226,7 @@ public class StonePath : MonoBehaviour
         if (!Application.isPlaying) { FollowEnds(); return; }
 #endif
         if (stones.Count == 0) return;
+        UpdateSpeedFactor();
         Frame(out Vector3 origin, out Quaternion rotation, out float length);
 
         foreach (PathStone stone in stones)
@@ -228,6 +244,22 @@ public class StonePath : MonoBehaviour
             stone.transform.SetPositionAndRotation(place + stone.Shake + Vector3.down * stone.Down, turn);
             if (stone.Moves && stone.pushPlayer) PushPlayer(stone, stone.transform.position - before);
         }
+    }
+
+    // Idle Speed: faster while you've been off its moving stones a while, back to normal once you are on one (the whole path at once)
+    void UpdateSpeedFactor()
+    {
+        if (idleSpeed <= 1f) { SpeedFactor = 1f; return; }
+        // Not before every moving stone started: they start one after another (Start Gap), and the gap must stay
+        // the designed one (faster meanwhile, the first ones would get ahead of the rest)
+        if (Appearing) { SpeedFactor = 1f; lastOnPath = Time.time; return; }
+        foreach (PathStone stone in stones)
+            if (stone.Moves && !stone.Started) { SpeedFactor = 1f; lastOnPath = Time.time; return; }
+        Transform under = playerMove != null ? playerMove.GroundUnder : null;
+        PathStone standing = under != null && under.IsChildOf(transform) ? under.GetComponentInParent<PathStone>() : null;
+        if (standing != null && standing.Moves) lastOnPath = Time.time;   // (only the moving ones: on the still ones you wait for them)
+        float target = Time.time - lastOnPath >= idleDelay ? idleSpeed : 1f;
+        SpeedFactor = Mathf.MoveTowards(SpeedFactor, target, (idleSpeed - 1f) / Mathf.Max(speedRamp, 0.01f) * Time.deltaTime);
     }
 
     // A moving stone that runs into the player (not under them) throws them along its way

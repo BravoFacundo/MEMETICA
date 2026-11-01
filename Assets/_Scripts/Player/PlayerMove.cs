@@ -17,6 +17,11 @@ public class PlayerMove : MonoBehaviour
     public float runSpeed = 10f;
     [Tooltip("How fast you can change direction in the air (m/s²). Higher = more control, lower = more inertia")]
     public float airAcceleration = 15f;
+    [Tooltip("In the air, letting go of the keys doesn't brake you: you keep your momentum until you land (pressing " +
+             "another way still steers)")]
+    public bool keepAirMomentum = true;
+    [Tooltip("Pressing Shift in the air (late) gives you run speed too")]
+    public bool runInAir = true;
 
     [Section("Jump")]
     public float jumpHeight = 3f;
@@ -86,6 +91,7 @@ public class PlayerMove : MonoBehaviour
     // Meters per second it is falling now (0 going up or on the ground)
     public float FallSpeed => Mathf.Max(0f, -verticalVelocity);
     private float airSpeed;
+    private bool thrown;   // knocked back, not landed yet
     private float lastGroundedTime = -99f;
     private float lastJumpPressedTime = -99f;
     private float knockbackUntil;
@@ -151,7 +157,12 @@ public class PlayerMove : MonoBehaviour
             FindGroundBelow();
         }
 
-        if (ascend) verticalVelocity += 25f * Time.deltaTime;
+        if (ascend)   // the end (LevelManager): up into the sky, speeding up to its Ending Rise Speed
+        {
+            float accel = LevelManager.Instance != null ? LevelManager.Instance.endingRiseAcceleration : 25f;
+            float top = LevelManager.Instance != null ? LevelManager.Instance.endingRiseSpeed : float.MaxValue;
+            verticalVelocity = Mathf.Min(verticalVelocity + accel * Time.deltaTime, top);
+        }
 
         UpdateGroundInteractions();
     }
@@ -343,13 +354,18 @@ public class PlayerMove : MonoBehaviour
 
         if (isGrounded)
         {
+            thrown = false;
             airSpeed = GameInput.Run ? runSpeed : walkSpeed;
             horizontalVelocity = input * airSpeed;
         }
         else
         {
-            // Air: keeps the take-off speed, steering is gradual
-            horizontalVelocity = Vector3.MoveTowards(horizontalVelocity, input * airSpeed, airAcceleration * Time.deltaTime);
+            // Air: keeps the take-off speed, steering is gradual. No keys: the momentum goes on until landing
+            // (not after being thrown: that one brakes as before). Shift late, in the air: run speed too
+            if (runInAir && GameInput.Run && !InputLocked) airSpeed = Mathf.Max(airSpeed, runSpeed);
+            bool coasting = keepAirMomentum && !thrown && input.sqrMagnitude < 0.01f;
+            Vector3 target = coasting ? horizontalVelocity : input * airSpeed;
+            horizontalVelocity = Vector3.MoveTowards(horizontalVelocity, target, airAcceleration * Time.deltaTime);
         }
     }
 
@@ -458,6 +474,7 @@ public class PlayerMove : MonoBehaviour
         verticalVelocity = Mathf.Max(velocity.y, 0.5f);
         airSpeed = Mathf.Max(walkSpeed, horizontalVelocity.magnitude * 0.5f);
         knockbackUntil = Time.time + 0.35f;
+        thrown = true;   // (no free momentum in the air after this)
         movingGround = null;
         lastGroundedTime = -99f;   // no coyote jump out of it
         wasGrounded = false;

@@ -35,6 +35,9 @@ public class MemeRecall : MonoBehaviour
     public bool bringForPortal = true;
     [Tooltip("Carrying it within reach of a pedestal that waits for it: it goes in without looking at it")]
     public bool snapInRange = true;
+    [Tooltip("Snap In Range also on the black / grey pedestals (any meme goes on them: e.g. the ones that open the " +
+             "optional islands), not only on the randomizer and the white ones waiting for it")]
+    public bool snapOnBlack = true;
 
     [Section("Flight")]
     [Tooltip("Speed it flies at (m/s); the flight takes 0.4 to 1.5 seconds anyway")]

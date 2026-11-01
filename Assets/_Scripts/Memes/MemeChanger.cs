@@ -29,6 +29,7 @@ public abstract class MemeChanger : Meme
     private MemeImage shown;                // the image showing now
     private VideoPlayer videoPlayer;        // plays the shown image's video (made on the first one)
     private bool showingVideoFrame;         // showing the video's frames (not its picture)
+    private Texture videoTexture;           // the video texture it shows
     private bool videoStarted;              // picked up once (MemeData Video Start = On Pick Up: till then, still)
     private bool VideoWaits => !videoStarted && Data != null && Data.videoStart == MemeData.VideoStart.OnPickUp;
     private bool hasMeme;                   // off: no MemeData, a plain carryable meme
@@ -72,6 +73,8 @@ public abstract class MemeChanger : Meme
     protected abstract void SetGlow(float amount);
     // An image was just shown (its title, for the window)
     protected virtual void OnImageShown(MemeImage image) { }
+    // Whose image is showing during a raffle (another meme's: its Fill, its title), else null (this one's own)
+    protected MemeData ImageOwner { get; private set; }
     // It may start with no meme (no warning): it waits for SetMeme
     protected virtual bool CanBeEmpty => false;
     // No meme: how it looks empty
@@ -162,6 +165,7 @@ public abstract class MemeChanger : Meme
         shownUnlocked = lastVariant = 0;
         IslandChanges = 0;
         visitedIslands.Clear();
+        ClearReached();
         movesSeen.Clear();
         videoStarted = false;
         movingTime = 0f;
@@ -194,21 +198,23 @@ public abstract class MemeChanger : Meme
         int last = -1;
         for (int k = 0; k < steps.Count; k++)
         {
-            if (!raffling) yield break;
+            if (!raffling) { ImageOwner = null; yield break; }
             bool final = k == steps.Count - 1;
             if (final || candidates.Count > 1)
             {
                 int i = final ? -1 : NextCandidate(candidates, last, winner, k == steps.Count - 2);
                 last = i;
+                ImageOwner = final ? winner : candidates[i];
                 SetImage(final ? winner.baseImage : candidates[i].baseImage);
             }
             else if (k % 2 == 0) ShowEmpty();   // only one left: it blinks in and out
-            else SetImage(winner.baseImage);
+            else { ImageOwner = winner; SetImage(winner.baseImage); }
             if (!final) Play(tick != null ? tick : Settings.sweepTickClip);   // (not ??: an empty Inspector field isn't a real null)
             yield return new WaitForSeconds(steps[k]);
         }
 
         raffling = false;
+        ImageOwner = null;
         SetMeme(winner);
         Play(win != null ? win : Settings.changeClip);
         PlayGrab(winner.BaseSound);
@@ -716,9 +722,15 @@ public abstract class MemeChanger : Meme
     // The video's frames once it has one (until then, its picture)
     void UpdateVideoFrame()
     {
-        if (showingVideoFrame || shown == null || shown.video == null || videoPlayer == null) return;
+        if (shown == null || shown.video == null || videoPlayer == null) return;
+        // Showing it: the build's player may hand a new texture later (the old one would stay black): follow it
+        if (showingVideoFrame)
+        {
+            if (videoPlayer.texture != null && videoPlayer.texture != videoTexture) ShowTexture(videoTexture = videoPlayer.texture);
+            return;
+        }
         if (!videoPlayer.isPlaying || videoPlayer.frame < 1 || videoPlayer.texture == null) return;
-        ShowTexture(videoPlayer.texture);
+        ShowTexture(videoTexture = videoPlayer.texture);
         showingVideoFrame = true;
         if (VideoWaits) videoPlayer.Pause();   // its first frame, until picked up
     }

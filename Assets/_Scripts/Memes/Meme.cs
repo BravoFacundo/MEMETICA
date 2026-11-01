@@ -267,9 +267,10 @@ public class Meme : MonoBehaviour
         lastGroundY = lastIslandY = transform.position.y;
     }
 
-    // Safety net: far from the player (farther than the void: Drop Distance and a bit) and not resting on an island
-    // (falling, or stuck on something down there), it comes back (a meteor, or to your hand in Game). By distance to the
-    // player, not by height: some areas (the tutorial) are far below the islands. Says why in the console
+    // Safety net: far from the player (farther than the void: Drop Distance and a bit), not resting on an island, and
+    // with nothing under it or far below you (falling, or stuck on something down there): it comes back (a meteor, or
+    // to your hand in Game). Not by height alone: some areas (the tutorial) are far below the islands; and a meme lying
+    // on its island's ground (Game_Old: loose, not attached) is never lost. Says why in the console
     private void CheckLost()
     {
         if (IsHeld || CurrentPedestal != null || meteor != null || LevelManager.Instance == null) return;
@@ -279,7 +280,10 @@ public class Meme : MonoBehaviour
         if (away < LevelManager.Instance.dropDistance + 5f) return;
         bool onIsland = transform.parent != null && (transform.parent.GetComponentInParent<Island>() != null || transform.parent.GetComponentInParent<FloatMotion>() != null);
         if (onIsland || body.isKinematic) return;   // left on an island, or held still somewhere (its home, waiting to come back): not lost
-        string on = Physics.Raycast(transform.position, Vector3.down, out RaycastHit hit, 3f, ~0, QueryTriggerInteraction.Ignore) ? hit.collider.name : "nothing";
+        bool grounded = Physics.Raycast(transform.position, Vector3.down, out RaycastHit hit, 3f, ~0, QueryTriggerInteraction.Ignore);
+        bool farBelow = transform.position.y < CurrentPlayer.transform.position.y - LevelManager.Instance.dropDistance;
+        if (grounded && !farBelow) return;   // lying on some ground: where you left it
+        string on = grounded ? hit.collider.name : "nothing";
         Debug.LogWarning($"[Meme] '{name}' is {away:F0} m from the player, not on an island (kinematic {body.isKinematic}, constraints {body.constraints}, " +
                          $"parent '{(transform.parent != null ? transform.parent.name : "none")}', on '{on}', last ground {lastGroundY:F1}, last island {lastIslandY:F1}): respawning it.", this);
         lastGroundY = transform.position.y + LevelManager.Instance.dropDistance;   // (Respawn's own checks)
@@ -301,6 +305,10 @@ public class Meme : MonoBehaviour
     protected int IslandChanges { get; set; }
     // The course islands it has already been carried onto (each gives its Move once: going back gives nothing)
     protected readonly HashSet<GameObject> visitedIslands = new HashSet<GameObject>();
+    // Every island it has been carried onto with its meme (CourseGuide: going back?), and the newest course one
+    public readonly HashSet<GameObject> Reached = new HashSet<GameObject>();
+    public GameObject LastNewIsland { get; private set; }
+    protected void ClearReached() { Reached.Clear(); LastNewIsland = null; }
 
     // The player is this close and it is on their screen
     protected bool PlayerSees(float distance)
@@ -407,9 +415,14 @@ public class Meme : MonoBehaviour
         Transform point = LevelManager.Instance.RespawnPointOf(island);
         if (point != null) respawnPoint = point;
         if (!IsHeld) return;
+        // Another level's island (CourseGuide): no change at all there, the guide sends you back
+        if (!CourseGuide.CountsFor(this, island)) { CourseGuide.Reached(this, island, false, false); return; }
+        bool firstTime = Reached.Add(island);
+        if (firstTime && CourseGuide.IsCourse(island)) LastNewIsland = island;
         bool counts = Unlocks(island) && visitedIslands.Add(island);   // the tutorial, the hub, an optional one, or one it already visited: only a pause in the changes
         if (counts) IslandChanges++;
         OnIslandVisited(island, counts);
+        CourseGuide.Reached(this, island, firstTime, true);
     }
 
     // The tutorial never unlocks a change; the letter islands (Island_A…, between bridges) only if set so
@@ -465,13 +478,16 @@ public class Meme : MonoBehaviour
             foreach (Renderer r in GetComponentsInChildren<Renderer>())
                 if (r.enabled && !r.transform.IsChildOf(rock.transform)) { r.enabled = false; hidden.Add(r); }
 
-        // Glow and trail while it falls
-        Light glow = gameObject.AddComponent<Light>();
+        // Glow and trail while it falls (on a child of their own: its root may have a renderer, and one object can't
+        // hold two renderers)
+        GameObject fx = new GameObject("MeteorFx");
+        fx.transform.SetParent(transform, false);
+        Light glow = fx.AddComponent<Light>();
         glow.type = LightType.Point;
         glow.color = Settings.meteorColor;
         glow.range = 10f;
         glow.intensity = 6f;
-        TrailRenderer trail = gameObject.AddComponent<TrailRenderer>();
+        TrailRenderer trail = fx.AddComponent<TrailRenderer>();
         trail.time = 0.45f;
         trail.startWidth = 0.7f;
         trail.endWidth = 0f;
@@ -510,7 +526,7 @@ public class Meme : MonoBehaviour
         }
         foreach (Renderer r in hidden) if (r != null) r.enabled = true;
         Destroy(glow);
-        Destroy(trail, trail.time);
+        Destroy(fx, trail.time);
         meteor = null;
     }
 

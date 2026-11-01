@@ -1,6 +1,8 @@
-// Qué hace cada cosa del escritorio. Va en Managers > UIManager.
-// Los íconos (DesktopIcon) solo detectan el input; en su "On Open" se elige un método de acá.
-// Ejemplo: Button_Play → On Open → UIManager.PlayGame()
+// What each desktop thing does, and moving between scenes. Goes in Managers > UIManager (every scene).
+// The icons and buttons (WindowButton) only detect the click; in their "On Click" / "On Open" a method of this is picked.
+// Example: Button_Play → On Open → UIManager.PlayGame()
+// Menu: the Play icons (with the tutorial popup first). Game: Play Again and back to the Menu. Both: loading with the
+// busy cursor, quitting, opening and closing windows.
 
 using System.Collections;
 using UnityEngine;
@@ -9,37 +11,31 @@ using UnityEngine.SceneManagement;
 
 public class UIManager : MonoBehaviour
 {
-    [Header("Referencias")]
-    public AudioManager audioManager;
+    [Section("Scenes")]
+    [Tooltip("The new Memetica (the Play icon)")]
+    public SceneField gameScene = new SceneField("Game");
+    [Tooltip("The original Memetica, opened from the Recycle Bin")]
+    public SceneField oldGameScene = new SceneField("Game_Old");
+    [Tooltip("Where the pause and the end screen go back to")]
+    public SceneField menuScene = new SceneField("Menu");
 
-    [Space(10)]
-    [Header("Escenas")]
-    public string gameScene = "Game";
-    [Tooltip("Original Memetica, opened from the Recycle Bin")]
-    public string oldGameScene = "Game_Old";
-    public string menuScene = "Menu";
-
-    [Header("Tutorial")]
+    [Section("Tutorial")]
     [Tooltip("Shown when a Play icon opens a game: does it skip the tutorial? Its buttons: Yes → UIManager.StartWithoutTutorial, " +
              "No → UIManager.StartWithTutorial. Empty: the games start with the tutorial")]
     public GameObject tutorialPopup;
+    [Tooltip("Play Again loads the same game skipping its tutorial (the same player: they already did it)")]
+    public bool playAgainSkipsTutorial = true;
 
-    [Header("Carga")]
-    [Tooltip("Segundos mínimos de carga, aunque el juego cargue antes")]
+    [Section("Loading", Closed = true)]
+    [Tooltip("Minimum seconds a load takes (busy cursor, music fading out), even if the scene is ready before")]
     public float minLoadingTime = 1.5f;
-    [Tooltip("Segundos que \"piensa\" antes de cerrar el juego")]
+    [Tooltip("Seconds it \"thinks\" before closing the game")]
     public float quitDelay = 2f;
 
     private bool loading;
     private string pendingScene;   // the game the tutorial popup is asking about
 
-    // F9 switches English / Spanish anytime, also in the build (handy at the exhibition)
-    private void Update()
-    {
-        if (Input.GetKeyDown(KeyCode.F9)) GameSettings.ToggleLanguage();
-    }
-
-    // ---------- Íconos ----------
+    // ---------- Icons ----------
 
     public void PlayGame() => AskTutorial(gameScene);
 
@@ -51,7 +47,7 @@ public class UIManager : MonoBehaviour
     // The popup asks first (without one: straight in, with the tutorial)
     void AskTutorial(string sceneName)
     {
-        if (loading) return;   // evita cargar dos veces si se hace doble clic de más
+        if (loading) return;   // (a double click too many doesn't load twice)
         pendingScene = sceneName;
         if (tutorialPopup != null) OpenWindow(tutorialPopup);
         else StartGame(false);
@@ -69,7 +65,17 @@ public class UIManager : MonoBehaviour
         StartCoroutine(LoadScene(pendingScene));
     }
 
-    // Used by the pause window (Game → Menu)
+    // ---------- Game ----------
+
+    // The end screen's Play Again: this game from the start
+    public void PlayAgain()
+    {
+        if (loading) return;
+        LevelManager.SkipFromMenu = playAgainSkipsTutorial;
+        StartCoroutine(LoadScene(SceneManager.GetActiveScene().name));
+    }
+
+    // The pause window and the end screen (Game → Menu)
     public void GoToMenu()
     {
         if (loading) return;
@@ -78,17 +84,17 @@ public class UIManager : MonoBehaviour
 
     public void QuitGame()
     {
-        if (loading) return;   // evita repetirlo si se hace clic de más
+        if (loading) return;   // (a click too many doesn't repeat it)
         StartCoroutine(Quit());
     }
 
-    // ---------- Ventanas ----------
-    // Funcionan aunque la ventana esté inactiva: se la referencia desde el Inspector.
+    // ---------- Windows ----------
+    // They work even if the window is inactive: it is referenced from the Inspector.
 
     public void OpenWindow(GameObject window)
     {
         window.SetActive(true);
-        window.transform.SetAsLastSibling();   // la que se abre queda adelante
+        window.transform.SetAsLastSibling();   // the one opened comes to the front
     }
 
     public void CloseWindow(GameObject window)
@@ -96,21 +102,21 @@ public class UIManager : MonoBehaviour
         window.SetActive(false);
     }
 
-    // ---------- Interno ----------
+    // ---------- Inside ----------
 
     IEnumerator Quit()
     {
         loading = true;
 
-        // Igual que al cargar: cursor de espera, nada clickeable y la música se apaga
+        // As when loading: busy cursor, nothing clickable and the music fades out
         if (EventSystem.current != null) EventSystem.current.enabled = false;
         if (RetroCursor.Instance != null) RetroCursor.Instance.SetBusy(true);
-        if (audioManager != null) audioManager.FadeOutMusic(quitDelay);
+        if (AudioManager.Instance != null) AudioManager.Instance.FadeOutMusic(quitDelay);
 
         yield return new WaitForSecondsRealtime(quitDelay);
 
 #if UNITY_EDITOR
-        UnityEditor.EditorApplication.isPlaying = false;   // en el editor: corta el Play
+        UnityEditor.EditorApplication.isPlaying = false;   // in the Editor: stops Play
 #else
         Application.Quit();
 #endif
@@ -120,18 +126,18 @@ public class UIManager : MonoBehaviour
     {
         loading = true;
 
-        // Mientras carga: cursor de espera y nada más se puede clickear
+        // While loading: busy cursor and nothing else clickable
         if (EventSystem.current != null) EventSystem.current.enabled = false;
         if (RetroCursor.Instance != null) RetroCursor.Instance.SetBusy(true);
-        if (audioManager != null) audioManager.FadeOutMusic(minLoadingTime);   // la música se apaga mientras carga
-        yield return null;   // un frame para que se vea el cursor de espera antes de empezar
+        if (AudioManager.Instance != null) AudioManager.Instance.FadeOutMusic(minLoadingTime);   // the music fades out while loading
+        yield return null;   // one frame so the busy cursor shows before it starts
 
-        // Carga en segundo plano, sin pasar todavía a la escena nueva
+        // Loads in the background, without switching to the new scene yet
         AsyncOperation op = SceneManager.LoadSceneAsync(sceneName);
         op.allowSceneActivation = false;
         float start = Time.unscaledTime;
 
-        // Unity deja el progreso en 0.9 hasta que se permite activar la escena
+        // Unity keeps the progress at 0.9 until the scene is allowed to activate
         while (op.progress < 0.9f || Time.unscaledTime - start < minLoadingTime)
             yield return null;
 
@@ -139,6 +145,6 @@ public class UIManager : MonoBehaviour
         Time.timeScale = 1f;
         PauseMenu.GameIsPaused = false;
 
-        op.allowSceneActivation = true;   // acá se cambia de escena
+        op.allowSceneActivation = true;   // here the scene switches
     }
 }

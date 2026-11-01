@@ -82,8 +82,8 @@ public class MemeRandomizer : MonoBehaviour
     [Tooltip("Carrying a meme this close to the platform's middle (meters, flat), it snaps in by itself (MemeRecall's " +
              "Snap In Range). 0: the usual reach from the pedestal. A bit less than the platform's radius: only once you are on it")]
     public float snapRadius = 0f;
-    [Tooltip("When the raffle starts you walk by yourself to Stand Point, facing the pedestal: you see the raffle, then " +
-             "the platform turns you toward your way")]
+    [Tooltip("When the raffle starts you walk by yourself to Stand Point, looking at the meme on the pedestal: you see " +
+             "the raffle, then the platform turns you toward your way")]
     public bool walkToStand = true;
     [Tooltip("Where you end up (a child of the platform). Empty: Stand Distance behind the pedestal, opposite the " +
              "platform's front: once it turns, you look past the pedestal at your way")]
@@ -97,9 +97,16 @@ public class MemeRandomizer : MonoBehaviour
     [Tooltip("The player can't walk (only look around) from the raffle until its first bridge starts")]
     public bool lockPlayer = true;
 
+    // Its way started rising and you can walk again (GameManager: the virus alert comes then)
+    public static event System.Action WayOpened;
+
     private readonly List<Axis> drawn = new List<Axis>();
     private AimPlatform platform;
     private PedestalRetire retire;
+
+    // From the raffle until its pedestal went down (or the platform stopped): the crosshair hides meanwhile (RetroCursor)
+    public static bool Busy { get; private set; }
+    void OnDestroy() => Busy = false;
 
     void Awake()
     {
@@ -209,11 +216,12 @@ public class MemeRandomizer : MonoBehaviour
 
         // You stay on the platform from the raffle until your way starts (Lock Player)
         Hold(true);
+        Busy = true;   // (the crosshair hides until the pedestal goes down)
         if (walkToStand) StartCoroutine(WalkToStand());
         raffling = true;
         yield return window.Raffle(left.ConvertAll(a => a.meme), winner.meme, raffleTime, tickClip, winClip);
         raffling = false;
-        if (window.Data != winner.meme) { Hold(false); yield break; }   // taken off halfway
+        if (window.Data != winner.meme) { Hold(false); Busy = false; yield break; }   // taken off halfway
 
         drawn.Add(winner);
         StartCoroutine(OpenWay(winner));   // its own (taking the meme off now doesn't stop it); the pedestal says "right" meanwhile
@@ -255,10 +263,19 @@ public class MemeRandomizer : MonoBehaviour
             player.AutoWalkTo = stand;
             Vector3 to = stand - player.transform.position;
             to.y = 0f;
-            Vector3 face = transform.position - player.transform.position;
+            // Looking at the meme (on the pedestal): turning the body to it, and the head up or down to it
+            Vector3 target = MemeTarget();
+            Vector3 face = target - player.transform.position;
             face.y = 0f;
             if (face.sqrMagnitude > 0.01f)
                 player.transform.rotation = Quaternion.RotateTowards(player.transform.rotation, Quaternion.LookRotation(face, Vector3.up), 240f * Time.deltaTime);
+            if (look != null)
+            {
+                Vector3 sight = target - look.transform.position;
+                float flat = new Vector2(sight.x, sight.z).magnitude;
+                float pitch = Mathf.Atan2(-sight.y, Mathf.Max(flat, 0.01f)) * Mathf.Rad2Deg;   // (down: positive)
+                look.Pitch = Mathf.MoveTowards(look.Pitch, pitch, 120f * Time.deltaTime);
+            }
             bool facing = face.sqrMagnitude <= 0.01f || Vector3.Angle(player.transform.forward, face) < 2f;
             if (to.magnitude < 0.05f && facing) break;
             yield return null;
@@ -266,6 +283,19 @@ public class MemeRandomizer : MonoBehaviour
         player.AutoWalkTo = null;
         if (look != null) look.LookLocked = false;   // (you can look around again; walking waits for your way)
         Debug.Log($"[MemeRandomizer] Walked you {Vector3.Distance(start, player.transform.position):F1} m to the stand point ({Vector3.ProjectOnPlane(StandPosition(player.transform.position) - player.transform.position, Vector3.up).magnitude:F2} m left).", this);
+    }
+
+    // The meme on it (the middle of what you see of it), or its socket
+    Vector3 MemeTarget()
+    {
+        Pedestal pedestal = GetComponent<Pedestal>();
+        GameObject meme = pedestal != null ? pedestal.MemeObject : null;
+        if (meme != null)
+        {
+            Renderer shape = meme.GetComponentInChildren<Renderer>();
+            return shape != null ? shape.bounds.center : meme.transform.position;
+        }
+        return pedestal != null && pedestal.socket != null ? pedestal.socket.position : transform.position;
     }
 
     // Stand Point, or behind the pedestal opposite the platform's front (it turns with it); no platform: on your side
@@ -282,7 +312,7 @@ public class MemeRandomizer : MonoBehaviour
     // The meme taken off while it raffles (the pedestal stops it): free again
     void Update()
     {
-        if (raffling && TryGetComponent(out Pedestal pedestal) && !pedestal.HasMeme) { raffling = false; Hold(false); }
+        if (raffling && TryGetComponent(out Pedestal pedestal) && !pedestal.HasMeme) { raffling = false; Hold(false); Busy = false; }
     }
 
     // Into the ground (if it retires), the platform turns toward it (if on one), then its way rises
@@ -303,6 +333,7 @@ public class MemeRandomizer : MonoBehaviour
             retire.Retire();
             while (retire.IsMoving) yield return null;
         }
+        Busy = false;   // the pedestal is down (or the platform stopped): the crosshair again
 
         // Islands: the target, then the rest in order, overlapping
         LevelManager level = LevelManager.Instance;
@@ -327,6 +358,7 @@ public class MemeRandomizer : MonoBehaviour
         for (float time = 0f; time < 15f && islandsUp.Exists(Moving); time += Time.deltaTime) yield return null;
         if (bridgeIds.Count > 0 && bridgesAfter > 0f) yield return new WaitForSeconds(bridgesAfter);
         if (player != null) player.InputLocked = false;
+        WayOpened?.Invoke();
         for (int i = 0; i < bridgeIds.Count; i++)
         {
             Transform t = level.FindBridge(bridgeIds[i]);
@@ -405,6 +437,17 @@ public class MemeRandomizer : MonoBehaviour
         }
     }
 #endif
+
+    // The first island of that meme's axis (CourseGuide: which level it belongs to), or null
+    public Transform FirstIslandOf(MemeData data)
+    {
+        if (data == null || LevelManager.Instance == null) return null;
+        Axis axis = axes.Find(a => a.meme == data);
+        if (axis == null) return null;
+        foreach (string entry in axis.sequence)
+            if (LevelManager.Instance.Resolve(entry, out string id, out bool island) && island) return LevelManager.Instance.FindIsland(id);
+        return null;
+    }
 
     Transform Target(Axis axis)
     {

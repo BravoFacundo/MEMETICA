@@ -38,10 +38,14 @@ public class Bridge : Lift
     public float launchHeight = 1.5f;
     [Tooltip("Seconds the ground shakes at anchor A before it bursts out (a warning)")]
     public float launchWarning = 0.6f;
-    [Tooltip("Meters around anchor A where the burst throws the player. In front of it: off into the void; anywhere else: back")]
+    [Tooltip("Meters around anchor A where the burst pushes the player (back, away from it; Push Into Void: in front of it, off along the bridge)")]
     public float launchPushRadius = 3f;
-    [Tooltip("Speed the player is thrown at (m/s)")]
+    [Tooltip("Speed the player is pushed at, right at anchor A (m/s). Farther away, softer")]
     public float launchPushSpeed = 9f;
+    [Tooltip("Top push speed, whatever Launch Push Speed says (small islands: a strong push throws you off unfairly)")]
+    public float launchPushMax = 4f;
+    [Tooltip("In front of anchor A it throws you off along the bridge, into the void. Off: always a step back onto the island")]
+    public bool launchPushIntoVoid = false;
     [Tooltip("Camera shake when it bursts out. 0 = off")]
     public float launchShake = 0.04f;
     public AudioClip launchClip;
@@ -394,8 +398,17 @@ public class Bridge : Lift
 
         Vector3 side = Vector3.Cross(Vector3.up, toward);
         bool inThePath = Vector3.Dot(offset, toward) > -0.5f && Mathf.Abs(Vector3.Dot(offset, side)) < 1.5f;
-        Vector3 away = inThePath ? toward : (offset.sqrMagnitude > 0.01f ? offset.normalized : -toward);
-        player.Knockback(away * launchPushSpeed + Vector3.up * launchPushSpeed * 0.5f);
+        Vector3 away;
+        if (inThePath) away = launchPushIntoVoid ? toward : -toward;   // (off: back onto the island, not into the void)
+        else
+        {
+            away = offset.sqrMagnitude > 0.01f ? offset.normalized : -toward;
+            if (!launchPushIntoVoid && Vector3.Dot(away, toward) > 0f) away = (away - toward * Vector3.Dot(away, toward)).normalized;   // never toward the bridge's side
+            if (away.sqrMagnitude < 0.01f) away = -toward;
+        }
+        float near = 1f - Mathf.Clamp01(offset.magnitude / launchPushRadius);   // 1 at anchor A, 0 at the radius
+        float speed = Mathf.Min(launchPushSpeed, launchPushMax) * Mathf.Lerp(0.4f, 1f, near);
+        player.Knockback(away * speed + Vector3.up * speed * 0.4f);
     }
 
     void Land(Vector3 point)

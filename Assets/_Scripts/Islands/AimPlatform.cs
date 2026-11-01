@@ -86,16 +86,25 @@ public class AimPlatform : MonoBehaviour
     public Coroutine AimAt(Vector3 point, float seconds = 0f)
     {
         StopAllCoroutines();
-        return StartCoroutine(Turning(point, seconds));
+        return StartCoroutine(Turning(point, seconds, true));
     }
 
-    IEnumerator Turning(Vector3 point, float seconds)
+    // Turns its back to that place (its front the other way): the side you climb faces you (the portal, coming back).
+    // Already like that: it doesn't move (no whole turn)
+    public Coroutine BackTo(Vector3 point, float seconds = 0f)
+    {
+        StopAllCoroutines();
+        return StartCoroutine(Turning(transform.position * 2f - point, seconds, false));
+    }
+
+    IEnumerator Turning(Vector3 point, float seconds, bool wholeTurn)
     {
         Vector3 toward = point - transform.position;
         toward.y = 0f;
         if (toward.sqrMagnitude < 0.01f) yield break;
         float angle = Vector3.SignedAngle(Front, toward.normalized, Vector3.up);   // -180..180: the shorter way round
-        if (Mathf.Abs(angle) < fullTurnBelow) angle += angle >= 0f ? 360f : -360f;   // one whole turn
+        if (!wholeTurn && Mathf.Abs(angle) < 1f) yield break;   // already there
+        if (wholeTurn && Mathf.Abs(angle) < fullTurnBelow) angle += angle >= 0f ? 360f : -360f;   // one whole turn
 
         IsTurning = true;
         Sound(turnClip, true);

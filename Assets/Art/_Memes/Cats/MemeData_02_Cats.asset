@@ -1,0 +1,78 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 768287d2d584491684181bc8170d860d, type: 3}
+  m_Name: MemeData_02_Cats
+  m_EditorClassIdentifier: 
+  title: Cats
+  baseImage:
+    windowTitle: NyanCat.mov
+    picture: {fileID: 2800000, guid: 05ff3d40f04b40f0919b4d6441b223e5, type: 3}
+    video: {fileID: 32900000, guid: 8b8fc2c9f9470934e8362e0be86ab569, type: 3}
+    sound: {fileID: 8300000, guid: 4a2e94f3823ec644190c2310e48e5ae9, type: 3}
+    loop: 1
+    fill: 1
+    videoSound: 1
+  videoStart: 0
+  fillAll: 1
+  fall:
+    windowTitle: MuejejeCat.png
+    picture: {fileID: 0}
+    video: {fileID: 32900000, guid: 3c09a0706b362574b8ea674ce678af5a, type: 3}
+    sound: {fileID: 0}
+    loop: 1
+    fill: 1
+    videoSound: 1
+  leave:
+    windowTitle: SadCat.jpg
+    picture: {fileID: 0}
+    video: {fileID: 32900000, guid: 114c44f7b1415cf42b425b444722a1e5, type: 3}
+    sound: {fileID: 0}
+    loop: 0
+    fill: 1
+    videoSound: 1
+  variants:
+  - windowTitle: PianoCat.mov
+    picture: {fileID: 0}
+    video: {fileID: 32900000, guid: 1251a085e9ade754b9cd9a566d89c549, type: 3}
+    sound: {fileID: 0}
+    loop: 0
+    fill: 1
+    videoSound: 1
+  - windowTitle: Uiiai.mp4
+    picture: {fileID: 0}
+    video: {fileID: 32900000, guid: 8358963c65a5a6b4188c27ce2e003d3c, type: 3}
+    sound: {fileID: 0}
+    loop: 1
+    fill: 1
+    videoSound: 1
+  - windowTitle: BongoCAT.mp4
+    picture: {fileID: 0}
+    video: {fileID: 32900000, guid: 2223694f0e2268f40b4504a8ecee5b38, type: 3}
+    sound: {fileID: 0}
+    loop: 1
+    fill: 1
+    videoSound: 1
+  - windowTitle: HappyCat.mov
+    picture: {fileID: 0}
+    video: {fileID: 32900000, guid: 6f7b9188d0ad64c4baa53af4643c64d2, type: 3}
+    sound: {fileID: 0}
+    loop: 1
+    fill: 1
+    videoSound: 1
+  fallbackSound: {fileID: 0}
+  fallbackSounds: []
+  moveSounds: []
+  fallSounds: []
+  leaveSounds: []
+  sounds: []
+  hints: []
+  references: []
