@@ -134,7 +134,7 @@ public class Painting : MonoBehaviour
     private void Update()
     {
         if (!playing) return;
-        if (PauseMenu.GameIsPaused != paused) Pause(PauseMenu.GameIsPaused);
+        if (UIManager.GameIsPaused != paused) Pause(UIManager.GameIsPaused);
         if (paused) return;
 
         float seconds = watched ? fadeInTime : fadeOutTime;

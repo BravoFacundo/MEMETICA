@@ -26,12 +26,17 @@ public class SettingsWindow : MonoBehaviour
     [Header("Mouse")]
     public Slider sensitivitySlider;
 
+    [Header("Display")]
+    [Tooltip("One per mode (Native, Classic 4:3): shown only on the selected one, e.g. a check mark")]
+    [SerializeField] private GameObject[] displayMarks;
+
     [Header("Language")]
     [Tooltip("One per language (English, Spanish): shown only on the selected one, e.g. a check mark")]
     [SerializeField] private GameObject[] languageMarks;
 
     float savedMaster, savedMusic, savedSfx, savedSensitivity;
     GameLanguage savedLanguage;   // values when the window opened (for Cancel)
+    DisplayManager.Mode savedDisplay;
 
     void Awake()
     {
@@ -48,9 +53,11 @@ public class SettingsWindow : MonoBehaviour
         savedSfx = SettingsManager.SfxVolume;
         savedSensitivity = SettingsManager.MouseSensitivity;
         savedLanguage = SettingsManager.Language;
+        savedDisplay = SettingsManager.DisplayMode;
 
         RefreshSliders();
         RefreshLanguageMarks();
+        RefreshMarks(displayMarks, (int)SettingsManager.DisplayMode);
         SelectTab(defaultPage);
     }
 
@@ -72,6 +79,14 @@ public class SettingsWindow : MonoBehaviour
         RefreshLanguageMarks();
     }
 
+    // Display buttons (WindowButton → On Click): 0 Native, 1 Classic (4:3 in the middle). Applies at once
+    public void SetDisplayMode(int mode)
+    {
+        SettingsManager.DisplayMode = (DisplayManager.Mode)mode;
+        SettingsManager.NotifyChanged();
+        RefreshMarks(displayMarks, mode);
+    }
+
     public void Apply()
     {
         gameObject.SetActive(false);   // changes were already applied live; OnDisable saves them
@@ -84,6 +99,7 @@ public class SettingsWindow : MonoBehaviour
         SettingsManager.SfxVolume = savedSfx;
         SettingsManager.MouseSensitivity = savedSensitivity;
         SettingsManager.Language = savedLanguage;
+        SettingsManager.DisplayMode = savedDisplay;
         SettingsManager.NotifyChanged();
         gameObject.SetActive(false);
     }
@@ -104,6 +120,13 @@ public class SettingsWindow : MonoBehaviour
         if (musicSlider != null) musicSlider.SetValueWithoutNotify(SettingsManager.MusicVolume);
         if (sfxSlider != null) sfxSlider.SetValueWithoutNotify(SettingsManager.SfxVolume);
         if (sensitivitySlider != null) sensitivitySlider.SetValueWithoutNotify(SettingsManager.MouseSensitivity);
+    }
+
+    static void RefreshMarks(GameObject[] marks, int selected)
+    {
+        if (marks == null) return;
+        for (int i = 0; i < marks.Length; i++)
+            if (marks[i] != null) marks[i].SetActive(i == selected);
     }
 
     private void RefreshLanguageMarks()

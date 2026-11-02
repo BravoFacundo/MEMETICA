@@ -27,11 +27,14 @@ public class SettingsManager : MonoBehaviour
     [Range(0f, 1f)] public float sfxVolume = DefaultVolume;
     [Tooltip("0.5 = the sensitivity set on PlayerLook in the Inspector")]
     [Range(0f, 1f)] public float mouseSensitivity = DefaultSensitivity;
+    [Tooltip("Native: the monitor's own shape. Classic: 4:3 in the middle, grey bars around (DisplayManager)")]
+    public DisplayManager.Mode displayMode = DisplayManager.Mode.Native;
 
     // Used when no SettingsManager set them (a scene played directly in the Editor)
     const float DefaultVolume = 0.8f, DefaultSensitivity = 0.5f;
     static GameLanguage firstLanguage = GameLanguage.Spanish;
     static float firstMaster = DefaultVolume, firstMusic = DefaultVolume, firstSfx = DefaultVolume, firstSensitivity = DefaultSensitivity;
+    static DisplayManager.Mode firstDisplay = DisplayManager.Mode.Native;
     static bool languageSet;   // (once per launch: coming back to the Menu doesn't reset it)
 
     void Awake()
@@ -41,6 +44,7 @@ public class SettingsManager : MonoBehaviour
         firstMusic = musicVolume;
         firstSfx = sfxVolume;
         firstSensitivity = mouseSensitivity;
+        firstDisplay = displayMode;
         if (resetLanguageEachLaunch && !languageSet) Language = startLanguage;
         languageSet = true;
     }
@@ -58,6 +62,9 @@ public class SettingsManager : MonoBehaviour
     public static float SfxVolume    { get => PlayerPrefs.GetFloat("SfxVolume", firstSfx);       set => PlayerPrefs.SetFloat("SfxVolume", value); }
     // Slider 0..1, middle (0.5) = the sensitivity set on PlayerLook in the Inspector
     public static float MouseSensitivity { get => PlayerPrefs.GetFloat("MouseSensitivityScale", firstSensitivity); set => PlayerPrefs.SetFloat("MouseSensitivityScale", value); }
+
+    // How the game fills the monitor (DisplayManager)
+    public static DisplayManager.Mode DisplayMode { get => (DisplayManager.Mode)PlayerPrefs.GetInt("DisplayMode", (int)firstDisplay); set => PlayerPrefs.SetInt("DisplayMode", (int)value); }
 
     // Multiplier for PlayerLook: 0 → x0.25, 0.5 → x1, 1 → x4 (exponential, so both halves feel even)
     public static float MouseSensitivityMultiplier => Mathf.Pow(4f, (MouseSensitivity - 0.5f) * 2f);

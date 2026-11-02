@@ -93,13 +93,14 @@ public class HudWindow : MonoBehaviour
         rect.position = from;
     }
 
-    // Where it is on the screen: its middle and height, 0-1 of the screen
-    public void ViewportRect(out Vector2 center, out float height)
+    // Where it is in that camera's view: its middle and height, 0-1 of the view (the camera may not fill the screen:
+    // the pause frame, the Classic 4:3 display)
+    public void ViewportRect(Camera cam, out Vector2 center, out float height)
     {
         var corners = new Vector3[4];
         ((RectTransform)transform).GetWorldCorners(corners);   // Overlay canvas: screen pixels
-        center = new Vector2((corners[0].x + corners[2].x) * 0.5f / Screen.width, (corners[0].y + corners[2].y) * 0.5f / Screen.height);
-        height = (corners[2].y - corners[0].y) / Screen.height;
+        center = cam.ScreenToViewportPoint((corners[0] + corners[2]) * 0.5f);
+        height = (corners[2].y - corners[0].y) / Mathf.Max(cam.pixelHeight, 1);
     }
 
     //---- What it shows (MemeWindow)

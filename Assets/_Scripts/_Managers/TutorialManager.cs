@@ -73,7 +73,7 @@ public class TutorialManager : MonoBehaviour
 
     void Update()
     {
-        bool hidden = hideWhilePaused && PauseMenu.GameIsPaused;
+        bool hidden = hideWhilePaused && UIManager.GameIsPaused;
         canvasGroup.alpha = hidden ? 0f : 1f;
         canvasGroup.blocksRaycasts = canvasGroup.interactable = !hidden;
 

@@ -245,7 +245,7 @@ public abstract class MemeChanger : Meme
 
     protected override void Update()
     {
-        PauseSounds(PauseMenu.GameIsPaused);
+        PauseSounds(UIManager.GameIsPaused);
         if (memeSource != null && memeSource.isPlaying) AudioManager.MemeSounding();   // the world goes quieter
         UpdateVideoSound();
         base.Update();
@@ -342,7 +342,7 @@ public abstract class MemeChanger : Meme
     // The Move an island gives comes from its number: Island_11 → Move 1, Island_12 → 2, Island_13 → 3 (its last digit).
     // The target island is named as the meme's axis (MemeData > Meme > Title: TrollFace → Island_TrollFace; case and
     // spaces don't matter) → the last Move. Any other name (Island_HUB, Island_Tutorial, Island_1A optional) → none.
-    // The hub, the tutorial and optional islands (IslandRole) never give one. Going back: nothing again.
+    // The hub, the tutorial and optional islands (Lift: Role) never give one. Going back: nothing again.
     // Game_Old (MemeOrb): as before (one more for the random pick on each new island)
     protected virtual bool ChangesOnce => false;
 
@@ -413,7 +413,7 @@ public abstract class MemeChanger : Meme
         // Game: a change showing goes on to its end (its sound too) and then back to the base, wherever you left it
         // (a black pedestal…). Game_Old: back to the base at once
         if (!ChangesOnce || (changeRoutine == null && revealRoutine == null)) StopMutationAndRestore();
-        bool optional = MemeIsland != null && IslandRole.Of(MemeIsland.transform) == IslandRole.Role.Optional;
+        bool optional = MemeIsland != null && Lift.RoleOf(MemeIsland.transform) == Lift.Role.Optional;
         if (Data.HasLeave && CurrentPedestal == null && !optional && !(ChangesOnce && leaveSeen)) SetPending(Data.leave, true);   // (not in an optional course)
     }
 

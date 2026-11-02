@@ -178,7 +178,7 @@ public class DebugTools : MonoBehaviour
         if (Pressed(KeyCode.F12, DebugKey.MemeDexLog) && MemeDex.Instance != null) MemeDex.Instance.LogProgress();
         ElevatorSpeed = fastElevators ? fastElevatorSpeed : 1f;
 
-        if (noclip && !PauseMenu.GameIsPaused) Fly();
+        if (noclip && !UIManager.GameIsPaused) Fly();
     }
 
     //---- Noclip
@@ -232,7 +232,7 @@ public class DebugTools : MonoBehaviour
         if (starts.Length == 0) return;
         pendingStart = selectedStart;
         Time.timeScale = 1f;
-        PauseMenu.GameIsPaused = false;
+        UIManager.GameIsPaused = false;
         SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
     }
 

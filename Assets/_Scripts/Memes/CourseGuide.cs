@@ -131,11 +131,11 @@ public class CourseGuide : MonoBehaviour
     }
 
     // Part of a level's course: not the tutorial, not the hub (an island right under "Levels", in no level), not an
-    // island marked Hub / Optional (IslandRole)
+    // island marked Hub / Optional (its Lift Role)
     public static bool IsCourse(GameObject island)
     {
         if (island == null || island.name.Contains("Tutorial")) return false;
-        if (IslandRole.Of(island.transform) != IslandRole.Role.Course) return false;
+        if (Lift.RoleOf(island.transform) != Lift.Role.Course) return false;
         Transform level = LevelRoot(island.transform);
         return level != null && level != island.transform;
     }

@@ -429,7 +429,7 @@ public class Meme : MonoBehaviour
     public static bool Unlocks(GameObject island)
     {
         if (island.name.Contains("Tutorial")) return false;
-        if (IslandRole.Of(island.transform) != IslandRole.Role.Course) return false;   // the hub, an optional course
+        if (Lift.RoleOf(island.transform) != Lift.Role.Course) return false;   // the hub, an optional course
         int separator = island.name.LastIndexOf('_');
         bool letter = separator >= 0 && island.name.Length - separator - 1 == 1 && char.IsLetter(island.name[separator + 1]);
         return !letter || Settings.letterIslandsUnlock;

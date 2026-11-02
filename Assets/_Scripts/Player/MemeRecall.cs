@@ -92,13 +92,13 @@ public class MemeRecall : MonoBehaviour
         {
             Transform from = lastPlace;
             lastPlace = place;
-            bool optional = IslandRole.Of(place) == IslandRole.Role.Optional;   // an optional course: it waits
+            bool optional = Lift.RoleOf(place) == Lift.Role.Optional;   // an optional course: it waits
             if (free && bringWhenLeaving && from != null && !optional)
                 foreach (MemeWindow window in windows)
                     if (CanCome(window) && LeftBehind(window, from, place)) { flying = StartCoroutine(Fly(window)); return; }
         }
         if (!FreeToCome(true)) { away = 0f; return; }
-        if (lastPlace != null && IslandRole.Of(lastPlace) == IslandRole.Role.Optional) { away = 0f; return; }   // an optional course: it waits
+        if (lastPlace != null && Lift.RoleOf(lastPlace) == Lift.Role.Optional) { away = 0f; return; }   // an optional course: it waits
 
         // Far
         MemeWindow far = null;

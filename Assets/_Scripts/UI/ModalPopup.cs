@@ -36,7 +36,7 @@ public class ModalPopup : MonoBehaviour
         bool clicked = false;
         for (float shownFor = 0f; ; )
         {
-            if (!PauseMenu.GameIsPaused)
+            if (!UIManager.GameIsPaused)
             {
                 Time.timeScale = 0f;   // (again every frame: leaving the pause sets it back to 1)
                 shownFor += Time.unscaledDeltaTime;
@@ -50,7 +50,7 @@ public class ModalPopup : MonoBehaviour
         }
 
         SetShown(panel, false);
-        if (!PauseMenu.GameIsPaused) Time.timeScale = 1f;
+        if (!UIManager.GameIsPaused) Time.timeScale = 1f;
         yield return null;   // (that click doesn't grab or jump too)
         if (player != null) player.InputLocked = wasInput;
         if (look != null) look.LookLocked = wasLook;

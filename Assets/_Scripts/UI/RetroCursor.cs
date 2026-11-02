@@ -51,7 +51,7 @@ public class RetroCursor : MonoBehaviour
 
     public Mode CurrentMode { get; private set; } = Mode.Free;
     // Free while playing (not the Menu, not the pause): the windows can be clicked
-    public bool FreeWhilePlaying => CurrentMode == Mode.Free && playerLook != null && !PauseMenu.GameIsPaused;
+    public bool FreeWhilePlaying => CurrentMode == Mode.Free && playerLook != null && !UIManager.GameIsPaused;
 
     private RectTransform rect;
     private bool busy;   // while loading, nothing else changes the cursor
@@ -63,7 +63,7 @@ public class RetroCursor : MonoBehaviour
     void Awake()
     {
         Instance = this;
-        GetComponent<Canvas>().sortingOrder = 999;   // above the UI (the frame is at 1000)
+        GetComponent<Canvas>().sortingOrder = 999;   // above the UI, under the monitor frame (1000): its border is the screen's edge
         rect = cursorImage.rectTransform;
         cursorImage.raycastTarget = false;           // it doesn't block clicks
         SetState(CursorState.Default);
@@ -83,12 +83,12 @@ public class RetroCursor : MonoBehaviour
     {
         bool ended = GameManager.Instance != null && GameManager.Instance.Ended;   // the blue screen / win screen: click on them
         bool freeHeld = freeWhilePlaying && Input.GetKey(freeKey);
-        Mode wanted = playerLook == null || PauseMenu.GameIsPaused || ended || freeHeld || ModalPopup.Open ? Mode.Free : Mode.Crosshair;   // (a modal popup: the arrow)
-        bool paused = PauseMenu.GameIsPaused;
+        Mode wanted = playerLook == null || UIManager.GameIsPaused || ended || freeHeld || ModalPopup.Open ? Mode.Free : Mode.Crosshair;   // (a modal popup: the arrow)
+        bool paused = UIManager.GameIsPaused;
         if (!modeStarted || wanted != CurrentMode || paused != wasPaused) ApplyMode(wanted);   // the pause also locks / frees it
         wasPaused = paused;
 
-        if (playerLook == null || PauseMenu.GameIsPaused) return;   // Menu / pause: the UI buttons set the icon
+        if (playerLook == null || UIManager.GameIsPaused) return;   // Menu / pause: the UI buttons set the icon
         if (CurrentMode == Mode.Crosshair) SetState(MemeRandomizer.Busy ? CursorState.Hidden : AimState());   // (raffling, the platform turning: no aim)
         else UpdateWindows();
     }
@@ -96,7 +96,12 @@ public class RetroCursor : MonoBehaviour
     void LateUpdate()
     {
         // On an Overlay Canvas, screen = position
-        rect.position = CurrentMode == Mode.Free ? Input.mousePosition : new Vector3(Screen.width * 0.5f, Screen.height * 0.5f, 0f);
+        // (kept inside the game's view: never over the Classic display's bars)
+        Rect view = DisplayManager.PixelView;
+        Vector3 mouse = Input.mousePosition;
+        rect.position = CurrentMode == Mode.Free
+            ? new Vector3(Mathf.Clamp(mouse.x, view.xMin, view.xMax), Mathf.Clamp(mouse.y, view.yMin, view.yMax), 0f)
+            : new Vector3(view.center.x, view.center.y, 0f);
     }
 
     void ApplyMode(Mode mode)
@@ -106,7 +111,7 @@ public class RetroCursor : MonoBehaviour
         bool free = mode == Mode.Free;
         Cursor.visible = false;   // ours, never Windows'
         Cursor.lockState = free ? CursorLockMode.None : CursorLockMode.Locked;
-        if (playerLook != null) playerLook.CursorFree = free && !PauseMenu.GameIsPaused;
+        if (playerLook != null) playerLook.CursorFree = free && !UIManager.GameIsPaused;
         if (free) SetState(CursorState.Default);   // the arrow (the aim sets its own icon)
     }
 

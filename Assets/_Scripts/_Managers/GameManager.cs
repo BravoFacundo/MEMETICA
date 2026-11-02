@@ -129,7 +129,7 @@ public class GameManager : MonoBehaviour
     void Update()
     {
         if (Current == State.NotStarted && ShouldStart()) StartTimer();
-        if (Current != State.Running || PauseMenu.GameIsPaused) return;
+        if (Current != State.Running || UIManager.GameIsPaused) return;
         TimeLeft -= Time.deltaTime;
         Elapsed += Time.deltaTime;
         if (TimeLeft <= 0f) { TimeLeft = 0f; Lose(); }

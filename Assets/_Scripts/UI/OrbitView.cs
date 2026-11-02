@@ -66,7 +66,6 @@ public class OrbitView : MonoBehaviour
         Vector3 flat = fromPosition - Center; flat.y = 0f;   // starts on the ring where you are
         angle = flat.sqrMagnitude > 0.01f ? Mathf.Atan2(flat.x, flat.z) * Mathf.Rad2Deg : source.transform.eulerAngles.y + 180f;
         started = Time.unscaledTime;
-        if (framed) PauseMenu.Framed = true;
         GrassField.SetFarView(view, Distance() + radius * 2f);   // the grass out there too
         IsShowing = true;
     }
@@ -77,7 +76,6 @@ public class OrbitView : MonoBehaviour
         IsShowing = false;
         if (view != null) view.enabled = false;
         if (source != null) source.enabled = true;
-        if (framed) PauseMenu.Framed = false;
         GrassField.SetFarView(null, 0f);
     }
 

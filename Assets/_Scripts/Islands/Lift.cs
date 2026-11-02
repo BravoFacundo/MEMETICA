@@ -12,8 +12,19 @@ using UnityEngine;
 // where it was placed on its parent, wherever the parent is now.
 // Down (waiting below): invisible and you fall through it (its renderers, colliders, lights and grass are off).
 // It shows again as soon as it starts rising.
+// Role: what it is for the meme window (before: IslandRole, a separate script)
+//   Course    each new one you carry the window onto gives it its next Move (going back to one already visited: nothing)
+//   Hub       never gives a Move (you start and come back here)
+//   Optional  an optional course (raised by a black pedestal): no Move, no Leave, and your window, left on its black
+//             pedestal, doesn't come back to you while you are here (MemeRecall)
 public abstract class Lift : MonoBehaviour
 {
+    public enum Role { Course, Hub, Optional }
+
+    [Section("Role")]
+    [Tooltip("Course: part of a level's way. Hub: where you start and come back. Optional: a side course (its things inside count as it too)")]
+    public Role role = Role.Course;
+
     [Section("Rise & Fall")]
     [Tooltip("Off: uses the LevelManager values. On: the values below")]
     public bool overrideTiming = false;
@@ -27,6 +38,15 @@ public abstract class Lift : MonoBehaviour
     public bool IsUp { get; private set; }
     public bool IsMoving { get; private set; }
     public bool IsHidden { get; private set; }
+
+    // The role of whatever that is part of: the first Hub or Optional among the lifts around it (a bridge inside an
+    // optional island is optional too), else Course (nothing set, or not in a lift: Course)
+    public static Role RoleOf(Transform t)
+    {
+        for (Transform p = t; p != null; p = p.parent)
+            if (p.TryGetComponent(out Lift lift) && lift.role != Role.Course) return lift.role;
+        return Role.Course;
+    }
 
     // Something inside a lift that is down (hidden): a respawn there would fall forever
     public static bool IsHiddenAt(Transform t)

@@ -2,6 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Text.RegularExpressions;
 using UnityEngine;
+using UnityEngine.Serialization;
 using UnityEngine.UI;
 
 // Todo lo general del nivel. Va en Managers > LevelManager.
@@ -52,6 +53,8 @@ public class LevelManager : MonoBehaviour
     [Section("Game")]
     [Tooltip("Where everything reappears at the start: the RespawnPoint of the tutorial island")]
     public Transform startRespawnPoint;
+    [Tooltip("Seconds the game's view takes to fade in at the start, with or without the tutorial (it hides the setting up)")]
+    [FormerlySerializedAs("skipFadeTime")] public float startFadeTime = 1f;
     [Tooltip("Objects you can turn off in the editor to see better (e.g. Clouds_HideIslands): they are turned on when the game starts")]
     public GameObject[] activateOnPlay;
     [Tooltip("Seconds the islands fall before going back to the Menu")]
@@ -86,8 +89,6 @@ public class LevelManager : MonoBehaviour
     public float skipMemeDistance = 1.5f;
     [Tooltip("Extra meters between its lowest point and the floor (it stays still there until picked up: raise it if it still sinks)")]
     public float skipMemeLift = 0.05f;
-    [Tooltip("Seconds the screen takes to fade in from black (it hides the setting up)")]
-    public float skipFadeTime = 1f;
 
     // Set by the menu's tutorial popup before loading the scene (null: this scene's Skip Tutorial)
     public static bool? SkipFromMenu;
@@ -128,7 +129,9 @@ public class LevelManager : MonoBehaviour
 
     void Start()
     {
-        if (SkippingTutorial) StartCoroutine(SkipTutorial(Blackout()));
+        CanvasGroup fade = Blackout();   // every start fades in (skipping: once everything is in place)
+        if (SkippingTutorial) StartCoroutine(SkipTutorial(fade));
+        else StartCoroutine(StartFade(fade));
     }
 
     void OnDestroy()
@@ -255,27 +258,43 @@ public class LevelManager : MonoBehaviour
         return nearest < float.MaxValue;
     }
 
-    // Black over everything (it hides the setting up), then FadeIn
+    // The game's view covered (it hides the setting up), then FadeIn. Only the view, in the frame's colour
+    // (DisplayManager.BarColor): the frame and the Classic bars stay as they are, the game "turns on" inside them
     static CanvasGroup Blackout()
     {
-        var go = new GameObject("SkipTutorialFade", typeof(Canvas), typeof(CanvasGroup), typeof(Image));
+        var go = new GameObject("SkipTutorialFade", typeof(Canvas), typeof(CanvasGroup));
         var canvas = go.GetComponent<Canvas>();
         canvas.renderMode = RenderMode.ScreenSpaceOverlay;
-        canvas.sortingOrder = 1000;
-        go.GetComponent<Image>().color = Color.black;
-        go.GetComponent<Image>().raycastTarget = false;
+        canvas.sortingOrder = 1000;   // (with the frame: same colour, so their order doesn't matter)
         var group = go.GetComponent<CanvasGroup>();
         group.alpha = 1f;
         group.blocksRaycasts = group.interactable = false;
+
+        var view = new GameObject("View", typeof(RectTransform), typeof(Image), typeof(AspectArea));
+        var rect = (RectTransform)view.transform;
+        rect.SetParent(go.transform, false);
+        rect.anchorMin = DisplayManager.View.min;   // (AspectArea keeps it there if the window changes)
+        rect.anchorMax = DisplayManager.View.max;
+        rect.offsetMin = rect.offsetMax = Vector2.zero;
+        var image = view.GetComponent<Image>();
+        image.color = DisplayManager.BarColor;
+        image.raycastTarget = false;
         return group;
+    }
+
+    // Normal start: one frame so everything sets itself up, then the fade
+    IEnumerator StartFade(CanvasGroup fade)
+    {
+        yield return null;
+        yield return FadeIn(fade);
     }
 
     IEnumerator FadeIn(CanvasGroup fade)
     {
         if (fade == null) yield break;
-        for (float t = 0f; t < skipFadeTime; t += Time.unscaledDeltaTime)
+        for (float t = 0f; t < startFadeTime; t += Time.unscaledDeltaTime)
         {
-            fade.alpha = 1f - Mathf.SmoothStep(0f, 1f, t / Mathf.Max(skipFadeTime, 0.01f));
+            fade.alpha = 1f - Mathf.SmoothStep(0f, 1f, t / Mathf.Max(startFadeTime, 0.01f));
             yield return null;
         }
         Destroy(fade.gameObject);
@@ -493,7 +512,7 @@ public class LevelManager : MonoBehaviour
         // Back to the desktop (Menu) instead of closing the game: the next visitor can play right away
         UIManager uiManager = FindObjectOfType<UIManager>();
         if (uiManager != null) uiManager.GoToMenu();
-        else { Time.timeScale = 1f; PauseMenu.GameIsPaused = false; UnityEngine.SceneManagement.SceneManager.LoadScene(menuScene); }
+        else { Time.timeScale = 1f; UIManager.GameIsPaused = false; UnityEngine.SceneManagement.SceneManager.LoadScene(menuScene); }
     }
 
     // "Island_02" → "Island_2": numbers without leading zeros, so 1 and 01 are the same ID

@@ -52,7 +52,7 @@ public class MemeDock : MonoBehaviour
 
     void Update()
     {
-        if (!PauseMenu.GameIsPaused && (Input.GetKeyDown(key) || GameInput.DropDown) && Carried != null) look.DropObject();
+        if (!UIManager.GameIsPaused && (Input.GetKeyDown(key) || GameInput.DropDown) && Carried != null) look.DropObject();
     }
 
     //---- In the hand (PlayerLook)
@@ -170,7 +170,7 @@ public class MemeDock : MonoBehaviour
     // The same for any HUD window and meme window (an optional meme's own place: DexCollectible)
     public void HudPose(HudWindow hud, Meme meme, Vector3 worldScale, out Vector3 position, out Quaternion rotation, out Vector3 scale)
     {
-        hud.ViewportRect(out Vector2 center, out float height);
+        hud.ViewportRect(cam, out Vector2 center, out float height);
         float tall = WindowHeight(meme, worldScale);
         float viewTall = 2f * Mathf.Tan(cam.fieldOfView * 0.5f * Mathf.Deg2Rad) * Mathf.Max(height, 0.001f);   // per meter away
         float distance = Mathf.Max(tall / viewTall, minDistance);

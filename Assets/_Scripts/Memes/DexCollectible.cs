@@ -35,7 +35,7 @@ public class DexCollectible : MonoBehaviour
     void Update()
     {
         if (source == null) return;
-        bool paused = PauseMenu.GameIsPaused;
+        bool paused = UIManager.GameIsPaused;
         if (paused != soundPaused) { soundPaused = paused; if (paused) source.Pause(); else source.UnPause(); }
         if (source.isPlaying) AudioManager.MemeSounding();
     }

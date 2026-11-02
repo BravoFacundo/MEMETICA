@@ -376,7 +376,7 @@ public class PortalWindow : MonoBehaviour
         if (!wanted) { if (view != null) view.enabled = false; return; }
 
         float scale = state == State.Sinking ? 1f : resolution;
-        int width = Mathf.Max(64, Mathf.RoundToInt(Screen.width * scale)), height = Mathf.Max(64, Mathf.RoundToInt(Screen.height * scale));
+        int width = Mathf.Max(64, Mathf.RoundToInt(playerCamera.pixelWidth * scale)), height = Mathf.Max(64, Mathf.RoundToInt(playerCamera.pixelHeight * scale));   // (your view's size, not the screen's)
         if (texture == null || texture.width != width || texture.height != height)
         {
             if (texture != null) texture.Release();
@@ -582,7 +582,7 @@ public class PortalWindow : MonoBehaviour
     // A camera above this window, where yours would be looking up through the exit one (only what is above it)
     void UpdateBackView()
     {
-        int width = Mathf.Max(64, Mathf.RoundToInt(Screen.width * 0.5f)), height = Mathf.Max(64, Mathf.RoundToInt(Screen.height * 0.5f));
+        int width = Mathf.Max(64, Mathf.RoundToInt(playerCamera.pixelWidth * 0.5f)), height = Mathf.Max(64, Mathf.RoundToInt(playerCamera.pixelHeight * 0.5f));
         if (backTexture == null || backTexture.width != width || backTexture.height != height)
         {
             if (backTexture != null) backTexture.Release();

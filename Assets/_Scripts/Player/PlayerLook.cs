@@ -111,7 +111,7 @@ public class PlayerLook : MonoBehaviour
     // Physics forces go in FixedUpdate: same pull at any frame rate (before: Update, stronger at high FPS)
     void FixedUpdate()
     {
-        if (heldObject == null || dropping != null || carriedInHud || PauseMenu.GameIsPaused || !canHold) return;
+        if (heldObject == null || dropping != null || carriedInHud || UIManager.GameIsPaused || !canHold) return;
         PullHeldObject();
         KeepHeldObjectOffFace();
     }
@@ -162,9 +162,9 @@ public class PlayerLook : MonoBehaviour
 
     private void UpdateHeldMeme()
     {
-        if (PauseMenu.GameIsPaused || ModalPopup.Open || !canHold)
+        if (UIManager.GameIsPaused || ModalPopup.Open || !canHold)
         {
-            if (logGrabs && GameInput.GrabDown) Debug.Log($"[PlayerLook] Click ignored: paused {PauseMenu.GameIsPaused}, modal popup {ModalPopup.Open}, can hold {canHold}", this);
+            if (logGrabs && GameInput.GrabDown) Debug.Log($"[PlayerLook] Click ignored: paused {UIManager.GameIsPaused}, modal popup {ModalPopup.Open}, can hold {canHold}", this);
             return;
         }   // no grabbing while paused, a modal popup is up (its click closes it) or riding an elevator
         if (CursorFree) { if (logGrabs && GameInput.GrabDown) Debug.Log("[PlayerLook] Click ignored: free cursor", this); LookingAtMeme = CanGrabLooked = false; return; }   // the click is the cursor's (RetroCursor)
@@ -335,7 +335,7 @@ public class PlayerLook : MonoBehaviour
 
     private void UpdateLookedPainting()
     {
-        if (PauseMenu.GameIsPaused) return;   // the painting pauses itself
+        if (UIManager.GameIsPaused) return;   // the painting pauses itself
         Painting looked = GetLookedPainting();
         if (looked == currentPainting) return;
 
@@ -364,7 +364,7 @@ public class PlayerLook : MonoBehaviour
 
         for (float elapsed = 0f; elapsed < duration; )
         {
-            if (!PauseMenu.GameIsPaused)   // paused: still camera until the game resumes
+            if (!UIManager.GameIsPaused)   // paused: still camera until the game resumes
             {
                 elapsed += Time.deltaTime;
                 float strength = magnitude * Mathf.Clamp01(elapsed / 0.1f) * Mathf.Clamp01((duration - elapsed) / (duration * 0.4f));
