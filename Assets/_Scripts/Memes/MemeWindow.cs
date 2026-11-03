@@ -138,10 +138,10 @@ public class MemeWindow : MemeChanger
     private bool comingBack;
     bool TryComeBack()
     {
-        if (MemeRecall.Instance != null && MemeRecall.Instance.BringNow(this)) return true;
-        PlayerLook look = FindObjectOfType<PlayerLook>();
-        if (look == null || look.heldObject != null) return false;
-        look.Grab(gameObject, 0.6f);
+        if (PlayerGrab.Instance != null && PlayerGrab.Instance.BringNow(this)) return true;
+        PlayerGrab hand = PlayerGrab.Instance;
+        if (hand == null || hand.heldObject != null) return false;
+        hand.Grab(gameObject, 0.6f);
         return true;
     }   // exactly where you placed it (hidden in the ground, on a branch…)
     protected override bool ReadyToRest => !loose && lyingDown == null;   // lies face up first, then rests on its island

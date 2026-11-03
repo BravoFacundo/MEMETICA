@@ -217,7 +217,6 @@ public class PedestalRetire : MonoBehaviour
     void Shake(float duration, float amount)
     {
         if (amount <= 0f) return;
-        PlayerLook look = FindObjectOfType<PlayerLook>();
-        if (look != null) look.StartCoroutine(look.ShakeTheCamera(duration, amount));
+        PlayerLook.Shake(duration, amount);
     }
 }

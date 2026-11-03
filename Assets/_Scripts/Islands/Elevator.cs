@@ -97,7 +97,7 @@ public class Elevator : MonoBehaviour
     {
         IsRiding = true;
         PlayerMove player = FindObjectOfType<PlayerMove>();
-        PlayerLook hold = Camera.main != null ? Camera.main.GetComponent<PlayerLook>() : null;
+        PlayerGrab hold = PlayerGrab.Instance;
         GameObject pedestalMeme = pedestal != null ? pedestal.MemeObject : null;   // read before the pedestal stops working
 
         // Board: player can look and zoom but not move or grab; everything rides parented to the elevator
@@ -228,10 +228,10 @@ public class Elevator : MonoBehaviour
 
     static bool SendToPlayer(Meme meme)
     {
-        if (meme is MemeWindow window && MemeRecall.Instance != null && MemeRecall.Instance.BringNow(window)) return true;
-        PlayerLook look = FindObjectOfType<PlayerLook>();
-        if (look == null || look.heldObject != null) return false;
-        look.Grab(meme.gameObject, 0.6f);
+        if (meme is MemeWindow window && PlayerGrab.Instance != null && PlayerGrab.Instance.BringNow(window)) return true;
+        PlayerGrab hand = PlayerGrab.Instance;
+        if (hand == null || hand.heldObject != null) return false;
+        hand.Grab(meme.gameObject, 0.6f);
         return true;
     }
 

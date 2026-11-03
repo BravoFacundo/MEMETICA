@@ -109,8 +109,7 @@ public class AimPlatform : MonoBehaviour
         IsTurning = true;
         Sound(turnClip, true);
         float duration = seconds > 0f ? seconds : Mathf.Max(minTurnTime, Mathf.Abs(angle) / Mathf.Max(turnSpeed, 1f) * 1.5f);   // (eased: 1.5 x the time at full speed)
-        if (shake > 0f && Camera.main != null && Camera.main.TryGetComponent(out PlayerLook look))
-            look.StartCoroutine(look.ShakeTheCamera(duration, shake));
+        PlayerLook.Shake(duration, shake);
 
         // Around its own vertical, on its parent (it still floats with its island)
         Quaternion from = transform.localRotation;

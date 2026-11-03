@@ -274,7 +274,7 @@ public class Meme : MonoBehaviour
     private void CheckLost()
     {
         if (IsHeld || CurrentPedestal != null || meteor != null || LevelManager.Instance == null) return;
-        if (MemeRecall.Instance != null && MemeRecall.Instance.IsBringing) return;   // (flying to you)
+        if (PlayerGrab.Instance != null && PlayerGrab.Instance.IsBringing) return;   // (flying to you)
         if (CurrentPlayer == null) return;
         float away = Vector3.Distance(CurrentPlayer.transform.position, transform.position);
         if (away < LevelManager.Instance.dropDistance + 5f) return;

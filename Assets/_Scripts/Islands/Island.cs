@@ -19,7 +19,7 @@ public class Island : Lift
     protected override void Start()
     {
         base.Start();
-        if (Camera.main != null) look = Camera.main.GetComponent<PlayerLook>();
+        look = PlayerLook.Instance;
         if (startRaised || DebugTools.AllIslandsUp) SetUp(true);
         else { SetHeight(BottomY); SetPresent(false); }   // waits below, invisible
     }

@@ -47,7 +47,7 @@ public class OrbitView : MonoBehaviour
     {
         if (IsShowing) return;
         PlayerLook look = FindObjectOfType<PlayerLook>();
-        source = look != null ? look.GetComponent<Camera>() : Camera.main;
+        source = look != null ? look.Camera : Camera.main;
         if (source == null) { Debug.LogWarning("[OrbitView] No camera to start from.", this); return; }
 
         if (view == null)

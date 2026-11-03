@@ -151,8 +151,7 @@ public class FallingPlatform : MonoBehaviour
 
     void ShakeCamera()
     {
-        if (Settings.cameraShakeAmount <= 0f || Camera.main == null) return;
-        if (Camera.main.TryGetComponent(out PlayerLook look)) look.StartCoroutine(look.ShakeTheCamera(0.15f, Settings.cameraShakeAmount));
+        PlayerLook.Shake(0.15f, Settings.cameraShakeAmount);
     }
 
     void Play(AudioClip clip)

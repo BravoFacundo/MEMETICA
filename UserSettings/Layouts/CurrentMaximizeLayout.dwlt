@@ -24,7 +24,7 @@ MonoBehaviour:
   m_MinSize: {x: 400, y: 100}
   m_MaxSize: {x: 32384, y: 16192}
   vertical: 0
-  controlID: 31009
+  controlID: 36451
   draggingID: 0
 --- !u!114 &2
 MonoBehaviour:
@@ -149,7 +149,7 @@ MonoBehaviour:
   m_MinSize: {x: 300, y: 100}
   m_MaxSize: {x: 24288, y: 16192}
   vertical: 1
-  controlID: 30958
+  controlID: 36400
   draggingID: 0
 --- !u!114 &4
 MonoBehaviour:
@@ -176,7 +176,7 @@ MonoBehaviour:
   m_MinSize: {x: 300, y: 50}
   m_MaxSize: {x: 24288, y: 8096}
   vertical: 0
-  controlID: 30934
+  controlID: 36376
   draggingID: 0
 --- !u!114 &5
 MonoBehaviour:
@@ -243,7 +243,7 @@ MonoBehaviour:
       scrollPos: {x: 0, y: 0}
       m_SelectedIDs: 
       m_LastClickedID: 0
-      m_ExpandedIDs: 1c03fdff8a54fdffc06cfdffee79fdff0492fdff5a96fdffd2b9fdffd6b9fdff44c3fdffb2dafdff70f5fdff0cfbfdffa404feff2aa3feff78a8feffdadffeff80fefeff1e05ffffd807ffff468affff18edffffe8edffff1cfbffff6a710000f6710000dc7600008677000008790000502e0100705301000657010026990200fc9c0200a6a0020070b40200b2b30500cabd0500aabf0500cac80500a20f0600903b060008400600ac4506003e4b0600504b0600544b0600fadd060032210700bc7b07000873080048780800347a0800
+      m_ExpandedIDs: 02f4f1ff0ef4f1ff50f5f1fff865fcffb86dfcff086efcff9877fcff928dfcff8890fcff1c03fdff8a54fdffc06cfdffee79fdff0492fdff5a96fdffd2b9fdffd6b9fdff44c3fdffb2dafdff70f5fdff0cfbfdffa404feff2aa3feff78a8feffdadffeff80fefeff1e05ffffd807ffff468affff18edffffe8edffff1cfbffff6a710000f6710000dc7600008677000008790000502e0100705301000657010026990200fc9c0200a6a0020070b40200b2b30500cabd0500aabf0500cac80500a20f0600903b060008400600ac4506003e4b0600504b0600544b0600fadd060032210700bc7b07000873080048780800347a0800
       m_RenameOverlay:
         m_UserAcceptedRename: 0
         m_Name: 
@@ -358,7 +358,7 @@ MonoBehaviour:
       floating: 0
       collapsed: 0
       displayed: 1
-      snapOffset: {x: 0, y: 0}
+      snapOffset: {x: 0, y: 24.436365}
       snapOffsetDelta: {x: 0, y: 0}
       snapCorner: 0
       id: unity-scene-view-toolbar
@@ -384,7 +384,7 @@ MonoBehaviour:
       floating: 0
       collapsed: 0
       displayed: 1
-      snapOffset: {x: 0, y: 0}
+      snapOffset: {x: 0, y: 24.436365}
       snapOffsetDelta: {x: 0, y: 0}
       snapCorner: 0
       id: unity-transform-toolbar
@@ -579,7 +579,7 @@ MonoBehaviour:
       floating: 0
       collapsed: 0
       displayed: 1
-      snapOffset: {x: 0, y: 9.600037}
+      snapOffset: {x: 0, y: 25}
       snapOffsetDelta: {x: 0, y: 0}
       snapCorner: 0
       id: UnityEditor.SceneViewCameraOverlay
@@ -795,8 +795,8 @@ MonoBehaviour:
     y: 589.0909
     width: 1348.3636
     height: 219.67267
-  m_MinSize: {x: 230, y: 250}
-  m_MaxSize: {x: 10000, y: 10000}
+  m_MinSize: {x: 231, y: 271}
+  m_MaxSize: {x: 10001, y: 10021}
   m_ActualView: {fileID: 12}
   m_Panes:
   - {fileID: 12}
@@ -920,9 +920,9 @@ MonoBehaviour:
       m_Icon: {fileID: 0}
       m_ResourceFile: 
   m_ListAreaState:
-    m_SelectedInstanceIDs: 7c720800
-    m_LastClickedInstanceID: 553596
-    m_HadKeyboardFocusLastEvent: 1
+    m_SelectedInstanceIDs: f4f3f1ff
+    m_LastClickedInstanceID: -920588
+    m_HadKeyboardFocusLastEvent: 0
     m_ExpandedInstanceIDs: c6230000d08c0000c0890000aa8b0000b68b000018150400e2590000e85900000000000084550f00c8500000
     m_RenameOverlay:
       m_UserAcceptedRename: 0
@@ -971,10 +971,10 @@ MonoBehaviour:
     m_Tooltip: 
   m_Pos:
     serializedVersion: 2
-    x: 6.9818177
-    y: 658.0363
-    width: 1336.0182
-    height: 194.30908
+    x: 0
+    y: 661.5272
+    width: 1347.3636
+    height: 198.67267
   m_SerializedDataModeController:
     m_DataMode: 0
     m_PreferredDataMode: 0
@@ -1220,8 +1220,8 @@ MonoBehaviour:
     y: 0
     width: 327.27258
     height: 808.76355
-  m_MinSize: {x: 276, y: 71}
-  m_MaxSize: {x: 4001, y: 4021}
+  m_MinSize: {x: 275, y: 50}
+  m_MaxSize: {x: 4000, y: 4000}
   m_ActualView: {fileID: 17}
   m_Panes:
   - {fileID: 17}
@@ -1267,7 +1267,7 @@ MonoBehaviour:
     m_CachedPref: 160
     m_ControlHash: -371814159
     m_PrefName: Preview_InspectorPreview
-  m_LastInspectedObjectInstanceID: 553596
+  m_LastInspectedObjectInstanceID: -920588
   m_LastVerticalScrollValue: 0
   m_GlobalObjectId: 
   m_InspectorMode: 0

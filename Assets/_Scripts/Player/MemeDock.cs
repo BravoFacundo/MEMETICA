@@ -30,7 +30,7 @@ public class MemeDock : MonoBehaviour
     public Meme Carried { get; private set; }
     public bool OnScreen(Meme meme) => meme != null && meme == Carried;
 
-    private PlayerLook look;
+    private PlayerGrab hand;
     private Camera cam;
     private Coroutine flying, swappingBack;
     private Meme onScreen;       // the one riding with the camera now
@@ -47,12 +47,12 @@ public class MemeDock : MonoBehaviour
     void Start()
     {
         cam = Camera.main;
-        look = cam.GetComponent<PlayerLook>();
+        hand = PlayerGrab.Instance;
     }
 
     void Update()
     {
-        if (!UIManager.GameIsPaused && (Input.GetKeyDown(key) || GameInput.DropDown) && Carried != null) look.DropObject();
+        if (!UIManager.GameIsPaused && (Input.GetKeyDown(key) || GameInput.DropDown) && Carried != null) hand.DropObject();
     }
 
     //---- In the hand (PlayerLook)

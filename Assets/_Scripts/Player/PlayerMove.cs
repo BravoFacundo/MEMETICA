@@ -3,12 +3,13 @@
 //  Jump     coyote time (jump a moment after leaving a ledge) and jump buffer (press a moment before landing)
 //  Ground   anything you stand on counts (optional: only the Ground layer), snaps down slopes,
 //           and carries you with moving ground (bridges, islands, platforms)
-//  Respawn  back to the last island stepped on after falling into the void (before: PlayerRespawn). It falls from
-//           high and brakes before the ground; with a RespawnSlam (on and enabled) it slams down from close instead
+//  Respawn  back to the last island stepped on after falling into the void (PlayerMove.Respawn.cs, same component):
+//           Classic falls from high and brakes before the ground (OriginalGame); Slam slams down from close and lands
+//           you on your face, with falling and landing sounds on every big fall (Game)
 
 using UnityEngine;
 
-public class PlayerMove : MonoBehaviour
+public partial class PlayerMove : MonoBehaviour
 {
     [Section("Move")]
     public bool playerCanMove = true;
@@ -34,10 +35,13 @@ public class PlayerMove : MonoBehaviour
     public float jumpBuffer = 0.2f;
 
     [Section("Respawn")]
+    [Tooltip("Classic: you reappear high above (LevelManager's Drop Distance) and brake before the ground. Slam: you " +
+             "reappear close above and slam down on your face (Slam Respawn below)")]
+    public RespawnStyle respawnStyle = RespawnStyle.Slam;
     [Tooltip("After reappearing it falls fast, then brakes over these last meters before the ground. 0 = no brake")]
-    public float respawnBrakeDistance = 6f;
+    [ShowIf(nameof(respawnStyle), RespawnStyle.Classic)] public float respawnBrakeDistance = 6f;
     [Tooltip("Falling speed it brakes down to (m/s); the last bit it falls on its own")]
-    public float respawnLandingSpeed = 3f;
+    [ShowIf(nameof(respawnStyle), RespawnStyle.Classic)] public float respawnLandingSpeed = 3f;
     [Tooltip("Meters below the last ground, with nothing under you, when the fall counts as into the void (the meme in your hand turns into its Fall change). Low: right away; too low: the end of a jump over a gap counts too")]
     public float voidFallMargin = 1.5f;
 
@@ -48,8 +52,9 @@ public class PlayerMove : MonoBehaviour
     public float maxGroundFollowDownSpeed = 6f;
 
     [Section("Advanced", Closed = true)]
-    [Tooltip("Found by name (GroundCheck child)")]
-    public Transform groundCheck;
+    [Tooltip("Height of the ground check sphere's middle, from the Player's middle (meters, below: negative). It used to be the GroundCheck child")]
+    public float groundCheckHeight = -0.821f;
+    [Tooltip("Radius of that sphere")]
     public float groundDistance = 0.2f;
     [Tooltip("Off: anything you stand on is ground (trees, rocks, memes). On: only Ground Mask counts, e.g. to limit where you can jump from")]
     public bool onlyGroundLayer = false;
@@ -66,14 +71,14 @@ public class PlayerMove : MonoBehaviour
     public static event System.Action VoidFallStarted;
     // Fell into the void and reappeared (a fall for the score: RunStats). Not the portal's way back
     public static event System.Action VoidRespawned;
-    // After that fall and the respawn, it touches the ground (RespawnSlam lands you on your face here)
+    // After that fall and the respawn, it touches the ground (Slam: you land on your face here)
     public static event System.Action RespawnTouchedDown;
     // Back in play after the respawn: touched the ground, or got up after the slam (the meme in the hand goes back)
     public static event System.Action RespawnLanded;
     // From the respawn until back in play
     public bool Respawning => awaitingLanding;
     public bool FallingIntoVoid { get; private set; }
-    // On: walking and jumping keys do nothing (gravity and moving ground still do), e.g. RespawnSlam getting up
+    // On: walking and jumping keys do nothing (gravity and moving ground still do), e.g. getting up after the slam
     public bool InputLocked { get; set; }
     // A walk it does by itself (MemeRandomizer: to its stand point), whatever InputLocked says. Null: none
     public Vector3? AutoWalkTo { get; set; }
@@ -83,8 +88,7 @@ public class PlayerMove : MonoBehaviour
     public GameObject CurrentIsland => lastIsland;
 
     private CharacterController characterController;
-    private PlayerLook look;   // está en la Main Camera; se guarda una vez
-    private RespawnSlam slam;   // optional: the slam landing (Game)
+    private PlayerLook look;   // on the Player too
 
     private Vector3 horizontalVelocity;
     private float verticalVelocity;
@@ -117,12 +121,23 @@ public class PlayerMove : MonoBehaviour
     private float nextRespawnCheck;
     private float lastGroundY;   // altura del último piso pisado: caer muy por debajo = cayó al vacío
 
+    // Where the ground check sphere is (at your feet)
+    Vector3 GroundCheckPoint => transform.TransformPoint(0f, groundCheckHeight, 0f);
+
+#if UNITY_EDITOR
+    // Selected: the ground check sphere
+    void OnDrawGizmosSelected()
+    {
+        Gizmos.color = new Color(0.4f, 1f, 0.6f);
+        Gizmos.DrawWireSphere(GroundCheckPoint, groundDistance);
+    }
+#endif
+
     private void Start()
     {
         characterController = GetComponent<CharacterController>();
-        groundCheck = transform.Find("GroundCheck").GetComponent<Transform>();
-        look = Camera.main.GetComponent<PlayerLook>();
-        slam = GetComponent<RespawnSlam>();
+        look = PlayerLook.Instance;
+        SetUpSounds();
         airSpeed = walkSpeed;
         debugHeight = transform.position.y;
 
@@ -134,6 +149,7 @@ public class PlayerMove : MonoBehaviour
     void Update()
     {
         LogStep("between frames");
+        UpdateFallSound();   // (Slam: every big fall is heard, also while moved by something else)
         if (Scripted) return;   // moved by something else (going through a portal)
         if (CheckFallAndRespawn()) return;
 
@@ -260,7 +276,7 @@ public class PlayerMove : MonoBehaviour
     private void UpdateGrounded()
     {
         int mask = onlyGroundLayer ? groundMask.value : SolidMask;   // never the player itself nor props
-        bool sphereHit = SolidSphere(groundCheck.position, groundDistance, mask);
+        bool sphereHit = SolidSphere(GroundCheckPoint, groundDistance, mask);
         isGrounded = onlyGroundLayer ? sphereHit : sphereHit || characterController.isGrounded;
         slideOff = Vector3.zero;
         if (!sphereHit && characterController.isGrounded && ObstacleUnder(out Obstacle obstacle, out Vector3 point))
@@ -397,7 +413,8 @@ public class PlayerMove : MonoBehaviour
             {
                 touchedDown = true;
                 RespawnTouchedDown?.Invoke();
-                if (!SlamOn) FinishRespawn();   // with the slam, once you got up
+                if (SlamOn) Land();   // back in play once you got up
+                else FinishRespawn();
             }
         }
         else
@@ -436,34 +453,6 @@ public class PlayerMove : MonoBehaviour
         else if (hit.transform.TryGetComponent(out FallingPlatform platform)) platform.StepOn();
     }
 
-    //---- Respawn landing
-
-    private bool SlamOn => slam != null && slam.isActiveAndEnabled;
-
-    // Back in play after a respawn (RespawnSlam calls it once you got up)
-    public void FinishRespawn()
-    {
-        if (!awaitingLanding) return;
-        awaitingLanding = false;
-        touchedDown = false;
-        RespawnLanded?.Invoke();
-    }
-
-    // Only the vertical speed: it can keep moving sideways while it brakes, wherever it is now
-    private void BrakeBeforeGround()
-    {
-        if (verticalVelocity >= -respawnLandingSpeed) return;
-        if (!Physics.Raycast(transform.position, Vector3.down, out RaycastHit ground, 200f, SolidMask, QueryTriggerInteraction.Ignore)) return;
-
-        float height = ground.distance - characterController.height * 0.5f - 0.6f;   // brakes until 0.6 m above, then drops
-        if (height > respawnBrakeDistance) return;
-        if (height <= 0f) { landingBrake = false; return; }
-
-        float speed = -verticalVelocity;
-        float braking = (speed * speed - respawnLandingSpeed * respawnLandingSpeed) / (2f * height);   // stops right at that height
-        verticalVelocity = -Mathf.Max(respawnLandingSpeed, speed - braking * Time.deltaTime);
-    }
-
     //---- Thrown
 
     // Something throws the player (a bridge bursting out of the ground): off the ground with this velocity,
@@ -482,7 +471,7 @@ public class PlayerMove : MonoBehaviour
 
     //---- Portal (PortalWindow)
 
-    // What is right under the player (MemeRecall: which island or bridge you are on)
+    // What is right under the player (PlayerGrab's recall: which island or bridge you are on)
     public Transform GroundUnder => lastGroundHit;
 
     // Moved by something else: no walking, gravity, collisions or falls into the void until FallFrom
@@ -500,7 +489,7 @@ public class PlayerMove : MonoBehaviour
     // A fall like into the void for what you carry (the meme window shows its Fall change; back when you land)
     public void AnnounceFall() => VoidFallStarted?.Invoke();
 
-    // Comes out there, falling at Speed: it lands as from a respawn (RespawnSlam), and that point is its respawn now
+    // Comes out there, falling at Speed: it lands as from a respawn (the slam), and that point is its respawn now
     public void FallFrom(Vector3 position, Quaternion rotation, float speed, Transform respawn, Vector3 carry = default)
     {
         transform.SetParent(null);
@@ -546,111 +535,6 @@ public class PlayerMove : MonoBehaviour
         // Fall reference = the ground below, however far (a spawn point high in the air must not count as falling into the void)
         bool groundBelow = Physics.Raycast(transform.position, Vector3.down, out RaycastHit ground, 500f, SolidMask, QueryTriggerInteraction.Ignore);
         lastGroundY = groundBelow ? ground.point.y : transform.position.y;
-        look.ResetSmoothing();
-        debugHeight = transform.position.y;
-    }
-
-    //---- Respawn (before: PlayerRespawn)
-
-    // ¿Cayó al vacío? Si no, actualiza el punto de respawn según la isla que pisa
-    private bool CheckFallAndRespawn()
-    {
-        float depth = SlamOn ? slam.fallDepth : LevelManager.Instance != null ? LevelManager.Instance.dropDistance : float.MaxValue;
-        if (LevelManager.Instance != null && transform.position.y < lastGroundY - depth)
-        {
-            Respawn();
-            return true;
-        }
-
-        if (!Physics.Raycast(transform.position, Vector3.down, out RaycastHit hit, 5f, Physics.DefaultRaycastLayers & ~PhysicsLayers.PropsMask)) return false;
-        lastGroundY = hit.point.y;                           // el piso de abajo (sigue a islas y ascensores que se mueven)
-        if (hit.transform != lastGroundHit)                  // something new under: which island it is
-        {
-            lastGroundHit = hit.transform;
-            groundIsland = FindParentWithTag(hit.transform.gameObject, "Isla");
-            if (groundIsland == null && hit.transform.GetComponentInParent<Bridge>() == null)   // (an island without the Isla tag)
-            {
-                Island island = hit.transform.GetComponentInParent<Island>();
-                if (island != null) groundIsland = island.gameObject;
-            }
-        }
-        if (groundIsland == null) return false;              // a bridge
-
-        // On an island: its respawn point nearest to you (a course can have one before each part), checked now and then
-        if (groundIsland == lastIsland && Time.time < nextRespawnCheck) return false;
-        lastIsland = groundIsland;
-        nextRespawnCheck = Time.time + 0.25f;
-        Transform point = LevelManager.Instance.RespawnPointOf(groundIsland, transform.position);
-        if (point == null && isGrounded) point = SafeSpot(groundIsland, hit.point);   // no RespawnPoint on it: where you last stood
-        if (point != null) respawnPoint = point;
-        return false;
-    }
-
-    // An island without a RespawnPoint: you reappear where you last stood on it (it floats with it)
-    private Transform safeSpot;
-    private GameObject warnedIsland;
-    private Transform SafeSpot(GameObject island, Vector3 ground)
-    {
-        if (safeSpot == null) safeSpot = new GameObject("PlayerSafeSpot").transform;
-        if (safeSpot.parent != island.transform) safeSpot.SetParent(island.transform, true);
-        safeSpot.position = ground;
-        if (warnedIsland != island)
-        {
-            warnedIsland = island;
-            Debug.LogWarning($"[PlayerMove] '{island.name}' has no RespawnPoint: falling, you reappear where you last stood on it (Memetica > Level > Respawn > New Respawn Point).", island);
-        }
-        return safeSpot;
-    }
-
-    // Fija el respawn a mano. Lo usa el ascensor: el jugador llega al Área 1 sin haberla pisado.
-    public void SetRespawn(Transform point)
-    {
-        respawnPoint = point;
-        lastGroundHit = null;   // obliga a volver a revisar el piso en el próximo frame
-    }
-
-    private void Respawn()
-    {
-        VoidRespawned?.Invoke();
-        // Its island went down meanwhile (invisible, nothing to land on): back to the start
-        if (respawnPoint == null || Lift.IsHiddenAt(respawnPoint))
-        {
-            Debug.LogWarning($"[PlayerMove] Respawn '{(respawnPoint != null ? respawnPoint.name : "none")}' " +
-                             (respawnPoint != null ? "is in an island that is down" : "not set") + ": back to the start respawn point.", respawnPoint);
-            respawnPoint = LevelManager.Instance.startRespawnPoint; lastIsland = null; lastGroundHit = null;
-        }
-
-        // Drop Distance above the ground of the RespawnPoint: it falls down onto it (and brakes before landing)
-        Vector3 from = LevelManager.Instance.RespawnPosition(respawnPoint, out float groundY);
-        respawnPoint.TryGetComponent(out RespawnPoint spot);
-        if (spot != null && spot.height > 0f) from.y = groundY + spot.height;   // its own height
-        lastGroundY = groundY;
-        // El CharacterController ignora el cambio de posición si está prendido
-        characterController.enabled = false;
-        transform.position = from;
-        characterController.enabled = true;
-        horizontalVelocity = Vector3.zero;
-        verticalVelocity = 0f;
-        movingGround = null;
-        landingBrake = respawnBrakeDistance > 0f;
-        awaitingLanding = true;
-        touchedDown = false;
-
-        // Slam: from close and fast, no brake (RespawnSlam lands it)
-        if (SlamOn)
-        {
-            characterController.enabled = false;
-            transform.position = new Vector3(from.x, groundY + (spot != null && spot.height > 0f ? spot.height : slam.height), from.z);
-            characterController.enabled = true;
-            verticalVelocity = -slam.StartSpeed(gravity);
-            landingBrake = false;
-        }
-
-        // Facing its arrow, looking ahead: ready to try again
-        if (spot != null && spot.face)
-        {
-            transform.rotation = Quaternion.LookRotation(spot.Facing, Vector3.up);   // (the head keeps its angle: looking down, still down)
-        }
         look.ResetSmoothing();
         debugHeight = transform.position.y;
     }

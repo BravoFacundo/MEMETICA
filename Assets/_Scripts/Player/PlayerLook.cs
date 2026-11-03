@@ -1,26 +1,32 @@
-//First Person Camera: looking around, zoom, and everything the player does by looking at things.
+//First Person Camera: looking around, zoom, and what the camera does on its own.
 //Being able to see far away is necessary for players to solve the puzzles, it allows them to plan their moves.
 //  Look & Zoom   mouse and right click
-//  Hold          grab, carry and drop memes (before: PlayerHoldObjects)
+//  Focus         someone wants you to look at something (the raffle, your way rising): you can still look around it,
+//                within Focus Radius, softly pulled back when you go past it. No Cinemachine: it only limits the angles
 //  Paintings     tells the painting you look at that you are watching it (it plays and fades itself)
 //  Shake         camera shake when islands move (before: CameraShake)
 //  Smoothing     the camera absorbs small pops of the body in height (PlayerMove tells it what the ground carried)
 //  Pose          someone else bends the head for a moment (RespawnSlam: face to the ground and back up)
-//Goes on the Main Camera.
+//Goes on the Player (root), with PlayerMove and PlayerGrab. The Main Camera is its child (CameraHolder > Main Camera).
 
+using System;
 using System.Collections;
 using UnityEngine;
 
 public class PlayerLook : MonoBehaviour
 {
-    private Transform playerTransform;
-    
+    // The player's (found once: there is one per game scene, none in the Menu)
+    private static PlayerLook instance;
+    public static PlayerLook Instance => instance != null ? instance : (instance = FindObjectOfType<PlayerLook>());
+
     [Section("Look")]
     public bool playerCanLook = true;   // the game starts looking (tutorial popups no longer block it)
     [Tooltip("Base sensitivity: the value at the middle of the settings slider (the slider scales it x0.25 to x4)")]
     public float mouseSensitivity = 3f;
     [Tooltip("Gamepad: degrees per second the right stick turns you, all the way (the settings slider scales it too)")]
     public float padLookSpeed = 160f;
+    [Tooltip("The player's camera. Empty: the Camera among its children (Main Camera)")]
+    [SerializeField] private Camera playerCamera;
     private float sensitivityMultiplier = 1f;   // from the settings window
     private float sensitivityReduction = 1;
     private float xRotation = 0f;
@@ -30,29 +36,18 @@ public class PlayerLook : MonoBehaviour
     [SerializeField] private int defaultFOV = 90;
     [SerializeField] private int zoomFOV = 20;
 
-    [Section("Hold Memes")]
-    public bool canHold = true;
-    public float pickUpRange = 2.5f;
-    [Tooltip("Debug: each click to grab says in the Console what it hit and what you hold")]
-    public bool logGrabs = false;
-    public float moveForce = 250;
-    [Tooltip("The held meme never gets closer to the camera than this (meters), so it doesn't hit your face or cross the near clip plane")]
-    public float minHoldDistance = 0.6f;
-    [Tooltip("Letting go: it first goes to the Drop Pivot (child of the camera, in front of you) and is let go there. 0 = let go where it is")]
-    public float dropTime = 0.12f;
-    private Transform holdParent;   // GrabPivot: where it is carried
-    private Transform dropParent;   // DropPivot: where it is let go
-    private Coroutine dropping;
-    private bool carriedInHud;      // a meme window: carried on the screen, as its HUD version (MemeDock)
-    private Rigidbody heldBody;
-    private Collider[] heldColliders;
-    private Collider playerCollider;
+    [Section("Focus")]
+    [Tooltip("Degrees you can look away from a focus, sideways (up and down: Focus Vertical of it)")]
+    public float focusRadius = 25f;
+    [Range(0f, 1f)] public float focusVertical = 0.6f;
+    [Tooltip("Seconds the view takes to come back inside the radius (a rubber band: you can push past it a little)")]
+    public float focusPull = 0.3f;
+    private Func<Vector3> focus;
+    private float focusRadiusNow;
 
     [Section("Paintings")]
     [SerializeField] private float paintingLookRange = 10f;
     private Painting currentPainting;
-
-    private Camera playerCamera;
 
     [Section("Camera")]
     [Tooltip("Seconds the camera takes to catch up when the body pops in height (bumps riding rising islands, steps, rough ground). 0 = off. What the ground carries is never smoothed")]
@@ -66,39 +61,35 @@ public class PlayerLook : MonoBehaviour
 
     [Section("Debug", Closed = true)]
     [ReadOnlyField, SerializeField] private bool isZooming = false;
-    [ReadOnlyField] public GameObject heldObject;
 
     private Vector3 cameraRestPosition;
     private Vector3 shakeOffset;
     private float poseDown, poseRoll, poseDip;   // SetPose: toward the ground (0-1), tilt (degrees), lower (meters)
 
+    // The camera, and the head that turns up and down (its transform)
+    public Camera Camera => playerCamera;
+    public Transform Head => playerCamera.transform;
+
     // On: the mouse doesn't turn the camera (an animation is using it, e.g. RespawnSlam)
     public bool LookLocked { get; set; }
     // On: the mouse moves the cursor instead of the camera (RetroCursor free, Ctrl held); clicks don't grab
     public bool CursorFree { get; set; }
-    // Where the held meme is pulled to (MemeDock flies it back there)
-    public Transform HoldPoint => holdParent;
 
-    // Read by RetroCursor to show the zoom and hand icons
+    // Read by RetroCursor to show the zoom icons
     public bool IsZooming => isZooming;
     public float DefaultFOV => defaultFOV;
     public float ZoomFOV => zoomFOV;
-    public bool LookingAtMeme { get; private set; }
-    // Clicking now would pick up what you look at: hands free, or an optional meme (DexCollectible: never in the hand)
-    public bool CanGrabLooked { get; private set; }
-    // Carrying a meme window on the screen (Game): the middle of the screen is free, the aim stays
-    public bool CarriedInHud => carriedInHud;
+
+    void Awake()
+    {
+        instance = this;
+        if (playerCamera == null) playerCamera = GetComponentInChildren<Camera>();
+    }
 
     void Start()
     {
-        playerTransform = transform.parent.parent.GetComponent<Transform>();
-        playerCamera = GetComponent<Camera>();
-        cameraRestPosition = transform.localPosition;
-        lastBodyHeight = playerTransform.position.y;
-        holdParent = GameObject.Find("GrabPivot").transform;
-        GameObject dropPivot = GameObject.Find("DropPivot");
-        if (dropPivot != null) dropParent = dropPivot.transform;
-        playerCollider = playerTransform.GetComponent<CharacterController>();
+        cameraRestPosition = Head.localPosition;
+        lastBodyHeight = transform.position.y;
         Cursor.lockState = CursorLockMode.Locked;
 
         // Sensitivity comes from the saved settings and follows the settings window
@@ -107,32 +98,26 @@ public class PlayerLook : MonoBehaviour
     }
 
     void OnDestroy() => SettingsManager.Changed -= ApplySettings;
-
-    // Physics forces go in FixedUpdate: same pull at any frame rate (before: Update, stronger at high FPS)
-    void FixedUpdate()
-    {
-        if (heldObject == null || dropping != null || carriedInHud || UIManager.GameIsPaused || !canHold) return;
-        PullHeldObject();
-        KeepHeldObjectOffFace();
-    }
     void ApplySettings() => sensitivityMultiplier = SettingsManager.MouseSensitivityMultiplier;
-    
+
     void Update()
-    {        
+    {
         if (playerCanLook && !LookLocked && !CursorFree)
         {
             MovePlayerView();
             ZoomOnPlayerView();
         }
         else if (LookLocked) ApplyRotation();
-        UpdateHeldMeme();
         UpdateLookedPainting();
     }
+
+    // After everything moved you (the platform turning, the ground carrying): the focus pulls from where you ended up
+    void LateUpdate() => ApplyFocus();
 
     //---- Look & Zoom
 
     //In the project, the Player object moves according to its forward vector.
-    //This function not only rotates the camera on the Y axis but also rotates the player's body on the X axis to not hinder their movement.
+    //This function not only rotates the camera on the X axis but also rotates the player's body on the Y axis to not hinder their movement.
     private void MovePlayerView()
     {
         float sensitivity = mouseSensitivity * sensitivityMultiplier / sensitivityReduction;
@@ -144,11 +129,11 @@ public class PlayerLook : MonoBehaviour
         xRotation = Mathf.Clamp(xRotation, -90f, 90f);
 
         ApplyRotation();
-        playerTransform.Rotate(Vector3.up * mouseX);
+        transform.Rotate(Vector3.up * mouseX);
     }
 
     // Where you look, bent by the pose (if any)
-    void ApplyRotation() => transform.localRotation = Quaternion.Euler(Mathf.LerpUnclamped(xRotation, 85f, poseDown), 0f, poseRoll);
+    void ApplyRotation() => Head.localRotation = Quaternion.Euler(Mathf.LerpUnclamped(xRotation, 85f, poseDown), 0f, poseRoll);
 
     private void ZoomOnPlayerView()
     {
@@ -158,177 +143,42 @@ public class PlayerLook : MonoBehaviour
         sensitivityReduction = isZooming ? 10 : 1;
     }
 
-    //---- Hold memes
+    //---- Focus
 
-    private void UpdateHeldMeme()
+    // Look around this, never far from it (radius in degrees; -1: Focus Radius). It can move (a rising island)
+    public void Focus(Func<Vector3> target, float radius = -1f)
     {
-        if (UIManager.GameIsPaused || ModalPopup.Open || !canHold)
-        {
-            if (logGrabs && GameInput.GrabDown) Debug.Log($"[PlayerLook] Click ignored: paused {UIManager.GameIsPaused}, modal popup {ModalPopup.Open}, can hold {canHold}", this);
-            return;
-        }   // no grabbing while paused, a modal popup is up (its click closes it) or riding an elevator
-        if (CursorFree) { if (logGrabs && GameInput.GrabDown) Debug.Log("[PlayerLook] Click ignored: free cursor", this); LookingAtMeme = CanGrabLooked = false; return; }   // the click is the cursor's (RetroCursor)
-
-        // Ignora triggers: si no, la zona del pedestal (que envuelve al meme) tapa el rayo
-        LookingAtMeme = Physics.Raycast(transform.position, transform.forward, out RaycastHit hit, pickUpRange, ~PhysicsLayers.PropsMask, QueryTriggerInteraction.Ignore)
-                        && hit.transform.CompareTag("Meme");
-        DexCollectible dex = LookingAtMeme ? hit.transform.GetComponentInParent<DexCollectible>() : null;
-        CanGrabLooked = LookingAtMeme && (heldObject == null || dex != null);
-
-        if (GameInput.GrabDown)
-        {
-            if (logGrabs) Debug.Log($"[PlayerLook] Click: looking at '{(hit.transform != null ? hit.transform.name : "nothing")}' " +
-                                    $"(tag {(hit.transform != null ? hit.transform.tag : "-")}, {hit.distance:F1} m of {pickUpRange}), holding '{(heldObject != null ? heldObject.name : "nothing")}', dex {dex != null}", this);
-            if (dex != null) dex.Collect();   // an optional meme: to its own HUD place, your hand stays as it is
-            else if (heldObject == null) { if (LookingAtMeme) PickUpObject(hit.transform.gameObject); }
-            else if (dropping == null) DropObject();
-        }
+        focus = target;
+        focusRadiusNow = radius >= 0f ? radius : focusRadius;
     }
+    public void Focus(Transform target, float radius = -1f) { if (target != null) Focus(() => target.position, radius); }
+    public void Focus(Vector3 point, float radius = -1f) => Focus(() => point, radius);
 
-    // Same pull as always: a force toward the grab point, so it still feels physical
-    private void PullHeldObject()
+    // Free again
+    public void ReleaseFocus() => focus = null;
+    public bool Focused => focus != null;
+
+    void ApplyFocus()
     {
-        if (Vector3.Distance(heldObject.transform.position, holdParent.position) > 0.1f)
-        {
-            Vector3 moveDirection = holdParent.position - heldObject.transform.position;
-            heldBody.AddForce(moveDirection * moveForce);
-        }
-    }
+        if (focus == null || LookLocked || Time.deltaTime <= 0f) return;   // (an animation has the head; the pause: still)
+        Vector3 to = focus() - Head.position;
+        float flat = new Vector2(to.x, to.z).magnitude;
+        if (to.sqrMagnitude < 0.01f) return;
 
-    // If it lags behind (walking backwards, turning fast) it is pushed out to the minimum distance,
-    // and only its speed toward the camera is cancelled: the rest of the physics stays
-    private void KeepHeldObjectOffFace()
-    {
-        Vector3 forward = transform.forward;
-        float distance = Vector3.Dot(heldBody.position - transform.position, forward);
-        if (distance >= minHoldDistance) return;
+        float targetYaw = Mathf.Atan2(to.x, to.z) * Mathf.Rad2Deg;
+        float targetPitch = Mathf.Atan2(-to.y, Mathf.Max(flat, 0.01f)) * Mathf.Rad2Deg;   // (down: positive, as xRotation)
+        float yawOff = Mathf.DeltaAngle(targetYaw, transform.eulerAngles.y);
+        float pitchOff = xRotation - targetPitch;
 
-        heldBody.position += forward * (minHoldDistance - distance);
-        float towardCamera = Vector3.Dot(heldBody.velocity, forward);
-        if (towardCamera < 0f) heldBody.velocity -= forward * towardCamera;
-    }
+        // Past the radius: pulled back toward its edge, softly (inside it, nothing happens)
+        float pull = 1f - Mathf.Exp(-Time.deltaTime / Mathf.Max(focusPull, 0.01f));
+        float wideYaw = focusRadiusNow, widePitch = focusRadiusNow * focusVertical;
+        float newYawOff = Mathf.Lerp(yawOff, Mathf.Clamp(yawOff, -wideYaw, wideYaw), pull);
+        float newPitchOff = Mathf.Lerp(pitchOff, Mathf.Clamp(pitchOff, -widePitch, widePitch), pull);
 
-    // While held it passes through the player's body (before: it bumped into the capsule and got pushed to the face)
-    private void IgnorePlayerCollision(bool ignore)
-    {
-        if (playerCollider == null || heldColliders == null) return;
-        foreach (Collider c in heldColliders)
-            if (c != null && !c.isTrigger) Physics.IgnoreCollision(c, playerCollider, ignore);
-    }
-
-    private void PickUpObject(GameObject pickObject, float hudSeconds = 0f)
-    {
-        if (!pickObject.TryGetComponent(out Rigidbody objectRb)) return;
-
-        heldObject = pickObject;
-        heldBody = objectRb;
-        heldColliders = pickObject.GetComponentsInChildren<Collider>();
-        objectRb.constraints = RigidbodyConstraints.None;
-
-        // A meme window: on the screen, exactly as its HUD version (MemeDock). The rest: pulled to the GrabPivot
-        carriedInHud = MemeDock.Instance != null && MemeDock.Instance.CanCarry(pickObject);
-        if (carriedInHud) MemeDock.Instance.Carry(pickObject.GetComponent<Meme>(), hudSeconds);
-        else
-        {
-            objectRb.isKinematic = false;
-            objectRb.useGravity = false;
-            objectRb.freezeRotation = true;
-            objectRb.drag = 10;
-            objectRb.transform.parent = holdParent;
-            IgnorePlayerCollision(true);
-        }
-
-        if (heldObject.TryGetComponent(out Meme meme)) meme.PickUp();
-    }
-
-    // Out of the hand without letting it go anywhere (it is gone: DexCollectible)
-    public void ForgetHeld(GameObject meme)
-    {
-        if (heldObject != meme) return;
-        heldObject = null;
-        heldBody = null;
-        carriedInHud = false;
-    }
-
-    // Into the hand from anywhere (MemeRecall): as if picked up; a meme window flies to the HUD in Hud Seconds
-    public void Grab(GameObject meme, float hudSeconds = 0f)
-    {
-        if (heldObject == null) PickUpObject(meme, hudSeconds);
-    }
-
-    // Let go: from the Drop Pivot if there is one (it goes there first, from the corner), else where it is
-    public void DropObject()
-    {
-        if (dropping != null) return;
-        Vector3 size = heldObject.transform.lossyScale;
-        if (carriedInHud) { size = MemeDock.Instance.Uncarry(heldObject.GetComponent<Meme>(), dropTime); carriedInHud = false; }   // from the screen to the world
-        if (dropParent == null || dropTime <= 0f) { heldObject.transform.localScale = size; LetGo(); return; }
-        dropping = StartCoroutine(DropFromPivot(size));
-    }
-
-    // To the Drop Pivot (growing back to its size in the world, if it came from the screen), then let go
-    IEnumerator DropFromPivot(Vector3 size)
-    {
-        heldBody.isKinematic = true;
-        heldObject.transform.parent = null;
-        Vector3 from = heldObject.transform.position;
-        Vector3 fromSize = heldObject.transform.localScale;
-        for (float t = 0f; t < dropTime && heldObject != null; t += Time.deltaTime)
-        {
-            float p = Mathf.SmoothStep(0f, 1f, t / dropTime);
-            heldObject.transform.position = Vector3.Lerp(from, dropParent.position, p);
-            heldObject.transform.localScale = Vector3.Lerp(fromSize, size, p);
-            yield return null;
-        }
-        if (heldObject != null) heldObject.transform.localScale = size;
-        dropping = null;
-        if (heldObject == null) yield break;   // snapped onto a pedestal meanwhile
-        heldObject.transform.position = dropParent.position;
-        heldBody.isKinematic = false;
-        heldBody.velocity = Vector3.zero;
-        LetGo();
-    }
-
-    void LetGo()
-    {
-        Rigidbody heldRig = heldObject.GetComponent<Rigidbody>();
-        heldRig.useGravity = true;
-        heldRig.freezeRotation = false;
-        heldRig.drag = 1;
-
-        if (heldObject.TryGetComponent(out Meme meme)) meme.Drop();
-
-        IgnorePlayerCollision(false);
-        heldObject.transform.parent = null;
-        heldObject = null;
-        heldBody = null;
-    }
-
-    //To avoid bugs or cheating, when the meme gets close enough to the pedestal it relocates until it is grabbed again.
-    //The pedestal tells the Meme itself (Meme.PlaceOnPedestal); here only the physics and the hand are released.
-    // Returns its size in the world. From the screen (a meme window in the HUD) it comes out where the HUD one is, as
-    // big as it showed: the pedestal flies it to its socket in Snap Time, growing back to that size
-    public Vector3 SnapObject(GameObject memeObject, float snapTime = 0f)
-    {
-        Vector3 size = memeObject.transform.lossyScale;
-        if (carriedInHud && heldObject == memeObject)
-        {
-            size = MemeDock.Instance.Uncarry(memeObject.GetComponent<Meme>(), snapTime);
-            carriedInHud = false;
-        }
-        Rigidbody snapRig = memeObject.GetComponent<Rigidbody>();
-        snapRig.useGravity = true;
-        snapRig.drag = 1;
-        snapRig.constraints = RigidbodyConstraints.FreezeAll;
-
-        if (heldObject != null && heldObject == memeObject)
-        {
-            IgnorePlayerCollision(false);
-            if (heldObject.transform.parent != null) heldObject.transform.parent = null;
-            heldObject = null;
-            heldBody = null;
-        }
-        return size;
+        transform.Rotate(Vector3.up * (newYawOff - yawOff));
+        xRotation = Mathf.Clamp(targetPitch + newPitchOff, -90f, 90f);
+        ApplyRotation();
     }
 
     //---- Paintings
@@ -347,19 +197,26 @@ public class PlayerLook : MonoBehaviour
     // The painting the camera points at: its canvas or its image (not the easel or the chair)
     private Painting GetLookedPainting()
     {
-        if (!Physics.Raycast(transform.position, transform.forward, out RaycastHit hit, paintingLookRange, Physics.DefaultRaycastLayers & ~PhysicsLayers.PropsMask)) return null;
+        if (!Physics.Raycast(Head.position, Head.forward, out RaycastHit hit, paintingLookRange, Physics.DefaultRaycastLayers & ~PhysicsLayers.PropsMask)) return null;
         Painting painting = hit.transform.GetComponentInParent<Painting>();
         return painting != null && painting.Shows(hit.transform) ? painting : null;
     }
 
     //---- Shake
 
+    // The player's camera shakes (islands, bridges, stones…): nothing if there is no player or no amount
+    public static void Shake(float duration, float magnitude)
+    {
+        if (magnitude <= 0f || Instance == null) return;
+        Instance.StartCoroutine(Instance.ShakeTheCamera(duration, magnitude));
+    }
+
     //Simulates in the camera the shaking of a large moving object (the islands), as feedback of something the player can't see yet.
     // Smooth rumble (noise, not a random jump every frame) that comes in fast and dies out.
     // Always around the camera's rest place, so two shakes at once never leave it displaced
     public IEnumerator ShakeTheCamera(float duration, float magnitude)
     {
-        float seed = Random.value * 100f;
+        float seed = UnityEngine.Random.value * 100f;
         duration = Mathf.Max(duration, 0.01f);
 
         for (float elapsed = 0f; elapsed < duration; )
@@ -387,8 +244,8 @@ public class PlayerLook : MonoBehaviour
     // the camera absorbs that and catches up. What the ground carried (rising, floating) moves it exactly, so it never lags behind
     public void FollowBody(float carriedHeight, bool onGround)
     {
-        float ownMove = playerTransform.position.y - lastBodyHeight - carriedHeight;
-        lastBodyHeight = playerTransform.position.y;
+        float ownMove = transform.position.y - lastBodyHeight - carriedHeight;
+        lastBodyHeight = transform.position.y;
 
         if (cameraSmoothTime <= 0f) cameraLag = 0f;
         else
@@ -402,12 +259,12 @@ public class PlayerLook : MonoBehaviour
     // After a teleport or a respawn: no catching up from the old place
     public void ResetSmoothing()
     {
-        lastBodyHeight = playerTransform.position.y;
+        lastBodyHeight = transform.position.y;
         cameraLag = 0f;
         ApplyCameraOffset();
     }
 
-    void ApplyCameraOffset() => transform.localPosition = cameraRestPosition + Vector3.up * (cameraLag - poseDip) + shakeOffset;
+    void ApplyCameraOffset() => Head.localPosition = cameraRestPosition + Vector3.up * (cameraLag - poseDip) + shakeOffset;
 
     //---- Pose
 

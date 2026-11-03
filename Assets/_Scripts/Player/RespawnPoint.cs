@@ -16,7 +16,7 @@ public class RespawnPoint : MonoBehaviour
 {
     [Tooltip("Turns you to face its arrow (blue) when you reappear")]
     public bool face = true;
-    [Tooltip("Meters above it you reappear. 0 = the default (Game: the player's RespawnSlam Height; Game_Old: LevelManager's Drop Distance)")]
+    [Tooltip("Meters above it you reappear. 0 = the default (Slam: the player's Slam Height; Classic: LevelManager's Drop Distance)")]
     public float height = 0f;
     public static readonly List<RespawnPoint> All = new List<RespawnPoint>();
 
@@ -137,8 +137,8 @@ public class RespawnPoint : MonoBehaviour
     float EditorHeight()
     {
         if (height > 0f) return height;
-        RespawnSlam slam = FindObjectOfType<RespawnSlam>();
-        if (slam != null && slam.enabled) return slam.height;
+        PlayerMove move = FindObjectOfType<PlayerMove>();
+        if (move != null && move.respawnStyle == RespawnStyle.Slam) return move.slamHeight;
         LevelManager level = FindObjectOfType<LevelManager>();
         return level != null ? level.dropDistance : 8f;
     }

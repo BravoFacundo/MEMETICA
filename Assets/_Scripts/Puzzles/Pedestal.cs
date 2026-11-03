@@ -89,9 +89,8 @@ public class Pedestal : MonoBehaviour
     bool seating;              // the meme window flying from the HUD to the socket
     RigidbodyInterpolation seatedInterpolation = RigidbodyInterpolation.Interpolate;   // what it had before (given back when let go)
 
-    static PlayerLook playerLook;
-    // The player's camera (found by its PlayerLook, not by the MainCamera tag: other cameras may have it)
-    static PlayerLook look => playerLook != null ? playerLook : (playerLook = FindObjectOfType<PlayerLook>());
+    // The player's hand (its camera: Eye, not the MainCamera tag: other cameras may have it)
+    static PlayerGrab hand => PlayerGrab.Instance;
 
     void Awake()
     {
@@ -133,16 +132,16 @@ public class Pedestal : MonoBehaviour
         return null;
     }
 
-    // MemeRecall's Snap In Range: carried within reach of a pedestal that waits for it (the randomizer, or a white one
+    // PlayerGrab's Snap In Range: carried within reach of a pedestal that waits for it (the randomizer, or a white one
     // whose Key Meme it shows), it goes in without looking. Once per pedestal (a retiring randomizer: each round)
     bool AutoSnap(GameObject inHand)
     {
-        MemeRecall assist = MemeRecall.Instance;
+        PlayerGrab assist = hand;
         if (assist == null || !assist.AutoSnaps) return false;
         if (everRight && !(randomizer != null && retire != null)) return false;   // (a randomizer that goes down: every round it is back up)
-        if (randomizer != null && randomizer.snapRadius > 0f) return randomizer.InSnapArea(look.transform.position);   // on its platform
+        if (randomizer != null && randomizer.snapRadius > 0f) return randomizer.InSnapArea(hand.Eye.position);   // on its platform
         float radius = trigger.radius * Mathf.Max(transform.lossyScale.x, transform.lossyScale.y, transform.lossyScale.z);
-        bool inRange = Vector3.Distance(look.transform.position, socket.position) <= look.pickUpRange + radius;
+        bool inRange = Vector3.Distance(hand.Eye.position, socket.position) <= hand.pickUpRange + radius;
         if (KeylessPedestal && randomizer == null)   // a black one: only when you bring it in, not when you pick it up already near it
         {
             bool entering = inRange && !(rangeMeme == inHand && rangeWas);
@@ -166,7 +165,7 @@ public class Pedestal : MonoBehaviour
     void OnTriggerEnter(Collider other)
     {
         if (!Usable || HasMeme || !other.CompareTag("Meme") || other.gameObject == releasedMeme) return;
-        if (look.heldObject == other.gameObject) return;
+        if (hand.heldObject == other.gameObject) return;
         Snap(other.gameObject);
     }
 
@@ -181,18 +180,18 @@ public class Pedestal : MonoBehaviour
     // The camera looks at the zone (the sphere around the Socket), within reach
     bool LookedAt()
     {
-        Transform cam = look.transform;
+        Transform cam = hand.Eye;
         float radius = trigger.radius * Mathf.Max(transform.lossyScale.x, transform.lossyScale.y, transform.lossyScale.z);
         Vector3 toSocket = socket.position - cam.position;
         float along = Vector3.Dot(toSocket, cam.forward);
-        if (along < 0f || along > look.pickUpRange + radius) return false;
+        if (along < 0f || along > hand.pickUpRange + radius) return false;
         return (toSocket - cam.forward * along).sqrMagnitude <= radius * radius;
     }
 
     void Snap(GameObject memeObject)
     {
         bool fromHud = MemeDock.Instance != null && memeObject.TryGetComponent(out Meme inHud) && MemeDock.Instance.OnScreen(inHud);
-        Vector3 size = look.SnapObject(memeObject, fromHud ? snapFlyTime : 0f);
+        Vector3 size = hand.SnapObject(memeObject, fromHud ? snapFlyTime : 0f);
         MemeObject = memeObject;   // taken: nothing else snaps in meanwhile
         if (fromHud) { seating = true; evaluating = StartCoroutine(FlyIn(memeObject, size)); return; }
         Seat(memeObject);
@@ -240,12 +239,12 @@ public class Pedestal : MonoBehaviour
     // (placing it made a fake exit, picking it up made a fake entry that snapped it back)
     void Update()
     {
-        if (look == null) return;
+        if (hand == null) return;
         if (releasedMeme != null && !InsideZone(releasedMeme) && !LookedAt()) releasedMeme = null;   // it really left: it can be placed again
         if (!HasMeme)
         {
             // In the hand: in when you look at the zone
-            GameObject inHand = look.heldObject;
+            GameObject inHand = hand.heldObject;
             if (Usable && inHand != null && inHand != releasedMeme && inHand.CompareTag("Meme") && (LookedAt() || AutoSnap(inHand))) Snap(inHand);
             return;
         }

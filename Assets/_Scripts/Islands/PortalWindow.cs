@@ -12,7 +12,7 @@ using UnityEngine;
 //   Through  when your eyes reach the screen you are already above the hub, seeing the same thing: no cut. Above you
 //            a window like it shows where you came from for a moment, then closes (Exit Window). You keep falling
 //            and land on the hub's respawn point (Exit) with the slam
-// With MemeRecall's Bring For Portal, a meme window left behind comes to your hand before it takes you.
+// With PlayerGrab's Bring For Portal, a meme window left behind comes to your hand before it takes you.
 // Made by Memetica > Level > Portal > New Portal Window (where the Scene view looks), inside its island.
 // The camera above the hub only draws while you are near and it can be seen.
 [DefaultExecutionOrder(1000)]   // after the player and its camera moved this frame
@@ -145,7 +145,7 @@ public class PortalWindow : MonoBehaviour
     {
         player = FindObjectOfType<PlayerMove>();
         look = FindObjectOfType<PlayerLook>();
-        playerCamera = look != null ? look.GetComponent<Camera>() : Camera.main;
+        playerCamera = look != null ? look.Camera : Camera.main;
         restLocal = transform.localPosition;
         renderers = GetComponentsInChildren<Renderer>(true);
         if (screen != null) material = screen.material;   // its own copy
@@ -226,9 +226,9 @@ public class PortalWindow : MonoBehaviour
         if (playerBody == null && player != null) playerBody = player.GetComponent<CharacterController>();
         bool over = player != null && !player.Scripted && OnScreen(player.transform.position, 4f);
 
-        // A meme window left behind comes first (MemeRecall): it takes you once it is in your hand
-        MemeRecall recall = MemeRecall.Instance;
-        bool waiting = over && recall != null && recall.bringForPortal && CarriedWindow == null && recall.BringLeftBehind();
+        // A meme window left behind comes first (PlayerGrab's recall): it takes you once it is in your hand
+        PlayerGrab recall = PlayerGrab.Instance;
+        bool waiting = over && recall != null && recall.RecallOn && recall.bringForPortal && CarriedWindow == null && recall.BringLeftBehind();
         bool allowed = over && !waiting && Allowed();
         SetPassThrough(allowed);
 
@@ -270,9 +270,9 @@ public class PortalWindow : MonoBehaviour
         bool before = standing > 0f;
         standing = on ? standing + Time.deltaTime : 0f;
 
-        // A meme window left behind comes first (MemeRecall): it takes you once it is in your hand
-        MemeRecall recall = MemeRecall.Instance;
-        if (on && recall != null && recall.bringForPortal && CarriedWindow == null && recall.BringLeftBehind())
+        // A meme window left behind comes first (PlayerGrab's recall): it takes you once it is in your hand
+        PlayerGrab recall = PlayerGrab.Instance;
+        if (on && recall != null && recall.RecallOn && recall.bringForPortal && CarriedWindow == null && recall.BringLeftBehind())
         {
             standing = Mathf.Min(standing, standTime * 0.5f);
             ripple = Mathf.MoveTowards(ripple, 1f, Time.deltaTime * 3f);
@@ -525,8 +525,7 @@ public class PortalWindow : MonoBehaviour
         }
         if (turnToExit) player.transform.rotation = toTurn;   // (landed first: the slam hides the rest of the turn)
         PlayerMove.RespawnTouchedDown -= OnLanded;
-        RespawnSlam slam = player.GetComponent<RespawnSlam>();
-        if (landed && slam != null && slam.isActiveAndEnabled) yield break;   // (it locks and frees you itself)
+        if (landed && player.respawnStyle == RespawnStyle.Slam) yield break;   // (the slam locks and frees you itself)
         look.SetPose(0f, 0f, 0f);
         look.LookLocked = false;
         player.InputLocked = false;

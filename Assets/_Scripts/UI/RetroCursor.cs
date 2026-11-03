@@ -44,8 +44,9 @@ public class RetroCursor : MonoBehaviour
     public float worldRange = 6f;
 
     [Header("Aim (Game only)")]
-    [Tooltip("Main Camera. Empty (Menu) = always the free cursor")]
-    public PlayerLook playerLook;
+    // The player's (found by itself: none in the Menu = always the free cursor)
+    private PlayerLook playerLook;
+    private PlayerGrab playerGrab;
     [Tooltip("FOV margin to call the zoom in or out finished")]
     public float fovMargin = 1f;
 
@@ -71,8 +72,10 @@ public class RetroCursor : MonoBehaviour
 
     void Start()
     {
+        playerLook = PlayerLook.Instance;
+        playerGrab = PlayerGrab.Instance;
         if (playerLook == null) return;
-        aimCamera = playerLook.GetComponent<Camera>();
+        aimCamera = playerLook.Camera;
     }
 
     // Windows shows its own cursor again when the game window gets the focus back
@@ -128,8 +131,9 @@ public class RetroCursor : MonoBehaviour
         if (fov < playerLook.DefaultFOV - fovMargin)
             return CursorState.ZoomOut;
 
-        if (playerLook.heldObject != null && !playerLook.CarriedInHud) return CursorState.Hidden;   // Game_Old: the meme in front, seen clean
-        if (playerLook.CanGrabLooked) return CursorState.Grab;   // (carrying yours: only an optional meme)
+        if (playerGrab == null) return CursorState.Dot;
+        if (playerGrab.heldObject != null && !playerGrab.CarriedInHud) return CursorState.Hidden;   // OriginalGame: the meme in front, seen clean
+        if (playerGrab.CanGrabLooked) return CursorState.Grab;   // (carrying yours: only an optional meme)
         return CursorState.Dot;
     }
 

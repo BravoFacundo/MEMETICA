@@ -89,7 +89,7 @@ public class WindowControls : MonoBehaviour
         }
     }
 
-    PlayerLook Look => Camera.main != null ? Camera.main.GetComponent<PlayerLook>() : null;
+    PlayerGrab Look => PlayerGrab.Instance;
 
     void LetGo() => Look.DropObject();
 

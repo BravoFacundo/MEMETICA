@@ -192,7 +192,7 @@ public class LevelManager : MonoBehaviour
         if (facing.sqrMagnitude < 0.001f) facing = Vector3.forward;
         facing.Normalize();
         player.transform.rotation = Quaternion.LookRotation(facing, Vector3.up);
-        PlayerLook look = Camera.main != null ? Camera.main.GetComponent<PlayerLook>() : null;
+        PlayerLook look = PlayerLook.Instance;
         if (look != null) { look.LookLevel(); look.ResetSmoothing(); }
 
         // The meme on the floor in front of you
@@ -211,7 +211,7 @@ public class LevelManager : MonoBehaviour
             meme.PlaceAt(place, Quaternion.LookRotation(facing, Vector3.up), respawn);   // its front to you
             Debug.Log($"[LevelManager] Skip meme '{meme.name}' at {Vector3.Distance(player.transform.position, meme.transform.position):F1} m " +
                       $"(colliders turned back on: {off}, tag {meme.tag}, layer {LayerMask.LayerToName(meme.gameObject.layer)}).", meme);
-            if (meme is MemeWindow window && MemeRecall.Instance != null) MemeRecall.Instance.WaitForPickUp(window);   // (it stays until you take it)
+            if (meme is MemeWindow window && PlayerGrab.Instance != null) PlayerGrab.Instance.WaitForPickUp(window);   // (it stays until you take it)
         }
 
         yield return new WaitForSecondsRealtime(0.2f);

@@ -96,6 +96,11 @@ public class MemeRandomizer : MonoBehaviour
     [Section("After The Raffle")]
     [Tooltip("The player can't walk (only look around) from the raffle until its first bridge starts")]
     public bool lockPlayer = true;
+    [Tooltip("Your view stays near what matters (PlayerLook Focus): the meme while it raffles, then your way's first " +
+             "island while the platform turns and it rises. You can look around it, not away. Free again once you can walk")]
+    public bool focusView = true;
+    [Tooltip("Degrees you can look away from it. -1: PlayerLook's Focus Radius")]
+    public float focusRadius = -1f;
 
     // Its way started rising and you can walk again (GameManager: the virus alert comes then)
     public static event System.Action WayOpened;
@@ -216,12 +221,13 @@ public class MemeRandomizer : MonoBehaviour
 
         // You stay on the platform from the raffle until your way starts (Lock Player)
         Hold(true);
+        if (focusView && PlayerLook.Instance != null) PlayerLook.Instance.Focus(MemeTarget, focusRadius);   // (once the walk to the stand lets go of the head)
         Busy = true;   // (the crosshair hides until the pedestal goes down)
         if (walkToStand) StartCoroutine(WalkToStand());
         raffling = true;
         yield return window.Raffle(left.ConvertAll(a => a.meme), winner.meme, raffleTime, tickClip, winClip);
         raffling = false;
-        if (window.Data != winner.meme) { Hold(false); Busy = false; yield break; }   // taken off halfway
+        if (window.Data != winner.meme) { Hold(false); Busy = false; ReleaseView(); yield break; }   // taken off halfway
 
         drawn.Add(winner);
         StartCoroutine(OpenWay(winner));   // its own (taking the meme off now doesn't stop it); the pedestal says "right" meanwhile
@@ -236,6 +242,8 @@ public class MemeRandomizer : MonoBehaviour
         if (held == null) held = FindObjectOfType<PlayerMove>();
         if (held != null) held.InputLocked = on;
     }
+
+    void ReleaseView() { if (focusView && PlayerLook.Instance != null) PlayerLook.Instance.ReleaseFocus(); }
 
     // Snap Radius: you (the camera) are close enough to the platform's middle
     public bool InSnapArea(Vector3 position)
@@ -271,7 +279,7 @@ public class MemeRandomizer : MonoBehaviour
                 player.transform.rotation = Quaternion.RotateTowards(player.transform.rotation, Quaternion.LookRotation(face, Vector3.up), 240f * Time.deltaTime);
             if (look != null)
             {
-                Vector3 sight = target - look.transform.position;
+                Vector3 sight = target - look.Head.position;
                 float flat = new Vector2(sight.x, sight.z).magnitude;
                 float pitch = Mathf.Atan2(-sight.y, Mathf.Max(flat, 0.01f)) * Mathf.Rad2Deg;   // (down: positive)
                 look.Pitch = Mathf.MoveTowards(look.Pitch, pitch, 120f * Time.deltaTime);
@@ -312,7 +320,7 @@ public class MemeRandomizer : MonoBehaviour
     // The meme taken off while it raffles (the pedestal stops it): free again
     void Update()
     {
-        if (raffling && TryGetComponent(out Pedestal pedestal) && !pedestal.HasMeme) { raffling = false; Hold(false); Busy = false; }
+        if (raffling && TryGetComponent(out Pedestal pedestal) && !pedestal.HasMeme) { raffling = false; Hold(false); Busy = false; ReleaseView(); }
     }
 
     // Into the ground (if it retires), the platform turns toward it (if on one), then its way rises
@@ -323,6 +331,11 @@ public class MemeRandomizer : MonoBehaviour
 
         // Turns with the pedestal up, then the pedestal slams in, facing the target
         Transform target = Target(winner);
+        if (focusView && target != null && PlayerLook.Instance != null)   // the island it turns to and that rises (its middle, as it moves)
+        {
+            Vector3 middle = AimPlatform.CenterOf(target) - target.position;
+            PlayerLook.Instance.Focus(() => target != null ? target.position + middle : MemeTarget(), focusRadius);
+        }
         if (platform != null)
         {
             if (target != null) yield return platform.AimAt(AimPlatform.CenterOf(target), turnTime);
@@ -358,6 +371,7 @@ public class MemeRandomizer : MonoBehaviour
         for (float time = 0f; time < 15f && islandsUp.Exists(Moving); time += Time.deltaTime) yield return null;
         if (bridgeIds.Count > 0 && bridgesAfter > 0f) yield return new WaitForSeconds(bridgesAfter);
         if (player != null) player.InputLocked = false;
+        ReleaseView();
         WayOpened?.Invoke();
         for (int i = 0; i < bridgeIds.Count; i++)
         {

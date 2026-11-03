@@ -349,8 +349,7 @@ public class PathStone : MonoBehaviour
 
         fallState = FallState.Warning;
         Play(s.crackClip);
-        if (s.cameraShakeAmount > 0f && Camera.main != null && Camera.main.TryGetComponent(out PlayerLook look))
-            look.StartCoroutine(look.ShakeTheCamera(0.15f, s.cameraShakeAmount));
+        PlayerLook.Shake(0.15f, s.cameraShakeAmount);
         for (float t = 0f; t < s.warningTime; t += Time.deltaTime * LevelManager.PlatformSpeed)
         {
             Vector2 jitter = Random.insideUnitCircle * s.shakeAmount;

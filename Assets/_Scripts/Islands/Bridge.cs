@@ -358,8 +358,7 @@ public class Bridge : Lift
     void Rumble()
     {
         DebrisBurst.Spawn(launchDebris, Mathf.Max(1, debrisCount / 4), LaunchPoint, Vector3.up, 2.5f, 1f);
-        if (launchShake > 0f && Camera.main != null && Camera.main.TryGetComponent(out PlayerLook look))
-            look.StartCoroutine(look.ShakeTheCamera(launchWarning, launchShake * 0.5f));
+        PlayerLook.Shake(launchWarning, launchShake * 0.5f);
     }
 
     // Extend From A bursting out of its island: rock and grass fly up, back and to the sides (never along the bridge),
@@ -381,8 +380,7 @@ public class Bridge : Lift
             }
             audioSource.PlayOneShot(launchClip);
         }
-        if (launchShake > 0f && Camera.main != null && Camera.main.TryGetComponent(out PlayerLook look))
-            look.StartCoroutine(look.ShakeTheCamera(0.25f, launchShake));
+        PlayerLook.Shake(0.25f, launchShake);
     }
 
     // In front of anchor A (where the bridge comes out): thrown off along it, into the void. Anywhere else: thrown back
@@ -425,7 +423,6 @@ public class Bridge : Lift
             }
             audioSource.PlayOneShot(landClip);
         }
-        if (slamShake > 0f && Camera.main != null && Camera.main.TryGetComponent(out PlayerLook look))
-            look.StartCoroutine(look.ShakeTheCamera(0.2f, slamShake));
+        PlayerLook.Shake(0.2f, slamShake);
     }
 }
