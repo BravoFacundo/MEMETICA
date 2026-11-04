@@ -73,12 +73,8 @@ public partial class PlayerMove
         if (hit.transform != lastGroundHit)                  // something new under: which island it is
         {
             lastGroundHit = hit.transform;
-            groundIsland = FindParentWithTag(hit.transform.gameObject, "Isla");
-            if (groundIsland == null && hit.transform.GetComponentInParent<Bridge>() == null)   // (an island without the Isla tag)
-            {
-                Island island = hit.transform.GetComponentInParent<Island>();
-                if (island != null) groundIsland = island.gameObject;
-            }
+            Transform island = Island.Of(hit.transform);   // (before: the Isla tag)
+            groundIsland = island != null ? island.gameObject : null;
         }
         if (groundIsland == null) return false;              // a bridge
 

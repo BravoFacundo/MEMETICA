@@ -99,7 +99,7 @@ GameObject:
   - component: {fileID: 7368252041600449344}
   m_Layer: 0
   m_Name: MemeWindow_Dex
-  m_TagString: Meme
+  m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0

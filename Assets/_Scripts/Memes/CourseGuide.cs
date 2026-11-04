@@ -184,11 +184,11 @@ public class CourseGuide : MonoBehaviour
     {
         var list = new List<Transform>();
         foreach (Transform t in level.GetComponentsInChildren<Transform>(true))
-            if (t.CompareTag("Isla") || t.GetComponent<Island>() != null)
+            if (Island.IsIsland(t))
             {
                 bool inner = false;   // (an island inside another one counts as that one)
                 for (Transform p = t.parent; p != null && p != level; p = p.parent)
-                    if (p.CompareTag("Isla") || p.GetComponent<Island>() != null) { inner = true; break; }
+                    if (Island.IsIsland(p)) { inner = true; break; }
                 if (!inner) list.Add(t);
             }
         return list;

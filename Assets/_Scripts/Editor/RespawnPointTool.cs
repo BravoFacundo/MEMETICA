@@ -62,8 +62,7 @@ public static class RespawnPointTool
         if (floating != null) return floating.transform;
         Island island = t.GetComponentInParent<Island>();
         if (island != null) return island.transform;
-        for (Transform p = t; p != null; p = p.parent) if (p.CompareTag("Isla")) return p;
-        return null;
+        return Island.Of(t);   // (an elevator)
     }
 
     static GameObject Prefab()

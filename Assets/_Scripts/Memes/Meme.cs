@@ -108,7 +108,7 @@ public class Meme : MonoBehaviour
                 FloatMotion floats = under.GetComponentInParent<FloatMotion>();
                 transform.SetParent(floats != null ? floats.transform : island.transform, true);
             }
-            lastIsland = FindParentWithTag(transform, "Isla") ?? island.gameObject;
+            lastIsland = IslandOf(transform) ?? island.gameObject;
             return;
         }
 
@@ -129,7 +129,7 @@ public class Meme : MonoBehaviour
         AttachStill();
         body.constraints = RigidbodyConstraints.FreezeAll;
         startIsland = island;
-        lastIsland = FindParentWithTag(transform, "Isla") ?? island.gameObject;
+        lastIsland = IslandOf(transform) ?? island.gameObject;
     }
 
     // Stays still where it was placed until picked up (a representation that lies on branches, shelves…)
@@ -398,18 +398,19 @@ public class Meme : MonoBehaviour
 
         if (!Physics.Raycast(transform.position, Vector3.down, out RaycastHit hit, 5f, ~0, QueryTriggerInteraction.Ignore)) return;
         lastGroundY = hit.point.y;
-        if (FindParentWithTag(hit.transform, "Isla") != null || hit.transform.GetComponentInParent<Island>() != null) lastIslandY = hit.point.y;
+        if (IslandOf(hit.transform) != null) lastIslandY = hit.point.y;
         if (hit.transform == lastGroundHit) return;   // still over the same thing
         lastGroundHit = hit.transform;
 
-        GameObject bridge = FindParentWithTag(hit.transform, "Puente");
+        Bridge onBridge = hit.transform.GetComponentInParent<Bridge>();
+        GameObject bridge = onBridge != null ? onBridge.gameObject : null;
         if (bridge != null && IsHeld && bridge != lastBridge)
         {
             lastBridge = bridge;
             OnBridgeCrossed();
         }
 
-        GameObject island = FindParentWithTag(hit.transform, "Isla");
+        GameObject island = IslandOf(hit.transform);
         if (island == null || island == lastIsland) return;   // a bridge, or the same island
         lastIsland = island;
         Transform point = LevelManager.Instance.RespawnPointOf(island);
@@ -544,7 +545,7 @@ public class Meme : MonoBehaviour
             Vector2 offset = Random.insideUnitCircle * Settings.landingRadius;
             Vector3 above = new Vector3(middle.x + offset.x, middle.y + 5f, middle.z + offset.y);
             if (!Physics.Raycast(above, Vector3.down, out RaycastHit ground, 200f, ~0, QueryTriggerInteraction.Ignore)) continue;
-            if (lastIsland != null && FindParentWithTag(ground.transform, "Isla") != lastIsland) continue;
+            if (lastIsland != null && IslandOf(ground.transform) != lastIsland) continue;
             if (ground.normal.y < 0.85f || NearPedestal(ground.point)) continue;
 
             Vector2 side = Random.insideUnitCircle.normalized;
@@ -570,11 +571,11 @@ public class Meme : MonoBehaviour
         return false;
     }
 
-    private static GameObject FindParentWithTag(Transform child, string tag)
+    // The island it is on or over (Island.Of), as a GameObject
+    private static GameObject IslandOf(Transform t)
     {
-        for (Transform t = child.parent; t != null; t = t.parent)
-            if (t.CompareTag(tag)) return t.gameObject;
-        return null;
+        Transform island = Island.Of(t);
+        return island != null ? island.gameObject : null;
     }
 
     //---- Rest (before: OrbPosition)

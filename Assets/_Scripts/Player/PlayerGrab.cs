@@ -104,7 +104,7 @@ public partial class PlayerGrab : MonoBehaviour
 
         // Ignores triggers: otherwise the pedestal's zone (around the meme) blocks the ray
         LookingAtMeme = Physics.Raycast(Eye.position, Eye.forward, out RaycastHit hit, pickUpRange, GrabMask, QueryTriggerInteraction.Ignore)
-                        && hit.transform.CompareTag("Meme");
+                        && hit.transform.GetComponent<Meme>() != null;   // (before: the Meme tag)
         DexCollectible dex = LookingAtMeme ? hit.transform.GetComponentInParent<DexCollectible>() : null;
         CanGrabLooked = LookingAtMeme && (heldObject == null || dex != null);
 

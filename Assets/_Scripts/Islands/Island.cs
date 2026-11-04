@@ -6,6 +6,15 @@ using UnityEngine;
 // At the end of the game every island falls away (FallAway).
 public class Island : Lift
 {
+    // The island something is part of: the nearest Island or Elevator holding it (itself included), or null (a
+    // bridge, the void). An elevator counts as an island: you stand on it, it has its respawn. Before: the "Isla" tag
+    public static Transform Of(Transform t)
+    {
+        for (Transform p = t; p != null; p = p.parent) if (IsIsland(p)) return p;
+        return null;
+    }
+    public static bool IsIsland(Transform t) => t.GetComponent<Island>() != null || t.GetComponent<Elevator>() != null;
+
     [Section("Island")]
     [Tooltip("Already up when the game starts (Island_01, the tutorial). Off: it goes down at start and rises when its pedestal is solved")]
     public bool startRaised = false;

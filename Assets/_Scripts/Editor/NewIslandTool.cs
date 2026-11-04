@@ -1,5 +1,5 @@
 // Menu: Memetica > Level > New Island. Creates an empty island with everything the code needs, ready to fill:
-//   Island_NN            Island (rises, falls) + FloatMotion (floats), tag "Isla". Place it where it ends up (up).
+//   Island_NN            Island (rises, falls) + FloatMotion (floats). Place it where it ends up (up).
 //   │                    Interactive things go right here: pedestals, paintings, memes, triggers, bridge anchors
 //   ├── Pivots
 //   │   └── RespawnPoint where the player and memes come back (high: they fall onto the island)
@@ -39,7 +39,6 @@ public static class NewIslandTool
         Vector3 at = SceneView.lastActiveSceneView != null ? SceneView.lastActiveSceneView.pivot : Vector3.zero;
         root.transform.position = new Vector3(at.x, 0f, at.z);
         root.AddComponent<Island>();
-        TrySetTag(root, "Isla");
 
         root.AddComponent<FloatMotion>();
 
@@ -64,9 +63,4 @@ public static class NewIslandTool
         return child.transform;
     }
 
-    static void TrySetTag(GameObject go, string tag)
-    {
-        try { go.tag = tag; }
-        catch { Debug.LogWarning($"[New Island] Tag '{tag}' doesn't exist: add it in Tags & Layers and tag {go.name}.", go); }
-    }
 }

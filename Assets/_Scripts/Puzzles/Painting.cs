@@ -53,7 +53,7 @@ public class Painting : MonoBehaviour
     public float fadeInTime = 0.3f;
 
     [Section("References")]
-    [Tooltip("The canvas board (the object tagged Pintura; empty: only the image is styled)")]
+    [Tooltip("The canvas board (its Renderer, drag it). Empty: one named Canvas / Board / Lienzo inside, else only the image is styled")]
     public Renderer board;
     [Tooltip("The image / video plane (the one with the VideoPlayer)")]
     public Renderer image;
@@ -72,12 +72,16 @@ public class Painting : MonoBehaviour
         ReadFromImage();
     }
 
-    // The board is the canvas tagged Pintura (this object or one inside), the image the one with the VideoPlayer
+    // The board: the one dragged in, else one named Canvas / Board / Lienzo inside (before: the Pintura tag).
+    // The image: the one with the VideoPlayer
     public void FindParts()
     {
-        board = null;
-        foreach (Transform t in GetComponentsInChildren<Transform>(true))
-            if (t.CompareTag("Pintura") && t.TryGetComponent(out Renderer canvas)) { board = canvas; break; }
+        if (board == null)
+            foreach (Renderer r in GetComponentsInChildren<Renderer>(true))
+            {
+                string n = r.name.ToLowerInvariant();
+                if (n.Contains("canvas") || n.Contains("board") || n.Contains("lienzo")) { board = r; break; }
+            }
         VideoPlayer video = GetComponentInChildren<VideoPlayer>(true);
         image = video != null ? video.GetComponent<Renderer>() : null;
     }

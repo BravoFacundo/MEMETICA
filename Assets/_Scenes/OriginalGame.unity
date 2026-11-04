@@ -7549,7 +7549,7 @@ GameObject:
   - component: {fileID: 91296459}
   m_Layer: 0
   m_Name: Bridge_04
-  m_TagString: Puente
+  m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -13669,7 +13669,7 @@ GameObject:
   - component: {fileID: 156427164}
   m_Layer: 0
   m_Name: Bridge_05
-  m_TagString: Puente
+  m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -19155,7 +19155,7 @@ GameObject:
   - component: {fileID: 165005548}
   m_Layer: 6
   m_Name: Island_03
-  m_TagString: Isla
+  m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -26504,7 +26504,7 @@ GameObject:
   - component: {fileID: 231693237}
   m_Layer: 0
   m_Name: Bridge_01
-  m_TagString: Puente
+  m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -27208,7 +27208,7 @@ GameObject:
   - component: {fileID: 270262292}
   m_Layer: 0
   m_Name: Meme_3Aa
-  m_TagString: Meme
+  m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -27906,7 +27906,7 @@ GameObject:
   - component: {fileID: 306690101}
   m_Layer: 0
   m_Name: Meme_1Ba
-  m_TagString: Meme
+  m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -41575,7 +41575,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 3226923575914045668, guid: f089c2499c1cbb0498c51e07e1b33566, type: 3}
       propertyPath: m_TagString
-      value: Pedestal
+      value: Untagged
       objectReference: {fileID: 0}
     - target: {fileID: 3226923575914045669, guid: f089c2499c1cbb0498c51e07e1b33566, type: 3}
       propertyPath: m_RootOrder
@@ -64418,7 +64418,7 @@ GameObject:
   - component: {fileID: 568968343}
   m_Layer: 0
   m_Name: Bridge_02
-  m_TagString: Puente
+  m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -70578,7 +70578,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 6737521462249647578, guid: e08be5de8b1a9c840956038b791f54f6, type: 3}
       propertyPath: m_TagString
-      value: Platform
+      value: Untagged
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
@@ -70699,7 +70699,7 @@ GameObject:
   - component: {fileID: 629050628}
   m_Layer: 0
   m_Name: Bridge_C
-  m_TagString: Puente
+  m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -72118,7 +72118,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 6737521462249647578, guid: e08be5de8b1a9c840956038b791f54f6, type: 3}
       propertyPath: m_TagString
-      value: Platform
+      value: Untagged
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
@@ -73610,7 +73610,7 @@ GameObject:
   - component: {fileID: 730945071}
   m_Layer: 0
   m_Name: Bridge_03
-  m_TagString: Puente
+  m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -75450,7 +75450,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 6737521462249647578, guid: e08be5de8b1a9c840956038b791f54f6, type: 3}
       propertyPath: m_TagString
-      value: Platform
+      value: Untagged
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
@@ -75600,7 +75600,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 6737521462249647578, guid: e08be5de8b1a9c840956038b791f54f6, type: 3}
       propertyPath: m_TagString
-      value: Platform
+      value: Untagged
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
@@ -80798,7 +80798,7 @@ GameObject:
   - component: {fileID: 799670872}
   m_Layer: 0
   m_Name: Island_02
-  m_TagString: Isla
+  m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -92974,7 +92974,7 @@ GameObject:
   - component: {fileID: 888874333}
   m_Layer: 6
   m_Name: Island_01
-  m_TagString: Isla
+  m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -100166,7 +100166,7 @@ GameObject:
   - component: {fileID: 920681410}
   m_Layer: 0
   m_Name: Island_06
-  m_TagString: Isla
+  m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -100618,7 +100618,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 6737521462249647578, guid: e08be5de8b1a9c840956038b791f54f6, type: 3}
       propertyPath: m_TagString
-      value: Platform
+      value: Untagged
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
@@ -102217,7 +102217,7 @@ GameObject:
   - component: {fileID: 963106372}
   m_Layer: 6
   m_Name: Rock 4 (2)
-  m_TagString: Platform
+  m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -115204,7 +115204,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 6737521462249647578, guid: e08be5de8b1a9c840956038b791f54f6, type: 3}
       propertyPath: m_TagString
-      value: Platform
+      value: Untagged
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
@@ -120774,7 +120774,7 @@ GameObject:
   - component: {fileID: 1076672618}
   m_Layer: 0
   m_Name: Island_05
-  m_TagString: Isla
+  m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -135245,7 +135245,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 3226923575914045668, guid: f089c2499c1cbb0498c51e07e1b33566, type: 3}
       propertyPath: m_TagString
-      value: Pedestal
+      value: Untagged
       objectReference: {fileID: 0}
     - target: {fileID: 3226923575914045669, guid: f089c2499c1cbb0498c51e07e1b33566, type: 3}
       propertyPath: m_RootOrder
@@ -136002,7 +136002,7 @@ GameObject:
   - component: {fileID: 1145924124}
   m_Layer: 6
   m_Name: Island_04
-  m_TagString: Isla
+  m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -147536,7 +147536,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 6737521462249647578, guid: e08be5de8b1a9c840956038b791f54f6, type: 3}
       propertyPath: m_TagString
-      value: Platform
+      value: Untagged
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
@@ -150182,7 +150182,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 6737521462249647578, guid: e08be5de8b1a9c840956038b791f54f6, type: 3}
       propertyPath: m_TagString
-      value: Platform
+      value: Untagged
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
@@ -159353,7 +159353,7 @@ GameObject:
   - component: {fileID: 1471182045}
   m_Layer: 0
   m_Name: Bridge_A
-  m_TagString: Puente
+  m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -160375,7 +160375,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 6737521462249647578, guid: e08be5de8b1a9c840956038b791f54f6, type: 3}
       propertyPath: m_TagString
-      value: Platform
+      value: Untagged
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
@@ -163154,7 +163154,7 @@ GameObject:
   - component: {fileID: 1636941700}
   m_Layer: 0
   m_Name: Island_B
-  m_TagString: Isla
+  m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -168578,7 +168578,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 6737521462249647578, guid: e08be5de8b1a9c840956038b791f54f6, type: 3}
       propertyPath: m_TagString
-      value: Platform
+      value: Untagged
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
@@ -168990,7 +168990,7 @@ GameObject:
   - component: {fileID: 1682492657}
   m_Layer: 0
   m_Name: Bridge_06
-  m_TagString: Puente
+  m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -169465,7 +169465,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 6737521462249647578, guid: e08be5de8b1a9c840956038b791f54f6, type: 3}
       propertyPath: m_TagString
-      value: Platform
+      value: Untagged
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
@@ -183057,7 +183057,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 3226923575914045668, guid: f089c2499c1cbb0498c51e07e1b33566, type: 3}
       propertyPath: m_TagString
-      value: Pedestal
+      value: Untagged
       objectReference: {fileID: 0}
     - target: {fileID: 3226923575914045669, guid: f089c2499c1cbb0498c51e07e1b33566, type: 3}
       propertyPath: m_RootOrder
@@ -194018,7 +194018,7 @@ GameObject:
   - component: {fileID: 1893306326}
   m_Layer: 0
   m_Name: Meme_4Aa
-  m_TagString: Meme
+  m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -197296,7 +197296,7 @@ GameObject:
   - component: {fileID: 2004233578}
   m_Layer: 0
   m_Name: Island_C
-  m_TagString: Isla
+  m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -201282,7 +201282,7 @@ GameObject:
   - component: {fileID: 2121772794}
   m_Layer: 0
   m_Name: Meme_1Aa
-  m_TagString: Meme
+  m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -202354,7 +202354,7 @@ GameObject:
   - component: {fileID: 9181683224565740324}
   m_Layer: 0
   m_Name: Painting
-  m_TagString: Pintura
+  m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -204386,7 +204386,7 @@ GameObject:
   - component: {fileID: 3924657054630763288}
   m_Layer: 6
   m_Name: Rock 4 (1)
-  m_TagString: Platform
+  m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -204521,7 +204521,7 @@ GameObject:
   - component: {fileID: 3924657055299540444}
   m_Layer: 6
   m_Name: Rock 4 (2)
-  m_TagString: Platform
+  m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -205625,7 +205625,7 @@ GameObject:
   - component: {fileID: 1539605126}
   m_Layer: 6
   m_Name: Rock 5
-  m_TagString: Platform
+  m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -205695,7 +205695,7 @@ GameObject:
   - component: {fileID: 876302996}
   m_Layer: 6
   m_Name: Rock 4 (1)
-  m_TagString: Platform
+  m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -206038,7 +206038,7 @@ GameObject:
   - component: {fileID: 790005531}
   m_Layer: 0
   m_Name: Canvas
-  m_TagString: Pintura
+  m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -206316,7 +206316,7 @@ GameObject:
   - component: {fileID: 503640871}
   m_Layer: 0
   m_Name: Canvas
-  m_TagString: Pintura
+  m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -206613,7 +206613,7 @@ GameObject:
   - component: {fileID: 3924657054851910939}
   m_Layer: 0
   m_Name: Bridge_Tutorial
-  m_TagString: Puente
+  m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -208511,7 +208511,7 @@ GameObject:
   - component: {fileID: 3924657055830139157}
   m_Layer: 6
   m_Name: Rock 3 (5)
-  m_TagString: Platform
+  m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -208581,7 +208581,7 @@ GameObject:
   - component: {fileID: 3924657054252873023}
   m_Layer: 6
   m_Name: Rock 3 (3)
-  m_TagString: Platform
+  m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -209112,7 +209112,7 @@ GameObject:
   - component: {fileID: 5819366397338351318}
   m_Layer: 6
   m_Name: Island_A
-  m_TagString: Isla
+  m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -215014,7 +215014,7 @@ GameObject:
   - component: {fileID: 1475111812}
   m_Layer: 6
   m_Name: Rock 2
-  m_TagString: Platform
+  m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -215114,7 +215114,7 @@ GameObject:
   - component: {fileID: 1706151182}
   m_Layer: 6
   m_Name: Rock 1 (1)
-  m_TagString: Platform
+  m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -215844,7 +215844,7 @@ GameObject:
   - component: {fileID: 3924657055997478018}
   m_Layer: 6
   m_Name: Rock 1 (1)
-  m_TagString: Platform
+  m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -216311,7 +216311,7 @@ GameObject:
   - component: {fileID: 1639568607}
   m_Layer: 6
   m_Name: Elevator_Tutorial_02
-  m_TagString: Isla
+  m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -217567,7 +217567,7 @@ GameObject:
   - component: {fileID: 1665076950}
   m_Layer: 0
   m_Name: Canvas
-  m_TagString: Pintura
+  m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -218132,7 +218132,7 @@ GameObject:
   - component: {fileID: 552880624}
   m_Layer: 6
   m_Name: Rock 1
-  m_TagString: Platform
+  m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -218152,7 +218152,7 @@ GameObject:
   - component: {fileID: 2142791833}
   m_Layer: 6
   m_Name: Rock 3 (5)
-  m_TagString: Platform
+  m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -218252,7 +218252,7 @@ GameObject:
   - component: {fileID: 498941107}
   m_Layer: 6
   m_Name: Rock 3 (3)
-  m_TagString: Platform
+  m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -218387,7 +218387,7 @@ GameObject:
   - component: {fileID: 1938306547}
   m_Layer: 6
   m_Name: Rock 3
-  m_TagString: Platform
+  m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0

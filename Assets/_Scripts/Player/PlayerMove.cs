@@ -141,7 +141,7 @@ public partial class PlayerMove : MonoBehaviour
         airSpeed = walkSpeed;
         debugHeight = transform.position.y;
 
-        // El juego arranca en el tutorial (la isla del tutorial no tiene el tag "Isla", así que se fija acá)
+        // The game starts in the tutorial: its start point, before standing on any island
         respawnPoint = LevelManager.Instance.startRespawnPoint;
         lastGroundY = transform.position.y;
     }
@@ -537,19 +537,6 @@ public partial class PlayerMove : MonoBehaviour
         lastGroundY = groundBelow ? ground.point.y : transform.position.y;
         look.ResetSmoothing();
         debugHeight = transform.position.y;
-    }
-
-    //In the project, the objects tagged "island" may be too far up the hierarchy from the object the raycast hits.
-    //This function returns the parent object with the "Island" tag regardless of how far up the hierarchy it is.
-    public GameObject FindParentWithTag(GameObject childObject, string tag)
-    {
-        Transform t = childObject.transform;
-        while (t.parent != null)
-        {
-            if (t.parent.CompareTag(tag)) return t.parent.gameObject;
-            t = t.parent.transform;
-        }
-        return null;
     }
 
     public void ActivateMoveTutorial() => playerCanMove = false;

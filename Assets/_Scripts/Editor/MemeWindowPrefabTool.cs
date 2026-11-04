@@ -46,7 +46,7 @@ public static class MemeWindowPrefabTool
         string oldControls = old != null && old.TryGetComponent(out WindowControls c) ? EditorJsonUtility.ToJson(c) : null;
 
         // Root: the meme (physics, the collider you grab)
-        var root = new GameObject("Meme_Window") { tag = "Meme" };
+        var root = new GameObject("Meme_Window");
         MemeWindow meme = root.AddComponent<MemeWindow>();
         root.GetComponent<Rigidbody>().interpolation = RigidbodyInterpolation.Interpolate;
         WindowControls controls = root.AddComponent<WindowControls>();

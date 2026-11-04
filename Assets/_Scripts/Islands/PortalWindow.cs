@@ -387,17 +387,22 @@ public class PortalWindow : MonoBehaviour
         if (view == null) MakeViewCamera();
 
         view.enabled = true;
+        view.rect = FullRect;   // the whole texture (CopyFrom brought your Camera.rect: Classic's 4:3 window, black around it)
         view.fieldOfView = playerCamera.fieldOfView;
         view.nearClipPlane = playerCamera.nearClipPlane;
         view.farClipPlane = playerCamera.farClipPlane;
         view.transform.SetPositionAndRotation(MapPoint(playerCamera.transform.position), MapRotation(playerCamera.transform.rotation));
     }
 
+    // A camera drawing into a texture fills all of it: the texture already has your view's size and shape
+    static readonly Rect FullRect = new Rect(0f, 0f, 1f, 1f);
+
     void MakeViewCamera()
     {
         var go = new GameObject($"{name}_View");
         view = go.AddComponent<Camera>();
         view.CopyFrom(playerCamera);
+        view.rect = FullRect;
         view.depth = playerCamera.depth - 1;   // before yours, this same frame
         view.targetTexture = texture;
         view.cullingMask = playerCamera.cullingMask;
@@ -590,6 +595,7 @@ public class PortalWindow : MonoBehaviour
             if (backMaterial != null) backMaterial.SetTexture("_MainTex", backTexture);
         }
         backView.enabled = true;
+        backView.rect = FullRect;   // (as the view: the whole texture, not Classic's 4:3 window)
         backView.fieldOfView = playerCamera.fieldOfView;
         backView.transform.SetPositionAndRotation(MapBack(playerCamera.transform.position), MapBackRotation(playerCamera.transform.rotation));
         backView.ResetProjectionMatrix();

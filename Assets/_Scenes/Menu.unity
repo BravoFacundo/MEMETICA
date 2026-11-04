@@ -36779,7 +36779,7 @@ GameObject:
   - component: {fileID: 799670871}
   m_Layer: 0
   m_Name: Island_02
-  m_TagString: Isla
+  m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -48025,7 +48025,7 @@ GameObject:
   - component: {fileID: 888874333}
   m_Layer: 6
   m_Name: Island_01
-  m_TagString: Isla
+  m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -117605,7 +117605,7 @@ GameObject:
   - component: {fileID: 503640871}
   m_Layer: 0
   m_Name: Canvas
-  m_TagString: Pintura
+  m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0

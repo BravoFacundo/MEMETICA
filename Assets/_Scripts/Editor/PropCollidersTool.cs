@@ -27,7 +27,7 @@ public static class PropCollidersTool
         int trees = LayerMask.NameToLayer("Trees");
         var done = new List<string>();
 
-        var roots = Object.FindObjectsOfType<Transform>(true).Where(t => t.CompareTag("Isla") || t.CompareTag("Puente"));
+        var roots = Object.FindObjectsOfType<Transform>(true).Where(t => Island.IsIsland(t) || t.GetComponent<Bridge>() != null);
         var renderers = roots.SelectMany(r => r.GetComponentsInChildren<MeshRenderer>(true)).Distinct();
         foreach (MeshRenderer renderer in renderers)
         {

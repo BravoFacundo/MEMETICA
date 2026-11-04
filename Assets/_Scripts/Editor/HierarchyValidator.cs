@@ -14,8 +14,6 @@ public static class HierarchyValidator
     // Objects the code finds by name (GameObject.Find) → must exist, be unique and active
     static readonly string[] RequiredNames = { "Player", "Main Camera", "GrabPivot" };
 
-    static readonly string[] RequiredTags = { "Isla", "Puente", "Pedestal", "Meme" };
-
     static int errors, warnings;
 
     [MenuItem("Memetica/Check/Validate Hierarchy", false, 400)]
@@ -47,7 +45,6 @@ public static class HierarchyValidator
             {
                 if (!isla.name.StartsWith(level.islandPrefix)) Warn($"Island '{isla.name}' does not follow the '{level.islandPrefix}ID' convention.", isla);
                 else if (level.RespawnPointOf(isla.gameObject) == null) Error($"Island '{isla.name}' has no '{level.respawnPointName}' inside it.", isla);
-                if (!isla.CompareTag("Isla")) Error($"Island '{isla.name}' is not tagged 'Isla' (respawn and meme crossings look for it).", isla);
 
                 // Floating: on the island itself (new) or on one direct child (old structure)
                 bool floatsItself = isla.GetComponent<FloatMotion>() != null;
@@ -124,8 +121,6 @@ public static class HierarchyValidator
                 if (!keyIDs.Any(k => meme.ID.StartsWith(k)))
                     Warn($"Meme '{meme.name}' matches no pedestal Key ID: it only works on keyless (black) pedestals (fine if that's intended).", meme);
             }
-            foreach (var go in all.Where(g => g.CompareTag("Meme") && g.GetComponentInParent<Meme>(true) == null))
-                Error($"'{go.name}' is tagged Meme but has no Meme component.", go);
         }
 
         // 3. Orbs: their sticker and their meme
@@ -150,8 +145,6 @@ public static class HierarchyValidator
             if (move.transform.Find("GroundCheck") == null) Error($"'{move.name}' lost its direct child 'GroundCheck'.", move);
 
         // 6. Tags the code uses
-        foreach (var tag in RequiredTags)
-            if (!all.Any(g => g.CompareTag(tag))) Error($"No object is tagged '{tag}'.");
 
         // 7. Organizing groups: empty, untagged objects holding islands, bridges or elevators.
         //    Their transform should be the identity, so what is inside sits where it was placed.

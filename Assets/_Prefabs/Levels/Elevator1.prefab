@@ -561,7 +561,7 @@ GameObject:
   - component: {fileID: 3392008267583998772}
   m_Layer: 6
   m_Name: Elevator1
-  m_TagString: Isla
+  m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -608,12 +608,17 @@ MonoBehaviour:
   - popup: {fileID: 0}
     showAt: 0.05
     hideAt: 0.4
+    modal: 0
   - popup: {fileID: 0}
     showAt: 0.45
     hideAt: 0.72
+    modal: 0
   passengers: []
   locks: {fileID: 0}
   pedestal: {fileID: 0}
+  returnWhenLeft: 0
+  returnDelay: 1
+  leaveDistance: 6
 --- !u!1 &7584257639071277748
 GameObject:
   m_ObjectHideFlags: 0
@@ -676,6 +681,8 @@ MonoBehaviour:
   cellSize: 8
   playerRadius: 0.8
   orbRadius: 0.5
+  useChildMeshes: 1
+  extraGroundMeshes: []
   groundColliders:
   - {fileID: 8951262946890829440}
   testDensity: 6

@@ -447,11 +447,11 @@ public class LevelManager : MonoBehaviour
         return null;
     }
 
-    // The island (Island, or tagged Isla) that holds this one, or null
+    // The island (Island or Elevator) that holds this one, or null
     static Transform OuterIsland(Transform island)
     {
         for (Transform p = island.parent; p != null; p = p.parent)
-            if (p.CompareTag("Isla") || p.GetComponent<Island>() != null) return p;
+            if (Island.IsIsland(p)) return p;
         return null;
     }
 

@@ -69,12 +69,8 @@ public class RespawnPoint : MonoBehaviour
         return null;
     }
 
-    // The nearest parent (or itself) tagged Isla, as the player finds islands (PlayerMove.FindParentWithTag), or null
-    public static Transform TaggedIsland(Transform t)
-    {
-        for (Transform p = t.parent; p != null; p = p.parent) if (p.CompareTag("Isla")) return p;
-        return null;
-    }
+    // The island holding it (Island.Of, from its parent up), as the player finds islands, or null
+    public static Transform TaggedIsland(Transform t) => t.parent != null ? Island.Of(t.parent) : null;
 
     // The nearest parent that holds islands (its level), or null
     static Island[] LevelIslands(Transform point, out Transform root)

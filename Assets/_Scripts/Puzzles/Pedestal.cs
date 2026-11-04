@@ -164,7 +164,7 @@ public class Pedestal : MonoBehaviour
     // Loose (falling, thrown) into the zone: in. In the hand: only by looking (Update)
     void OnTriggerEnter(Collider other)
     {
-        if (!Usable || HasMeme || !other.CompareTag("Meme") || other.gameObject == releasedMeme) return;
+        if (!Usable || HasMeme || other.GetComponent<Meme>() == null || other.gameObject == releasedMeme) return;
         if (hand.heldObject == other.gameObject) return;
         Snap(other.gameObject);
     }
@@ -245,7 +245,7 @@ public class Pedestal : MonoBehaviour
         {
             // In the hand: in when you look at the zone
             GameObject inHand = hand.heldObject;
-            if (Usable && inHand != null && inHand != releasedMeme && inHand.CompareTag("Meme") && (LookedAt() || AutoSnap(inHand))) Snap(inHand);
+            if (Usable && inHand != null && inHand != releasedMeme && inHand.GetComponent<Meme>() != null && (LookedAt() || AutoSnap(inHand))) Snap(inHand);
             return;
         }
 
