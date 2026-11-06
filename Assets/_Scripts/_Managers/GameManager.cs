@@ -18,7 +18,7 @@ public partial class GameManager : MonoBehaviour
     public static GameManager Instance { get; private set; }
 
     public enum State { NotStarted, Running, Won, Lost }
-    public enum StartOn { IslandReached, Manual, PedestalDown, VirusAlert }
+    public enum StartOn { Manual = 1, PedestalDown = 2, VirusAlert = 3 }   // (numbers kept: scenes store them)
 
     [Section("Time")]
     [Tooltip("Minutes until the blue screen (the itch.io build: 30; the exhibition: 5). 0: no countdown (OriginalGame)")]
@@ -30,11 +30,8 @@ public partial class GameManager : MonoBehaviour
     [Section("Start")]
     [Tooltip("Virus Alert: once the first raffle's way rose, the Virus Alert window shows (you stay still) and the " +
              "countdown starts when it closes. Pedestal Down: when Start Pedestal goes into the ground (the hub's " +
-             "randomizer, after your first raffle). Island Reached: when you first step on Start Island. Manual: when " +
-             "something calls StartTimer")]
+             "randomizer, after your first raffle). Manual: when something calls StartTimer")]
     public StartOn startOn = StartOn.PedestalDown;
-    [Tooltip("Its ID (1 → Island_1)")]
-    [ShowIf(nameof(startOn), StartOn.IslandReached)] public string startIsland = "1";
     [Tooltip("The pedestal (its PedestalRetire) whose first trip into the ground starts the countdown")]
     [ShowIf(nameof(startOn), StartOn.PedestalDown)] public PedestalRetire startPedestal;
     public UnityEvent onStart;
@@ -149,17 +146,8 @@ public partial class GameManager : MonoBehaviour
     {
         if (minutes <= 0f) return false;   // no countdown (OriginalGame)
         if (virusAlert != null) return false;   // a Virus Alert set: it starts the countdown (whatever Start On says)
-        if (startOn == StartOn.IslandReached) return OnStartIsland();
         if (startOn == StartOn.PedestalDown) return startPedestal != null && !startPedestal.IsUp;
         return false;
-    }
-
-    bool OnStartIsland()
-    {
-        if (player == null || player.CurrentIsland == null || LevelManager.Instance == null) return false;   // (Start Island: an Island reference once pedestals are migrated)
-        Transform start = LevelManager.Instance.FindIsland(startIsland);
-        Island here = player.CurrentIsland.GetComponentInParent<Island>();
-        return start != null && here != null && here.transform == start;
     }
 
     //---- The run

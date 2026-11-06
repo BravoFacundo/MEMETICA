@@ -1,15 +1,15 @@
-// Herramienta de editor: pone viento a los objetos seleccionados (y sus hijos).
-// Menú: Memetica > Level > Wind > Apply Wind to Selection
-//   - Cada material de cada Mesh Renderer se cambia por su copia "_Wind" (shader Memetica/Wind Sway).
-//     La copia se crea una sola vez en la MISMA carpeta que el shader WindSway y se reutiliza (sirve para atlas).
-//     Así, si movés la carpeta, la herramienta la sigue sola.
-//     Copia color, textura, smoothness y metallic del original.
+// Editor tool: gives wind to the selected objects (and their children).
+// Menu: Memetica > Level > Wind > Apply Wind to Selection
+//   - Every material of every Mesh Renderer is swapped for its "_Wind" copy (shader Memetica/Wind Sway).
+//     The copy is made once, in the SAME folder as the WindSway shader, and reused (works for atlases).
+//     So if you move the folder, the tool follows it.
+//     It copies color, texture, smoothness and metallic from the original.
 //   - Unticks "Batching Static" and "Contribute GI": moving objects can't use static batching or baked lighting.
-//   - Si la escena no tiene WindController, lo crea.
-// Ctrl+Z deshace los cambios en la escena.
+//   - If the scene has no WindController, it makes one.
+// Ctrl+Z undoes the changes in the scene.
 //
-// Menú: Memetica > Level > Wind > Particles Follow the Wind
-//   Agrega WindParticles a las partículas de hojas (material con "Lea"/"Leaf") y de ráfagas (objetos "WindParticles").
+// Menu: Memetica > Level > Wind > Particles Follow the Wind
+//   Adds WindParticles to the leaf particles (material with "Lea"/"Leaf") and the gusts (objects named "WindParticles").
 
 using System.Linq;
 using UnityEditor;
@@ -25,10 +25,10 @@ public static class WindTool
     static void ApplyToSelection()
     {
         Shader wind = Shader.Find(ShaderName);
-        if (wind == null) { Debug.LogError("[Viento] No encuentro el shader " + ShaderName); return; }
+        if (wind == null) { Debug.LogError("[Wind] Can't find the shader " + ShaderName); return; }
         string folder = System.IO.Path.GetDirectoryName(AssetDatabase.GetAssetPath(wind)).Replace('\\', '/');
 
-        Undo.SetCurrentGroupName("Aplicar viento");
+        Undo.SetCurrentGroupName("Apply Wind");
         int undoGroup = Undo.GetCurrentGroup();
         int renderers = 0, created = 0;
 
@@ -45,7 +45,7 @@ public static class WindTool
             }
             if (changed)
             {
-                Undo.RecordObject(r, "Aplicar viento");
+                Undo.RecordObject(r, "Apply Wind");
                 r.sharedMaterials = mats;
                 PrefabUtility.RecordPrefabInstancePropertyModifications(r);
                 renderers++;
@@ -65,20 +65,20 @@ public static class WindTool
         if (Object.FindObjectOfType<WindController>(true) == null)
         {
             GameObject controller = new GameObject("WindController", typeof(WindController));
-            Undo.RegisterCreatedObjectUndo(controller, "Crear WindController");
-            Debug.Log("[Viento] Creé el WindController en la escena: el viento se ajusta desde ahí.", controller);
+            Undo.RegisterCreatedObjectUndo(controller, "Create WindController");
+            Debug.Log("[Wind] Made a WindController in the scene: the wind is tuned there.", controller);
         }
 
         Undo.CollapseUndoOperations(undoGroup);
         EditorSceneManager.MarkSceneDirty(SceneManager.GetActiveScene());
         AssetDatabase.SaveAssets();
-        Debug.Log($"[Viento] Listo: {renderers} renderers con viento, {created} materiales _Wind nuevos en {folder}.");
+        Debug.Log($"[Wind] Done: {renderers} renderers with wind, {created} new _Wind materials in {folder}.");
     }
 
     [MenuItem("Memetica/Level/Wind/Particles Follow the Wind", false, 311)]
     static void AddWindParticles()
     {
-        Undo.SetCurrentGroupName("Partículas siguen el viento");
+        Undo.SetCurrentGroupName("Particles Follow the Wind");
         int undoGroup = Undo.GetCurrentGroup();
         int added = 0;
 
@@ -92,12 +92,12 @@ public static class WindTool
 
             Undo.AddComponent<WindParticles>(ps.gameObject);
             added++;
-            Debug.Log("[Viento] WindParticles → " + ps.transform.parent?.name + "/" + ps.name, ps);
+            Debug.Log("[Wind] WindParticles → " + ps.transform.parent?.name + "/" + ps.name, ps);
         }
 
         Undo.CollapseUndoOperations(undoGroup);
         EditorSceneManager.MarkSceneDirty(SceneManager.GetActiveScene());
-        Debug.Log("[Viento] Listo: " + added + " sistemas de partículas siguen el viento.");
+        Debug.Log("[Wind] Done: " + added + " particle systems follow the wind.");
     }
 
     [MenuItem("Memetica/Level/Wind/Apply Wind to Selection", true)]
@@ -122,7 +122,7 @@ public static class WindTool
 
         AssetDatabase.CreateAsset(copy, path);
         created++;
-        Debug.Log("[Viento] Material nuevo: " + path, copy);
+        Debug.Log("[Wind] New material: " + path, copy);
         return copy;
     }
 }

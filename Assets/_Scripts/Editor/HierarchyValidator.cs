@@ -12,7 +12,6 @@ using UnityEngine.SceneManagement;
 public static class HierarchyValidator
 {
     // Objects the code finds by name (GameObject.Find) → must exist, be unique and active
-    static readonly string[] RequiredNames = { };   // (none left: PlayerGrab finds its pivots inside the Player, the rest by reference)
 
     static int errors, warnings;
 
@@ -22,19 +21,7 @@ public static class HierarchyValidator
         errors = 0; warnings = 0;
         var all = AllObjectsInScene();
 
-        // 1. Names the code looks for
-        foreach (var name in RequiredNames)
-        {
-            var found = all.Where(g => g.name == name).ToList();
-            if (found.Count == 0) Error($"There is no '{name}' (the code finds it by name).");
-            else
-            {
-                if (found.Count > 1) Error($"There are {found.Count} objects named '{name}'. GameObject.Find takes any of them.", found[1]);
-                if (!found[0].activeInHierarchy) Error($"'{name}' (or a parent) is off. GameObject.Find doesn't find inactive objects.", found[0]);
-            }
-        }
-
-        // 1b. LevelManager references, naming convention, islands and bridges
+        // 1. LevelManager references, islands and bridges (names are free: everything goes by reference)
         LevelManager level = Object.FindObjectOfType<LevelManager>(true);
         if (level == null) Error("There is no LevelManager in the scene.");
         else
@@ -42,37 +29,34 @@ public static class HierarchyValidator
             if (level.startRespawnPoint == null) Error("LevelManager: Start Respawn Point not assigned.", level);
 
             var noRespawn = new List<string>();
-            foreach (var isla in Object.FindObjectsOfType<Island>(true))
+            foreach (var island in Object.FindObjectsOfType<Island>(true))
             {
-                if (!isla.name.StartsWith(level.islandPrefix)) Warn($"Island '{isla.name}' does not follow the '{level.islandPrefix}ID' convention.", isla);
-                else if (level.RespawnPointOf(isla.gameObject) == null) noRespawn.Add(isla.name);   // (fine: you reappear where you last stood on it)
+                if (level.RespawnPointOf(island.gameObject) == null) noRespawn.Add(island.name);   // (fine: you reappear where you last stood on it)
 
                 // Floating: on the island itself (new) or on one direct child (old structure)
-                bool floatsItself = isla.GetComponent<FloatMotion>() != null;
-                int floatingChildren = isla.transform.Cast<Transform>().Count(c => c.GetComponent<FloatMotion>() != null);
-                if (!floatsItself && floatingChildren == 0) Warn($"Island '{isla.name}' doesn't float (no FloatMotion on it or on a direct child).", isla);
-                if (floatsItself && floatingChildren > 0) Warn($"Island '{isla.name}' floats twice (FloatMotion on it and on a child).", isla);
+                bool floatsItself = island.GetComponent<FloatMotion>() != null;
+                int floatingChildren = island.transform.Cast<Transform>().Count(c => c.GetComponent<FloatMotion>() != null);
+                if (!floatsItself && floatingChildren == 0) Warn($"Island '{island.name}' doesn't float (no FloatMotion on it or on a direct child).", island);
+                if (floatsItself && floatingChildren > 0) Warn($"Island '{island.name}' floats twice (FloatMotion on it and on a child).", island);
             }
             if (noRespawn.Count > 0)
                 Debug.Log($"[Hierarchy] Info: {noRespawn.Count} island(s) without a RespawnPoint, falling you reappear where you last stood on them: {string.Join(", ", noRespawn)}.");
-            foreach (var puente in Object.FindObjectsOfType<Bridge>(true))
+            foreach (var bridge in Object.FindObjectsOfType<Bridge>(true))
             {
-                if (!puente.name.StartsWith(level.bridgePrefix)) Warn($"Bridge '{puente.name}' does not follow the '{level.bridgePrefix}ID' convention.", puente);
-                bool bends = puente.TryGetComponent(out BridgeBend _);
-                if (puente.appearance == Bridge.Appearance.ExtendFromA && !bends) Error($"Bridge '{puente.name}' uses Extend From A but has no BridgeBend.", puente);
-                if (bends && (puente.anchorA == null || puente.anchorB == null)) Error($"Bridge '{puente.name}' has a BridgeBend but is missing an anchor (right click on Bridge > Create Anchors).", puente);
-                foreach (Transform anchor in new[] { puente.anchorA, puente.anchorB })
+                bool bends = bridge.TryGetComponent(out BridgeBend _);
+                if (bridge.appearance == Bridge.Appearance.ExtendFromA && !bends) Error($"Bridge '{bridge.name}' uses Extend From A but has no BridgeBend.", bridge);
+                if (bends && (bridge.anchorA == null || bridge.anchorB == null)) Error($"Bridge '{bridge.name}' has a BridgeBend but is missing an anchor (right click on Bridge > Create Anchors).", bridge);
+                foreach (Transform anchor in new[] { bridge.anchorA, bridge.anchorB })
                 {
                     if (anchor == null) continue;
                     // Inside an island or an elevator, or at least something floating (the tutorial island, not a Lift): it follows it
                     bool floats = anchor.GetComponentInParent<FloatMotion>() != null;
-                    if (Island.Of(anchor) == null && !floats) Warn($"Bridge '{puente.name}': anchor '{anchor.name}' is not inside an island.", anchor);
-                    else if (!floats) Warn($"Bridge '{puente.name}': anchor '{anchor.name}' is not inside the floating part of its island (that end won't follow it).", anchor);
+                    if (Island.Of(anchor) == null && !floats) Warn($"Bridge '{bridge.name}': anchor '{anchor.name}' is not inside an island.", anchor);
+                    else if (!floats) Warn($"Bridge '{bridge.name}': anchor '{anchor.name}' is not inside the floating part of its island (that end won't follow it).", anchor);
                 }
             }
             foreach (var elevator in Object.FindObjectsOfType<Elevator>(true))
             {
-                if (!elevator.name.StartsWith(level.elevatorPrefix)) Warn($"Elevator '{elevator.name}' does not follow the '{level.elevatorPrefix}ID' convention.", elevator);
                 if (elevator.dockPoint == null) Error($"Elevator '{elevator.name}' has no Dock Point.", elevator);
                 else if (!elevator.rideOnStart && elevator.dockPoint.GetComponentInParent<Island>() == null) Warn($"Elevator '{elevator.name}': its Dock Point is not inside an island (no respawn or docking on arrival).", elevator);
             }
@@ -90,18 +74,12 @@ public static class HierarchyValidator
             if (ped.GetComponentInParent<Island>() != null && ped.GetComponentInParent<FloatMotion>() == null)
                 Warn($"Pedestal '{ped.name}' is not inside the floating part of its island (it won't float with it).", ped);
         }
-        // 2b. Pedestal kinds: a white one has its key and clue, a randomizer its axes; nothing still by name
-        var memes = Object.FindObjectsOfType<Meme>(true);
+        // 2b. Pedestal kinds: a white one has its key and clue, a randomizer its axes
         foreach (var ped in Object.FindObjectsOfType<Pedestal>(true))
         {
-            if (ped.ControlledIslands.Length > 0 || ped.ControlledBridges.Length > 0 || !string.IsNullOrEmpty(ped.groupID) ||
-                ped.GetComponent<MemeRandomizer>() != null || ped.GetComponent<PedestalReactions>() != null ||
-                (!ped.KeylessPedestal && !(ped is KeyPedestal) && !(ped is RandomizerPedestal)))
-                Warn($"Pedestal '{ped.name}' still has old data: run Memetica > Check > Migrate Pedestals.", ped);
             if (ped is KeyPedestal key)
             {
-                if (key.key == null && string.IsNullOrEmpty(key.keyId)) Error($"Key pedestal '{ped.name}' has no Key (nor Key ID).", ped);
-                else if (key.key == null && !memes.Any(m => m.ID.StartsWith(key.keyId))) Error($"Key pedestal '{ped.name}' expects a meme whose ID starts with '{key.keyId}', and there is none.", ped);
+                if (key.key == null) Error($"Key pedestal '{ped.name}' has no Key (the meme it waits for).", ped);
                 // A clue only where the scene uses them (OriginalGame's easels; Game's end-of-level pedestals have none)
                 bool usesClues = Object.FindObjectsOfType<Painting>(true).Length > 0;
                 if (usesClues && !Object.FindObjectsOfType<PedestalGroup>(true).Any(g => g.members.Contains(ped)) && key.Hint == null && Island.Of(ped.transform)?.GetComponentInChildren<Painting>(true) == null)
@@ -116,8 +94,6 @@ public static class HierarchyValidator
         }
         foreach (var group in Object.FindObjectsOfType<PedestalGroup>(true))
             if (group.members.Count(m => m != null) < 2) Warn($"Pedestal group '{group.name}' has fewer than 2 pedestals: they complete alone.", group);
-        foreach (var meme in memes)   // (orbs only: pedestals find them by that ID; meme windows go by their MemeData)
-            if (meme is MemeOrb && !meme.name.StartsWith(Meme.NamePrefix)) Warn($"Meme '{meme.name}' should be named '{Meme.NamePrefix}<ID>' (e.g. {Meme.NamePrefix}3Aa).", meme);
 
         // 3. Orbs: their sticker and their meme
         foreach (var orb in Object.FindObjectsOfType<MemeOrb>(true))
@@ -153,7 +129,7 @@ public static class HierarchyValidator
             bool containsMovers = go.GetComponentsInChildren<Island>(true).Length > 0
                                || go.GetComponentsInChildren<Bridge>(true).Length > 0
                                || go.GetComponentsInChildren<Elevator>(true).Length > 0;
-            bool isGroup = isEmpty && untagged && containsMovers && !RequiredNames.Contains(go.name);
+            bool isGroup = isEmpty && untagged && containsMovers ;
             if (!isGroup) continue;
             var t = go.transform;
             if (t.localPosition != Vector3.zero || t.localRotation != Quaternion.identity || t.localScale != Vector3.one)

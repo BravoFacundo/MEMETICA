@@ -62,7 +62,7 @@ MeshRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 2100000, guid: 1f982cd990c529c4b9b25040e49f8aae, type: 2}
+  - {fileID: -1276543510340128140, guid: 87d9aa76a9c95494997f8f4aea6194d1, type: 3}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -168,7 +168,7 @@ MeshRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 2100000, guid: e26c631febfc5834194c94042a014874, type: 2}
+  - {fileID: -1276543510340128140, guid: 87d9aa76a9c95494997f8f4aea6194d1, type: 3}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -230,7 +230,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!4 &2609359658830767027
 Transform:
   m_ObjectHideFlags: 0
@@ -380,7 +380,7 @@ MeshRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 2100000, guid: b7d39227420bd374bac113c907bcc9cf, type: 2}
+  - {fileID: -1276543510340128140, guid: 87d9aa76a9c95494997f8f4aea6194d1, type: 3}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -548,7 +548,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!4 &4294621937603341139
 Transform:
   m_ObjectHideFlags: 0
@@ -5533,11 +5533,11 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 3226923575914045669}
+  - component: {fileID: 3226923575914045670}
+  - component: {fileID: 2217173723488731088}
   - component: {fileID: 7207571356752833544}
   - component: {fileID: 6429361867974928861}
   - component: {fileID: 3707322068011324572}
-  - component: {fileID: 3226923575914045670}
-  - component: {fileID: 2217173723488731088}
   m_Layer: 6
   m_Name: Pedestal_Randomizer
   m_TagString: Untagged
@@ -5562,6 +5562,139 @@ Transform:
   - {fileID: 2445013231932802812}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 65.727, z: 0}
+--- !u!114 &3226923575914045670
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3226923575914045668}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 107b19b0bc550034d8f324e2b6c159ec, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  raises: []
+  inOrder: 0
+  completesGame: 0
+  chargeClip: {fileID: 8300000, guid: 965f3244f5f8362419082390ab3e24c2, type: 3}
+  correctClip: {fileID: 8300000, guid: 708aa9b78c6214e49a245c4f88139d62, type: 3}
+  incorrectClip: {fileID: 8300000, guid: 15c2f96a00068b0469720d72634f0a85, type: 3}
+  snapClip: {fileID: 8300000, guid: 8069a62e7b897a14393029d89482ec73, type: 3}
+  snapFlyTime: 0.2
+  like: {fileID: 21300000, guid: b357b2ba3719d1e4bb091d8c6d7312e3, type: 3}
+  dislike: {fileID: 21300000, guid: d3695cc19e802e240b7bf8f01b5b7882, type: 3}
+  question: {fileID: 21300000, guid: b670d545611307b4983bae8f4d1ae3d4, type: 3}
+  reactionHeight: -0.25
+  reactionSize: 0.16
+  reactionSpread: 0.5
+  reactionRise: 0.5
+  reactionLifetime: 1.3
+  reactionBurst: 5
+  questionRate: 3
+  reactionOrder: 20
+  breakClip: {fileID: 8300000, guid: f155031a589b30a4b948c6ee6eb17bfc, type: 3}
+  toppleTime: 0.7
+  slideAcceleration: 2.5
+  body: {fileID: 2445013231932802812}
+  socket: {fileID: 3226923575181979655}
+  visualKeyed: {fileID: 2023253672444881256}
+  visualKeyless: {fileID: 2857672062698841196}
+  axes:
+  - meme: {fileID: 11400000, guid: e5793dcd1ab958d46bf4914eca5e12ac, type: 2}
+    way:
+    - {fileID: 0}
+    - {fileID: 0}
+    - {fileID: 0}
+    - {fileID: 0}
+    - {fileID: 0}
+    - {fileID: 0}
+    - {fileID: 0}
+    - {fileID: 0}
+    aimAt: {fileID: 0}
+  - meme: {fileID: 11400000, guid: e929799d11f34e34ea7b6e92573c6974, type: 2}
+    way:
+    - {fileID: 0}
+    - {fileID: 0}
+    - {fileID: 0}
+    - {fileID: 0}
+    - {fileID: 0}
+    - {fileID: 0}
+    - {fileID: 0}
+    - {fileID: 0}
+    aimAt: {fileID: 0}
+  - meme: {fileID: 11400000, guid: c4494fa9e2a181a42b72d11545a4b1aa, type: 2}
+    way:
+    - {fileID: 0}
+    - {fileID: 0}
+    - {fileID: 0}
+    - {fileID: 0}
+    - {fileID: 0}
+    - {fileID: 0}
+    - {fileID: 0}
+    - {fileID: 0}
+    aimAt: {fileID: 0}
+  - meme: {fileID: 11400000, guid: dce25e3f716d7c54c962a4a079987f17, type: 2}
+    way:
+    - {fileID: 0}
+    - {fileID: 0}
+    - {fileID: 0}
+    - {fileID: 0}
+    - {fileID: 0}
+    - {fileID: 0}
+    - {fileID: 0}
+    - {fileID: 0}
+    aimAt: {fileID: 0}
+  forceResult: {fileID: 0}
+  raffleTime: 3
+  tickClip: {fileID: 0}
+  winClip: {fileID: 0}
+  turnTime: 3
+  targetRise: 2.5
+  islandsAfter: 0.1
+  islandRise: 2
+  islandGap: 0.5
+  bridgesAfter: 0.2
+  bridgeRise: 1.5
+  bridgeGap: 0.5
+  timeline: 
+  snapRadius: 3
+  walkToStand: 1
+  standPoint: {fileID: 3226923575914045669}
+  standDistance: 1
+  standWalkSpeed: 1.5
+  lockPlayer: 1
+  focusView: 1
+  focusRadius: -1
+  focusFov: 0
+--- !u!114 &2217173723488731088
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3226923575914045668}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e54aefa0a917451b94fa32d5b60299cd, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  mode: 1
+  when: 0
+  dropMeme: 0
+  delay: 0.2
+  slamPortion: 0.2
+  slamTime: 0.18
+  riseOn: 0
+  riseRadius: 30
+  riseTime: 1.4
+  slamClip: {fileID: 8300000, guid: 925906eebcbf83548a49c1a3881a8a12, type: 3}
+  riseClip: {fileID: 8300000, guid: 8f183ec1614434d47875b411ecdee0c9, type: 3}
+  swallowTime: 2.5
+  swallowClip: {fileID: 0}
+  slamShake: 0.08
+  tremble: 0.03
+  dust: {fileID: 0}
 --- !u!114 &7207571356752833544
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -5698,151 +5831,6 @@ SphereCollider:
   serializedVersion: 3
   m_Radius: 0.19604154
   m_Center: {x: -0.52000004, y: 2.036, z: 0.58000004}
---- !u!114 &3226923575914045670
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 3226923575914045668}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 107b19b0bc550034d8f324e2b6c159ec, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  raises: []
-  inOrder: 0
-  completesGame: 0
-  chargeClip: {fileID: 8300000, guid: 965f3244f5f8362419082390ab3e24c2, type: 3}
-  correctClip: {fileID: 8300000, guid: 708aa9b78c6214e49a245c4f88139d62, type: 3}
-  incorrectClip: {fileID: 8300000, guid: 15c2f96a00068b0469720d72634f0a85, type: 3}
-  snapClip: {fileID: 8300000, guid: 8069a62e7b897a14393029d89482ec73, type: 3}
-  snapFlyTime: 0.2
-  like: {fileID: 21300000, guid: b357b2ba3719d1e4bb091d8c6d7312e3, type: 3}
-  dislike: {fileID: 21300000, guid: d3695cc19e802e240b7bf8f01b5b7882, type: 3}
-  question: {fileID: 21300000, guid: b670d545611307b4983bae8f4d1ae3d4, type: 3}
-  reactionHeight: -0.25
-  reactionSize: 0.16
-  reactionSpread: 0.5
-  reactionRise: 0.5
-  reactionLifetime: 1.3
-  reactionBurst: 5
-  questionRate: 3
-  reactionOrder: 20
-  breakClip: {fileID: 8300000, guid: f155031a589b30a4b948c6ee6eb17bfc, type: 3}
-  toppleTime: 0.7
-  slideAcceleration: 2.5
-  body: {fileID: 2445013231932802812}
-  socket: {fileID: 3226923575181979655}
-  visualKeyed: {fileID: 2023253672444881256}
-  visualKeyless: {fileID: 2857672062698841196}
-  KeylessPedestal: 0
-  KeyID: 
-  keyMeme: {fileID: 0}
-  drainMeme: 0
-  ControlledIslands: []
-  ControlledBridges: []
-  groupID: 
-  cluePainting: {fileID: 0}
-  axes:
-  - meme: {fileID: 11400000, guid: e5793dcd1ab958d46bf4914eca5e12ac, type: 2}
-    way:
-    - {fileID: 0}
-    - {fileID: 0}
-    - {fileID: 0}
-    - {fileID: 0}
-    - {fileID: 0}
-    - {fileID: 0}
-    - {fileID: 0}
-    - {fileID: 0}
-    aimAt: {fileID: 0}
-    sequence: []
-  - meme: {fileID: 11400000, guid: e929799d11f34e34ea7b6e92573c6974, type: 2}
-    way:
-    - {fileID: 0}
-    - {fileID: 0}
-    - {fileID: 0}
-    - {fileID: 0}
-    - {fileID: 0}
-    - {fileID: 0}
-    - {fileID: 0}
-    - {fileID: 0}
-    aimAt: {fileID: 0}
-    sequence: []
-  - meme: {fileID: 11400000, guid: c4494fa9e2a181a42b72d11545a4b1aa, type: 2}
-    way:
-    - {fileID: 0}
-    - {fileID: 0}
-    - {fileID: 0}
-    - {fileID: 0}
-    - {fileID: 0}
-    - {fileID: 0}
-    - {fileID: 0}
-    - {fileID: 0}
-    aimAt: {fileID: 0}
-    sequence: []
-  - meme: {fileID: 11400000, guid: dce25e3f716d7c54c962a4a079987f17, type: 2}
-    way:
-    - {fileID: 0}
-    - {fileID: 0}
-    - {fileID: 0}
-    - {fileID: 0}
-    - {fileID: 0}
-    - {fileID: 0}
-    - {fileID: 0}
-    - {fileID: 0}
-    aimAt: {fileID: 0}
-    sequence: []
-  forceResult: {fileID: 0}
-  raffleTime: 3
-  tickClip: {fileID: 0}
-  winClip: {fileID: 0}
-  turnTime: 3
-  targetRise: 2.5
-  islandsAfter: 0.1
-  islandRise: 2
-  islandGap: 0.5
-  bridgesAfter: 0.2
-  bridgeRise: 1.5
-  bridgeGap: 0.5
-  timeline: 
-  snapRadius: 3
-  walkToStand: 1
-  standPoint: {fileID: 3226923575914045669}
-  standDistance: 1
-  standWalkSpeed: 1.5
-  lockPlayer: 1
-  focusView: 1
-  focusRadius: -1
-  focusFov: 0
---- !u!114 &2217173723488731088
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 3226923575914045668}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: e54aefa0a917451b94fa32d5b60299cd, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  mode: 1
-  when: 0
-  dropMeme: 0
-  delay: 0.2
-  slamPortion: 0.2
-  slamTime: 0.18
-  riseOn: 0
-  riseRadius: 30
-  riseTime: 1.4
-  slamClip: {fileID: 8300000, guid: 925906eebcbf83548a49c1a3881a8a12, type: 3}
-  riseClip: {fileID: 8300000, guid: 8f183ec1614434d47875b411ecdee0c9, type: 3}
-  swallowTime: 2.5
-  swallowClip: {fileID: 0}
-  slamShake: 0.08
-  tremble: 0.03
-  dust: {fileID: 0}
 --- !u!1 &4770880684022384123
 GameObject:
   m_ObjectHideFlags: 0
@@ -5905,7 +5893,7 @@ MeshRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 2100000, guid: b7d39227420bd374bac113c907bcc9cf, type: 2}
+  - {fileID: -1276543510340128140, guid: 87d9aa76a9c95494997f8f4aea6194d1, type: 3}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -6049,7 +6037,7 @@ MeshRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 2100000, guid: b7d39227420bd374bac113c907bcc9cf, type: 2}
+  - {fileID: -1276543510340128140, guid: 87d9aa76a9c95494997f8f4aea6194d1, type: 3}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -6155,7 +6143,7 @@ MeshRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 2100000, guid: e26c631febfc5834194c94042a014874, type: 2}
+  - {fileID: -1276543510340128140, guid: 87d9aa76a9c95494997f8f4aea6194d1, type: 3}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -6261,7 +6249,7 @@ MeshRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 2100000, guid: b7d39227420bd374bac113c907bcc9cf, type: 2}
+  - {fileID: -1276543510340128140, guid: 87d9aa76a9c95494997f8f4aea6194d1, type: 3}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -6367,7 +6355,7 @@ MeshRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 2100000, guid: e26c631febfc5834194c94042a014874, type: 2}
+  - {fileID: -1276543510340128140, guid: 87d9aa76a9c95494997f8f4aea6194d1, type: 3}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0

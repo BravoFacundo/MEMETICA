@@ -46,10 +46,6 @@ public class PortalWindow : MonoBehaviour
     [Tooltip("Seconds that turn takes (0: at the platform's own Turn Speed)")]
     public float platformTurnTime = 1.2f;
 
-    // Old (before Raises): the pedestal it waited for. Opening a scene in the Editor puts this portal in that pedestal's
-    // Raises and clears it (OnValidate); delete once every scene was opened and saved
-    [HideInInspector] public PedestalRetire openAfter;
-
     [Section("Opening")]
     [Tooltip("Seconds after its pedestal went into the earth (or was right) before it rises. Opened by a pedestal that " +
              "has this portal in its Raises; no pedestal does: open from the start")]
@@ -341,7 +337,7 @@ public class PortalWindow : MonoBehaviour
     IEnumerator AfterLanding()
     {
         yield return null;
-        for (float t = 0f; t < 15f && player.Respawning; t += Time.deltaTime) yield return null;
+        for (float t = 0f; t < 15f && PlayerRespawn.Instance.Respawning; t += Time.deltaTime) yield return null;
         MemeChanger window = CarriedWindow;
         if (emptyOnLanding && window != null) window.SetMeme(null);
         Arrived?.Invoke();   // the hub's pedestal comes back up (PedestalRetire)
@@ -562,7 +558,7 @@ public class PortalWindow : MonoBehaviour
             AimPlatform spin = FindObjectOfType<AimPlatform>();
             if (spin != null && !spin.IsTurning) spin.BackTo(exit.transform.position, platformTurnTime);
         }
-        if (fallChange && CarriedWindow != null) player.AnnounceFall();   // the window you carry: its Fall change
+        if (fallChange && CarriedWindow != null) PlayerRespawn.Instance.AnnounceFall();   // the window you carry: its Fall change
         StartCoroutine(AfterLanding());
         if (exitWindow) StartCoroutine(ExitWindow());
         state = State.Open;
@@ -574,7 +570,7 @@ public class PortalWindow : MonoBehaviour
 
         // Looking up again while you fall (landing first: the slam takes the head from there)
         landed = false;
-        PlayerMove.RespawnTouchedDown += OnLanded;
+        PlayerRespawn.RespawnTouchedDown += OnLanded;
         Quaternion fromTurn = player.transform.rotation, toTurn = Quaternion.LookRotation(ExitFacing, Vector3.up);
         for (float t = 0f; t < lookUpTime && !landed; t += Time.deltaTime)
         {
@@ -584,8 +580,8 @@ public class PortalWindow : MonoBehaviour
             yield return null;
         }
         if (turnToExit) player.transform.rotation = toTurn;   // (landed first: the slam hides the rest of the turn)
-        PlayerMove.RespawnTouchedDown -= OnLanded;
-        if (landed && player.respawnStyle == RespawnStyle.Slam) yield break;   // (the slam locks and frees you itself)
+        PlayerRespawn.RespawnTouchedDown -= OnLanded;
+        if (landed && PlayerRespawn.Instance.respawnStyle == RespawnStyle.Slam) yield break;   // (the slam locks and frees you itself)
         look.SetPose(0f, 0f, 0f);
         look.LookLocked = false;
         player.InputLocked = false;
@@ -694,30 +690,6 @@ public class PortalWindow : MonoBehaviour
     void OpenNow() { if (state == State.Hidden) { openDelay = 0f; StartCoroutine(Rise()); } }
 
 #if UNITY_EDITOR
-    // The old Open After → this portal in that pedestal's Raises (once, on its own, when the scene opens)
-    void OnValidate()
-    {
-        if (openAfter == null || Application.isPlaying) return;
-        UnityEditor.EditorApplication.delayCall += () =>
-        {
-            if (this == null || openAfter == null) return;
-            Pedestal pedestal = openAfter.GetComponent<Pedestal>();
-            if (pedestal != null && !pedestal.raises.Contains(transform))
-            {
-                UnityEditor.Undo.RecordObject(pedestal, "Portal into Raises");
-                pedestal.raises.Add(transform);
-                UnityEditor.PrefabUtility.RecordPrefabInstancePropertyModifications(pedestal);
-                UnityEditor.EditorUtility.SetDirty(pedestal);
-            }
-            UnityEditor.Undo.RecordObject(this, "Portal into Raises");
-            Debug.Log($"[Portal] '{name}': now in '{openAfter.name}' Raises (was its Open After). Save the scene.", this);
-            openAfter = null;
-            UnityEditor.PrefabUtility.RecordPrefabInstancePropertyModifications(this);
-            UnityEditor.EditorUtility.SetDirty(this);
-            UnityEditor.SceneManagement.EditorSceneManager.MarkSceneDirty(gameObject.scene);
-        };
-    }
-
     // Where it leads: a line up to where you come out above the hub
     void OnDrawGizmosSelected()
     {

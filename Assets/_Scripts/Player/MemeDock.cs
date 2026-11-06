@@ -11,7 +11,7 @@ using UnityEngine;
 //   Placed      on a pedestal, the same, flying to its socket (Pedestal)
 // While on the screen the 3D one rides with the camera, hidden and without physics: it is still carried (it notices
 // islands and falls, and keeps changing: the HUD one shows its changes).
-// Without a HUD version (Game_Old) nothing of this happens: the window is carried as any meme. Goes on the Player.
+// Without a HUD version (OriginalGame) nothing of this happens: the window is carried as any meme. Goes on the Player.
 public class MemeDock : MonoBehaviour
 {
     public static MemeDock Instance { get; private set; }
@@ -60,7 +60,7 @@ public class MemeDock : MonoBehaviour
     // Whether it goes to the HUD (a meme window, with its HUD version on the canvas)
     public bool CanCarry(GameObject meme) => Hud != null && meme.TryGetComponent(out MemeWindow _);
 
-    // Picked up: toward its HUD place, in Seconds (0: Fly Time; MemeRecall: longer from far away)
+    // Picked up: toward its HUD place, in Seconds (0: Fly Time; PlayerGrab's Recall: longer from far away)
     public void Carry(Meme meme, float seconds = 0f)
     {
         Carried = meme;

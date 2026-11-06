@@ -255,7 +255,7 @@ public class StonePath : MonoBehaviour
         if (Appearing) { SpeedFactor = 1f; lastOnPath = Time.time; return; }
         foreach (PathStone stone in stones)
             if (stone.Moves && !stone.Started) { SpeedFactor = 1f; lastOnPath = Time.time; return; }
-        Transform under = playerMove != null ? playerMove.GroundUnder : null;
+        Transform under = playerMove != null ? PlayerRespawn.Instance.GroundUnder : null;
         PathStone standing = under != null && under.IsChildOf(transform) ? under.GetComponentInParent<PathStone>() : null;
         if (standing != null && standing.Moves) lastOnPath = Time.time;   // (only the moving ones: on the still ones you wait for them)
         float target = Time.time - lastOnPath >= idleDelay ? idleSpeed : 1f;
@@ -269,7 +269,7 @@ public class StonePath : MonoBehaviour
     {
         if (player == null || playerMove == null || moved.sqrMagnitude < 1e-6f || !stone.IsPresent) return;
         if (lastPush.TryGetValue(stone, out float last) && Time.time - last < 0.4f) return;
-        Transform under = playerMove.GroundUnder;
+        Transform under = PlayerRespawn.Instance.GroundUnder;
         if (under != null && under.IsChildOf(stone.transform)) return;   // on it: it carries you
 
         Vector3 body = player.transform.position;

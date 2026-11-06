@@ -9,10 +9,11 @@ using UnityEngine;
 public class KeyPedestal : Pedestal
 {
     [Section("Key")]
-    [Tooltip("The meme it waits for (one of our MemeData: the meme window has to be showing it)")]
+    [Tooltip("The meme it waits for (one of our MemeData: the meme window or orb has to be showing it)")]
     public MemeData key;
-    [Tooltip("Orbs (OriginalGame): the meme is right if its ID starts with this (Meme_3Aa → ID 3Aa). Used if there is no Key")]
-    public string keyId;
+    // Old (orbs by name: Meme_1Aa → "1A"). Opening the scene in the Editor turns it into Key (OnValidate); delete once
+    // OriginalGame was opened and saved
+    [HideInInspector] public string keyId;
     [Tooltip("Game: right, the meme window empties (its meme is downloaded)")]
     public bool downloadMeme = false;
     [Tooltip("The painting (easel) with its clue. Empty: the first painting on its island")]
@@ -47,24 +48,17 @@ public class KeyPedestal : Pedestal
         return null;
     }
 
-    // A white pedestal waits for a meme that has a painting (the clue); a meme without one belongs on black ones
+    // A white pedestal waits for a meme; with an easel, that meme needs a painting (the clue)
     void WarnIfNoClue()
     {
-        if (key != null) return;   // a MemeData: the meme window shows it when it carries it
-        Meme meme = Meme.WithKey(keyId);
-        if (meme == null) Debug.LogWarning($"[KeyPedestal] '{name}': no Key, and no meme with Key ID '{keyId}' in the scene.", this);
-        else if (meme.Data != null && !meme.Data.HasPainting)
-            Debug.LogWarning($"[KeyPedestal] '{name}' waits for '{meme.name}', whose meme '{meme.Data.title}' has no painting (MemeData: Hints). " +
-                             "Give it one, or use a black pedestal.", this);
+        if (key == null) Debug.LogWarning($"[KeyPedestal] '{name}' has no Key (the meme it waits for).", this);
+        else if (hint != null && !key.HasPainting)
+            Debug.LogWarning($"[KeyPedestal] '{name}' waits for '{key.name}', which has no painting (MemeData: Hints) for its easel.", this);
     }
 
-    // The one it waits for: showing its Key (if set), else its ID starts with Key ID
-    public bool Fits(GameObject memeObject)
-    {
-        if (memeObject == null) return false;
-        if (key != null) return memeObject.TryGetComponent(out Meme meme) && meme.Data == key;
-        return !string.IsNullOrEmpty(keyId) && Meme.IDOf(memeObject).StartsWith(keyId);
-    }
+    // The one it waits for: showing its Key
+    public bool Fits(GameObject memeObject) =>
+        key != null && memeObject != null && memeObject.TryGetComponent(out Meme meme) && meme.Data == key;
 
     // The sweep of images while it charges, then it decides
     protected override IEnumerator Judge()
@@ -89,6 +83,30 @@ public class KeyPedestal : Pedestal
     protected override bool AutoSnapsWhen(GameObject inHand, bool inRange) => inRange && key != null && Fits(inHand);
 
 #if UNITY_EDITOR
+    // The old Key ID → Key: the meme of the orb whose name starts with Meme_<Key ID> (once, when the scene opens)
+    protected override void OnValidate()
+    {
+        base.OnValidate();
+        if (key != null || string.IsNullOrEmpty(keyId) || Application.isPlaying) return;
+        UnityEditor.EditorApplication.delayCall += () =>
+        {
+            if (this == null || key != null || string.IsNullOrEmpty(keyId)) return;
+            foreach (Meme meme in FindObjectsOfType<Meme>(true))
+            {
+                if (meme.gameObject.scene != gameObject.scene || !meme.name.StartsWith("Meme_" + keyId) || meme.data == null) continue;
+                UnityEditor.Undo.RecordObject(this, "Key ID into Key");
+                key = meme.data;
+                Debug.Log($"[KeyPedestal] '{name}': Key = '{key.name}' (was Key ID '{keyId}', the orb '{meme.name}'). Save the scene.", this);
+                keyId = "";
+                UnityEditor.PrefabUtility.RecordPrefabInstancePropertyModifications(this);
+                UnityEditor.EditorUtility.SetDirty(this);
+                UnityEditor.SceneManagement.EditorSceneManager.MarkSceneDirty(gameObject.scene);
+                return;
+            }
+            Debug.LogWarning($"[KeyPedestal] '{name}': Key ID '{keyId}' matches no orb: drag its Key in.", this);
+        };
+    }
+
     protected override void OnDrawGizmosSelected()
     {
         base.OnDrawGizmosSelected();

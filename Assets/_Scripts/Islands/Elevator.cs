@@ -4,7 +4,7 @@ using UnityEngine;
 // Tutorial elevator: carries the player (and anything riding with it) up to its island and docks there.
 // There are two, both in the tutorial:
 //   Elevator_Tutorial_01  intro: starts riding as soon as the game starts (look + zoom popups on the way)
-//   Elevator_Tutorial_02  tutorial → Island_1: started by its pedestal (LevelManager.SubirIsla("Tutorial_02"))
+//   Elevator_Tutorial_02  tutorial → Island_1: started by its pedestal (it is in the pedestal's Raises)
 // It starts where it is placed in the scene and ends at Dock Point, an empty child of the destination island.
 // Dock Point, Leave Via and Arrive Via go inside the floating part of their island (e.g. Island_01/Island/Pivots),
 // so the path follows the island while it floats.
@@ -81,7 +81,7 @@ public class Elevator : MonoBehaviour
     void Start()
     {
         if (locks != null) locks.SetActive(false);
-        if (rideOnStart && !LevelManager.SkippingTutorial) StartRide();   // tutorial skipped: no intro ride
+        if (rideOnStart && !GameManager.SkippingTutorial) StartRide();   // tutorial skipped: no intro ride
     }
 
     // Only once per game
@@ -137,7 +137,7 @@ public class Elevator : MonoBehaviour
         {
             player.transform.SetParent(null);
             player.playerCanMove = true;
-            if (respawn != null) player.SetRespawn(respawn);
+            if (respawn != null) PlayerRespawn.Instance.SetRespawn(respawn);
         }
         foreach (Transform p in passengers)
             if (p != null && respawn != null && p.TryGetComponent(out Meme meme)) meme.SetRespawn(respawn);
@@ -170,7 +170,7 @@ public class Elevator : MonoBehaviour
         if (returnWhenLeft) StartCoroutine(ReturnWhenLeft());
     }
 
-    // Tutorial skipped (LevelManager): its pedestal is gone from the start
+    // Tutorial skipped (GameManager): its pedestal is gone from the start
     public void RemovePedestal()
     {
         if (pedestal == null) return;

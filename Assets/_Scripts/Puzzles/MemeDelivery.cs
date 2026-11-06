@@ -50,7 +50,7 @@ public class MemeDelivery : MonoBehaviour
         pedestal = GetComponent<Pedestal>();
         if (meme == null || afterElevator == null) { Debug.LogWarning($"[MemeDelivery] '{name}': assign Meme and After Elevator.", this); done = true; return; }
         worldScale = meme.transform.lossyScale;
-        if (LevelManager.SkippingTutorial) { done = true; return; }   // (LevelManager places it)
+        if (GameManager.SkippingTutorial) { done = true; return; }   // (GameManager places it)
         meme.gameObject.SetActive(false);
     }
 

@@ -1,5 +1,4 @@
 using UnityEngine;
-using UnityEngine.Serialization;
 
 // Slow idle motion around the start position and rotation (it never wanders off).
 // Before: FloatBob (islands) and CloudDrift (clouds). Each part is optional: 0 turns it off.
@@ -15,9 +14,9 @@ public class FloatMotion : MonoBehaviour
 {
     [Header("Bob")]
     [Tooltip("Meters up and down")]
-    [FormerlySerializedAs("amplitude")] public float bobAmplitude = 0.8f;
+    public float bobAmplitude = 0.8f;
     [Tooltip("Seconds per full cycle (higher = slower)")]
-    [FormerlySerializedAs("period")] public float bobPeriod = 16f;
+    public float bobPeriod = 16f;
 
     [Header("Drift")]
     [Tooltip("Meters to each side of the start position. 0 = no drift")]

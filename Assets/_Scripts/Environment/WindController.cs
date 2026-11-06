@@ -1,26 +1,26 @@
 using UnityEngine;
 
-// Viento global de la escena: lo leen todos los materiales "Memetica/Wind Sway".
-// Uno solo por escena. Se actualiza en el editor al cambiar valores (no hace falta entrar en Play).
+// The scene's wind: every "Memetica/Wind Sway" material reads it.
+// One per scene. It updates in the editor as values change (no need to press Play).
 [ExecuteAlways]
 public class WindController : MonoBehaviour
 {
-    [Header("Viento")]
+    [Header("Wind")]
     public Vector2 direction = new Vector2(1f, 0.3f);    // X, Z
-    [Range(0, 1)] public float strength = 0.1f;          // balanceo
+    [Range(0, 1)] public float strength = 0.1f;          // sway
     [Range(0, 5)] public float speed = 1f;
-    [Range(0, 0.5f)] public float lean = 0.05f;          // inclinación constante
+    [Range(0, 0.5f)] public float lean = 0.05f;          // constant lean
 
-    [Header("Altura (metros sobre la base de cada objeto)")]
-    public float baseHeight = 0.3f;                      // sin movimiento hasta acá
-    public float heightRange = 4f;                       // fuerza completa a partir de acá
-    [Range(1, 6)] public float stiffness = 3f;           // más = la mitad del árbol se mueve menos
+    [Header("Height (meters above each object's base)")]
+    public float baseHeight = 0.3f;                      // no motion up to here
+    public float heightRange = 4f;                       // full strength from here on
+    [Range(1, 6)] public float stiffness = 3f;           // more = the lower half of a tree moves less
 
-    [Header("Temblor de hojas")]
+    [Header("Leaf Flutter")]
     [Range(0, 0.2f)] public float flutterStrength = 0.01f;
     [Range(0, 20)] public float flutterSpeed = 6f;
-    [Range(0, 0.95f)] public float flutterStart = 0.6f;  // 0 base, 1 punta
-    [Range(0.2f, 4)] public float flutterScale = 1f;     // más chico = más en bloque
+    [Range(0, 0.95f)] public float flutterStart = 0.6f;  // 0 base, 1 tip
+    [Range(0.2f, 4)] public float flutterScale = 1f;     // smaller = more in one block
 
     public static WindController Instance { get; private set; }
 
@@ -42,6 +42,6 @@ public class WindController : MonoBehaviour
         Shader.SetGlobalFloat("_MW_FlutterScale", flutterScale);
     }
 
-    // Dirección en mundo (para que las hojas que caen sigan el mismo viento)
+    // Direction in the world (so falling leaves follow the same wind)
     public Vector3 WorldDirection => new Vector3(direction.x, 0f, direction.y).normalized;
 }

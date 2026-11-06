@@ -1,5 +1,5 @@
 // General sound. Goes in Managers > AudioManager.
-// - Music: each scene's own, looped from the start (Menu: its theme; Game / Game_Old: the same one in the background,
+// - Music: each scene's own, looped from the start (Menu: its theme; Game / OriginalGame: the same one in the background,
 //   at Music Level). It fades out when changing scene (UIManager asks for it). The settings' Music slider turns it
 //   down or off (mixer's Music group). It makes its own source.
 // - Ambience: the scene's background loop (Menu: the wind), 2D, on the Sfx group (the Sfx slider). It fades out with
@@ -15,7 +15,6 @@
 using System.Collections;
 using UnityEngine;
 using UnityEngine.Audio;
-using UnityEngine.Serialization;
 
 public class AudioManager : MonoBehaviour
 {
@@ -34,7 +33,7 @@ public class AudioManager : MonoBehaviour
 
     [Section("Music")]
     [Tooltip("This scene's music, looped from the start (Menu and Game: MainTheme). Empty: no music here")]
-    [FormerlySerializedAs("menuMusic")] public AudioClip music;
+    public AudioClip music;
     [Tooltip("Its level in this scene before the slider (Game: lower, so it stays in the background)")]
     [Range(0f, 1f)] public float musicLevel = 1f;
     [Tooltip("The music's volume while a meme sounds (so the meme is heard), then back up")]

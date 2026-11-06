@@ -23,8 +23,7 @@ public static class NewIslandTool
     [MenuItem("Memetica/Level/New Island", false, 300)]
     public static void Create()
     {
-        LevelManager level = Object.FindObjectOfType<LevelManager>(true);
-        string prefix = level != null ? level.islandPrefix : "Island_";
+        const string prefix = "Island_";   // (just a tidy name: nothing finds islands by name)
 
         // Next free number (Island_01, Island_02…)
         int next = Object.FindObjectsOfType<Island>(true)
@@ -43,7 +42,7 @@ public static class NewIslandTool
         root.AddComponent<FloatMotion>();
 
         Transform pivots = Child(root.transform, "Pivots");
-        Transform respawn = Child(pivots, level != null ? level.respawnPointName : "RespawnPoint");
+        Transform respawn = Child(pivots, "RespawnPoint");
         respawn.localPosition = Vector3.up * RespawnHeight;
 
         Transform scenery = Child(root.transform, "Scenery");

@@ -3,11 +3,10 @@
 //  Jump     coyote time (jump a moment after leaving a ledge) and jump buffer (press a moment before landing)
 //  Ground   anything you stand on counts (optional: only the Ground layer), snaps down slopes,
 //           and carries you with moving ground (bridges, islands, platforms)
-// Falling into the void and coming back: PlayerRespawn (next to it, on the Player). This calls it at the right moments
-// and forwards its old names (Respawning, SetRespawn, the Void… / Respawn… events) so nothing else had to change.
+// Falling into the void and coming back: PlayerRespawn (next to it, on the Player). This calls it at the right moments;
+// everything about the respawn (where, how, its events) is asked to PlayerRespawn.
 
 using UnityEngine;
-using UnityEngine.Serialization;
 
 public class PlayerMove : MonoBehaviour
 {
@@ -56,56 +55,9 @@ public class PlayerMove : MonoBehaviour
     [ReadOnlyField] public bool isGrounded;
     [ReadOnlyField] public bool ascend = false;   // the GameManager turns it on at the end (Ending: Ascend)
 
-    //---- Respawn: moved to PlayerRespawn. Old names, forwarded (callers didn't change)
-    public static event System.Action VoidFallStarted { add => PlayerRespawn.VoidFallStarted += value; remove => PlayerRespawn.VoidFallStarted -= value; }
-    public static event System.Action VoidRespawned { add => PlayerRespawn.VoidRespawned += value; remove => PlayerRespawn.VoidRespawned -= value; }
-    public static event System.Action RespawnTouchedDown { add => PlayerRespawn.RespawnTouchedDown += value; remove => PlayerRespawn.RespawnTouchedDown -= value; }
-    public static event System.Action RespawnLanded { add => PlayerRespawn.RespawnLanded += value; remove => PlayerRespawn.RespawnLanded -= value; }
-    public bool Respawning => respawn != null && respawn.Respawning;
-    public bool FallingIntoVoid => respawn != null && respawn.FallingIntoVoid;
-    public GameObject CurrentIsland => respawn != null ? respawn.CurrentIsland : null;
-    public Transform GroundUnder => respawn != null ? respawn.GroundUnder : null;
-    public RespawnStyle respawnStyle => respawn != null ? respawn.respawnStyle : oldRespawnStyle;
-    public void SetRespawn(Transform point) { if (respawn != null) respawn.SetRespawn(point); }
-    public void FinishRespawn() { if (respawn != null) respawn.FinishRespawn(); }
-    public void AnnounceFall() { if (respawn != null) respawn.AnnounceFall(); }
-
-    // Old respawn values, kept hidden so they can be copied to PlayerRespawn (Memetica > Check > Migrate Managers, or
-    // on Play if the Player has no PlayerRespawn yet). Delete once migrated
-    [HideInInspector, FormerlySerializedAs("respawnStyle")] public RespawnStyle oldRespawnStyle = RespawnStyle.Slam;
-    [HideInInspector, FormerlySerializedAs("respawnBrakeDistance")] public float oldRespawnBrakeDistance = 6f;
-    [HideInInspector, FormerlySerializedAs("respawnLandingSpeed")] public float oldRespawnLandingSpeed = 3f;
-    [HideInInspector, FormerlySerializedAs("voidFallMargin")] public float oldVoidFallMargin = 1.5f;
-    [HideInInspector, FormerlySerializedAs("slamFallDepth")] public float oldSlamFallDepth = 12f;
-    [HideInInspector, FormerlySerializedAs("slamHeight")] public float oldSlamHeight = 8f;
-    [HideInInspector, FormerlySerializedAs("slamFallTime")] public float oldSlamFallTime = 0.45f;
-    [HideInInspector, FormerlySerializedAs("slamDownTime")] public float oldSlamDownTime = 0.08f;
-    [HideInInspector, FormerlySerializedAs("slamStayTime")] public float oldSlamStayTime = 0.17f;
-    [HideInInspector, FormerlySerializedAs("slamGetUpTime")] public float oldSlamGetUpTime = 0.25f;
-    [HideInInspector, FormerlySerializedAs("slamRoll")] public float oldSlamRoll = 14f;
-    [HideInInspector, FormerlySerializedAs("slamDip")] public float oldSlamDip = 0.6f;
-    [HideInInspector, FormerlySerializedAs("slamShake")] public float oldSlamShake = 0.12f;
-    [HideInInspector, FormerlySerializedAs("landingSounds")] public AudioClip[] oldLandingSounds;
-    [HideInInspector, FormerlySerializedAs("fallingSounds")] public AudioClip[] oldFallingSounds;
-    [HideInInspector, FormerlySerializedAs("fallSoundsVolume")] public float oldFallSoundsVolume = 1f;
-    [HideInInspector, FormerlySerializedAs("bigFallHeight")] public float oldBigFallHeight = 6f;
-    [HideInInspector, FormerlySerializedAs("lookAhead")] public float oldLookAhead = 1.5f;
-    [HideInInspector, FormerlySerializedAs("lookAheadDelay")] public float oldLookAheadDelay = 0.25f;
-    [HideInInspector] public bool migratedToPlayerRespawn;
-
-    public void CopyOldValuesTo(PlayerRespawn r)
-    {
-        r.respawnStyle = oldRespawnStyle; r.respawnBrakeDistance = oldRespawnBrakeDistance; r.respawnLandingSpeed = oldRespawnLandingSpeed;
-        r.voidFallMargin = oldVoidFallMargin; r.slamFallDepth = oldSlamFallDepth; r.slamHeight = oldSlamHeight;
-        r.slamFallTime = oldSlamFallTime; r.slamDownTime = oldSlamDownTime; r.slamStayTime = oldSlamStayTime;
-        r.slamGetUpTime = oldSlamGetUpTime; r.slamRoll = oldSlamRoll; r.slamDip = oldSlamDip; r.slamShake = oldSlamShake;
-        r.landingSounds = oldLandingSounds; r.fallingSounds = oldFallingSounds; r.fallSoundsVolume = oldFallSoundsVolume;
-        r.bigFallHeight = oldBigFallHeight; r.lookAhead = oldLookAhead; r.lookAheadDelay = oldLookAheadDelay;
-    }
-
     // On: walking and jumping keys do nothing (gravity and moving ground still do), e.g. getting up after the slam
     public bool InputLocked { get; set; }
-    // A walk it does by itself (MemeRandomizer: to its stand point), whatever InputLocked says. Null: none
+    // A walk it does by itself (RandomizerPedestal: to its stand point), whatever InputLocked says. Null: none
     public Vector3? AutoWalkTo { get; set; }
     public float AutoWalkSpeed { get; set; } = 1.5f;
 
@@ -152,12 +104,7 @@ public class PlayerMove : MonoBehaviour
     {
         characterController = GetComponent<CharacterController>();
         respawn = GetComponent<PlayerRespawn>();
-        if (respawn == null)   // a Player from before PlayerRespawn (Migrate Managers adds it for good)
-        {
-            respawn = gameObject.AddComponent<PlayerRespawn>();
-            CopyOldValuesTo(respawn);
-            Debug.Log("[PlayerMove] No PlayerRespawn on the Player: added one with the old values. Run Memetica > Check > Migrate Managers to keep it.", this);
-        }
+        if (respawn == null) Debug.LogError("[PlayerMove] The Player needs a PlayerRespawn next to it.", this);
     }
 
     private void Start()
@@ -433,7 +380,7 @@ public class PlayerMove : MonoBehaviour
 
     private void UpdateGroundInteractions()
     {
-        // Un solo rayo hacia abajo para todo
+        // One ray down for everything
         if (!Physics.Raycast(transform.position, Vector3.down, out RaycastHit hit, Mathf.Infinity, Physics.DefaultRaycastLayers & ~PhysicsLayers.PropsMask)) return;
 
         // Falling platforms (the meme in the hand tracks its own bridges and islands: Meme.TrackGround)
@@ -513,7 +460,7 @@ public class PlayerMove : MonoBehaviour
         characterController.enabled = false;
         transform.position = point.position;
         characterController.enabled = true;
-        SetRespawn(point);
+        respawn.SetRespawn(point);
         ResetMotion();
     }
 

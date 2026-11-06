@@ -8,7 +8,6 @@
 using UnityEngine;
 using UnityEngine.Events;
 using UnityEngine.EventSystems;
-using UnityEngine.Serialization;
 
 public class WindowButton : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler, IPointerClickHandler
 {
@@ -23,7 +22,6 @@ public class WindowButton : MonoBehaviour, IPointerEnterHandler, IPointerExitHan
     [Tooltip("Double Click: a single click (no second one in time) shows the scene's NotificationWindow")]
     public bool hintOnSingleClick = true;
     [Tooltip("What happens on click")]
-    [FormerlySerializedAs("onOpen")]   // keeps the event of objects that used the old DesktopIcon
     public UnityEvent onClick;
 
     private bool hovering;

@@ -1,5 +1,5 @@
 //The recall part of PlayerGrab (same component, its own file): an auto grab, so the meme window never stays behind
-//and if you forget how to use it, the game uses it for you (Game; before: the MemeRecall component).
+//and if you forget how to use it, the game uses it for you (Game).
 //  Far          farther than Recall Distance from it for a moment: it comes back to your hand (the HUD)
 //  Assist (each optional; together, no softlocks):
 //     Bring When Leaving   you step from where it is onto another bridge or island: it comes (e.g. you leave the
@@ -89,7 +89,7 @@ public partial class PlayerGrab
         bool free = FreeToCome(false);
 
         // You stepped somewhere new: the one left where you were comes
-        Transform place = PlaceOf(player.GroundUnder);
+        Transform place = PlaceOf(PlayerRespawn.Instance.GroundUnder);
         if (place != null && place != lastPlace)
         {
             Transform from = lastPlace;
@@ -128,7 +128,7 @@ public partial class PlayerGrab
     }
 
     // Your hands are free (and you stand on something)
-    bool FreeToCome(bool onGround) => heldObject == null && !player.Scripted && !player.Respawning && (!onGround || player.isGrounded);
+    bool FreeToCome(bool onGround) => heldObject == null && !player.Scripted && !PlayerRespawn.Instance.Respawning && (!onGround || player.isGrounded);
 
     // Right now, whatever it is doing (it fell into the void, or got lost: Meme): flies to your hand. False: it can't
     public bool BringNow(MemeWindow window)

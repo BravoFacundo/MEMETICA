@@ -12,11 +12,11 @@ using UnityEngine;
 // where it was placed on its parent, wherever the parent is now.
 // Down (waiting below): invisible and you fall through it (its renderers, colliders, lights and grass are off).
 // It shows again as soon as it starts rising.
-// Role: what it is for the meme window (before: IslandRole, a separate script)
+// Role: what it is for the meme window
 //   Course    each new one you carry the window onto gives it its next Move (going back to one already visited: nothing)
 //   Hub       never gives a Move (you start and come back here)
 //   Optional  an optional course (raised by a black pedestal): no Move, no Leave, and your window, left on its black
-//             pedestal, doesn't come back to you while you are here (MemeRecall)
+//             pedestal, doesn't come back to you while you are here (PlayerGrab's Recall)
 public abstract class Lift : MonoBehaviour
 {
     public enum Role { Course, Hub, Optional }
@@ -96,7 +96,7 @@ public abstract class Lift : MonoBehaviour
         StartMove(RiseDuration, true);
     }
 
-    // Rises taking these seconds (from now on), whatever its timing says (MemeRandomizer's timing)
+    // Rises taking these seconds (from now on), whatever its timing says (RandomizerPedestal's timing)
     public void RaiseIn(float seconds)
     {
         riseFor = seconds;

@@ -36,10 +36,8 @@ public class DebugTools : MonoBehaviour
         public string name = "Island 1";
         [Tooltip("Where the player appears (e.g. the RespawnPoint of an island)")]
         public Transform spawnPoint;
-        [Tooltip("Island IDs already up (e.g. 1, 2)")]
-        public string[] islands;
-        [Tooltip("Bridge IDs already up (e.g. A, 02)")]
-        public string[] bridges;
+        [Tooltip("Islands and bridges already up, no animation (drag them in)")]
+        public Lift[] up = new Lift[0];
         [Tooltip("Elevators already docked at their island (the intro one too, so it doesn't ride)")]
         public Elevator[] dockedElevators;
         [Tooltip("Memes already placed on a pedestal (the pedestal evaluates them as usual)")]
@@ -255,8 +253,7 @@ public class DebugTools : MonoBehaviour
         // Next frame, after the player, islands and bridges set themselves up: move the player, put things in place, place the memes
         yield return null;
         if (start.spawnPoint != null && playerMove != null) playerMove.TeleportTo(start.spawnPoint);
-        foreach (string id in start.islands) LevelManager.Instance.SnapIslandUp(id);
-        foreach (string id in start.bridges) LevelManager.Instance.SnapBridgeUp(id);
+        foreach (Lift lift in start.up) if (lift != null) lift.SnapUp();
         foreach (MemePlacement placement in start.memes)
         {
             if (placement.meme == null || placement.pedestal == null) continue;
@@ -296,8 +293,7 @@ public class DebugTools : MonoBehaviour
         {
             name = "Skip tutorial",
             spawnPoint = spawn,
-            islands = new string[0],
-            bridges = new string[0],
+            up = new Lift[0],
             dockedElevators = elevators,
             memes = memes.ToArray(),
         };

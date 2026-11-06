@@ -13,8 +13,8 @@ public static class RunStats
     static void Hook()
     {
         Falls = 0;
-        PlayerMove.VoidRespawned -= OnVoidRespawn;
-        PlayerMove.VoidRespawned += OnVoidRespawn;
+        PlayerRespawn.VoidRespawned -= OnVoidRespawn;
+        PlayerRespawn.VoidRespawned += OnVoidRespawn;
         GameManager.StateChanged -= OnState;
         GameManager.StateChanged += OnState;
         SceneManager.sceneLoaded -= OnScene;

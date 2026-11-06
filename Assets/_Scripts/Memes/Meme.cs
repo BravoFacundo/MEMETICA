@@ -2,7 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-// Anything the player carries that holds a meme: MemeOrb (Game_Old) or MemeWindow (Game).
+// Anything the player carries that holds a meme: MemeOrb (OriginalGame) or MemeWindow (Game).
 // The environment (hold, pedestals, respawn, bridges and islands) only talks to this class,
 // so it works the same with both. Each representation decides what to do in the On... methods.
 // On its own (no MemeOrb / MemeWindow) it is a plain carryable meme with no visual logic, e.g. the tutorial orb.
@@ -10,28 +10,21 @@ using UnityEngine;
 // in it) glowing with a trail, falling at an angle onto open ground near the island's middle (not trees, not pedestals).
 // On impact the ground breaks, the rock bursts in a dark cloud and the meme comes out; smoke rises there until it is picked up.
 // While held it travels with the player: it notices on its own the bridges and islands it is carried to,
-// and the player falling into the void (PlayerMove.VoidFallStarted, then RespawnLanded). Shared values: MemeSettings (Assets/Resources).
+// and the player falling into the void (PlayerRespawn.VoidFallStarted, then RespawnLanded). Shared values: MemeSettings (Assets/Resources).
 // This class only detects (what happened, where the player is, whether they can see it); each representation
 // (MemeOrb, MemeWindow) decides what each change looks like and when it shows.
-// Object name: Meme_<ID> (e.g. Meme_3Aa). Pedestals compare their Key ID with that ID: the ID is the orb's place in
-// the level, the meme in it (MemeData) can be any.
+// Its name is free: a white pedestal knows it by the meme it shows (its MemeData), not by its name.
 [RequireComponent(typeof(Rigidbody))]
 [SelectionBase]   // clicking any of its parts in the Scene view selects this
 public class Meme : MonoBehaviour
 {
-    public const string NamePrefix = "Meme_";
-
     [Section("Meme")]
-    [Tooltip("The meme it holds: its images and sounds (Art/Memes/<Meme>/<Meme>.asset)")]
+    [Tooltip("The meme it holds: its images and sounds (Art/_Memes/<Meme>/MemeData_<Meme>.asset)")]
     public MemeData data;
-    // Old (MemeGroup is going away): Migrate Managers puts the group's spare into Data, then clears these
-    [HideInInspector] public MemeGroup reserveGroup;
-    [HideInInspector] public int reserveSlot = 1;
 
     // The meme it holds this game (Data, or another one: the randomizer)
     public MemeData Data { get; protected set; }   // MemeChanger.SetMeme swaps it (the randomizer)
 
-    public string ID => IDOf(gameObject);
     public bool IsHeld { get; private set; }
     public Pedestal CurrentPedestal { get; private set; }
 
@@ -52,13 +45,6 @@ public class Meme : MonoBehaviour
     private float lastGroundY;
     private float lastIslandY;   // the last island ground under it (a safety net: far below it, it is lost)
 
-    // "Meme_3Aa" → "3Aa". Everything after the first "_", so old names ("Orb_3Aa") still work
-    public static string IDOf(GameObject meme)
-    {
-        int separator = meme.name.IndexOf('_');
-        return separator >= 0 ? meme.name.Substring(separator + 1) : meme.name;
-    }
-
     // The meme in the player's hand, or null
     public static Meme Held => all.Find(m => m.IsHeld);
 
@@ -68,10 +54,6 @@ public class Meme : MonoBehaviour
         IslandChanges++;
         OnIslandVisited(lastIsland, true);
     }
-
-    // The meme a white pedestal waits for (its ID starts with the Key ID), or null
-    public static Meme WithKey(string keyID) =>
-        string.IsNullOrEmpty(keyID) ? null : all.Find(m => m.ID.StartsWith(keyID));
 
     protected virtual void Awake()
     {
@@ -202,15 +184,15 @@ public class Meme : MonoBehaviour
     protected virtual void OnEnable()
     {
         all.Add(this);
-        PlayerMove.VoidFallStarted += OnPlayerVoidFall;
-        PlayerMove.RespawnLanded += OnPlayerLanded;
+        PlayerRespawn.VoidFallStarted += OnPlayerVoidFall;
+        PlayerRespawn.RespawnLanded += OnPlayerLanded;
     }
 
     protected virtual void OnDisable()
     {
         all.Remove(this);
-        PlayerMove.VoidFallStarted -= OnPlayerVoidFall;
-        PlayerMove.RespawnLanded -= OnPlayerLanded;
+        PlayerRespawn.VoidFallStarted -= OnPlayerVoidFall;
+        PlayerRespawn.RespawnLanded -= OnPlayerLanded;
     }
 
     protected virtual void Update()
@@ -268,7 +250,7 @@ public class Meme : MonoBehaviour
     // Safety net: far from the player (farther than the void: Drop Distance and a bit), not resting on an island, and
     // with nothing under it or far below you (falling, or stuck on something down there): it comes back (a meteor, or
     // to your hand in Game). Not by height alone: some areas (the tutorial) are far below the islands; and a meme lying
-    // on its island's ground (Game_Old: loose, not attached) is never lost. Says why in the console
+    // on its island's ground (OriginalGame: loose, not attached) is never lost. Says why in the console
     private void CheckLost()
     {
         if (IsHeld || CurrentPedestal != null || meteor != null || LevelManager.Instance == null) return;
@@ -296,7 +278,7 @@ public class Meme : MonoBehaviour
 
     protected static PlayerMove CurrentPlayer => player != null ? player : (player = FindObjectOfType<PlayerMove>());
     // The island the player stepped on last, and the one this meme is on (or was carried over last)
-    protected GameObject PlayerIsland => CurrentPlayer != null ? CurrentPlayer.CurrentIsland : null;
+    protected GameObject PlayerIsland => CurrentPlayer != null ? PlayerRespawn.Instance.CurrentIsland : null;
     protected GameObject MemeIsland => lastIsland;
     // Times it has been carried onto an island other than the last one (not the tutorial ones, nor the letter ones
     // unless MemeSettings' Letter Islands Unlock is on)

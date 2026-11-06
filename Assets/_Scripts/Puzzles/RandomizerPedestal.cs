@@ -2,8 +2,8 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-// The randomizer (the hub): a black pedestal that gives the meme window its meme (before: MemeRandomizer on a
-// Pedestal). Put a meme window (empty or not) on it: the axes still to draw go by on the window, faster and then slower,
+// The randomizer (the hub): a pedestal that gives the meme window its meme. It goes on the platform that turns (the
+// physical pedestal on it is its Body). Put a meme window (empty or not) on it: the axes still to draw go by on the window, faster and then slower,
 // it stops on one at random (or always on Force Result), the window becomes that meme (MemeChanger.SetMeme) and that
 // axis' Way rises: islands, elevators and bridges mixed, dragged in the order you want.
 // Timing: the platform turns (Turn Time) with the pedestal up, the pedestal slams in, the target (Aim At, else the
@@ -20,13 +20,15 @@ public class RandomizerPedestal : Pedestal
     public class Axis
     {
         public MemeData meme;
-        [Tooltip("Islands, elevators and bridges that rise when this axis comes out, in the order you want (drag them " +
+        [Tooltip("Islands, elevators, bridges and portals that rise when this axis comes out, in the order you want (drag them " +
                  "in). The first island is the target, unless Aim At")]
         public List<Transform> way = new List<Transform>();
         [Tooltip("Where the platform points when this axis comes out (empty: the first island)")]
         public Transform aimAt;
-        [HideInInspector] public string[] sequence = new string[0];   // (old: names, moved into Way by Migrate Pedestals)
     }
+
+    // White (marble), like its platform
+    protected override bool IsWhite => true;
 
     static bool IsBridge(Transform t) => t != null && t.GetComponent<Bridge>() != null;
 
@@ -339,20 +341,8 @@ public class RandomizerPedestal : Pedestal
         WayOpened?.Invoke();
     }
 
-    // Its axis' way, in order (an axis still with names: found by name)
-    List<Transform> Way(Axis axis)
-    {
-        List<Transform> way = axis.way.FindAll(t => t != null);
-        if (way.Count > 0 || axis.sequence == null) return way;
-        LevelManager level = LevelManager.Instance;   // (old: by name)
-        foreach (string entry in axis.sequence)
-        {
-            if (!level.Resolve(entry, out string id, out bool isIsland)) continue;
-            Transform t = isIsland ? level.FindIsland(id) : level.FindBridge(id);
-            if (t != null) way.Add(t);
-        }
-        return way;
-    }
+    // Its axis' way, in order (empty slots left out)
+    List<Transform> Way(Axis axis) => axis.way.FindAll(t => t != null);
 
     // The first island of that meme's axis (CourseGuide: which level it belongs to), or null
     public Transform FirstIslandOf(MemeData data)

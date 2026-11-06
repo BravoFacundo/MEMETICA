@@ -4,8 +4,8 @@ using UnityEngine;
 // A platform that turns to point at where you go next (the hub's, with the randomizer pedestal on it): after the
 // raffle it turns its front (the thick blue arrow it draws in the Scene view) toward the winner's first island (the
 // middle of its meshes, not its pivot), and only then that
-// way rises in front of you. It only turns around the vertical, the shorter way round (90° left, never 270° right): an
-// island below (rising, or waiting hidden) doesn't make it look up or down.
+// way rises in front of you. It only turns around its own vertical, the shorter way round (90° left, never 270° right):
+// it never looks up or down, an island below (rising, or waiting hidden) or its island leaning while it floats.
 // Whatever is inside it turns with it (the pedestal and its meme); the player standing on it turns too (PlayerMove).
 // Its front is part of it: rotate the platform in the Scene view (Y) and the arrow turns with it, so you can leave it
 // pointing anywhere (e.g. at the tutorial). Set it once from its menu (right click on the component): Front = Where
@@ -111,9 +111,10 @@ public class AimPlatform : MonoBehaviour
         float duration = seconds > 0f ? seconds : Mathf.Max(minTurnTime, Mathf.Abs(angle) / Mathf.Max(turnSpeed, 1f) * 1.5f);   // (eased: 1.5 x the time at full speed)
         PlayerLook.Shake(duration, shake);
 
-        // Around its own vertical, on its parent (it still floats with its island)
+        // Around its OWN vertical (the axis of it that points up, on its parent): it never tilts, it keeps the slope it had
+        // when it started (before: the world's vertical, so on a floating island leaning that moment it tilted up or down)
         Quaternion from = transform.localRotation;
-        Vector3 axis = transform.parent != null ? transform.parent.InverseTransformDirection(Vector3.up) : Vector3.up;   // the world's vertical, on its parent
+        Vector3 axis = from * OwnUp();
         for (float t = 0f; t < duration; t += Time.deltaTime)
         {
             float p = t / duration;
@@ -126,6 +127,16 @@ public class AimPlatform : MonoBehaviour
         Sound(null, false);
         Sound(stopClip, false);
         IsTurning = false;
+    }
+
+    // Its local axis closest to the world's up (its model may be imported lying down: X, Y or Z, either way)
+    Vector3 OwnUp()
+    {
+        Vector3 up = transform.InverseTransformDirection(Vector3.up);
+        Vector3 a = new Vector3(Mathf.Abs(up.x), Mathf.Abs(up.y), Mathf.Abs(up.z));
+        if (a.x >= a.y && a.x >= a.z) return new Vector3(Mathf.Sign(up.x), 0f, 0f);
+        if (a.y >= a.z) return new Vector3(0f, Mathf.Sign(up.y), 0f);
+        return new Vector3(0f, 0f, Mathf.Sign(up.z));
     }
 
     void Sound(AudioClip clip, bool loop)

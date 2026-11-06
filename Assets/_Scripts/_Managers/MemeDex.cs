@@ -6,7 +6,7 @@ using UnityEngine.Events;
 // Each axis (its MemeData) has 7, the standard:
 //   Base     its white pedestal at the end of its course: the sweep ends on the base meme (Pedestal)
 //   Fall     its Fall change shows (you fell with it)
-//   Leave    its Leave change shows (you left it behind and came back, or it came to you: MemeRecall)
+//   Leave    its Leave change shows (you left it behind and came back, or it came to you: PlayerGrab's Recall)
 //   Move 1-4 its Move changes, in order: each main island of its course you carry it onto (MemeChanger)
 // Optional memes (one each, at the end of the dex): the meme window at the end of an optional course (DexCollectible).
 // An image an axis doesn't have (no Leave yet, 3 Moves) doesn't count. Once all are in: On Complete (the backup popup,

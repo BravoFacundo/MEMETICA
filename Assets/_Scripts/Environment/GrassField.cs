@@ -34,7 +34,8 @@ public class GrassField : MonoBehaviour
     [Header("Paint")]
     [SerializeField] private bool useChildMeshes = true;              // every mesh under this object is ground
     [SerializeField] private List<MeshFilter> extraGroundMeshes = new();
-    [SerializeField, HideInInspector] private List<Collider> groundColliders = new();    // old setup, still read
+    // Old (ground given as colliders): opening the scene in the Editor moves their meshes into Extra Ground Meshes
+    [SerializeField, HideInInspector] private List<Collider> groundColliders = new();
     [SerializeField] private float testDensity = 6f;    // cards per square meter
     [SerializeField, Range(0, 1)] private float minUpNormal = 0.7f;
     [SerializeField] private bool onlyTopSurface = true;    // skip ground covered by rocks, props or other meshes
@@ -91,7 +92,24 @@ public class GrassField : MonoBehaviour
         Camera.onPreCull += DrawForCamera;
     }
     private void OnDisable() => Camera.onPreCull -= DrawForCamera;
-    private void OnValidate() => isDirty = true;
+    private void OnValidate()
+    {
+        isDirty = true;
+#if UNITY_EDITOR
+        if (groundColliders.Count == 0 || Application.isPlaying) return;
+        EditorApplication.delayCall += () =>
+        {
+            if (this == null || groundColliders.Count == 0) return;
+            Undo.RecordObject(this, "Ground Colliders into Extra Ground Meshes");
+            foreach (Collider old in groundColliders)
+                if (old != null && old.TryGetComponent(out MeshFilter filter) && !extraGroundMeshes.Contains(filter)) extraGroundMeshes.Add(filter);
+            groundColliders.Clear();
+            EditorUtility.SetDirty(this);
+            UnityEditor.SceneManagement.EditorSceneManager.MarkSceneDirty(gameObject.scene);
+            Debug.Log($"[Grass] '{name}': its ground colliders are now Extra Ground Meshes. Save the scene.", this);
+        };
+#endif
+    }
 
     //-------------------------------------------------------------------------------------------------------------------
 
@@ -516,8 +534,6 @@ public class GrassField : MonoBehaviour
         var meshes = new List<MeshFilter>();
         if (useChildMeshes) meshes.AddRange(GetComponentsInChildren<MeshFilter>());
         meshes.AddRange(extraGroundMeshes);
-        foreach (Collider oldCollider in groundColliders)
-            if (oldCollider != null && oldCollider.TryGetComponent(out MeshFilter filter)) meshes.Add(filter);
         return meshes.Where(m => m != null && m.sharedMesh != null).Distinct().ToList();
     }
 

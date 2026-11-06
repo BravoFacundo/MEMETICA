@@ -8,8 +8,8 @@ using UnityEngine;
 //   RandomizerPedestal  (black, the hub) gives the meme window a meme: a raffle, then that meme's way rises
 // Optional, on the same object: PedestalRetire (used once, then into the ground), MemeDelivery (a meme falls onto it).
 // Grouped pedestals (a PedestalGroup lists them) complete together, once all of them have a meme.
-// What it raises: its Raises list, islands, elevators and bridges mixed, dragged in the order you want (each one is
-// raised its own way: an island rises, an elevator starts its ride, a bridge appears). In Order: one after the other,
+// What it raises: its Raises list, islands, elevators, bridges and portals mixed, dragged in the order you want (each
+// one is raised its own way: an island rises, an elevator starts its ride, a bridge appears, a portal opens). In Order: one after the other,
 // each once the previous arrived; off: all at once. Taken off, its bridges go down again (not a randomizer's).
 // Placing: a meme in your hand goes in when you look at the zone (the sphere around the Socket, within reach), not when
 // it touches it. One that falls or is thrown into the zone goes in on its own. The meme window carried in the HUD
@@ -77,19 +77,8 @@ public class Pedestal : MonoBehaviour
     public GameObject visualKeyed;
     public GameObject visualKeyless;
 
-    // Old (before the kinds): Memetica > Check > Migrate Pedestals moves them into the new fields and kinds.
-    // Kept until it ran in every scene; meanwhile a pedestal still with names raises them by name
     // What moves when it retires or breaks
     public Transform Body => body != null ? body : transform;
-
-    [HideInInspector] public bool KeylessPedestal = false;
-    [HideInInspector] public string KeyID;
-    [HideInInspector] public MemeData keyMeme;
-    [HideInInspector] public bool drainMeme = false;
-    [HideInInspector] public string[] ControlledIslands = new string[0];
-    [HideInInspector] public string[] ControlledBridges = new string[0];
-    [HideInInspector] public string groupID;
-    [HideInInspector] public Transform cluePainting;
 
     // State (read only from outside)
     public GameObject MemeObject { get; private set; }
@@ -151,34 +140,12 @@ public class Pedestal : MonoBehaviour
 
     //---- What it raises
 
-    // Something it raises (an island, elevator or bridge): PlayerGrab's recall asks
-    public bool Raises(Transform place)
-    {
-        if (place == null) return false;
-        if (raises.Contains(place)) return true;
-        LevelManager level = LevelManager.Instance;
-        if (level == null) return false;
-        foreach (string id in ControlledIslands) if (level.FindIsland(id) == place) return true;   // (old: by name)
-        foreach (string id in ControlledBridges) if (level.FindBridge(id) == place) return true;
-        return false;
-    }
-
-    bool ByName => raises.Count == 0 && (ControlledIslands.Length > 0 || ControlledBridges.Length > 0);
+    // Something it raises (an island, elevator, bridge or portal): PlayerGrab's recall asks
+    public bool Raises(Transform place) => place != null && raises.Contains(place);
 
     void RaiseWay()
     {
-        LevelManager level = LevelManager.Instance;
-        if (completesGame && level != null) level.CompleteGame();
-        if (ByName)   // (old: not migrated yet)
-        {
-            if (inOrder) level.RaiseInOrder(ControlledIslands, ControlledBridges);
-            else
-            {
-                foreach (string id in ControlledIslands) level.SubirIsla(id);
-                foreach (string id in ControlledBridges) level.SubirPuente(id);
-            }
-            return;
-        }
+        if (completesGame && LevelManager.Instance != null) LevelManager.Instance.CompleteGame();
         if (inOrder) { StartCoroutine(RaiseInOrder()); return; }
         foreach (Transform t in raises) RaiseOne(t, 0f, this);
     }
@@ -223,7 +190,6 @@ public class Pedestal : MonoBehaviour
     protected void LowerBridges()
     {
         foreach (Transform t in raises) if (t != null && t.TryGetComponent(out Bridge bridge)) bridge.Lower();
-        if (LevelManager.Instance != null) foreach (string id in ControlledBridges) LevelManager.Instance.BajarPuente(id);   // (old)
     }
 
     //---- What each kind decides
@@ -405,21 +371,18 @@ public class Pedestal : MonoBehaviour
         yield return new WaitForSeconds(Length(snapClip));
 
         // Grouped: charging until the whole group has memes
-        if (group != null || IsGroupedByName)
+        if (group != null)
         {
             Play(chargeClip, true);
             Think(true);   // waiting for the rest of the group
             yield return new WaitForSeconds(Length(chargeClip));
-            if (group != null) group.CompleteIfFull();
-            else CompleteGroupByName();
+            group.CompleteIfFull();
             yield break;
         }
         yield return Judge();
     }
 
-    //---- Group (PedestalGroup; old: by Group ID)
-
-    bool IsGroupedByName => group == null && !string.IsNullOrEmpty(groupID);
+    //---- Group (PedestalGroup)
 
     // The whole group has memes (PedestalGroup)
     public void CompleteFromGroup()
@@ -427,13 +390,6 @@ public class Pedestal : MonoBehaviour
         if (groupCompleted) return;
         groupCompleted = true;
         SetCorrect();
-    }
-
-    void CompleteGroupByName()
-    {
-        List<Pedestal> members = all.FindAll(p => p.groupID == groupID);
-        if (members.Exists(p => !p.HasMeme)) return;
-        foreach (Pedestal member in members) member.CompleteFromGroup();
     }
 
     //---- Results

@@ -7,13 +7,18 @@ using UnityEngine;
 public class Island : Lift
 {
     // The island something is part of: the nearest Island or Elevator holding it (itself included), or null (a
-    // bridge, the void). An elevator counts as an island: you stand on it, it has its respawn. Before: the "Isla" tag
+    // bridge, the void). An elevator counts as an island: you stand on it, it has its respawn
     public static Transform Of(Transform t)
     {
         for (Transform p = t; p != null; p = p.parent) if (IsIsland(p)) return p;
         return null;
     }
     public static bool IsIsland(Transform t) => t.GetComponent<Island>() != null || t.GetComponent<Elevator>() != null;
+
+    // Every island in the scene (LevelManager: is any still rising?)
+    public static readonly System.Collections.Generic.List<Island> All = new System.Collections.Generic.List<Island>();
+    void OnEnable() => All.Add(this);
+    void OnDisable() => All.Remove(this);
 
     [Section("Island")]
     [Tooltip("Already up when the game starts (Island_01, the tutorial). Off: it goes down at start and rises when its pedestal is solved")]

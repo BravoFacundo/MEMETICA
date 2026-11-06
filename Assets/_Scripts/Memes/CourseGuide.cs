@@ -1,7 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.Serialization;
 
 // Keeps the player on the right course with the meme window (Game). Goes in Managers > CourseGuide.
 //   Another level   carried onto an island of a level that isn't the meme's (its axis: the level of Island_<Title>,
@@ -41,7 +40,7 @@ public class CourseGuide : MonoBehaviour
     public GameObject arrowPrefab;
     public Color arrowColor = new Color(1f, 0.85f, 0.2f, 0.9f);
     [Tooltip("Most arrows along the way (one per stone): far ones are left out")]
-    [FormerlySerializedAs("arrowCount")] [Range(3, 30)] public int maxArrows = 14;
+    [Range(3, 30)] public int maxArrows = 14;
     [Tooltip("Meters from you to the first one")]
     public float arrowStart = 1.5f;
     [Tooltip("Meters between them on the ground (islands, solid bridges)")]
@@ -75,7 +74,7 @@ public class CourseGuide : MonoBehaviour
         if (player == null) player = FindObjectOfType<PlayerMove>();
         Meme meme = Meme.Held;
         if (player == null || meme == null) { lastBridge = null; return; }
-        Bridge bridge = player.GroundUnder != null ? player.GroundUnder.GetComponentInParent<Bridge>() : null;
+        Bridge bridge = PlayerRespawn.Instance.GroundUnder != null ? PlayerRespawn.Instance.GroundUnder.GetComponentInParent<Bridge>() : null;
         if (bridge == lastBridge) return;
         lastBridge = bridge;
         if (bridge == null || !GoingBack(meme, bridge, out Transform next)) return;
@@ -101,8 +100,8 @@ public class CourseGuide : MonoBehaviour
         foreach (GameObject reached in meme.Reached) if (reached != null && Outer(reached.transform) == island) return true;
         return false;
     }
-    void OnEnable() => PlayerMove.RespawnTouchedDown += OnRespawned;
-    void OnDisable() => PlayerMove.RespawnTouchedDown -= OnRespawned;
+    void OnEnable() => PlayerRespawn.RespawnTouchedDown += OnRespawned;
+    void OnDisable() => PlayerRespawn.RespawnTouchedDown -= OnRespawned;
     void OnDestroy() { if (Instance == this) Instance = null; }
 
     //---- What Meme asks
@@ -335,7 +334,7 @@ public class CourseGuide : MonoBehaviour
         PlayerMove player = FindObjectOfType<PlayerMove>();
         if (player == null || target == null) return;
         Transform island = Outer(Island.Of(target)) ?? target;
-        Transform here = player.CurrentIsland != null ? Outer(player.CurrentIsland.transform) : null;
+        Transform here = PlayerRespawn.Instance.CurrentIsland != null ? Outer(PlayerRespawn.Instance.CurrentIsland.transform) : null;
         ClearArrows();
         wayEnd = island;
         wayEndOffset = Center(island) - island.position;

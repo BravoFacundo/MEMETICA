@@ -3,7 +3,7 @@
 // layer (made if the project doesn't have it). Memes rest on them; the player still walks through them and ignores
 // them in its checks (PhysicsLayers).
 // Left out: trees (layer Trees), pedestals, paintings, memes, and anything already with a collider.
-// Run it in each scene (Game, Game_Old) and save. Again after adding decoration. Ctrl+Z undoes it. The Console lists them.
+// Run it in each scene (Game, OriginalGame) and save. Again after adding decoration. Ctrl+Z undoes it. The Console lists them.
 
 using System.Collections.Generic;
 using System.Linq;

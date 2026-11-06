@@ -1,7 +1,7 @@
 using UnityEngine;
 using UnityEngine.Video;
 
-// A painting, edited from here: the root of the painting (Painting_<KeyID>, with its Canvas, Easel, Chair…).
+// A painting, edited from here: the root of the painting (Painting_<Meme>, with its Canvas, Easel, Chair…).
 //   Board  (the Canvas, tagged Pintura, Memetica/PaintingCanvas, shared material): color and cloth, set per painting
 //          on its renderer (not saved in the material), so every painting can differ.
 //   Image  (inside the Canvas, with the VideoPlayer, Memetica/Painting): frame, mirror, paint edge, cloth and brush

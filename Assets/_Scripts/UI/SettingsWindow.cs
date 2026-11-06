@@ -1,6 +1,5 @@
 using System;
 using UnityEngine;
-using UnityEngine.Serialization;
 using UnityEngine.UI;
 
 // The configuration window, shared by the Menu (Game Configuration) and the pause (Pause Menu). The values themselves
@@ -15,7 +14,6 @@ public class SettingsWindow : MonoBehaviour
     [Tooltip("One page per tab, in the same order as the SelectTab indexes")]
     public GameObject[] pages;
     [Tooltip("Page shown every time the window opens")]
-    [FormerlySerializedAs("defaultTab")]
     public int defaultPage = 0;
 
     [Header("Sound")]

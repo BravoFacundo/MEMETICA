@@ -681,10 +681,11 @@ MonoBehaviour:
   cellSize: 8
   playerRadius: 0.8
   orbRadius: 0.5
+  memeMargin: 0.25
   useChildMeshes: 1
-  extraGroundMeshes: []
-  groundColliders:
-  - {fileID: 8951262946890829440}
+  extraGroundMeshes:
+  - {fileID: 7581241166629856610}
+  groundColliders: []
   testDensity: 6
   minUpNormal: 0.7
   onlyTopSurface: 1

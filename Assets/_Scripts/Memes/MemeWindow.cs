@@ -5,7 +5,7 @@ using UnityEngine;
 // Meme as a window of the game's retro OS (Game), made of your PNG layers: the frame in front (its middle
 // transparent) and behind it the Content (shader Memetica/MemeWindow: its own background, the meme on it), with a body
 // behind both (the depth). When and which change shows: MemeChanger (the same rules as the orb). It can start empty
-// (no Data): the Content's background only, until MemeRandomizer's raffle gives it a meme.
+// (no Data): the Content's background only, until RandomizerPedestal's raffle gives it a meme.
 // How it behaves:
 //   Placed      it stays exactly where it was put in the scene (a tree branch, a shelf…), still, as it was turned,
 //               until you pick it up (you may have to jump for it)
@@ -242,18 +242,13 @@ public class MemeWindow : MemeChanger
     private bool OnScreen => MemeDock.Instance != null && MemeDock.Instance.OnScreen(this);
 
     // Its title: the image's Window Title (Trollface.png…; also the raffle's candidates), else the meme's axis (MemeData
-    // Title, else its asset's name). Title Shows Change (MemeSettings, hidden): also which change ("Troll · Move 2")
+    // Title, else its asset's name)
     private string shownTitle = "";
     string TitleOf(MemeImage image)
     {
         if (image != null && !string.IsNullOrEmpty(image.windowTitle)) return image.windowTitle;
         if (Data == null) return "";
-        string title = !string.IsNullOrEmpty(Data.title) ? Data.title : Data.name.Replace("MemeData_", "");
-        if (Settings == null || !Settings.titleShowsChange || image == Data.baseImage) return title;
-        if (image == Data.fall) return title + " · Fall";
-        if (image == Data.leave) return title + " · Leave";
-        int move = Data.variants.IndexOf(image) + 1;
-        return move > 0 ? $"{title} · Move {move}" : title;
+        return !string.IsNullOrEmpty(Data.title) ? Data.title : Data.name.Replace("MemeData_", "");
     }
 
     void SetTitle(string title)

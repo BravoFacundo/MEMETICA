@@ -8,7 +8,7 @@ using UnityEngine;
 //   Slammed     it slams into the ground, not all the way (its top still shows), and comes back up when you land
 //               near it from a respawn (Rise Radius), or when something calls Restore (the hub's pedestal: ready
 //               for the next round). On a randomizer it slams in as soon as the meme is chosen, with the meme on it
-//               (MemeRandomizer), so you see the island on the horizon
+//               (RandomizerPedestal), so you see the island on the horizon
 // Goes on a Pedestal (white or randomizer). What moves is the pedestal's Body (the randomizer: the pedestal on its
 // platform, not the platform). Without it, the pedestal works as always (OriginalGame).
 [RequireComponent(typeof(Pedestal))]
@@ -76,8 +76,8 @@ public class PedestalRetire : MonoBehaviour
         audioSource = GetComponent<AudioSource>();
     }
 
-    void OnEnable() { PlayerMove.RespawnTouchedDown += OnRespawn; PortalWindow.Arrived += OnPortal; }
-    void OnDisable() { PlayerMove.RespawnTouchedDown -= OnRespawn; PortalWindow.Arrived -= OnPortal; }
+    void OnEnable() { PlayerRespawn.RespawnTouchedDown += OnRespawn; PortalWindow.Arrived += OnPortal; }
+    void OnDisable() { PlayerRespawn.RespawnTouchedDown -= OnRespawn; PortalWindow.Arrived -= OnPortal; }
 
     void OnPortal()
     {

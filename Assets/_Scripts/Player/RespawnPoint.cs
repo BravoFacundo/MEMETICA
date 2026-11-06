@@ -7,7 +7,7 @@ using UnityEngine;
 // Several on one island: you reappear at the one nearest to where you last stood on it (a parkour course: one before
 // each hard part, facing it). The hub's one is LevelManager > Start Respawn Point.
 // Inside its island (any depth): it is that island's. Children just named RespawnPoint, without this, still work
-// (Game_Old): they reappear you from the default height, facing where you were.
+// (OriginalGame): they reappear you from the default height, facing where you were.
 // Inside a level instead (not in any island), standing on an island (the hub): it is that island's, but only once its
 // level is up (any of the level's islands: its target island rises first). E.g. on the hub, facing the level's first
 // bridge: it turns with the level (its root at 0,0), so it keeps facing it. Until then the island's other ones are used.
@@ -134,12 +134,7 @@ public class RespawnPoint : MonoBehaviour
     {
         if (height > 0f) return height;
         PlayerRespawn respawn = FindObjectOfType<PlayerRespawn>();
-        if (respawn != null) { if (respawn.respawnStyle == RespawnStyle.Slam) return respawn.slamHeight; }
-        else
-        {
-            PlayerMove move = FindObjectOfType<PlayerMove>();   // (a Player not migrated yet: its old values)
-            if (move != null && move.oldRespawnStyle == RespawnStyle.Slam) return move.oldSlamHeight;
-        }
+        if (respawn != null && respawn.respawnStyle == RespawnStyle.Slam) return respawn.slamHeight;
         LevelManager level = FindObjectOfType<LevelManager>();
         return level != null ? level.dropDistance : 8f;
     }

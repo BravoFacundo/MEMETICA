@@ -15,7 +15,7 @@ public class UIManager : MonoBehaviour
     [Tooltip("The new Memetica (the Play icon)")]
     public SceneField gameScene = new SceneField("Game");
     [Tooltip("The original Memetica, opened from the Recycle Bin")]
-    public SceneField oldGameScene = new SceneField("OriginalGame");
+    public SceneField originalGameScene = new SceneField("OriginalGame");
     [Tooltip("Where the pause and the end screen go back to")]
     public SceneField menuScene = new SceneField("Menu");
 
@@ -116,8 +116,8 @@ public class UIManager : MonoBehaviour
 
     public void PlayGame() => AskTutorial(gameScene);
 
-    // Button_Play inside the Recycle Bin window
-    public void PlayOldGame() => AskTutorial(oldGameScene);
+    // The Play button inside the Recycle Bin window
+    public void PlayOriginalGame() => AskTutorial(originalGameScene);
 
     // ---------- Tutorial popup ----------
 
@@ -138,7 +138,7 @@ public class UIManager : MonoBehaviour
     {
         if (loading || string.IsNullOrEmpty(pendingScene)) return;
         if (tutorialPopup != null) tutorialPopup.SetActive(false);
-        LevelManager.SkipFromMenu = skipTutorial;   // the game scene's LevelManager reads it when it starts
+        GameManager.SkipFromMenu = skipTutorial;   // the game scene's GameManager reads it when it starts
         StartCoroutine(LoadScene(pendingScene));
     }
 
@@ -148,7 +148,7 @@ public class UIManager : MonoBehaviour
     public void PlayAgain()
     {
         if (loading) return;
-        LevelManager.SkipFromMenu = playAgainSkipsTutorial;
+        GameManager.SkipFromMenu = playAgainSkipsTutorial;
         StartCoroutine(LoadScene(SceneManager.GetActiveScene().name));
     }
 

@@ -1,6 +1,5 @@
 using System.Collections;
 using UnityEngine;
-using UnityEngine.Serialization;
 
 // Bridge: appears when its pedestal is solved and goes away when the meme is taken off.
 // It waits until the islands that are rising have arrived, so it always connects to something that is there.
@@ -31,7 +30,7 @@ public class Bridge : Lift
 
     [Section("Rise From Below", nameof(appearance), Appearance.RiseFromBelow)]
     [Tooltip("Meters it waits above the Drop Distance (negative: further down). Usually 0")]
-    [FormerlySerializedAs("offset")] public float lowerOffset = 0f;
+    public float lowerOffset = 0f;
 
     [Section("Extend From A", nameof(appearance), Appearance.ExtendFromA)]
     [Tooltip("Meters the arc it flies along rises above its place (in the middle)")]

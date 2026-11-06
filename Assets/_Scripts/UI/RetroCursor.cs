@@ -5,7 +5,7 @@
 //              clicks buttons: the UI ones (WindowButton: the HUD, the meme window in the HUD) and the 3D meme window's
 //              in the world (WindowControls, within World Range). In the Menu and the pause only the UI ones
 // Aim icons: Zoom (right click): magnifier + while zooming in, nothing once fully zoomed, magnifier − while zooming out.
-//   Looking at a meme you can pick up: hand | Holding a meme in front (Game_Old): nothing (seen clean) | Else: Dot
+//   Looking at a meme you can pick up: hand | Holding a meme in front (OriginalGame): nothing (seen clean) | Else: Dot
 //   (Game: carrying the meme window on the HUD keeps the aim: hand only over an optional meme, DexCollectible)
 // Each cursor's click point is its sprite's PIVOT (arrow and pointing hand → the tip, grabbing hand → Center).
 

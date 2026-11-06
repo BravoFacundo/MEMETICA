@@ -1,6 +1,6 @@
 using UnityEngine;
 
-// Meme as an orb (Game_Old): a glass bubble (this object: Memetica/MemeOrb) with the meme inside as a sticker (child
+// Meme as an orb (OriginalGame): a glass bubble (this object: Memetica/MemeOrb) with the meme inside as a sticker (child
 // Sticker: Memetica/MemeSticker, one shared material; each orb shows its images on it through a property block).
 // When and which change shows: MemeChanger. Here only how it looks: every change happens inside a mist, a fog that
 // swirls and multiplies inside the bubble while the glass clouds over (_Frost); at its thickest the image swaps

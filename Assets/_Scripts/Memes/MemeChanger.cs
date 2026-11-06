@@ -110,7 +110,7 @@ public abstract class MemeChanger : Meme
     // No meme on it (empty window)
     public bool IsEmpty => !hasMeme;
 
-    // Its Leave change (you forgot it and it came to you: MemeRecall), right now, if it hasn't shown it yet. False: it
+    // Its Leave change (you forgot it and it came to you: PlayerGrab's Recall), right now, if it hasn't shown it yet. False: it
     // has none left to show
     public bool PendLeave()
     {
@@ -253,7 +253,7 @@ public abstract class MemeChanger : Meme
         UpdateVideoFrame();
         UpdateMutation();   // the image mutates over time while you carry it and move
         UpdatePending();    // fall and leave changes wait until you see them
-        if (fallingWithPlayer && CurrentPlayer != null && CurrentPlayer.isGrounded && !CurrentPlayer.FallingIntoVoid && !CurrentPlayer.Respawning)
+        if (fallingWithPlayer && CurrentPlayer != null && CurrentPlayer.isGrounded && !PlayerRespawn.Instance.FallingIntoVoid && !PlayerRespawn.Instance.Respawning)
             OnFallLanded();   // it wasn't the void after all (it landed on something): back too
     }
 
@@ -285,7 +285,7 @@ public abstract class MemeChanger : Meme
         if (!withPlayer) { SetPending(Data.fall, false); return; }
 
         // Falling again from the same island: no Fall change (only the landing sound differs). From another one: yes
-        GameObject island = CurrentPlayer != null ? CurrentPlayer.CurrentIsland : null;
+        GameObject island = CurrentPlayer != null ? PlayerRespawn.Instance.CurrentIsland : null;
         if (island != null && island == lastFallIsland) return;
         lastFallIsland = island;
 
@@ -343,7 +343,7 @@ public abstract class MemeChanger : Meme
     // The target island is named as the meme's axis (MemeData > Meme > Title: TrollFace → Island_TrollFace; case and
     // spaces don't matter) → the last Move. Any other name (Island_HUB, Island_Tutorial, Island_1A optional) → none.
     // The hub, the tutorial and optional islands (Lift: Role) never give one. Going back: nothing again.
-    // Game_Old (MemeOrb): as before (one more for the random pick on each new island)
+    // OriginalGame (MemeOrb): as before (one more for the random pick on each new island)
     protected virtual bool ChangesOnce => false;
 
     void ShowMoveOf(GameObject island)
@@ -411,7 +411,7 @@ public abstract class MemeChanger : Meme
     void OnLetGo()
     {
         // Game: a change showing goes on to its end (its sound too) and then back to the base, wherever you left it
-        // (a black pedestal…). Game_Old: back to the base at once
+        // (a black pedestal…). OriginalGame: back to the base at once
         if (!ChangesOnce || (changeRoutine == null && revealRoutine == null)) StopMutationAndRestore();
         bool optional = MemeIsland != null && Lift.RoleOf(MemeIsland.transform) == Lift.Role.Optional;
         if (Data.HasLeave && CurrentPedestal == null && !optional && !(ChangesOnce && leaveSeen)) SetPending(Data.leave, true);   // (not in an optional course)

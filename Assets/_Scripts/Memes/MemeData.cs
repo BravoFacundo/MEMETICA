@@ -47,12 +47,9 @@ public class MemeData : ScriptableObject
 
     [Header("Fallback")]
     [Tooltip("Picked up with no Base sound, and the last resort for an image without one")]
-    [UnityEngine.Serialization.FormerlySerializedAs("grabSound")] public AudioClip fallbackSound;
+    public AudioClip fallbackSound;
     [Tooltip("For any image without its own sound: one of these at random")]
     public MemeSound[] fallbackSounds;
-
-    // Before each image had its own sound (older MemeData): brought into the images and Fallback Sounds once
-    [SerializeField, HideInInspector] MemeSound[] moveSounds, fallSounds, leaveSounds, sounds;
 
     [Header("Painting")]
     [Tooltip("The clue videos of its paintings. Empty: it has no painting, so it goes on black (keyless) pedestals " +
@@ -66,42 +63,6 @@ public class MemeData : ScriptableObject
     public bool HasLeave => MemeImage.Exists(leave);
     // What plays when you pick it up: Base's own sound, else Fallback Sound
     public AudioClip BaseSound => baseImage != null && baseImage.sound != null ? baseImage.sound : fallbackSound;
-
-    // The older sound lists into the images (Move N → its variant, the first Fall / Leave → theirs) and the rest into
-    // Fallback Sounds. Once, when it loads (in the editor it is saved like that)
-    void OnEnable()
-    {
-        bool old = Has(moveSounds) || Has(fallSounds) || Has(leaveSounds) || Has(sounds);
-        if (!old) return;
-        var rest = new List<MemeSound>();
-        if (fallbackSounds != null) rest.AddRange(fallbackSounds);
-        for (int i = 0; moveSounds != null && i < moveSounds.Length; i++)
-            if (i < variants.Count && Valid(moveSounds[i]) && variants[i].sound == null) Give(variants[i], moveSounds[i]);
-        Spread(fallSounds, fall, rest);
-        Spread(leaveSounds, leave, rest);
-        if (sounds != null) rest.AddRange(System.Array.FindAll(sounds, Valid));
-        fallbackSounds = rest.ToArray();
-        moveSounds = fallSounds = leaveSounds = sounds = null;
-#if UNITY_EDITOR
-        UnityEditor.EditorUtility.SetDirty(this);
-#endif
-    }
-
-    static bool Has(MemeSound[] list) => list != null && System.Array.Exists(list, Valid);
-    static bool Valid(MemeSound s) => s != null && s.clip != null;
-    static void Give(MemeImage image, MemeSound s) { image.sound = s.clip; image.loop = s.loop; }
-
-    // The first one to the image (if it has none), the others to the fallback
-    static void Spread(MemeSound[] list, MemeImage image, List<MemeSound> rest)
-    {
-        if (list == null) return;
-        foreach (MemeSound s in list)
-        {
-            if (!Valid(s)) continue;
-            if (image != null && image.sound == null && MemeImage.Exists(image)) Give(image, s);
-            else rest.Add(s);
-        }
-    }
 }
 
 // One image of a meme: a picture, a video, or both (the picture until the video shows its first frame)

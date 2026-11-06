@@ -97,7 +97,7 @@ public partial class GameManager
         Transform spot = new GameObject("SkipTutorialSpot").transform;
         spot.position = floor + Vector3.up * feet;
         player.TeleportTo(spot);
-        if (respawn != null) { player.SetRespawn(respawn); Destroy(spot.gameObject); }
+        if (respawn != null) { PlayerRespawn.Instance.SetRespawn(respawn); Destroy(spot.gameObject); }
 
         Transform target = skipLookAt;
         if (target == null && startPedestal != null) target = startPedestal.transform;

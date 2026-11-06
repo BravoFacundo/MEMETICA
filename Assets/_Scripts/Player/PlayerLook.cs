@@ -8,7 +8,7 @@
 //  Paintings     tells the painting you look at that you are watching it (it plays and fades itself)
 //  Shake         camera shake when islands move (before: CameraShake)
 //  Smoothing     the camera absorbs small pops of the body in height (PlayerMove tells it what the ground carried)
-//  Pose          someone else bends the head for a moment (RespawnSlam: face to the ground and back up)
+//  Pose          someone else bends the head for a moment (PlayerRespawn's slam: face to the ground and back up)
 //Goes on the Player (root), with PlayerMove and PlayerGrab. The Main Camera is its child (CameraHolder > Main Camera).
 
 using System;
@@ -77,7 +77,7 @@ public class PlayerLook : MonoBehaviour
     public Camera Camera => playerCamera;
     public Transform Head => playerCamera.transform;
 
-    // On: the mouse doesn't turn the camera (an animation is using it, e.g. RespawnSlam)
+    // On: the mouse doesn't turn the camera (an animation is using it, e.g. PlayerRespawn's slam)
     public bool LookLocked { get; set; }
     // On: the mouse moves the cursor instead of the camera (RetroCursor free, Ctrl held); clicks don't grab
     public bool CursorFree { get; set; }
