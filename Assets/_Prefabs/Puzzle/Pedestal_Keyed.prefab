@@ -5112,9 +5112,8 @@ GameObject:
   - component: {fileID: 3226923575914045670}
   - component: {fileID: 6429361867974928861}
   - component: {fileID: 3707322068011324572}
-  - component: {fileID: 2703313924515926382}
   m_Layer: 0
-  m_Name: Pedestal
+  m_Name: Pedestal_Keyed
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -5147,29 +5146,46 @@ MonoBehaviour:
   m_GameObject: {fileID: 3226923575914045668}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 788f41b11a66e334899b27db2d428ca2, type: 3}
+  m_Script: {fileID: 11500000, guid: abb918b706175ee42af8bf8c4f2d61df, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  KeylessPedestal: 0
-  KeyID: 
-  keyMeme: {fileID: 0}
-  drainMeme: 0
-  ControlledIslands: []
-  ControlledBridges: []
+  raises: []
   inOrder: 0
-  groupID: 
-  cluePainting: {fileID: 0}
+  completesGame: 0
   chargeClip: {fileID: 8300000, guid: 965f3244f5f8362419082390ab3e24c2, type: 3}
   correctClip: {fileID: 8300000, guid: 708aa9b78c6214e49a245c4f88139d62, type: 3}
   incorrectClip: {fileID: 8300000, guid: 15c2f96a00068b0469720d72634f0a85, type: 3}
   snapClip: {fileID: 8300000, guid: 8069a62e7b897a14393029d89482ec73, type: 3}
   snapFlyTime: 0.2
+  like: {fileID: 21300000, guid: b357b2ba3719d1e4bb091d8c6d7312e3, type: 3}
+  dislike: {fileID: 21300000, guid: d3695cc19e802e240b7bf8f01b5b7882, type: 3}
+  question: {fileID: 21300000, guid: b670d545611307b4983bae8f4d1ae3d4, type: 3}
+  reactionHeight: -0.25
+  reactionSize: 0.16
+  reactionSpread: 0.5
+  reactionRise: 0.5
+  reactionLifetime: 1.3
+  reactionBurst: 5
+  questionRate: 3
+  reactionOrder: 20
   breakClip: {fileID: 8300000, guid: f155031a589b30a4b948c6ee6eb17bfc, type: 3}
   toppleTime: 0.7
   slideAcceleration: 2.5
   socket: {fileID: 3226923575181979655}
   visualKeyed: {fileID: 2023253672444881256}
   visualKeyless: {fileID: 2857672062698841196}
+  KeylessPedestal: 0
+  KeyID: 
+  keyMeme: {fileID: 0}
+  drainMeme: 0
+  ControlledIslands: []
+  ControlledBridges: []
+  groupID: 
+  cluePainting: {fileID: 0}
+  key: {fileID: 0}
+  keyId: 
+  downloadMeme: 0
+  hint: {fileID: 0}
 --- !u!82 &6429361867974928861
 AudioSource:
   m_ObjectHideFlags: 0
@@ -5287,25 +5303,3 @@ SphereCollider:
   serializedVersion: 3
   m_Radius: 0.32673588
   m_Center: {x: 0, y: 1.7499998, z: 0}
---- !u!114 &2703313924515926382
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 3226923575914045668}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: d3e7440e5bd54dd1a36718671091454a, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  like: {fileID: 21300000, guid: b357b2ba3719d1e4bb091d8c6d7312e3, type: 3}
-  dislike: {fileID: 21300000, guid: d3695cc19e802e240b7bf8f01b5b7882, type: 3}
-  question: {fileID: 21300000, guid: b670d545611307b4983bae8f4d1ae3d4, type: 3}
-  height: -0.25
-  size: 0.16
-  spread: 0.5
-  riseSpeed: 0.5
-  lifetime: 1.3
-  burst: 5
-  questionRate: 3

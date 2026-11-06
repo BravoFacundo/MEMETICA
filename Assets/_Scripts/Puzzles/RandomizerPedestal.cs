@@ -255,7 +255,7 @@ public class RandomizerPedestal : Pedestal
     Vector3 StandPosition(Vector3 from)
     {
         if (standPoint != null) return standPoint.position;
-        Vector3 pedestal = transform.position;
+        Vector3 pedestal = Body.position;
         Vector3 away = platform != null ? -platform.Front : from - pedestal;
         away.y = 0f;
         if (away.sqrMagnitude < 0.01f) away = -transform.forward;
@@ -295,7 +295,7 @@ public class RandomizerPedestal : Pedestal
             if (!IsBridge(t))
             {
                 bool isTarget = up.Count == 0 && !walking;
-                RaiseOne(t, isTarget ? targetRise : islandRise);
+                RaiseOne(t, isTarget ? targetRise : islandRise, this);
                 up.Add(t);
                 if (isTarget)   // the target: the rest once it arrived
                 {
@@ -318,7 +318,7 @@ public class RandomizerPedestal : Pedestal
             }
             Bridge bridge = t.GetComponent<Bridge>();
             bridge.waitForIslands = false;   // (the islands are up: this timing waited for them)
-            RaiseOne(t, bridgeRise);
+            RaiseOne(t, bridgeRise, this);
             yield return null;
             for (float time = 0f; time < 15f && Arriving(t); time += Time.deltaTime) yield return null;
             if (i < way.Count - 1 && bridgeGap > 0f) yield return new WaitForSeconds(bridgeGap);
@@ -374,6 +374,26 @@ public class RandomizerPedestal : Pedestal
     {
         base.OnValidate();
         timeline = Timeline();
+    }
+
+    // Right click on the component > Clean Ways: each axis keeps only its own parts (anything an earlier axis already
+    // raises goes out of the later ones; Migrate Pedestals left each axis with every earlier way in front of its own)
+    [ContextMenu("Clean Ways (each axis only its own)")]
+    void CleanWays()
+    {
+        UnityEditor.Undo.RecordObject(this, "Clean Ways");
+        var earlier = new HashSet<Transform>();
+        var report = new System.Text.StringBuilder($"[RandomizerPedestal] '{name}' ways cleaned:\n");
+        foreach (Axis axis in axes)
+        {
+            int before = axis.way.Count;
+            axis.way.RemoveAll(t => t == null || earlier.Contains(t));
+            foreach (Transform t in axis.way) earlier.Add(t);
+            report.AppendLine($"  {(axis.meme != null ? axis.meme.name : "(no meme)")}: {before} → {axis.way.Count} ({string.Join(", ", axis.way.ConvertAll(t => t.name))})");
+        }
+        UnityEditor.EditorUtility.SetDirty(this);
+        timeline = Timeline();
+        Debug.Log(report.ToString(), this);
     }
 
     // Seconds from placing the meme to each part, for each axis (an estimate)
@@ -432,8 +452,8 @@ public class RandomizerPedestal : Pedestal
             }
         }
         Gizmos.color = new Color(0.4f, 1f, 0.6f);
-        Vector3 stand = standPoint != null ? standPoint.position : transform.position - aim.Front * standDistance;
-        Gizmos.DrawWireSphere(new Vector3(stand.x, transform.position.y, stand.z), 0.4f);
+        Vector3 stand = standPoint != null ? standPoint.position : Body.position - aim.Front * standDistance;
+        Gizmos.DrawWireSphere(new Vector3(stand.x, Body.position.y, stand.z), 0.4f);
         Gizmos.color = new Color(1f, 0.6f, 0.2f);
         foreach (Axis axis in axes)
         {

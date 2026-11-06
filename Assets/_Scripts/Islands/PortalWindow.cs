@@ -4,7 +4,8 @@ using UnityEngine;
 // The way back to the hub (Game): a big window lying on the target island's ground that shows the hub seen from the
 // sky, live. It isn't a picture: a camera above the hub copies yours as if the window were a hole into that sky (look
 // at it from the side and you see the hub from the side), so walking onto it is stepping onto a hole.
-//   Hidden   inside the ground until its pedestal (Open After) went into the earth; then it rises showing the
+//   Hidden   inside the ground until a pedestal that has it in its Raises opens it (once that pedestal went into the
+//            earth, if it retires; no pedestal raises it: open from the start); then it rises showing the
 //            empty window's PNG, and the view loads in, pixelated (an old image loading), down to its Pixelate
 //   Open     jump (or step) onto the middle of its screen (Edge Margin inside): it lets you through and you sink into it,
 //            looking down, without ever standing on it; its frame and edge you can walk on. Fall In off: stand on it
@@ -45,10 +46,13 @@ public class PortalWindow : MonoBehaviour
     [Tooltip("Seconds that turn takes (0: at the platform's own Turn Speed)")]
     public float platformTurnTime = 1.2f;
 
+    // Old (before Raises): the pedestal it waited for. Opening a scene in the Editor puts this portal in that pedestal's
+    // Raises and clears it (OnValidate); delete once every scene was opened and saved
+    [HideInInspector] public PedestalRetire openAfter;
+
     [Section("Opening")]
-    [Tooltip("It rises once this pedestal went into the earth (the target island's, Swallowed). Empty: open from the start")]
-    public PedestalRetire openAfter;
-    [Tooltip("Seconds after that")]
+    [Tooltip("Seconds after its pedestal went into the earth (or was right) before it rises. Opened by a pedestal that " +
+             "has this portal in its Raises; no pedestal does: open from the start")]
     public float openDelay = 0.4f;
     [Tooltip("Meters below its place it waits hidden")]
     public float riseDepth = 0.6f;
@@ -165,7 +169,7 @@ public class PortalWindow : MonoBehaviour
         if (exitAtLevelRespawn) UseLevelRespawn();
         if (exit != null) exitFacing = FacingOf(exit);
         if (exit == null) { Debug.LogWarning($"[Portal] '{name}' has no Exit (a RespawnPoint in the hub).", this); }
-        if (openAfter != null) Hide();
+        if (RaisedByAPedestal()) Hide();
         else { state = State.Open; staticAmount = 0f; pixels = pixelate; StartHum(); }
     }
 
@@ -200,7 +204,8 @@ public class PortalWindow : MonoBehaviour
         if (state == State.Hidden)
         {
             SetShown(false);   // (its island rising shows what it hid: not this yet)
-            if (openAfter != null && PedestalGone()) StartCoroutine(Rise());
+            // Raised (a pedestal's Raises): once that pedestal went into the earth (one that doesn't retire: right away)
+            if (raised && (opener == null || Gone(opener))) StartCoroutine(Rise());
         }
         if (state == State.Open) WatchPlayer();
     }
@@ -223,7 +228,31 @@ public class PortalWindow : MonoBehaviour
         }
     }
 
-    bool PedestalGone() => !openAfter.gameObject.activeInHierarchy || (!openAfter.IsUp && !openAfter.IsMoving);
+    static bool Gone(PedestalRetire retire) => !retire.gameObject.activeInHierarchy || (!retire.IsUp && !retire.IsMoving);
+
+    //---- Raised by a pedestal (it is in its Raises)
+
+    private bool raised;              // asked to open, waiting for its pedestal to go in
+    private PedestalRetire opener;    // that pedestal's retire (null: it doesn't go in, so right away)
+
+    // Opens it (Pedestal.RaiseOne): once By went into the earth if it retires, else now
+    public void Raise(Pedestal by = null)
+    {
+        if (state != State.Hidden || raised) return;
+        raised = true;
+        opener = by != null ? by.GetComponent<PedestalRetire>() : null;
+    }
+
+    // Asked to open and not open yet (a pedestal's In Order waits for it)
+    public bool IsArriving => raised && state != State.Open;
+
+    bool RaisedByAPedestal()
+    {
+        foreach (Pedestal pedestal in FindObjectsOfType<Pedestal>(true)) if (pedestal.Raises(transform)) return true;
+        foreach (RandomizerPedestal randomizer in FindObjectsOfType<RandomizerPedestal>(true))
+            foreach (RandomizerPedestal.Axis axis in randomizer.axes) if (axis.way.Contains(transform)) return true;
+        return false;
+    }
 
     // Fall In: over its middle (and carrying what it needs) it doesn't hold you: you fall into it, and as your feet reach
     // it you are going through. Not allowed: it holds you and flickers
@@ -665,6 +694,30 @@ public class PortalWindow : MonoBehaviour
     void OpenNow() { if (state == State.Hidden) { openDelay = 0f; StartCoroutine(Rise()); } }
 
 #if UNITY_EDITOR
+    // The old Open After → this portal in that pedestal's Raises (once, on its own, when the scene opens)
+    void OnValidate()
+    {
+        if (openAfter == null || Application.isPlaying) return;
+        UnityEditor.EditorApplication.delayCall += () =>
+        {
+            if (this == null || openAfter == null) return;
+            Pedestal pedestal = openAfter.GetComponent<Pedestal>();
+            if (pedestal != null && !pedestal.raises.Contains(transform))
+            {
+                UnityEditor.Undo.RecordObject(pedestal, "Portal into Raises");
+                pedestal.raises.Add(transform);
+                UnityEditor.PrefabUtility.RecordPrefabInstancePropertyModifications(pedestal);
+                UnityEditor.EditorUtility.SetDirty(pedestal);
+            }
+            UnityEditor.Undo.RecordObject(this, "Portal into Raises");
+            Debug.Log($"[Portal] '{name}': now in '{openAfter.name}' Raises (was its Open After). Save the scene.", this);
+            openAfter = null;
+            UnityEditor.PrefabUtility.RecordPrefabInstancePropertyModifications(this);
+            UnityEditor.EditorUtility.SetDirty(this);
+            UnityEditor.SceneManagement.EditorSceneManager.MarkSceneDirty(gameObject.scene);
+        };
+    }
+
     // Where it leads: a line up to where you come out above the hub
     void OnDrawGizmosSelected()
     {

@@ -9,7 +9,8 @@ using UnityEngine;
 //               near it from a respawn (Rise Radius), or when something calls Restore (the hub's pedestal: ready
 //               for the next round). On a randomizer it slams in as soon as the meme is chosen, with the meme on it
 //               (MemeRandomizer), so you see the island on the horizon
-// Goes on a Pedestal (white or randomizer). Without it, the pedestal works as always (Game_Old).
+// Goes on a Pedestal (white or randomizer). What moves is the pedestal's Body (the randomizer: the pedestal on its
+// platform, not the platform). Without it, the pedestal works as always (OriginalGame).
 [RequireComponent(typeof(Pedestal))]
 public class PedestalRetire : MonoBehaviour
 {
@@ -60,6 +61,7 @@ public class PedestalRetire : MonoBehaviour
     // Going in or coming out now
     public bool IsMoving => moving != null;
 
+    private Transform body;      // what goes in and out (the Pedestal's Body)
     private Vector3 restLocal;   // its place, on its parent (it floats with its island)
     private float depth;         // meters below its place now
     private Vector3 jitter;
@@ -68,7 +70,8 @@ public class PedestalRetire : MonoBehaviour
 
     void Awake()
     {
-        restLocal = transform.localPosition;
+        body = GetComponent<Pedestal>().Body;
+        restLocal = body.localPosition;
         height = MeasureHeight();   // now, before it holds a meme
         audioSource = GetComponent<AudioSource>();
     }
@@ -84,8 +87,8 @@ public class PedestalRetire : MonoBehaviour
     void LateUpdate()
     {
         if (depth <= 0f && jitter == Vector3.zero) return;
-        Vector3 down = transform.parent != null ? transform.parent.InverseTransformDirection(Vector3.down) : Vector3.down;
-        transform.localPosition = restLocal + down * depth + jitter;
+        Vector3 down = body.parent != null ? body.parent.InverseTransformDirection(Vector3.down) : Vector3.down;
+        body.localPosition = restLocal + down * depth + jitter;
     }
 
     //---- Called by the Pedestal
@@ -147,7 +150,7 @@ public class PedestalRetire : MonoBehaviour
         }
         depth = 0f;
         jitter = Vector3.zero;
-        transform.localPosition = restLocal;
+        body.localPosition = restLocal;
         IsUp = true;
         moving = null;
     }
@@ -168,7 +171,7 @@ public class PedestalRetire : MonoBehaviour
             yield return null;
         }
         jitter = Vector3.zero;
-        gameObject.SetActive(false);   // for good
+        body.gameObject.SetActive(false);   // for good
     }
 
     //---- Shared
@@ -196,7 +199,8 @@ public class PedestalRetire : MonoBehaviour
     float MeasureHeight()
     {
         float top = float.MinValue, bottom = float.MaxValue;
-        foreach (MeshRenderer r in GetComponentsInChildren<MeshRenderer>())
+        Transform from = body != null ? body : GetComponent<Pedestal>().Body;
+        foreach (MeshRenderer r in from.GetComponentsInChildren<MeshRenderer>())
         {
             top = Mathf.Max(top, r.bounds.max.y);
             bottom = Mathf.Min(bottom, r.bounds.min.y);

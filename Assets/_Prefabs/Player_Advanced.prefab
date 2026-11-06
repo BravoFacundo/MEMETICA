@@ -122,6 +122,7 @@ GameObject:
   - component: {fileID: 7127082442667979664}
   - component: {fileID: 7900629407848026548}
   - component: {fileID: 3816402957164820117}
+  - component: {fileID: 5853169273269499320}
   m_Layer: 2
   m_Name: Player_Advanced
   m_TagString: Player
@@ -194,10 +195,6 @@ MonoBehaviour:
   maxFallSpeed: 25
   coyoteTime: 0.2
   jumpBuffer: 0.2
-  respawnStyle: 1
-  respawnBrakeDistance: 6
-  respawnLandingSpeed: 3
-  voidFallMargin: 1.5
   groundSnapDistance: 0.3
   maxGroundFollowDownSpeed: 6
   groundCheckHeight: -0.821
@@ -209,6 +206,157 @@ MonoBehaviour:
   logBumps: 0
   isGrounded: 0
   ascend: 0
+  oldRespawnStyle: 1
+  oldRespawnBrakeDistance: 6
+  oldRespawnLandingSpeed: 3
+  oldVoidFallMargin: 1.5
+  oldSlamFallDepth: 12
+  oldSlamHeight: 8
+  oldSlamFallTime: 0.45
+  oldSlamDownTime: 0.08
+  oldSlamStayTime: 0.17
+  oldSlamGetUpTime: 0.25
+  oldSlamRoll: 14
+  oldSlamDip: 0.6
+  oldSlamShake: 0.12
+  oldLandingSounds:
+  - {fileID: 8300000, guid: 32ac174b8a3776c47a5273b2f5cb99fe, type: 3}
+  - {fileID: 8300000, guid: 5f387d5121fe26b46b2553373869fc54, type: 3}
+  - {fileID: 8300000, guid: 979d18ebf68d3c542b199c8abf4f6c91, type: 3}
+  - {fileID: 8300000, guid: 049b2efa452852c439eec968d1dfc1c6, type: 3}
+  - {fileID: 8300000, guid: 83448f0c7e3cd444e9463b69c6d12fd9, type: 3}
+  - {fileID: 8300000, guid: de8ed48984c61e84196d90e767793bf1, type: 3}
+  - {fileID: 8300000, guid: 6189ffae441dc0142ba063cf254b4db3, type: 3}
+  - {fileID: 8300000, guid: df0bc9ad9f275b44ba8c694f70193a28, type: 3}
+  - {fileID: 8300000, guid: ddbe3ddd3848d0949905288a9e25b2d1, type: 3}
+  - {fileID: 8300000, guid: c232d6bbfd85929488780dc35d44dfa1, type: 3}
+  - {fileID: 8300000, guid: 1e6e26766c267264ea106a371059b35f, type: 3}
+  - {fileID: 8300000, guid: 2d915002e0edcf046aff248fd76ac77d, type: 3}
+  - {fileID: 8300000, guid: 1ea420d556b8d514d888501e9483260e, type: 3}
+  - {fileID: 8300000, guid: 20edf63bcb7a3ce4c83931f4c801e8c2, type: 3}
+  - {fileID: 8300000, guid: de2f916ddfee5f3418a7b393291e3c71, type: 3}
+  - {fileID: 8300000, guid: 1744aa731e2f60d429406adc8025e0e1, type: 3}
+  - {fileID: 8300000, guid: 3d22e7befb43a134f9f2ac1449e79e01, type: 3}
+  oldFallingSounds:
+  - {fileID: 8300000, guid: ad9ba0aed71a4c04181af629840917bb, type: 3}
+  - {fileID: 8300000, guid: d0dda55583bf2864c8e5e93937b061ef, type: 3}
+  - {fileID: 8300000, guid: 7103f8873f6d7814a927f0797dab195b, type: 3}
+  - {fileID: 8300000, guid: 3d632fcebd4ee4844b20e0e6a68aa78b, type: 3}
+  - {fileID: 8300000, guid: 3fc014f5c4ddd884dafe910ef966dd46, type: 3}
+  - {fileID: 8300000, guid: 0b21c8cf99c018847a591fc92fdb3934, type: 3}
+  - {fileID: 8300000, guid: 3edb7199b3ddb8044a5b8cfe4af6103f, type: 3}
+  - {fileID: 8300000, guid: c41a347a13dc4ed4c97336c79603dbae, type: 3}
+  - {fileID: 8300000, guid: 028a07c64ee93784f87f96547b0346d8, type: 3}
+  - {fileID: 8300000, guid: 8fbc2e6d5db144b44b83b56589a8d5de, type: 3}
+  - {fileID: 8300000, guid: 7a42b40ef734e1c42b35bb61461113c4, type: 3}
+  - {fileID: 8300000, guid: 6158c4dfa177ee34d932af84e0dbe0a8, type: 3}
+  - {fileID: 8300000, guid: 08d9594646e4fe34f86609e50c5f5277, type: 3}
+  - {fileID: 8300000, guid: 9374f4fe3d86d4e428b1e62e671e0e15, type: 3}
+  - {fileID: 8300000, guid: 73f92c5caa6036540807d9cab4678b11, type: 3}
+  - {fileID: 8300000, guid: c315ef17069890c48a9a40e7c1130f68, type: 3}
+  - {fileID: 8300000, guid: 333420f867006bb4aa76e9358d49b444, type: 3}
+  - {fileID: 8300000, guid: 15e8599482e8c83418a66ad55cc84ecb, type: 3}
+  oldFallSoundsVolume: 1
+  oldBigFallHeight: 5
+  oldLookAhead: 1.5
+  oldLookAheadDelay: 0.25
+  migratedToPlayerRespawn: 1
+--- !u!114 &7127082442667979664
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4493911082594123580}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 52b2aff0c4704e4b9d5e8ff8e3a41faa, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  key: 113
+  flyTime: 0.22
+  swapAt: 0.85
+  swapBackAt: 0.15
+  minDistance: 0.45
+--- !u!114 &7900629407848026548
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4493911082594123580}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7a3735e6fe9d121418f58bc95de845a0, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  playerCanLook: 1
+  mouseSensitivity: 3
+  padLookSpeed: 160
+  playerCamera: {fileID: 0}
+  zoomingSpeed: 5
+  defaultFOV: 90
+  zoomFOV: 20
+  focusRadius: 25
+  focusVertical: 0.6
+  focusPull: 0.3
+  focusSoftEdge: 0.6
+  focusZoomTime: 0.8
+  paintingLookRange: 10
+  cameraSmoothTime: 0.08
+  cameraMaxLag: 0.25
+  shakeFrequency: 18
+  isZooming: 0
+--- !u!114 &3816402957164820117
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4493911082594123580}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 46b9da97d59b106428c30ea822dd37be, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  canHold: 1
+  pickUpRange: 2.5
+  moveForce: 250
+  minHoldDistance: 0.6
+  dropTime: 0.12
+  holdParent: {fileID: 0}
+  dropParent: {fileID: 0}
+  logGrabs: 0
+  heldObject: {fileID: 0}
+  recall: 1
+  recallDistance: 20
+  recallDelay: 1
+  fromPedestals: 1
+  bringWhenLeaving: 1
+  bringForPortal: 1
+  snapInRange: 1
+  snapOnBlack: 1
+  recallSpeed: 300
+  flyUpTo: 25
+  leaveOnArrival: 1
+  fallOnArrival: 0
+  comeClip: {fileID: 0}
+--- !u!114 &5853169273269499320
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4493911082594123580}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9590a02ac49fb444580479416bf48706, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  respawnStyle: 1
+  respawnBrakeDistance: 6
+  respawnLandingSpeed: 3
+  voidFallMargin: 1.5
   slamFallDepth: 12
   slamHeight: 8
   slamFallTime: 0.45
@@ -256,88 +404,9 @@ MonoBehaviour:
   - {fileID: 8300000, guid: 333420f867006bb4aa76e9358d49b444, type: 3}
   - {fileID: 8300000, guid: 15e8599482e8c83418a66ad55cc84ecb, type: 3}
   fallSoundsVolume: 1
-  landingSoundMax: 1.75
   bigFallHeight: 5
   lookAhead: 1.5
   lookAheadDelay: 0.25
---- !u!114 &7127082442667979664
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 4493911082594123580}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 52b2aff0c4704e4b9d5e8ff8e3a41faa, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  key: 113
-  flyTime: 0.22
-  swapAt: 0.85
-  swapBackAt: 0.15
-  minDistance: 0.45
---- !u!114 &7900629407848026548
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 4493911082594123580}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 7a3735e6fe9d121418f58bc95de845a0, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  playerCanLook: 1
-  mouseSensitivity: 3
-  padLookSpeed: 160
-  playerCamera: {fileID: 0}
-  zoomingSpeed: 5
-  defaultFOV: 90
-  zoomFOV: 20
-  focusRadius: 25
-  focusVertical: 0.6
-  focusPull: 0.3
-  paintingLookRange: 10
-  cameraSmoothTime: 0.08
-  cameraMaxLag: 0.25
-  shakeFrequency: 18
-  isZooming: 0
---- !u!114 &3816402957164820117
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 4493911082594123580}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 46b9da97d59b106428c30ea822dd37be, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  canHold: 1
-  pickUpRange: 2.5
-  moveForce: 250
-  minHoldDistance: 0.6
-  dropTime: 0.12
-  holdParent: {fileID: 0}
-  dropParent: {fileID: 0}
-  logGrabs: 0
-  heldObject: {fileID: 0}
-  recall: 1
-  recallDistance: 20
-  recallDelay: 1
-  fromPedestals: 1
-  bringWhenLeaving: 1
-  bringForPortal: 1
-  snapInRange: 1
-  snapOnBlack: 1
-  recallSpeed: 300
-  flyUpTo: 25
-  leaveOnArrival: 1
-  fallOnArrival: 0
-  comeClip: {fileID: 0}
 --- !u!1 &7336801035387777779
 GameObject:
   m_ObjectHideFlags: 0

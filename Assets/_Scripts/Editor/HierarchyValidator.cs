@@ -12,7 +12,7 @@ using UnityEngine.SceneManagement;
 public static class HierarchyValidator
 {
     // Objects the code finds by name (GameObject.Find) → must exist, be unique and active
-    static readonly string[] RequiredNames = { "Player", "Main Camera", "GrabPivot" };
+    static readonly string[] RequiredNames = { };   // (none left: PlayerGrab finds its pivots inside the Player, the rest by reference)
 
     static int errors, warnings;
 
@@ -41,10 +41,11 @@ public static class HierarchyValidator
         {
             if (level.startRespawnPoint == null) Error("LevelManager: Start Respawn Point not assigned.", level);
 
+            var noRespawn = new List<string>();
             foreach (var isla in Object.FindObjectsOfType<Island>(true))
             {
                 if (!isla.name.StartsWith(level.islandPrefix)) Warn($"Island '{isla.name}' does not follow the '{level.islandPrefix}ID' convention.", isla);
-                else if (level.RespawnPointOf(isla.gameObject) == null) Error($"Island '{isla.name}' has no '{level.respawnPointName}' inside it.", isla);
+                else if (level.RespawnPointOf(isla.gameObject) == null) noRespawn.Add(isla.name);   // (fine: you reappear where you last stood on it)
 
                 // Floating: on the island itself (new) or on one direct child (old structure)
                 bool floatsItself = isla.GetComponent<FloatMotion>() != null;
@@ -52,6 +53,8 @@ public static class HierarchyValidator
                 if (!floatsItself && floatingChildren == 0) Warn($"Island '{isla.name}' doesn't float (no FloatMotion on it or on a direct child).", isla);
                 if (floatsItself && floatingChildren > 0) Warn($"Island '{isla.name}' floats twice (FloatMotion on it and on a child).", isla);
             }
+            if (noRespawn.Count > 0)
+                Debug.Log($"[Hierarchy] Info: {noRespawn.Count} island(s) without a RespawnPoint, falling you reappear where you last stood on them: {string.Join(", ", noRespawn)}.");
             foreach (var puente in Object.FindObjectsOfType<Bridge>(true))
             {
                 if (!puente.name.StartsWith(level.bridgePrefix)) Warn($"Bridge '{puente.name}' does not follow the '{level.bridgePrefix}ID' convention.", puente);
@@ -61,15 +64,17 @@ public static class HierarchyValidator
                 foreach (Transform anchor in new[] { puente.anchorA, puente.anchorB })
                 {
                     if (anchor == null) continue;
-                    if (anchor.GetComponentInParent<Island>() == null) Warn($"Bridge '{puente.name}': anchor '{anchor.name}' is not inside an island.", anchor);
-                    else if (anchor.GetComponentInParent<FloatMotion>() == null) Warn($"Bridge '{puente.name}': anchor '{anchor.name}' is not inside the floating part of its island (that end won't follow it).", anchor);
+                    // Inside an island or an elevator, or at least something floating (the tutorial island, not a Lift): it follows it
+                    bool floats = anchor.GetComponentInParent<FloatMotion>() != null;
+                    if (Island.Of(anchor) == null && !floats) Warn($"Bridge '{puente.name}': anchor '{anchor.name}' is not inside an island.", anchor);
+                    else if (!floats) Warn($"Bridge '{puente.name}': anchor '{anchor.name}' is not inside the floating part of its island (that end won't follow it).", anchor);
                 }
             }
             foreach (var elevator in Object.FindObjectsOfType<Elevator>(true))
             {
                 if (!elevator.name.StartsWith(level.elevatorPrefix)) Warn($"Elevator '{elevator.name}' does not follow the '{level.elevatorPrefix}ID' convention.", elevator);
                 if (elevator.dockPoint == null) Error($"Elevator '{elevator.name}' has no Dock Point.", elevator);
-                else if (elevator.dockPoint.GetComponentInParent<Island>() == null) Warn($"Elevator '{elevator.name}': its Dock Point is not inside an island (no respawn or docking on arrival).", elevator);
+                else if (!elevator.rideOnStart && elevator.dockPoint.GetComponentInParent<Island>() == null) Warn($"Elevator '{elevator.name}': its Dock Point is not inside an island (no respawn or docking on arrival).", elevator);
             }
         }
 
@@ -91,13 +96,15 @@ public static class HierarchyValidator
         {
             if (ped.ControlledIslands.Length > 0 || ped.ControlledBridges.Length > 0 || !string.IsNullOrEmpty(ped.groupID) ||
                 ped.GetComponent<MemeRandomizer>() != null || ped.GetComponent<PedestalReactions>() != null ||
-                (!ped.KeylessPedestal && !(ped is KeyPedestal)))
+                (!ped.KeylessPedestal && !(ped is KeyPedestal) && !(ped is RandomizerPedestal)))
                 Warn($"Pedestal '{ped.name}' still has old data: run Memetica > Check > Migrate Pedestals.", ped);
             if (ped is KeyPedestal key)
             {
                 if (key.key == null && string.IsNullOrEmpty(key.keyId)) Error($"Key pedestal '{ped.name}' has no Key (nor Key ID).", ped);
                 else if (key.key == null && !memes.Any(m => m.ID.StartsWith(key.keyId))) Error($"Key pedestal '{ped.name}' expects a meme whose ID starts with '{key.keyId}', and there is none.", ped);
-                if (!Object.FindObjectsOfType<PedestalGroup>(true).Any(g => g.members.Contains(ped)) && key.Hint == null && Island.Of(ped.transform)?.GetComponentInChildren<Painting>(true) == null)
+                // A clue only where the scene uses them (OriginalGame's easels; Game's end-of-level pedestals have none)
+                bool usesClues = Object.FindObjectsOfType<Painting>(true).Length > 0;
+                if (usesClues && !Object.FindObjectsOfType<PedestalGroup>(true).Any(g => g.members.Contains(ped)) && key.Hint == null && Island.Of(ped.transform)?.GetComponentInChildren<Painting>(true) == null)
                     Warn($"Key pedestal '{ped.name}' has no Hint (the easel with its clue), and there is no painting on its island.", ped);
             }
             if (ped is RandomizerPedestal randomizer)
@@ -105,12 +112,12 @@ public static class HierarchyValidator
                     if (axis.meme == null || axis.way.Count == 0)
                         Warn($"Randomizer '{ped.name}' has an axis without a meme or without anything to raise.", ped);
             if (ped.raises.Exists(t => t == null || !Pedestal.IsRaisable(t)))
-                Warn($"Pedestal '{ped.name}' has empty slots, or something that isn't an island, elevator or bridge, in Raises.", ped);
+                Warn($"Pedestal '{ped.name}' has empty slots, or something that isn't an island, elevator, bridge or portal, in Raises.", ped);
         }
         foreach (var group in Object.FindObjectsOfType<PedestalGroup>(true))
             if (group.members.Count(m => m != null) < 2) Warn($"Pedestal group '{group.name}' has fewer than 2 pedestals: they complete alone.", group);
-        foreach (var meme in memes)
-            if (!meme.name.StartsWith(Meme.NamePrefix)) Warn($"Meme '{meme.name}' should be named '{Meme.NamePrefix}<ID>' (e.g. {Meme.NamePrefix}3Aa).", meme);
+        foreach (var meme in memes)   // (orbs only: pedestals find them by that ID; meme windows go by their MemeData)
+            if (meme is MemeOrb && !meme.name.StartsWith(Meme.NamePrefix)) Warn($"Meme '{meme.name}' should be named '{Meme.NamePrefix}<ID>' (e.g. {Meme.NamePrefix}3Aa).", meme);
 
         // 3. Orbs: their sticker and their meme
         foreach (var orb in Object.FindObjectsOfType<MemeOrb>(true))
@@ -129,9 +136,11 @@ public static class HierarchyValidator
                 Error($"Platform '{plat.name}' lost its pivots (PlatformPivotSuperior/Inferior) inside its bridge.", plat);
         }
 
-        // 5. Player: "GroundCheck" child
-        foreach (var move in Object.FindObjectsOfType<PlayerMove>(true))
-            if (move.transform.Find("GroundCheck") == null) Error($"'{move.name}' lost its direct child 'GroundCheck'.", move);
+        // 5. Player: one PlayerMove with its PlayerRespawn (the ground check is PlayerMove > Ground Check Height now)
+        var moves = Object.FindObjectsOfType<PlayerMove>(true);
+        if (moves.Length == 0) Error("There is no Player (PlayerMove).");
+        foreach (var move in moves)
+            if (move.GetComponent<PlayerRespawn>() == null) Warn($"'{move.name}' has no PlayerRespawn (Memetica > Check > Migrate Managers).", move);
 
         // 6. Tags the code uses
 

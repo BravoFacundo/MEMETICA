@@ -70,12 +70,18 @@ public class Pedestal : MonoBehaviour
     public float slideAcceleration = 2.5f;
 
     [Section("References", Closed = true)]
+    [Tooltip("The physical pedestal: what slams, sinks or topples (PedestalRetire, Break). Empty: this object. " +
+             "On the randomizer the script is on the platform (it turns whole) and Body is the pedestal on it")]
+    public Transform body;
     public Transform socket;
     public GameObject visualKeyed;
     public GameObject visualKeyless;
 
     // Old (before the kinds): Memetica > Check > Migrate Pedestals moves them into the new fields and kinds.
     // Kept until it ran in every scene; meanwhile a pedestal still with names raises them by name
+    // What moves when it retires or breaks
+    public Transform Body => body != null ? body : transform;
+
     [HideInInspector] public bool KeylessPedestal = false;
     [HideInInspector] public string KeyID;
     [HideInInspector] public MemeData keyMeme;
@@ -174,7 +180,7 @@ public class Pedestal : MonoBehaviour
             return;
         }
         if (inOrder) { StartCoroutine(RaiseInOrder()); return; }
-        foreach (Transform t in raises) RaiseOne(t);
+        foreach (Transform t in raises) RaiseOne(t, 0f, this);
     }
 
     IEnumerator RaiseInOrder()
@@ -182,7 +188,7 @@ public class Pedestal : MonoBehaviour
         float gap = LevelManager.Instance != null ? LevelManager.Instance.sequenceGap : 0.3f;
         foreach (Transform t in raises)
         {
-            if (!RaiseOne(t)) continue;
+            if (!RaiseOne(t, 0f, this)) continue;
             yield return null;
             while (Arriving(t)) yield return null;
             yield return new WaitForSeconds(gap);
@@ -192,9 +198,10 @@ public class Pedestal : MonoBehaviour
     //---- One of what it raises: what it is decides how (an island, an elevator or a bridge)
 
     // Raises it its own way, in Seconds (0: its own time). False: it's none of them (or empty)
-    public static bool RaiseOne(Transform t, float seconds = 0f)
+    public static bool RaiseOne(Transform t, float seconds = 0f, Pedestal by = null)
     {
         if (t == null) return false;
+        if (t.TryGetComponent(out PortalWindow portal)) { portal.Raise(by); return true; }   // (once that pedestal went into the earth, if it does)
         if (t.TryGetComponent(out Elevator elevator)) { elevator.StartRide(); return true; }
         if (t.TryGetComponent(out Lift lift)) { if (seconds > 0f) lift.RaiseIn(seconds); else lift.Raise(); return true; }   // (an island or a bridge)
         return false;
@@ -206,11 +213,12 @@ public class Pedestal : MonoBehaviour
         if (t == null) return false;
         if (t.TryGetComponent(out Bridge bridge)) return bridge.IsAppearing || bridge.IsMoving;
         if (t.TryGetComponent(out Elevator elevator)) return elevator.IsRiding;
+        if (t.TryGetComponent(out PortalWindow portal)) return portal.IsArriving;
         return t.TryGetComponent(out Lift lift) && lift.IsMoving;
     }
 
     // Something a pedestal can raise
-    public static bool IsRaisable(Transform t) => t != null && (t.GetComponent<Lift>() != null || t.GetComponent<Elevator>() != null);
+    public static bool IsRaisable(Transform t) => t != null && (t.GetComponent<Lift>() != null || t.GetComponent<Elevator>() != null || t.GetComponent<PortalWindow>() != null);
 
     protected void LowerBridges()
     {
@@ -616,7 +624,7 @@ public class Pedestal : MonoBehaviour
     protected virtual void OnValidate()
     {
         foreach (Transform t in raises)
-            if (t != null && !IsRaisable(t)) Debug.LogWarning($"[Pedestal] '{name}': '{t.name}' in Raises isn't an island, an elevator or a bridge (it does nothing).", this);
+            if (t != null && !IsRaisable(t)) Debug.LogWarning($"[Pedestal] '{name}': '{t.name}' in Raises isn't an island, an elevator, a bridge or a portal (it does nothing).", this);
         UnityEditor.EditorApplication.delayCall += () =>
         {
             if (this == null || UnityEditor.EditorUtility.IsPersistent(this)) return;
@@ -659,8 +667,8 @@ public class Pedestal : MonoBehaviour
         trigger.enabled = false;
         if (sparks != null) sparks.Stop();
         Think(false);
-        foreach (Collider c in GetComponentsInChildren<Collider>()) c.enabled = false;
-        transform.SetParent(null, true);   // not riding the elevator any more
+        foreach (Collider c in Body.GetComponentsInChildren<Collider>()) c.enabled = false;
+        Body.SetParent(null, true);   // not riding the elevator any more
 
         Vector3 start = Center();
         StartCoroutine(FallOff(NearestEdge(start), start.y));
@@ -669,8 +677,9 @@ public class Pedestal : MonoBehaviour
     IEnumerator FallOff(Vector3 dir, float startY)
     {
         // 1. Tips over its base edge on that side, speeding up like a falling weight
-        MeshRenderer[] rends = GetComponentsInChildren<MeshRenderer>();
-        Bounds b = rends.Length > 0 ? rends[0].bounds : new Bounds(transform.position, Vector3.one);
+        Transform body = Body;
+        MeshRenderer[] rends = body.GetComponentsInChildren<MeshRenderer>();
+        Bounds b = rends.Length > 0 ? rends[0].bounds : new Bounds(body.position, Vector3.one);
         foreach (MeshRenderer r in rends) b.Encapsulate(r.bounds);
         float edge = Mathf.Abs(dir.x) * b.extents.x + Mathf.Abs(dir.z) * b.extents.z;
         Vector3 pivot = new Vector3(b.center.x, b.min.y, b.center.z) + dir * edge;
@@ -680,11 +689,11 @@ public class Pedestal : MonoBehaviour
         for (float t = 0f; t < toppleTime; t += Time.deltaTime)
         {
             float target = 90f * Mathf.Pow(t / toppleTime, 2.5f);
-            transform.RotateAround(pivot, axis, target - angle);
+            body.RotateAround(pivot, axis, target - angle);
             angle = target;
             yield return null;
         }
-        transform.RotateAround(pivot, axis, 90f - angle);
+        body.RotateAround(pivot, axis, 90f - angle);
         if (breakClip != null) AudioSource.PlayClipAtPoint(breakClip, pivot);
 
         // 2. Scrapes toward the edge until its middle is over the void
@@ -692,28 +701,28 @@ public class Pedestal : MonoBehaviour
         for (float t = 0f; t < 15f && HasGround(Center()); t += Time.deltaTime)
         {
             speed = Mathf.Min(speed + slideAcceleration * Time.deltaTime, 3f);
-            transform.position += dir * speed * Time.deltaTime;
+            body.position += dir * speed * Time.deltaTime;
             yield return null;
         }
 
         // 3. Off the edge: gravity, rolling slowly over it
-        if (!TryGetComponent(out Rigidbody body)) body = gameObject.AddComponent<Rigidbody>();
-        body.isKinematic = false;
-        body.useGravity = true;
-        body.interpolation = RigidbodyInterpolation.Interpolate;
-        body.velocity = dir * Mathf.Max(speed, 0.5f);
-        body.angularVelocity = axis * 1.2f;
+        if (!body.TryGetComponent(out Rigidbody rb)) rb = body.gameObject.AddComponent<Rigidbody>();
+        rb.isKinematic = false;
+        rb.useGravity = true;
+        rb.interpolation = RigidbodyInterpolation.Interpolate;
+        rb.velocity = dir * Mathf.Max(speed, 0.5f);
+        rb.angularVelocity = axis * 1.2f;
 
         float bottom = startY - LevelManager.Instance.dropDistance;
-        while (transform.position.y > bottom) yield return null;
-        gameObject.SetActive(false);
+        while (body.position.y > bottom) yield return null;
+        body.gameObject.SetActive(false);
     }
 
     // Middle of its meshes (no particles)
     Vector3 Center()
     {
-        MeshRenderer[] rends = GetComponentsInChildren<MeshRenderer>();
-        if (rends.Length == 0) return transform.position;
+        MeshRenderer[] rends = Body.GetComponentsInChildren<MeshRenderer>();
+        if (rends.Length == 0) return Body.position;
         Bounds b = rends[0].bounds;
         foreach (MeshRenderer r in rends) b.Encapsulate(r.bounds);
         return b.center;

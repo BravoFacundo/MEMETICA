@@ -2,7 +2,7 @@
 // view's middle points, inside that island, its top toward where the view looks. It is your meme window lying on the
 // ground (the frame PNG of Assets/_Prefabs/MemeWindow; without it, only the screen), Size meters wide, with the live
 // view of the hub in its hole (loading in from the empty window's PNG). Its Exit: the LevelManager's Start Respawn Point (the hub), if it is a RespawnPoint.
-// Then set Open After (the target island's pedestal, PedestalRetire Swallowed). Ctrl+Z undoes it. Save the scene.
+// Then drag it into the Raises of the target island's pedestal (it opens once that pedestal went into the earth). Ctrl+Z undoes it. Save the scene.
 // Under its frame, a Body like the meme window's (its shape, from the MemeWindow prefab), Body Depth meters deep: what
 // you see of it as it comes out of the ground. Deeper or shallower: the Body's Z scale.
 // Add Body to Selected Portal: the same for a portal you already made (select its root; again: it is remade).
