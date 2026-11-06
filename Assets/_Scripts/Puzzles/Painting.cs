@@ -46,6 +46,11 @@ public class Painting : MonoBehaviour
     [Tooltip("How much the brush strokes catch the light")]
     [Range(0f, 2f)] public float relief = 0.5f;
 
+    [Section("Hint")]
+    [Tooltip("Which of its pedestal's Key hints it shows (0 = the first of the MemeData's Hints). -1: the video its " +
+             "VideoPlayer already has (set by hand)")]
+    public int hintIndex = -1;
+
     [Section("Music")]
     [Tooltip("Seconds the music takes to fade out after you look away (the video keeps going until it is silent)")]
     public float fadeOutTime = 2.5f;
@@ -114,6 +119,15 @@ public class Painting : MonoBehaviour
         if (video == null) video = GetComponentInChildren<VideoPlayer>(true);
         if (music == null && video != null) music = video.GetComponentInChildren<AudioSource>(true);
         if (music != null) fullVolume = music.volume;
+    }
+
+    // Its clue from the pedestal that points at it (KeyPedestal > Hint, its Key's hints), if Hint Index says so
+    private void Start()
+    {
+        if (hintIndex < 0 || video == null) return;
+        if (!(Pedestal.WithClue(transform) is KeyPedestal pedestal) || pedestal.key == null) return;
+        if (hintIndex < pedestal.key.hints.Count && pedestal.key.hints[hintIndex] != null) video.clip = pedestal.key.hints[hintIndex];
+        else Debug.LogWarning($"[Painting] '{name}': its pedestal's key '{pedestal.key.name}' has no hint {hintIndex}.", this);
     }
 
     //---- Watching (PlayerLook)

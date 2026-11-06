@@ -3,13 +3,13 @@
 //  Jump     coyote time (jump a moment after leaving a ledge) and jump buffer (press a moment before landing)
 //  Ground   anything you stand on counts (optional: only the Ground layer), snaps down slopes,
 //           and carries you with moving ground (bridges, islands, platforms)
-//  Respawn  back to the last island stepped on after falling into the void (PlayerMove.Respawn.cs, same component):
-//           Classic falls from high and brakes before the ground (OriginalGame); Slam slams down from close and lands
-//           you on your face, with falling and landing sounds on every big fall (Game)
+// Falling into the void and coming back: PlayerRespawn (next to it, on the Player). This calls it at the right moments
+// and forwards its old names (Respawning, SetRespawn, the Void… / Respawn… events) so nothing else had to change.
 
 using UnityEngine;
+using UnityEngine.Serialization;
 
-public partial class PlayerMove : MonoBehaviour
+public class PlayerMove : MonoBehaviour
 {
     [Section("Move")]
     public bool playerCanMove = true;
@@ -34,17 +34,6 @@ public partial class PlayerMove : MonoBehaviour
     [Tooltip("Seconds a jump press is remembered before landing")]
     public float jumpBuffer = 0.2f;
 
-    [Section("Respawn")]
-    [Tooltip("Classic: you reappear high above (LevelManager's Drop Distance) and brake before the ground. Slam: you " +
-             "reappear close above and slam down on your face (Slam Respawn below)")]
-    public RespawnStyle respawnStyle = RespawnStyle.Slam;
-    [Tooltip("After reappearing it falls fast, then brakes over these last meters before the ground. 0 = no brake")]
-    [ShowIf(nameof(respawnStyle), RespawnStyle.Classic)] public float respawnBrakeDistance = 6f;
-    [Tooltip("Falling speed it brakes down to (m/s); the last bit it falls on its own")]
-    [ShowIf(nameof(respawnStyle), RespawnStyle.Classic)] public float respawnLandingSpeed = 3f;
-    [Tooltip("Meters below the last ground, with nothing under you, when the fall counts as into the void (the meme in your hand turns into its Fall change). Low: right away; too low: the end of a jump over a gap counts too")]
-    public float voidFallMargin = 1.5f;
-
     [Section("Ground")]
     [Tooltip("Meters it sticks down when walking off a slope or step, instead of flying off for a moment. 0 = off")]
     public float groundSnapDistance = 0.3f;
@@ -65,43 +54,76 @@ public partial class PlayerMove : MonoBehaviour
     [Tooltip("Logs each frame the body moves more than 5 mm up or down in one step, with every step of that frame (to find the bumps). Slows the game while on")]
     public bool logBumps = false;
     [ReadOnlyField] public bool isGrounded;
-    [ReadOnlyField] public bool ascend = false;   // lo prende el LevelManager al terminar el juego
+    [ReadOnlyField] public bool ascend = false;   // the GameManager turns it on at the end (Ending: Ascend)
 
-    // Falling with nothing below: it will reappear (the meme in the hand turns into its Fall change on the way down)
-    public static event System.Action VoidFallStarted;
-    // Fell into the void and reappeared (a fall for the score: RunStats). Not the portal's way back
-    public static event System.Action VoidRespawned;
-    // After that fall and the respawn, it touches the ground (Slam: you land on your face here)
-    public static event System.Action RespawnTouchedDown;
-    // Back in play after the respawn: touched the ground, or got up after the slam (the meme in the hand goes back)
-    public static event System.Action RespawnLanded;
-    // From the respawn until back in play
-    public bool Respawning => awaitingLanding;
-    public bool FallingIntoVoid { get; private set; }
+    //---- Respawn: moved to PlayerRespawn. Old names, forwarded (callers didn't change)
+    public static event System.Action VoidFallStarted { add => PlayerRespawn.VoidFallStarted += value; remove => PlayerRespawn.VoidFallStarted -= value; }
+    public static event System.Action VoidRespawned { add => PlayerRespawn.VoidRespawned += value; remove => PlayerRespawn.VoidRespawned -= value; }
+    public static event System.Action RespawnTouchedDown { add => PlayerRespawn.RespawnTouchedDown += value; remove => PlayerRespawn.RespawnTouchedDown -= value; }
+    public static event System.Action RespawnLanded { add => PlayerRespawn.RespawnLanded += value; remove => PlayerRespawn.RespawnLanded -= value; }
+    public bool Respawning => respawn != null && respawn.Respawning;
+    public bool FallingIntoVoid => respawn != null && respawn.FallingIntoVoid;
+    public GameObject CurrentIsland => respawn != null ? respawn.CurrentIsland : null;
+    public Transform GroundUnder => respawn != null ? respawn.GroundUnder : null;
+    public RespawnStyle respawnStyle => respawn != null ? respawn.respawnStyle : oldRespawnStyle;
+    public void SetRespawn(Transform point) { if (respawn != null) respawn.SetRespawn(point); }
+    public void FinishRespawn() { if (respawn != null) respawn.FinishRespawn(); }
+    public void AnnounceFall() { if (respawn != null) respawn.AnnounceFall(); }
+
+    // Old respawn values, kept hidden so they can be copied to PlayerRespawn (Memetica > Check > Migrate Managers, or
+    // on Play if the Player has no PlayerRespawn yet). Delete once migrated
+    [HideInInspector, FormerlySerializedAs("respawnStyle")] public RespawnStyle oldRespawnStyle = RespawnStyle.Slam;
+    [HideInInspector, FormerlySerializedAs("respawnBrakeDistance")] public float oldRespawnBrakeDistance = 6f;
+    [HideInInspector, FormerlySerializedAs("respawnLandingSpeed")] public float oldRespawnLandingSpeed = 3f;
+    [HideInInspector, FormerlySerializedAs("voidFallMargin")] public float oldVoidFallMargin = 1.5f;
+    [HideInInspector, FormerlySerializedAs("slamFallDepth")] public float oldSlamFallDepth = 12f;
+    [HideInInspector, FormerlySerializedAs("slamHeight")] public float oldSlamHeight = 8f;
+    [HideInInspector, FormerlySerializedAs("slamFallTime")] public float oldSlamFallTime = 0.45f;
+    [HideInInspector, FormerlySerializedAs("slamDownTime")] public float oldSlamDownTime = 0.08f;
+    [HideInInspector, FormerlySerializedAs("slamStayTime")] public float oldSlamStayTime = 0.17f;
+    [HideInInspector, FormerlySerializedAs("slamGetUpTime")] public float oldSlamGetUpTime = 0.25f;
+    [HideInInspector, FormerlySerializedAs("slamRoll")] public float oldSlamRoll = 14f;
+    [HideInInspector, FormerlySerializedAs("slamDip")] public float oldSlamDip = 0.6f;
+    [HideInInspector, FormerlySerializedAs("slamShake")] public float oldSlamShake = 0.12f;
+    [HideInInspector, FormerlySerializedAs("landingSounds")] public AudioClip[] oldLandingSounds;
+    [HideInInspector, FormerlySerializedAs("fallingSounds")] public AudioClip[] oldFallingSounds;
+    [HideInInspector, FormerlySerializedAs("fallSoundsVolume")] public float oldFallSoundsVolume = 1f;
+    [HideInInspector, FormerlySerializedAs("bigFallHeight")] public float oldBigFallHeight = 6f;
+    [HideInInspector, FormerlySerializedAs("lookAhead")] public float oldLookAhead = 1.5f;
+    [HideInInspector, FormerlySerializedAs("lookAheadDelay")] public float oldLookAheadDelay = 0.25f;
+    [HideInInspector] public bool migratedToPlayerRespawn;
+
+    public void CopyOldValuesTo(PlayerRespawn r)
+    {
+        r.respawnStyle = oldRespawnStyle; r.respawnBrakeDistance = oldRespawnBrakeDistance; r.respawnLandingSpeed = oldRespawnLandingSpeed;
+        r.voidFallMargin = oldVoidFallMargin; r.slamFallDepth = oldSlamFallDepth; r.slamHeight = oldSlamHeight;
+        r.slamFallTime = oldSlamFallTime; r.slamDownTime = oldSlamDownTime; r.slamStayTime = oldSlamStayTime;
+        r.slamGetUpTime = oldSlamGetUpTime; r.slamRoll = oldSlamRoll; r.slamDip = oldSlamDip; r.slamShake = oldSlamShake;
+        r.landingSounds = oldLandingSounds; r.fallingSounds = oldFallingSounds; r.fallSoundsVolume = oldFallSoundsVolume;
+        r.bigFallHeight = oldBigFallHeight; r.lookAhead = oldLookAhead; r.lookAheadDelay = oldLookAheadDelay;
+    }
+
     // On: walking and jumping keys do nothing (gravity and moving ground still do), e.g. getting up after the slam
     public bool InputLocked { get; set; }
     // A walk it does by itself (MemeRandomizer: to its stand point), whatever InputLocked says. Null: none
     public Vector3? AutoWalkTo { get; set; }
     public float AutoWalkSpeed { get; set; } = 1.5f;
 
-    // The island it stepped on last (null before any)
-    public GameObject CurrentIsland => lastIsland;
-
     private CharacterController characterController;
     private PlayerLook look;   // on the Player too
+    private PlayerRespawn respawn;
 
     private Vector3 horizontalVelocity;
     private float verticalVelocity;
     // Meters per second it is falling now (0 going up or on the ground)
     public float FallSpeed => Mathf.Max(0f, -verticalVelocity);
+    // Up (+) or down (-), m/s (PlayerRespawn brakes the Classic respawn with it)
+    public float VerticalVelocity { get => verticalVelocity; set => verticalVelocity = value; }
     private float airSpeed;
     private bool thrown;   // knocked back, not landed yet
     private float lastGroundedTime = -99f;
     private float lastJumpPressedTime = -99f;
     private float knockbackUntil;
-    private bool landingBrake;   // just respawned: brakes before touching the ground
-    private bool awaitingLanding;   // just respawned: RespawnLanded not sent yet
-    private bool touchedDown;       // just respawned: RespawnTouchedDown already sent
     private bool wasGrounded;
 
     private Transform movingGround;
@@ -113,13 +135,6 @@ public partial class PlayerMove : MonoBehaviour
     private float debugHeight;
     private string debugSteps = "";
     private bool debugJump;
-
-    private Transform respawnPoint;
-    private Transform lastGroundHit;
-    private GameObject lastIsland;
-    private GameObject groundIsland;      // the island under the player now (null on a bridge)
-    private float nextRespawnCheck;
-    private float lastGroundY;   // altura del último piso pisado: caer muy por debajo = cayó al vacío
 
     // Where the ground check sphere is (at your feet)
     Vector3 GroundCheckPoint => transform.TransformPoint(0f, groundCheckHeight, 0f);
@@ -133,25 +148,30 @@ public partial class PlayerMove : MonoBehaviour
     }
 #endif
 
-    private void Start()
+    void Awake()
     {
         characterController = GetComponent<CharacterController>();
+        respawn = GetComponent<PlayerRespawn>();
+        if (respawn == null)   // a Player from before PlayerRespawn (Migrate Managers adds it for good)
+        {
+            respawn = gameObject.AddComponent<PlayerRespawn>();
+            CopyOldValuesTo(respawn);
+            Debug.Log("[PlayerMove] No PlayerRespawn on the Player: added one with the old values. Run Memetica > Check > Migrate Managers to keep it.", this);
+        }
+    }
+
+    private void Start()
+    {
         look = PlayerLook.Instance;
-        SetUpSounds();
         airSpeed = walkSpeed;
         debugHeight = transform.position.y;
-
-        // The game starts in the tutorial: its start point, before standing on any island
-        respawnPoint = LevelManager.Instance.startRespawnPoint;
-        lastGroundY = transform.position.y;
     }
 
     void Update()
     {
         LogStep("between frames");
-        UpdateFallSound();   // (Slam: every big fall is heard, also while moved by something else)
         if (Scripted) return;   // moved by something else (going through a portal)
-        if (CheckFallAndRespawn()) return;
+        if (respawn.CheckFall()) return;   // fell into the void: it reappeared
 
         if (playerCanMove)
         {
@@ -173,10 +193,10 @@ public partial class PlayerMove : MonoBehaviour
             FindGroundBelow();
         }
 
-        if (ascend)   // the end (LevelManager): up into the sky, speeding up to its Ending Rise Speed
+        if (ascend)   // the end (GameManager, Ending: Ascend): up into the sky, speeding up to its Ending Rise Speed
         {
-            float accel = LevelManager.Instance != null ? LevelManager.Instance.endingRiseAcceleration : 25f;
-            float top = LevelManager.Instance != null ? LevelManager.Instance.endingRiseSpeed : float.MaxValue;
+            float accel = GameManager.Instance != null ? GameManager.Instance.endingRiseAcceleration : 25f;
+            float top = GameManager.Instance != null ? GameManager.Instance.endingRiseSpeed : float.MaxValue;
             verticalVelocity = Mathf.Min(verticalVelocity + accel * Time.deltaTime, top);
         }
 
@@ -222,7 +242,7 @@ public partial class PlayerMove : MonoBehaviour
     //---- Ground
 
     // What the player stands on and measures: everything but itself and the props (PhysicsLayers: solid only for memes)
-    private int SolidMask => ~(1 << gameObject.layer | PhysicsLayers.PropsMask);
+    public int SolidMask => ~(1 << gameObject.layer | PhysicsLayers.PropsMask);
 
     // Memes and obstacles are never ground: you can't stand or jump on them (dropping the window and jumping on it broke
     // the parkour; Meme also makes the player's body pass through them). On an obstacle you slide off (Obstacle)
@@ -405,38 +425,8 @@ public partial class PlayerMove : MonoBehaviour
         }
 
         if (!isGrounded || verticalVelocity > 0f) verticalVelocity = Mathf.Max(verticalVelocity + gravity * Time.deltaTime, -maxFallSpeed);
-        if (isGrounded)
-        {
-            landingBrake = false;
-            FallingIntoVoid = false;
-            if (awaitingLanding && !touchedDown)
-            {
-                touchedDown = true;
-                RespawnTouchedDown?.Invoke();
-                if (SlamOn) Land();   // back in play once you got up
-                else FinishRespawn();
-            }
-        }
-        else
-        {
-            if (landingBrake) BrakeBeforeGround();
-            // Already well below where it stood (not just the end of a jump over a gap), with nothing under it
-            bool belowLastGround = transform.position.y < lastGroundY - voidFallMargin;
-            if (!FallingIntoVoid && !awaitingLanding && verticalVelocity < 0f && belowLastGround && NothingBelow())
-            {
-                FallingIntoVoid = true;
-                VoidFallStarted?.Invoke();
-            }
-        }
-    }
-
-    // No ground under the player, however far (the meme in the hand and invisible lowered islands don't count)
-    private bool NothingBelow()
-    {
-        int mask = SolidMask & ~(1 << 2);   // not the player, not Ignore Raycast, not props
-        foreach (RaycastHit hit in Physics.RaycastAll(transform.position, Vector3.down, 1000f, mask, QueryTriggerInteraction.Ignore))
-            if (hit.collider.GetComponentInParent<Meme>() == null) return false;
-        return true;
+        if (isGrounded) respawn.Grounded();   // (just respawned: touched down)
+        else respawn.Airborne();              // (the Classic brake; a fall into the void?)
     }
 
     //---- What is under the player
@@ -471,9 +461,6 @@ public partial class PlayerMove : MonoBehaviour
 
     //---- Portal (PortalWindow)
 
-    // What is right under the player (PlayerGrab's recall: which island or bridge you are on)
-    public Transform GroundUnder => lastGroundHit;
-
     // Moved by something else: no walking, gravity, collisions or falls into the void until FallFrom
     public bool Scripted { get; private set; }
 
@@ -486,9 +473,6 @@ public partial class PlayerMove : MonoBehaviour
         movingGround = null;
     }
 
-    // A fall like into the void for what you carry (the meme window shows its Fall change; back when you land)
-    public void AnnounceFall() => VoidFallStarted?.Invoke();
-
     // Comes out there, falling at Speed: it lands as from a respawn (the slam), and that point is its respawn now
     public void FallFrom(Vector3 position, Quaternion rotation, float speed, Transform respawn, Vector3 carry = default)
     {
@@ -499,14 +483,23 @@ public partial class PlayerMove : MonoBehaviour
         horizontalVelocity = new Vector3(carry.x, 0f, carry.z);   // (a portal: the momentum you went in with)
         verticalVelocity = -speed;
         movingGround = null;
-        lastGroundHit = null;
-        bool groundBelow = Physics.Raycast(position, Vector3.down, out RaycastHit ground, 500f, SolidMask, QueryTriggerInteraction.Ignore);
-        lastGroundY = groundBelow ? ground.point.y : position.y;   // falling onto it is not a fall into the void
-        if (respawn != null) SetRespawn(respawn);
-        landingBrake = false;
-        awaitingLanding = true;
-        touchedDown = false;
+        this.respawn.ArriveFalling(position, respawn);   // lands as from a respawn; that point is its respawn now
         look.ResetSmoothing();
+        debugHeight = transform.position.y;
+    }
+
+    //---- Placed (PlayerRespawn reappearing you)
+
+    // There at once (the controller ignores a position change while on), falling at Vertical Speed, nothing else left
+    public void PlaceAt(Vector3 position, float verticalSpeed)
+    {
+        characterController.enabled = false;
+        transform.position = position;
+        characterController.enabled = true;
+        horizontalVelocity = Vector3.zero;
+        verticalVelocity = verticalSpeed;
+        movingGround = null;
+        if (look != null) look.ResetSmoothing();
         debugHeight = transform.position.y;
     }
 
@@ -530,11 +523,7 @@ public partial class PlayerMove : MonoBehaviour
         horizontalVelocity = Vector3.zero;
         verticalVelocity = 0f;
         movingGround = null;
-        lastGroundHit = null;
-
-        // Fall reference = the ground below, however far (a spawn point high in the air must not count as falling into the void)
-        bool groundBelow = Physics.Raycast(transform.position, Vector3.down, out RaycastHit ground, 500f, SolidMask, QueryTriggerInteraction.Ignore);
-        lastGroundY = groundBelow ? ground.point.y : transform.position.y;
+        respawn.ResetGroundReference();   // the fall reference: the ground below, however far
         look.ResetSmoothing();
         debugHeight = transform.position.y;
     }

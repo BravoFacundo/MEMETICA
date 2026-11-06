@@ -26,7 +26,10 @@ public class GrassField : MonoBehaviour
 
     [Header("Interaction")]
     [SerializeField] private float playerRadius = 0.8f;
+    [Tooltip("Meters around a meme the grass bends away (at least): a big one (a meme window lying down) uses its own size")]
     [SerializeField] private float orbRadius = 0.5f;
+    [Tooltip("Extra meters around a meme's own size, so no blade pokes through its edges")]
+    [SerializeField] private float memeMargin = 0.25f;
 
     [Header("Paint")]
     [SerializeField] private bool useChildMeshes = true;              // every mesh under this object is ground
@@ -74,7 +77,7 @@ public class GrassField : MonoBehaviour
 
     private const int MaxInteractors = 16;
     private static readonly Vector4[] interactorData = new Vector4[MaxInteractors];
-    private static readonly List<Transform> orbs = new();
+    private static readonly List<Collider> orbs = new List<Collider>();
     private static Transform player;
     private static int lastInteractorFrame = -1;
     private readonly List<Cell> cells = new();
@@ -245,10 +248,14 @@ public class GrassField : MonoBehaviour
 
         int count = 0;
         if (player != null) interactorData[count++] = new Vector4(player.position.x, player.position.y, player.position.z, playerRadius);
-        foreach (Transform orb in orbs)
+        foreach (Collider orb in orbs)
         {
             if (count >= MaxInteractors) break;
-            if (orb != null && orb.gameObject.activeInHierarchy) interactorData[count++] = new Vector4(orb.position.x, orb.position.y, orb.position.z, orbRadius);
+            if (orb == null || !orb.gameObject.activeInHierarchy) continue;
+            // Its middle and its own size lying there (a meme window is much wider than an orb)
+            Bounds b = orb.bounds;
+            float radius = Mathf.Max(orbRadius, Mathf.Max(b.extents.x, b.extents.z) + memeMargin);
+            interactorData[count++] = new Vector4(b.center.x, b.min.y, b.center.z, radius);
         }
 
         Shader.SetGlobalVectorArray("_GrassInteractors", interactorData);
@@ -261,7 +268,11 @@ public class GrassField : MonoBehaviour
         player = playerMove != null ? playerMove.transform : null;
 
         orbs.Clear();
-        foreach (Meme meme in FindObjectsOfType<Meme>()) orbs.Add(meme.transform);
+        foreach (Meme meme in FindObjectsOfType<Meme>())
+        {
+            Collider shape = meme.GetComponent<Collider>() ?? meme.GetComponentInChildren<Collider>();
+            if (shape != null) orbs.Add(shape);
+        }
     }
 
     // Three quads crossed like a star; base at y = 0, tip at y = 1, normals up for soft even lighting
@@ -361,7 +372,7 @@ public class GrassField : MonoBehaviour
             targets.AddRange(FindObjectsOfType<Pedestal>());
             targets.AddRange(FindObjectsOfType<Bridge>());
             foreach (Pedestal pedestal in FindObjectsOfType<Pedestal>())
-                if (pedestal.cluePainting != null) targets.Add(pedestal.cluePainting);
+                if (pedestal.Hint != null) targets.Add(pedestal.Hint);
             targets.AddRange(FindObjectsOfType<Elevator>());
 
             // Each mesh piece clears its own spot, so a long or diagonal bridge clears only under its planks, not a whole box

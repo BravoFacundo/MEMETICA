@@ -3,20 +3,20 @@ using System.Collections.Generic;
 using System.Text.RegularExpressions;
 using UnityEngine;
 using UnityEngine.Serialization;
-using UnityEngine.UI;
 
-// Todo lo general del nivel. Va en Managers > LevelManager.
-// - Drop Distance: one distance for heights and falls (before: Top Y / Bottom Y, Fall Distance; MasterPivot, LimiteCaida, Cage)
-// - Subir y bajar islas, puentes y ascensores (antes: IslandsManager en "Scene Manager")
-// Los demás scripts lo usan con LevelManager.Instance.
+// The level, the scenery: values every island, bridge and stone uses unless it overrides them. Goes in Managers > LevelManager.
+// - Drop Distance: one distance for heights and falls. Islands and bridges are placed where they end up: hidden ones
+//   wait Drop Distance below that and rise back to it (Island: Start Raised stays up)
+// - Lift: rise / lower timing for every island and bridge (each one can Override Timing)
+// - Platforms: the speed of every moving stone
+// - Respawn: where you start, and the RespawnPoint of each island
+// How the run starts and ends (fade in, skip tutorial, ending): the GameManager. Debug starts: DebugTools.
+// Others use it through LevelManager.Instance.
 //
-// Los pedestales piden cosas por ID y acá se buscan por nombre, con la convención Tipo_ID:
-//   isla "3" → "Island_3"   |   puente "A" → "Bridge_A"   |   isla "0" → fin del juego
+// Old (until every pedestal is migrated): pedestals ask for things by ID, found by name (Type_ID):
+//   island "3" → "Island_3"   |   bridge "A" → "Bridge_A"   |   island "0" → the end (GameManager.Win)
 //   elevators: "Tutorial_02" → "Elevator_Tutorial_02" (an island ID that matches an elevator starts its ride)
-// Leading zeros in numbers are ignored: "2", "02" and "002" all find Island_2 / Island_02 (no limit on how many islands).
-// Cada isla tiene un hijo "RespawnPoint" donde reaparece el jugador.
-// Para sumar una isla o un puente no hace falta tocar código: alcanza con respetar la convención.
-// Los prefijos se pueden cambiar en el Inspector (sección NOMBRES).
+// Leading zeros in numbers are ignored: "2", "02" and "002" all find Island_2 / Island_02.
 public class LevelManager : MonoBehaviour
 {
     public static LevelManager Instance { get; private set; }
@@ -50,52 +50,36 @@ public class LevelManager : MonoBehaviour
     [Tooltip("Scene view: a shadow of each island and bridge where it waits hidden, and the line you fall from above each RespawnPoint")]
     public bool showDropGizmos = true;
 
-    [Section("Game")]
+    [Section("Start")]
     [Tooltip("Where everything reappears at the start: the RespawnPoint of the tutorial island")]
     public Transform startRespawnPoint;
-    [Tooltip("Seconds the game's view takes to fade in at the start, with or without the tutorial (it hides the setting up)")]
-    [FormerlySerializedAs("skipFadeTime")] public float startFadeTime = 1f;
     [Tooltip("Objects you can turn off in the editor to see better (e.g. Clouds_HideIslands): they are turned on when the game starts")]
     public GameObject[] activateOnPlay;
-    [Tooltip("Seconds the islands fall before going back to the Menu")]
-    public float endingDuration = 10f;
-    [Tooltip("The end: how fast you speed up rising into the sky (m/s², gravity pulls 9.8 the other way)")]
-    public float endingRiseAcceleration = 25f;
-    [Tooltip("The end: the top speed you rise at (m/s). Low: you don't go so high that the sky shows its seams")]
-    public float endingRiseSpeed = 8f;
-    [Tooltip("Shown while you rise at the end (Game_Old: the three final pedestals). A popup of the tutorial panel " +
-             "fades in through the TutorialManager; anything else is just turned on")]
-    public GameObject endingPopup;
-    [Tooltip("Seconds after the ending starts that it shows")]
-    public float endingPopupDelay = 1f;
-    [Tooltip("The Menu scene (used if this scene has no UIManager)")]
-    public string menuScene = "Menu";
 
-    [Section("Skip Tutorial")]
-    [Tooltip("Start without the tutorial: inside Skip Elevator, already docked at the hub, the meme on the floor in front of " +
-             "you, facing the hub's pedestal. The menu's popup decides it; this one is used when pressing Play in this scene. " +
-             "A DebugTools start (Start At) wins over it")]
-    public bool skipTutorial = false;
-    [Tooltip("The elevator from the tutorial to the hub (Elevator_Tutorial_02). Empty: the first one that doesn't ride on start")]
-    public Elevator skipElevator;
-    [Tooltip("What you face (the hub's spinning pedestal). Empty: the GameManager's Start Pedestal")]
-    public Transform skipLookAt;
-    [Tooltip("Put a meme on the floor in front of you (Game). Off: every meme stays where it is, the ones riding Skip " +
-             "Elevator arrive in it (Game_Old: both island 1 memes)")]
-    public bool skipMemeInFront = true;
-    [Tooltip("The meme you start with (Meme Window or orb). Empty: the one riding Skip Elevator, else the tutorial's (MemeDelivery)")]
-    public Meme skipMeme;
-    [Tooltip("Meters in front of you where it lies")]
-    public float skipMemeDistance = 1.5f;
-    [Tooltip("Extra meters between its lowest point and the floor (it stays still there until picked up: raise it if it still sinks)")]
-    public float skipMemeLift = 0.05f;
+    // ---------- Moved to the GameManager (Intro, Skip Tutorial, Ending) and DebugTools (Skip Tutorial) ----------
+    // Kept hidden so Memetica > Check > Migrate Managers can copy their values; delete once migrated.
+    [HideInInspector, FormerlySerializedAs("startFadeTime"), FormerlySerializedAs("skipFadeTime")] public float oldStartFadeTime = 1f;
+    [HideInInspector, FormerlySerializedAs("endingDuration")] public float oldEndingDuration = 10f;
+    [HideInInspector, FormerlySerializedAs("endingRiseAcceleration")] public float oldEndingRiseAcceleration = 25f;
+    [HideInInspector, FormerlySerializedAs("endingRiseSpeed")] public float oldEndingRiseSpeed = 8f;
+    [HideInInspector, FormerlySerializedAs("endingPopup")] public GameObject oldEndingPopup;
+    [HideInInspector, FormerlySerializedAs("endingPopupDelay")] public float oldEndingPopupDelay = 1f;
+    [HideInInspector, FormerlySerializedAs("menuScene")] public string oldMenuScene = "Menu";
+    [HideInInspector, FormerlySerializedAs("skipTutorial")] public bool oldSkipTutorial;
+    [HideInInspector, FormerlySerializedAs("skipElevator")] public Elevator oldSkipElevator;
+    [HideInInspector, FormerlySerializedAs("skipLookAt")] public Transform oldSkipLookAt;
+    [HideInInspector, FormerlySerializedAs("skipMemeInFront")] public bool oldSkipMemeInFront = true;
+    [HideInInspector, FormerlySerializedAs("skipMeme")] public Meme oldSkipMeme;
+    [HideInInspector, FormerlySerializedAs("skipMemeDistance")] public float oldSkipMemeDistance = 1.5f;
+    [HideInInspector, FormerlySerializedAs("skipMemeLift")] public float oldSkipMemeLift = 0.05f;
+    [HideInInspector] public bool migratedToGameManager;
 
-    // Set by the menu's tutorial popup before loading the scene (null: this scene's Skip Tutorial)
-    public static bool? SkipFromMenu;
-    // This game started without the tutorial (the intro elevator reads it: no ride)
-    public static bool SkippingTutorial { get; private set; }
-    // This scene was opened from the menu (its popup chose): DebugTools' Start At doesn't apply
-    public static bool FromMenu { get; private set; }
+    // Forwarded to the GameManager (old callers: UIManager, DebugTools, Elevator, MemeDelivery, PlayerMove)
+    public static bool? SkipFromMenu { get => GameManager.SkipFromMenu; set => GameManager.SkipFromMenu = value; }
+    public static bool SkippingTutorial => GameManager.SkippingTutorial;
+    public static bool FromMenu => GameManager.FromMenu;
+    public float endingRiseAcceleration => GameManager.Instance != null ? GameManager.Instance.endingRiseAcceleration : oldEndingRiseAcceleration;
+    public float endingRiseSpeed => GameManager.Instance != null ? GameManager.Instance.endingRiseSpeed : oldEndingRiseSpeed;
 
     [Section("Names (Type_ID)", Closed = true)]
     public string islandPrefix = "Island_";
@@ -118,186 +102,43 @@ public class LevelManager : MonoBehaviour
         foreach (Bridge b in FindObjectsOfType<Bridge>()) bridges[NormalizeName(b.name)] = b;
         foreach (Elevator e in FindObjectsOfType<Elevator>()) elevators[NormalizeName(e.name)] = e;
 
-        // Before the elevators' Start (the intro one doesn't ride). Coming from the menu, its popup decides (DebugTools'
-        // Start At is ignored); pressing Play in the scene, a DebugTools start wins over Skip Tutorial
-        FromMenu = SkipFromMenu.HasValue;
-        SkippingTutorial = SkipFromMenu ?? skipTutorial;
-        SkipFromMenu = null;
-        DebugTools debug = FindObjectOfType<DebugTools>();
-        if (!FromMenu && debug != null && debug.enabled && debug.startAt >= 0) SkippingTutorial = false;
+        EnsureGameManager();
     }
 
-    void Start()
+    // A scene without a GameManager (OriginalGame before Migrate Managers): one made here, with this one's old values
+    void EnsureGameManager()
     {
-        CanvasGroup fade = Blackout();   // every start fades in (skipping: once everything is in place)
-        if (SkippingTutorial) StartCoroutine(SkipTutorial(fade));
-        else StartCoroutine(StartFade(fade));
+        if (GameManager.Instance != null || FindObjectOfType<GameManager>() != null) return;
+        GameManager game = gameObject.AddComponent<GameManager>();
+        game.minutes = 0f;                          // no countdown
+        game.ending = GameManager.Ending.Ascend;   // the old ending
+        CopyOldValuesTo(game);
+        Debug.Log("[LevelManager] No GameManager in this scene: made one (no countdown, Ending Ascend). " +
+                  "Run Memetica > Check > Migrate Managers to keep it.", this);
     }
 
-    void OnDestroy()
+    // The values that moved to the GameManager (Migrate Managers, and EnsureGameManager)
+    public void CopyOldValuesTo(GameManager game)
     {
-        if (Instance == this) SkippingTutorial = FromMenu = false;
+        game.startFadeTime = oldStartFadeTime;
+        game.endingDuration = oldEndingDuration;
+        game.endingRiseAcceleration = oldEndingRiseAcceleration;
+        game.endingRiseSpeed = oldEndingRiseSpeed;
+        game.endingPopup = oldEndingPopup;
+        game.endingPopupDelay = oldEndingPopupDelay;
+        game.menuScene = oldMenuScene;
+        game.skipElevator = oldSkipElevator;
+        game.skipLookAt = oldSkipLookAt;
+        game.skipMemeInFront = oldSkipMemeInFront;
+        game.skipMeme = oldSkipMeme;
+        game.skipMemeDistance = oldSkipMemeDistance;
+        game.skipMemeLift = oldSkipMemeLift;
     }
 
-    // ---------- Skip Tutorial ----------
-
-    IEnumerator SkipTutorial(CanvasGroup fade)
+    // The end (a pedestal with Completes Game, or the old island "0")
+    public void CompleteGame()
     {
-        yield return null;   // the player, islands, elevators and memes set themselves up first
-
-        Elevator elevator = skipElevator != null ? skipElevator : HubElevator();
-        PlayerMove player = FindObjectOfType<PlayerMove>();
-        if (elevator == null || elevator.dockPoint == null || player == null)
-        {
-            Debug.LogWarning("[LevelManager] Skip Tutorial: no Skip Elevator (with a Dock Point) or no player: starting with the tutorial's start.", this);
-            yield return FadeIn(fade);
-            yield break;
-        }
-        Meme meme = !skipMemeInFront ? null : skipMeme != null ? skipMeme : PassengerMeme(elevator);
-        if (skipMemeInFront && meme == null)   // (Game: the one the tutorial drops on its pedestal, MemeDelivery)
-        {
-            MemeDelivery delivery = FindObjectOfType<MemeDelivery>();
-            if (delivery != null) meme = delivery.meme;
-        }
-        if (meme != null && !meme.gameObject.activeSelf) meme.gameObject.SetActive(true);   // (hidden until delivered: MemeDelivery)
-        Pedestal holder = meme != null ? meme.CurrentPedestal : null;
-
-        // The elevator at the hub, as if it had arrived
-        elevator.DockInstantly();
-        yield return null;
-        Island hub = elevator.dockPoint.GetComponentInParent<Island>();
-        Transform respawn = hub != null ? RespawnPointOf(hub.gameObject, elevator.transform.position) : null;
-
-        // Its pedestal is gone from the start (the meme off it first)
-        if (meme != null && holder != null && holder == elevator.pedestal)
-        {
-            meme.transform.SetParent(null, true);
-            meme.RemoveFromPedestal(holder);
-        }
-        elevator.RemovePedestal();
-
-        // You, standing on its floor, facing the hub's pedestal, looking straight ahead
-        CharacterController body = player.GetComponent<CharacterController>();
-        Vector3 floor = FloorUnder(elevator.transform.position + Vector3.up * 2f, player.transform, meme, out Vector3 hit) ? hit : elevator.transform.position;
-        float feet = body != null ? body.height * 0.5f - body.center.y + body.skinWidth + 0.05f : 1f;
-        Transform spot = new GameObject("SkipTutorialSpot").transform;
-        spot.position = floor + Vector3.up * feet;
-        player.TeleportTo(spot);
-        if (respawn != null) { player.SetRespawn(respawn); Destroy(spot.gameObject); }
-
-        Transform target = skipLookAt;
-        if (target == null && GameManager.Instance != null && GameManager.Instance.startPedestal != null) target = GameManager.Instance.startPedestal.transform;
-        Vector3 facing = target != null ? target.position - player.transform.position : elevator.transform.forward;
-        facing.y = 0f;
-        if (facing.sqrMagnitude < 0.001f) facing = Vector3.forward;
-        facing.Normalize();
-        player.transform.rotation = Quaternion.LookRotation(facing, Vector3.up);
-        PlayerLook look = PlayerLook.Instance;
-        if (look != null) { look.LookLevel(); look.ResetSmoothing(); }
-
-        // The meme on the floor in front of you
-        if (meme != null)
-        {
-            if (holder != null && holder != elevator.pedestal) holder.Break();   // (another pedestal: it lets it go next frame)
-            Vector3 place = player.transform.position + facing * skipMemeDistance;
-            meme.transform.SetParent(null, true);
-            meme.transform.position = place;   // off its pedestal: it lets it go next frame
-            // Solid and grabbable whatever state it was left in (hidden by the tutorial, carried on the HUD…)
-            int off = 0;
-            foreach (Collider c in meme.GetComponentsInChildren<Collider>(true)) if (!c.enabled) { c.enabled = true; off++; }
-            yield return null;
-            if (FloorUnder(place + Vector3.up * 2f, player.transform, meme, out Vector3 ground))
-                place = ground + Vector3.up * (PivotAboveBottom(meme) + skipMemeLift);   // its lowest point on the floor, plus Skip Meme Lift
-            meme.PlaceAt(place, Quaternion.LookRotation(facing, Vector3.up), respawn);   // its front to you
-            Debug.Log($"[LevelManager] Skip meme '{meme.name}' at {Vector3.Distance(player.transform.position, meme.transform.position):F1} m " +
-                      $"(colliders turned back on: {off}, tag {meme.tag}, layer {LayerMask.LayerToName(meme.gameObject.layer)}).", meme);
-            if (meme is MemeWindow window && PlayerGrab.Instance != null) PlayerGrab.Instance.WaitForPickUp(window);   // (it stays until you take it)
-        }
-
-        yield return new WaitForSecondsRealtime(0.2f);
-        yield return FadeIn(fade);
-        Debug.Log($"[LevelManager] Tutorial skipped: in '{elevator.name}'" + (meme != null ? $", '{meme.name}' in front" : ", no meme") + ".", this);
-    }
-
-    // How far its pivot is above its lowest point (solid colliders and visible meshes; colliders measured once enabled)
-    static float PivotAboveBottom(Meme meme)
-    {
-        bool found = false;
-        Bounds all = new Bounds();
-        void Add(Bounds b) { if (b.size == Vector3.zero) return; if (found) all.Encapsulate(b); else { all = b; found = true; } }
-        foreach (Collider c in meme.GetComponentsInChildren<Collider>()) if (c.enabled && !c.isTrigger) Add(c.bounds);
-        foreach (Renderer r in meme.GetComponentsInChildren<Renderer>()) if (r.enabled && !(r is ParticleSystemRenderer) && !(r is TrailRenderer)) Add(r.bounds);
-        return found ? Mathf.Max(0f, meme.transform.position.y - all.min.y) : 0.5f;
-    }
-
-    // The first elevator that doesn't ride on start (the one from the tutorial to the hub)
-    Elevator HubElevator()
-    {
-        foreach (Elevator e in FindObjectsOfType<Elevator>()) if (!e.rideOnStart && e.dockPoint != null) return e;
-        return null;
-    }
-
-    // The meme riding it (its passengers, or on its pedestal)
-    static Meme PassengerMeme(Elevator elevator)
-    {
-        foreach (Transform p in elevator.passengers) if (p != null && p.TryGetComponent(out Meme m)) return m;
-        if (elevator.pedestal != null && elevator.pedestal.MemeObject != null) return elevator.pedestal.MemeObject.GetComponent<Meme>();
-        return null;
-    }
-
-    // The ground under a point (not the player nor the meme)
-    static bool FloorUnder(Vector3 from, Transform player, Meme meme, out Vector3 point)
-    {
-        point = from;
-        float nearest = float.MaxValue;
-        foreach (RaycastHit h in Physics.RaycastAll(from, Vector3.down, 10f, ~0, QueryTriggerInteraction.Ignore))
-        {
-            if (h.transform.IsChildOf(player) || (meme != null && h.transform.IsChildOf(meme.transform))) continue;
-            if (h.distance < nearest) { nearest = h.distance; point = h.point; }
-        }
-        return nearest < float.MaxValue;
-    }
-
-    // The game's view covered (it hides the setting up), then FadeIn. Only the view, in the frame's colour
-    // (DisplayManager.BarColor): the frame and the Classic bars stay as they are, the game "turns on" inside them
-    static CanvasGroup Blackout()
-    {
-        var go = new GameObject("SkipTutorialFade", typeof(Canvas), typeof(CanvasGroup));
-        var canvas = go.GetComponent<Canvas>();
-        canvas.renderMode = RenderMode.ScreenSpaceOverlay;
-        canvas.sortingOrder = 1000;   // (with the frame: same colour, so their order doesn't matter)
-        var group = go.GetComponent<CanvasGroup>();
-        group.alpha = 1f;
-        group.blocksRaycasts = group.interactable = false;
-
-        var view = new GameObject("View", typeof(RectTransform), typeof(Image), typeof(AspectArea));
-        var rect = (RectTransform)view.transform;
-        rect.SetParent(go.transform, false);
-        rect.anchorMin = DisplayManager.View.min;   // (AspectArea keeps it there if the window changes)
-        rect.anchorMax = DisplayManager.View.max;
-        rect.offsetMin = rect.offsetMax = Vector2.zero;
-        var image = view.GetComponent<Image>();
-        image.color = DisplayManager.BarColor;
-        image.raycastTarget = false;
-        return group;
-    }
-
-    // Normal start: one frame so everything sets itself up, then the fade
-    IEnumerator StartFade(CanvasGroup fade)
-    {
-        yield return null;
-        yield return FadeIn(fade);
-    }
-
-    IEnumerator FadeIn(CanvasGroup fade)
-    {
-        if (fade == null) yield break;
-        for (float t = 0f; t < startFadeTime; t += Time.unscaledDeltaTime)
-        {
-            fade.alpha = 1f - Mathf.SmoothStep(0f, 1f, t / Mathf.Max(startFadeTime, 0.01f));
-            yield return null;
-        }
-        Destroy(fade.gameObject);
+        if (GameManager.Instance != null) GameManager.Instance.Win();
     }
 
     // ---------- Lo que piden los pedestales ----------
@@ -306,7 +147,7 @@ public class LevelManager : MonoBehaviour
     {
         switch (NormalizeName(id))
         {
-            case "0": StartCoroutine(GameComplete()); break;
+            case "0": CompleteGame(); break;
             default:
                 // Elevators share the pedestal IDs with islands: if one matches, it starts its ride
                 if (elevators.TryGetValue(NormalizeName(elevatorPrefix + id), out Elevator elevator)) elevator.StartRide();
@@ -491,28 +332,6 @@ public class LevelManager : MonoBehaviour
         foreach (Transform child in container.GetComponentsInChildren<Transform>(true))
             if (child.name == respawnPointName) return child;
         return null;
-    }
-
-    IEnumerator GameComplete()
-    {
-        GameObject.Find("Player").GetComponent<PlayerMove>().ascend = true;
-
-        // Todas las islas caen (más adelante: primero los puentes, al azar, y que se desvanezcan)
-        foreach (Island isla in islands.Values) isla.FallAway();
-
-        if (endingPopup != null)
-        {
-            yield return new WaitForSeconds(Mathf.Min(endingPopupDelay, endingDuration));
-            TutorialManager tutorial = TutorialManager.Instance;
-            if (tutorial != null && tutorial.popupCanvas != null && endingPopup.transform.IsChildOf(tutorial.popupCanvas)) tutorial.Show(endingPopup);
-            else endingPopup.SetActive(true);
-        }
-        yield return new WaitForSeconds(Mathf.Max(endingDuration - (endingPopup != null ? endingPopupDelay : 0f), 0f));
-
-        // Back to the desktop (Menu) instead of closing the game: the next visitor can play right away
-        UIManager uiManager = FindObjectOfType<UIManager>();
-        if (uiManager != null) uiManager.GoToMenu();
-        else { Time.timeScale = 1f; UIManager.GameIsPaused = false; UnityEngine.SceneManagement.SceneManager.LoadScene(menuScene); }
     }
 
     // "Island_02" → "Island_2": numbers without leading zeros, so 1 and 01 are the same ID

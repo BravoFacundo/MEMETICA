@@ -150,12 +150,12 @@ public partial class PlayerGrab
         if (pedestal == null || HoldsTheWay(pedestal)) return true;   // (a black one: LeftBehind decides)
         if (fromPedestals == FromPedestals.Always) return true;
         if (fromPedestals == FromPedestals.Never) return false;
-        return pedestal.GetComponent<MemeRandomizer>() != null || pedestal.GetComponent<PedestalRetire>() != null;
+        return pedestal is RandomizerPedestal || pedestal.GetComponent<PedestalRetire>() != null;
     }
 
     // A black pedestal: holds its islands and bridges up while it has a meme
     static bool HoldsTheWay(Pedestal pedestal) =>
-        pedestal.KeylessPedestal && pedestal.GetComponent<MemeRandomizer>() == null && pedestal.GetComponent<PedestalRetire>() == null;
+        !(pedestal is KeyPedestal) && !(pedestal is RandomizerPedestal) && pedestal.GetComponent<PedestalRetire>() == null;
 
     // You went From where it is To somewhere else (on a black pedestal: from its island or what it raised, to
     // somewhere it didn't raise)
@@ -170,11 +170,7 @@ public partial class PlayerGrab
     // Its own island, or one of the islands and bridges it raises
     static bool Raised(Pedestal pedestal, Transform place)
     {
-        if (place == PlaceOf(pedestal.transform)) return true;
-        LevelManager level = LevelManager.Instance;
-        foreach (string id in pedestal.ControlledIslands) if (level.FindIsland(id) == place) return true;
-        foreach (string id in pedestal.ControlledBridges) if (level.FindBridge(id) == place) return true;
-        return false;
+        return place == PlaceOf(pedestal.transform) || pedestal.Raises(place);
     }
 
     // The island or bridge something is part of

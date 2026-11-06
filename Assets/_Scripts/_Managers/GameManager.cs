@@ -1,7 +1,9 @@
 using UnityEngine;
 using UnityEngine.Events;
 
-// The run (Game): the virus countdown and how it ends. Your first meme also downloads a virus (a meme itself): from
+// The run, in every game scene: how it starts (GameManager.Intro: the fade in, skipping the tutorial), the virus
+// countdown, winning and losing, and how it ends (GameManager.Ending: the End Screen, or rising into the sky).
+// Game: the countdown. Your first meme also downloads a virus (a meme itself): from
 // then on (Start On: the hub's pedestal going down after your first raffle) you have Minutes until it throws the blue screen. Collect every meme in the MemeDex and back it up
 // before that to win.
 //   Lose  time is up: the blue screen (Blue Screen) for a moment, then the End Screen (On Lose)
@@ -9,8 +11,9 @@ using UnityEngine.Events;
 // End Screen is one window for both: its Win Only / Lose Only parts (titles, texts, pictures) show for that result.
 // Without an End Screen: the old separate Blue Screen / Win Screen.
 // When it ends the player stops (only the cursor moves, for the screens). The HUD shows the time with a VirusClock.
-// Goes in Managers > GameManager. Without it (Game_Old) there is no countdown.
-public class GameManager : MonoBehaviour
+// OriginalGame: Minutes 0 (no countdown) and Ending Ascend (its last pedestals win: Completes Game).
+// Goes in Managers > GameManager (Game and OriginalGame). A scene without one gets one made by the LevelManager.
+public partial class GameManager : MonoBehaviour
 {
     public static GameManager Instance { get; private set; }
 
@@ -18,7 +21,7 @@ public class GameManager : MonoBehaviour
     public enum StartOn { IslandReached, Manual, PedestalDown, VirusAlert }
 
     [Section("Time")]
-    [Tooltip("Minutes until the blue screen (the itch.io build: 30; the exhibition: 5)")]
+    [Tooltip("Minutes until the blue screen (the itch.io build: 30; the exhibition: 5). 0: no countdown (OriginalGame)")]
     public float minutes = 5f;
     public enum ScoreMode { Expo, Itch }
     [Tooltip("Which build this is, saved with each score: runs of different builds aren't ranked together")]
@@ -86,6 +89,7 @@ public class GameManager : MonoBehaviour
     void Awake()
     {
         Instance = this;
+        DecideIntro();   // before the elevators' Start (the intro one doesn't ride when skipping)
         TimeLeft = minutes * 60f;
         if (blueScreen != null) blueScreen.SetActive(false);
         if (winScreen != null) winScreen.SetActive(false);
@@ -93,8 +97,8 @@ public class GameManager : MonoBehaviour
         if (virusAlert != null) virusAlert.SetActive(false);
     }
 
-    void OnEnable() => MemeRandomizer.WayOpened += OnWayOpened;
-    void OnDisable() => MemeRandomizer.WayOpened -= OnWayOpened;
+    void OnEnable() => RandomizerPedestal.WayOpened += OnWayOpened;
+    void OnDisable() => RandomizerPedestal.WayOpened -= OnWayOpened;
 
     //---- Virus Alert: the first way rose → the window, you stay still → closed: the countdown
 
@@ -110,7 +114,7 @@ public class GameManager : MonoBehaviour
         alerting = true;
         yield return new WaitForSeconds(alertDelay);
         if (virusMinutesText != null) virusMinutesText.text = virusMinutesText.text.Replace("{min}", Mathf.RoundToInt(minutes).ToString());
-        if (alertClip != null) source.PlayOneShot(alertClip);
+        PlayClip(alertClip);
         bool closed = false;
         ModalPopup.Show(virusAlert, () => closed = true, alertMinTime);   // the game stops until clicked
         StartTimer();   // the clock shows with it, stopped (time is frozen): it runs once clicked
@@ -124,6 +128,12 @@ public class GameManager : MonoBehaviour
         source.playOnAwake = false;
         source.spatialBlend = 0f;
         source.ignoreListenerPause = true;
+        BeginIntro();
+    }
+
+    void OnDestroy()
+    {
+        if (Instance == this) { Instance = null; EndIntro(); }
     }
 
     void Update()
@@ -137,6 +147,7 @@ public class GameManager : MonoBehaviour
 
     bool ShouldStart()
     {
+        if (minutes <= 0f) return false;   // no countdown (OriginalGame)
         if (virusAlert != null) return false;   // a Virus Alert set: it starts the countdown (whatever Start On says)
         if (startOn == StartOn.IslandReached) return OnStartIsland();
         if (startOn == StartOn.PedestalDown) return startPedestal != null && !startPedestal.IsUp;
@@ -145,7 +156,7 @@ public class GameManager : MonoBehaviour
 
     bool OnStartIsland()
     {
-        if (player == null || player.CurrentIsland == null || LevelManager.Instance == null) return false;
+        if (player == null || player.CurrentIsland == null || LevelManager.Instance == null) return false;   // (Start Island: an Island reference once pedestals are migrated)
         Transform start = LevelManager.Instance.FindIsland(startIsland);
         Island here = player.CurrentIsland.GetComponentInParent<Island>();
         return start != null && here != null && here.transform == start;
@@ -173,7 +184,8 @@ public class GameManager : MonoBehaviour
     public void Win()
     {
         if (Current == State.Won || Current == State.Lost) return;
-        End(State.Won, winScreen, winClip);
+        if (ending == Ending.Ascend) { SetState(State.Won); PlayClip(winClip); StartCoroutine(Ascend()); }
+        else End(State.Won, winScreen, winClip);
         onWin.Invoke();
     }
 
@@ -188,9 +200,9 @@ public class GameManager : MonoBehaviour
     {
         SetState(state);
         if (player != null) player.InputLocked = true;
-        PlayerLook look = FindObjectOfType<PlayerLook>();
+        PlayerLook look = PlayerLook.Instance;
         if (look != null) look.LookLocked = true;   // only the cursor moves (RetroCursor: free once it ended), for the screens
-        if (clip != null) source.PlayOneShot(clip);
+        PlayClip(clip);
         if (endScreen == null) { if (screen != null) screen.SetActive(true); return; }   // (the old separate screens)
 
         bool won = state == State.Won;
@@ -207,6 +219,11 @@ public class GameManager : MonoBehaviour
         yield return new WaitForSecondsRealtime(blueScreenSeconds);
         endScreen.SetActive(true);
         endScreen.transform.SetAsLastSibling();
+    }
+
+    void PlayClip(AudioClip clip)
+    {
+        if (clip != null && source != null) source.PlayOneShot(clip);
     }
 
     void SetState(State state)

@@ -1,16 +1,22 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.Serialization;
 
 // Keeps the player on the right course with the meme window (Game). Goes in Managers > CourseGuide.
 //   Another level   carried onto an island of a level that isn't the meme's (its axis: the level of Island_<Title>,
 //                   or the randomizer's first island for it), the meme doesn't change there (no Move), the Wrong
-//                   Way Popup shows and arrows on the ground point back (to the last island of its own course, or the hub)
-//   Going back      carried back onto an island it was already on (not the newest one) while its course isn't done, or
-//                   reappearing after a fall: arrows on the ground point to the next island (the nearest one of its
-//                   level not visited yet, from the newest one it reached)
-// Without a CourseGuide in the scene: the meme changes on any island, as before (Game_Old).
-// The arrows: Arrow Prefab if set (pointing along its blue axis), else simple flat chevrons. They stay Arrow Time.
+//                   Way Popup shows and the arrows show the way back (to the last island of its own course, or the hub)
+//   Going back      the wrong way while its course isn't done: stepping onto a bridge from the newest island it reached
+//                   toward one it was already on, or carried back onto an old island: the arrows show the way to the
+//                   next island (the nearest one of its level not visited yet, from the newest one it reached)
+//   Respawn         optionally, reappearing after a fall (Arrows On Respawn)
+// The way: from the island you are on, across the bridges that join them (the fewest; found by their anchors), one
+// arrow on each stone pointing at the next one, as the stones move. Islands no bridge joins (an elevator, the portal):
+// straight at it. Arrow Sprite (your own, a UI image lying flat, pointing up in the image) or Arrow Prefab (pointing along
+// its blue axis), else flat chevrons. They stay Arrow Time.
+// It lives here, not in the meme: what it knows is the scene's layout (levels, islands, bridges); the meme only asks
+// (CountsFor) and tells (Reached). Without a CourseGuide in the scene the meme changes on any island (OriginalGame).
 public class CourseGuide : MonoBehaviour
 {
     public static CourseGuide Instance { get; private set; }
@@ -25,33 +31,76 @@ public class CourseGuide : MonoBehaviour
     public float popupTime = 4f;
 
     [Section("Arrows")]
-    [Tooltip("Arrows when you go back along the course you already did")]
+    [Tooltip("Arrows when you go the wrong way: onto a bridge back toward an island already done, or onto that island")]
     public bool arrowsGoingBack = true;
     [Tooltip("Arrows when you reappear after a fall")]
     public bool arrowsOnRespawn = true;
-    [Tooltip("Your own arrow (points along its blue axis, lies on the ground). Empty: flat chevrons")]
+    [Tooltip("Your own arrow as an image (a UI sprite): lies flat, pointing where the top of the image points. Tinted by Arrow Color (white: as it is)")]
+    public Sprite arrowSprite;
+    [Tooltip("Your own arrow as an object (points along its blue axis, lies on the ground). Used if there is no Arrow Sprite. Empty: flat chevrons")]
     public GameObject arrowPrefab;
     public Color arrowColor = new Color(1f, 0.85f, 0.2f, 0.9f);
-    [Tooltip("How many arrows in a row")]
-    [Range(1, 6)] public int arrowCount = 3;
+    [Tooltip("Most arrows along the way (one per stone): far ones are left out")]
+    [FormerlySerializedAs("arrowCount")] [Range(3, 30)] public int maxArrows = 14;
     [Tooltip("Meters from you to the first one")]
     public float arrowStart = 1.5f;
-    [Tooltip("Meters between them")]
+    [Tooltip("Meters between them on the ground (islands, solid bridges)")]
     public float arrowSpacing = 1.2f;
     [Tooltip("Arrow size (meters)")]
     public float arrowSize = 0.8f;
-    [Tooltip("Seconds they stay (they fade out at the end)")]
+    [Tooltip("Meters they float above the ground or the stone")]
+    public float arrowHover = 0.15f;
+    [Tooltip("Seconds between one arrow popping in and the next (they show the way in order)")]
+    public float arrowPop = 0.06f;
+    [Tooltip("Seconds they stay once all are in (they fade out at the end)")]
     public float arrowTime = 5f;
     [Tooltip("Logs to the Console what it decides ([CourseGuide])")]
     public bool log = false;
 
-    private readonly List<GameObject> arrows = new List<GameObject>();
     private Coroutine arrowRoutine, popupRoutine;
     private Material arrowMaterial;
     private Mesh chevron;
     private bool warnedWrongLevel;
 
     void Awake() => Instance = this;
+
+    // The wrong way, early: stepping onto a bridge that goes from the newest island back to one already done
+    private PlayerMove player;
+    private Bridge lastBridge;
+    private float nextCheck;
+    void Update()
+    {
+        if (!arrowsGoingBack || Time.time < nextCheck) return;
+        nextCheck = Time.time + 0.2f;
+        if (player == null) player = FindObjectOfType<PlayerMove>();
+        Meme meme = Meme.Held;
+        if (player == null || meme == null) { lastBridge = null; return; }
+        Bridge bridge = player.GroundUnder != null ? player.GroundUnder.GetComponentInParent<Bridge>() : null;
+        if (bridge == lastBridge) return;
+        lastBridge = bridge;
+        if (bridge == null || !GoingBack(meme, bridge, out Transform next)) return;
+        Log($"'{meme.name}' onto {bridge.name}, back toward a done island: arrows to {next.name}.");
+        ShowWay(next);
+    }
+
+    // This bridge leaves the newest island toward one already done (and the next one isn't there)
+    bool GoingBack(Meme meme, Bridge bridge, out Transform next)
+    {
+        next = null;
+        if (meme.LastNewIsland == null || bridge.anchorA == null || bridge.anchorB == null) return false;
+        Transform newest = Outer(meme.LastNewIsland.transform);
+        Transform a = Outer(Island.Of(bridge.anchorA)), b = Outer(Island.Of(bridge.anchorB));
+        Transform other = a == newest ? b : b == newest ? a : null;
+        if (other == null || !Visited(meme, other)) return false;
+        next = NextIsland(meme);
+        return next != null && Outer(next) != other;
+    }
+
+    static bool Visited(Meme meme, Transform island)
+    {
+        foreach (GameObject reached in meme.Reached) if (reached != null && Outer(reached.transform) == island) return true;
+        return false;
+    }
     void OnEnable() => PlayerMove.RespawnTouchedDown += OnRespawned;
     void OnDisable() => PlayerMove.RespawnTouchedDown -= OnRespawned;
     void OnDestroy() { if (Instance == this) Instance = null; }
@@ -83,7 +132,7 @@ public class CourseGuide : MonoBehaviour
             Log($"'{meme.name}' carried into another level ({island.name}): no change, back.");
             ShowPopup();
             Transform back = meme.LastNewIsland != null ? meme.LastNewIsland.transform : HubPoint();
-            if (back != null) ShowArrows(Center(back));
+            if (back != null) ShowWay(back);
             return;
         }
         warnedWrongLevel = false;
@@ -91,7 +140,7 @@ public class CourseGuide : MonoBehaviour
         Transform next = NextIsland(meme);
         if (next == null) return;   // its course is done: going back is fine
         Log($"'{meme.name}' going back ({island.name}): arrows to {next.name}.");
-        ShowArrows(Center(next));
+        ShowWay(next);
     }
 
     void OnRespawned()
@@ -108,7 +157,7 @@ public class CourseGuide : MonoBehaviour
     IEnumerator ArrowsNextFrame(Transform next)
     {
         yield return new WaitForSeconds(0.3f);   // (on the ground, facing its way)
-        ShowArrows(Center(next));
+        ShowWay(next);
     }
 
     //---- The course
@@ -162,7 +211,7 @@ public class CourseGuide : MonoBehaviour
                 string id = island.name.Substring(island.name.LastIndexOf('_') + 1).Replace(" ", "");
                 if (string.Equals(id, title, System.StringComparison.OrdinalIgnoreCase)) return island.transform;
             }
-        foreach (MemeRandomizer randomizer in FindObjectsOfType<MemeRandomizer>(true))
+        foreach (RandomizerPedestal randomizer in FindObjectsOfType<RandomizerPedestal>(true))
         {
             Transform first = randomizer.FirstIslandOf(data);
             if (first != null) return first;
@@ -223,36 +272,219 @@ public class CourseGuide : MonoBehaviour
         popupRoutine = null;
     }
 
-    //---- Arrows on the ground
+    //---- The way: from the island you are on, along the bridges, to the island
 
-    void ShowArrows(Vector3 toward)
+    // One bridge of the way, and which way you cross it (from its anchor A to B, or back)
+    struct Crossing { public Bridge bridge; public bool forward; }
+
+    // The bridges that join From and To, in order (the fewest), only the ones that are up. Null: no bridges join them
+    // (an elevator, the portal): then the arrows point straight at it
+    static List<Crossing> Route(Transform from, Transform to)
+    {
+        if (from == null || to == null || from == to) return null;
+        var links = new List<(Bridge bridge, Transform a, Transform b)>();
+        foreach (Bridge bridge in FindObjectsOfType<Bridge>())
+        {
+            if (bridge.IsHidden || bridge.anchorA == null || bridge.anchorB == null) continue;
+            Transform a = Outer(Island.Of(bridge.anchorA)), b = Outer(Island.Of(bridge.anchorB));
+            if (a != null && b != null && a != b) links.Add((bridge, a, b));
+        }
+
+        // Breadth first: the way with the fewest bridges
+        var cameFrom = new Dictionary<Transform, (Transform island, Crossing crossing)>();
+        var queue = new Queue<Transform>();
+        queue.Enqueue(from);
+        cameFrom[from] = (null, default);
+        while (queue.Count > 0)
+        {
+            Transform here = queue.Dequeue();
+            if (here == to) break;
+            foreach (var link in links)
+            {
+                Transform next = link.a == here ? link.b : link.b == here ? link.a : null;
+                if (next == null || cameFrom.ContainsKey(next)) continue;
+                cameFrom[next] = (here, new Crossing { bridge = link.bridge, forward = link.a == here });
+                queue.Enqueue(next);
+            }
+        }
+        if (!cameFrom.ContainsKey(to)) return null;
+        var route = new List<Crossing>();
+        for (Transform t = to; cameFrom[t].island != null; t = cameFrom[t].island) route.Insert(0, cameFrom[t].crossing);
+        return route;
+    }
+
+    // An island inside another one counts as that one (as IslandsIn)
+    static Transform Outer(Transform island)
+    {
+        if (island == null) return null;
+        for (Transform p = island.parent != null ? Island.Of(island.parent) : null; p != null; p = p.parent != null ? Island.Of(p.parent) : null)
+            island = p;
+        return island;
+    }
+
+    //---- Arrows: over the ground and the stones, each one pointing at the next
+
+    class Arrow { public Transform root, look; public float bob; }
+    private readonly List<Arrow> shown = new List<Arrow>();
+    private Transform wayEnd;          // where the last arrow points (the island)
+    private Vector3 wayEndOffset;      // (its middle, from it: it floats)
+
+    // Arrows from you to that island: across its bridges, stone by stone. No bridges between you: straight at it
+    void ShowWay(Transform target)
     {
         PlayerMove player = FindObjectOfType<PlayerMove>();
-        if (player == null) return;
-        Vector3 origin = player.transform.position;
-        Vector3 direction = toward - origin;
-        direction.y = 0f;
-        if (direction.sqrMagnitude < 1f) return;   // already there
-        direction.Normalize();
-
+        if (player == null || target == null) return;
+        Transform island = Outer(Island.Of(target)) ?? target;
+        Transform here = player.CurrentIsland != null ? Outer(player.CurrentIsland.transform) : null;
         ClearArrows();
-        for (int i = 0; i < arrowCount; i++)
+        wayEnd = island;
+        wayEndOffset = Center(island) - island.position;
+
+        List<Crossing> route = Route(here, island);
+        Vector3 from = player.transform.position;
+        if (route == null || route.Count == 0)
         {
-            Vector3 spot = origin + direction * (arrowStart + i * arrowSpacing);
-            int notPlayer = ~(1 << player.gameObject.layer);
-            if (!Physics.Raycast(spot + Vector3.up * 2f, Vector3.down, out RaycastHit ground, 6f, notPlayer, QueryTriggerInteraction.Ignore)) continue;   // over the void: none there (the next one may be on a stone)
-            GameObject arrow = MakeArrow();
-            arrow.transform.SetPositionAndRotation(ground.point + ground.normal * 0.03f,
-                Quaternion.LookRotation(Vector3.ProjectOnPlane(direction, ground.normal), ground.normal));
-            arrow.transform.SetParent(ground.transform, true);   // (moves with a moving stone or a floating island)
-            arrows.Add(arrow);
+            Log($"No bridges from {(here != null ? here.name : "where you are")} to {island.name}: straight at it.");
+            OverGround(from, Center(island), here, arrowSpacing * 3f);
         }
+        else
+        {
+            Log($"The way to {island.name}: {string.Join(" > ", route.ConvertAll(c => c.bridge.name))}.");
+            foreach (Crossing crossing in route)
+            {
+                if (shown.Count >= maxArrows) break;
+                Transform start = crossing.forward ? crossing.bridge.anchorA : crossing.bridge.anchorB;
+                Transform end = crossing.forward ? crossing.bridge.anchorB : crossing.bridge.anchorA;
+                OverGround(from, start.position, null, Vector3.Distance(from, start.position));   // on the island, to the bridge
+                AcrossBridge(crossing, start.position, end.position);
+                from = end.position;
+            }
+            if (shown.Count < maxArrows) OverGround(from, Center(island), island, arrowSpacing * 1.5f);   // one onto the island
+        }
+
         if (arrowRoutine != null) StopCoroutine(arrowRoutine);
-        if (arrows.Count > 0) arrowRoutine = StartCoroutine(FadeArrows());
+        if (shown.Count > 0) arrowRoutine = StartCoroutine(PlayArrows());
+    }
+
+    // On the ground from From toward To (up to Length meters, every Arrow Spacing), only where there is ground
+    // (Only: on that island)
+    void OverGround(Vector3 from, Vector3 to, Transform only, float length)
+    {
+        Vector3 flat = to - from;
+        flat.y = 0f;
+        float far = Mathf.Min(length, flat.magnitude);
+        if (far < 0.5f) return;
+        flat.Normalize();
+        for (float d = arrowStart; d <= far && shown.Count < maxArrows; d += arrowSpacing)
+        {
+            if (!Ground(from + flat * d, out RaycastHit hit)) continue;
+            if (only != null && Outer(Island.Of(hit.transform)) != only) continue;
+            AddArrow(hit.point, hit.transform);
+        }
+    }
+
+    // Over its stones in order (a stone path, each one carries its arrow as it moves), else along it every Arrow Spacing
+    void AcrossBridge(Crossing crossing, Vector3 start, Vector3 end)
+    {
+        StonePath path = crossing.bridge.GetComponentInChildren<StonePath>();
+        if (path != null)
+        {
+            List<PathStone> stones = path.Stones;
+            if (!crossing.forward) stones.Reverse();
+            foreach (PathStone stone in stones)
+            {
+                if (shown.Count >= maxArrows) return;
+                Renderer shape = stone.GetComponentInChildren<Renderer>();
+                if (shape == null) continue;
+                Bounds b = shape.bounds;
+                AddArrow(new Vector3(b.center.x, b.max.y, b.center.z), stone.transform);
+            }
+            return;
+        }
+        float length = Vector3.Distance(start, end);
+        for (float d = arrowSpacing; d < length && shown.Count < maxArrows; d += arrowSpacing)
+            if (Ground(Vector3.Lerp(start, end, d / length), out RaycastHit hit) && hit.transform.IsChildOf(crossing.bridge.transform))
+                AddArrow(hit.point, hit.transform);
+    }
+
+    static bool Ground(Vector3 at, out RaycastHit hit)
+    {
+        int mask = Physics.DefaultRaycastLayers & ~PhysicsLayers.PropsMask;   // (not the player: Ignore Raycast)
+        return Physics.Raycast(at + Vector3.up * 3f, Vector3.down, out hit, 8f, mask, QueryTriggerInteraction.Ignore);
+    }
+
+    void AddArrow(Vector3 at, Transform carrier)
+    {
+        var root = new GameObject("GuideArrow").transform;
+        root.position = at + Vector3.up * arrowHover;
+        root.SetParent(carrier, true);   // (moves with a moving stone or a floating island)
+        GameObject look = MakeArrow();
+        look.transform.SetParent(root, false);
+        look.transform.localScale = Vector3.zero;   // (it pops in, PlayArrows)
+        shown.Add(new Arrow { root = root, look = look.transform, bob = shown.Count * 0.7f });
+    }
+
+    // One after another along the way (popping in), floating a little, each one turned to the next as the stones move;
+    // a light runs along them, from you to the island. The last second they fade out
+    IEnumerator PlayArrows()
+    {
+        var block = new MaterialPropertyBlock();
+        float total = arrowTime + shown.Count * arrowPop;
+        for (float t = 0f; t < total; t += Time.deltaTime)
+        {
+            float fade = Mathf.Clamp01((total - t) / 1f);
+            for (int i = 0; i < shown.Count; i++)
+            {
+                Arrow arrow = shown[i];
+                if (arrow.root == null) continue;
+                Vector3 next = i + 1 < shown.Count && shown[i + 1].root != null ? shown[i + 1].root.position
+                             : wayEnd != null ? wayEnd.position + wayEndOffset : arrow.root.position + arrow.root.forward;
+                Vector3 flat = next - arrow.root.position;
+                flat.y = 0f;
+                if (flat.sqrMagnitude > 0.0001f) arrow.root.rotation = Quaternion.LookRotation(flat, Vector3.up);
+
+                float age = t - i * arrowPop;   // (popping in one after another)
+                float pop = age <= 0f ? 0f : age >= 0.25f ? 1f : EaseOutBack(age / 0.25f);
+                arrow.look.localScale = Vector3.one * (arrowSize * pop);
+                arrow.look.localPosition = Vector3.up * (Mathf.Sin(t * 3f + arrow.bob) * 0.05f);
+
+                if (arrowPrefab != null && arrowSprite == null) continue;
+                float run = Mathf.Repeat(t * 1.5f - i * 0.25f, 1f);   // a light running along the way
+                Color c = arrowColor;
+                c.a *= fade * Mathf.Lerp(0.55f, 1f, Mathf.Clamp01(1f - Mathf.Abs(run - 0.5f) * 4f));
+                SpriteRenderer sprite = arrow.look.GetComponentInChildren<SpriteRenderer>();
+                if (sprite != null) { sprite.color = c; continue; }
+                block.SetColor("_Color", c);
+                arrow.look.GetComponent<MeshRenderer>().SetPropertyBlock(block);
+            }
+            yield return null;
+        }
+        ClearArrows();
+        arrowRoutine = null;
+    }
+
+    static float EaseOutBack(float p)
+    {
+        const float c1 = 1.70158f, c3 = c1 + 1f;
+        p -= 1f;
+        return 1f + c3 * p * p * p + c1 * p * p;
     }
 
     GameObject MakeArrow()
     {
+        if (arrowSprite != null)   // lying flat, the top of the image pointing forward; 1 m wide at Arrow Size 1
+        {
+            var holder = new GameObject("ArrowSprite");
+            var flat = new GameObject("Image");
+            flat.transform.SetParent(holder.transform, false);
+            flat.transform.localRotation = Quaternion.Euler(90f, 0f, 0f);
+            SpriteRenderer image = flat.AddComponent<SpriteRenderer>();
+            image.sprite = arrowSprite;
+            image.shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.Off;
+            float width = arrowSprite.bounds.size.x;
+            if (width > 0f) flat.transform.localScale = Vector3.one / width;
+            return holder;
+        }
         if (arrowPrefab != null)
         {
             GameObject own = Instantiate(arrowPrefab);
@@ -261,13 +493,12 @@ public class CourseGuide : MonoBehaviour
         }
         if (arrowMaterial == null) arrowMaterial = new Material(Shader.Find("Sprites/Default"));
         if (chevron == null) chevron = MakeChevron();
-        GameObject arrow = new GameObject("GuideArrow");
+        GameObject arrow = new GameObject("Chevron");
         arrow.AddComponent<MeshFilter>().sharedMesh = chevron;
         MeshRenderer renderer = arrow.AddComponent<MeshRenderer>();
         renderer.sharedMaterial = arrowMaterial;
         renderer.shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.Off;
         renderer.receiveShadows = false;
-        arrow.transform.localScale = Vector3.one * arrowSize;
         return arrow;
     }
 
@@ -286,32 +517,10 @@ public class CourseGuide : MonoBehaviour
         return mesh;
     }
 
-    IEnumerator FadeArrows()
-    {
-        var block = new MaterialPropertyBlock();
-        for (float t = 0f; t < arrowTime; t += Time.deltaTime)
-        {
-            float fade = Mathf.Clamp01((arrowTime - t) / 1f);                  // the last second: fading out
-            float pulse = 0.75f + 0.25f * Mathf.Sin(t * 6f);                     // a soft pulse, so they are noticed
-            for (int i = 0; i < arrows.Count; i++)
-            {
-                if (arrows[i] == null || arrowPrefab != null) continue;
-                float wave = 0.6f + 0.4f * Mathf.Sin(t * 6f - i * 1.2f);         // a wave along the row: the way to go
-                Color c = arrowColor;
-                c.a *= fade * pulse * wave;
-                block.SetColor("_Color", c);
-                arrows[i].GetComponent<MeshRenderer>().SetPropertyBlock(block);
-            }
-            yield return null;
-        }
-        ClearArrows();
-        arrowRoutine = null;
-    }
-
     void ClearArrows()
     {
-        foreach (GameObject arrow in arrows) if (arrow != null) Destroy(arrow);
-        arrows.Clear();
+        foreach (Arrow arrow in shown) if (arrow.root != null) Destroy(arrow.root.gameObject);
+        shown.Clear();
     }
 
     void Log(string message) { if (log) Debug.Log("[CourseGuide] " + message, this); }

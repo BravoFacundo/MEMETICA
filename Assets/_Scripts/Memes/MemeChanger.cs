@@ -5,7 +5,7 @@ using UnityEngine.Video;
 
 // A meme that changes: the rules every representation shares (MemeOrb, MemeWindow). Meme (the base) detects what
 // happens; this class decides which change shows and when; each representation only draws it (the abstract methods).
-// Its meme (images, sounds) is a MemeData (Meme: Data, or a spare from a MemeGroup).
+// Its meme (images, sounds) is a MemeData (Meme: Data).
 //   Move     carried onto an island other than the last one: it changes, to the next variant of its list (1, 2…; the
 //            tutorial doesn't count), or to one of them once all were shown. Moving around, now and then too
 //   Fall     in your hand: as soon as nothing is below you (you will reappear) it turns into its Fall change, and
@@ -18,7 +18,7 @@ using UnityEngine.Video;
 // happens once you see it, and every change goes back to the base image.
 // Every change happens under a cover (the orb's mist, the window's loading): it comes up and hides the image, the
 // image swaps at its thickest, and it clears. An image can be a video: a VideoPlayer made here plays it.
-// Empty (Can Be Empty, the window): no meme until SetMeme gives it one (MemeRandomizer's raffle); until then it is
+// Empty (Can Be Empty, the window): no meme until SetMeme gives it one (RandomizerPedestal's raffle); until then it is
 // only carried. SetMeme starts the new meme from scratch (its Move list from 1).
 // Picking it up plays its Grab Sound. Its change sound, the first that exists: the image's own (each Move its own) →
 // the meme's → MemeSettings' fallback; a looping one plays while the change shows, and a new change cuts it.
@@ -46,7 +46,7 @@ public abstract class MemeChanger : Meme
     private Coroutine revealRoutine;   // a pending change happening in front of the player
     private int lastVariant;
     private int shownUnlocked;         // variants already shown on arriving to an island
-    private bool raffling;             // MemeRandomizer is drawing its meme (on its pedestal)
+    private bool raffling;             // RandomizerPedestal is drawing its meme (on it)
 
     // A change waiting for the player to see it (fall alone, leave)
     private MemeImage pendingImage;
@@ -176,7 +176,7 @@ public abstract class MemeChanger : Meme
         else ShowEmpty();
     }
 
-    // The raffle (MemeRandomizer, on its pedestal): the candidates' base images go by, fast and then slower and slower,
+    // The raffle (RandomizerPedestal): the candidates' base images go by, fast and then slower and slower,
     // a tick each, and it stops on the winner, which becomes its meme (SetMeme, its own sound and a flash).
     // Taken off the pedestal halfway: it stays as it was
     public IEnumerator Raffle(IList<MemeData> candidates, MemeData winner, float duration, AudioClip tick, AudioClip win)
@@ -662,10 +662,7 @@ public abstract class MemeChanger : Meme
     void ShowBaseInEditor()
     {
         if (this == null || Application.isPlaying) return;
-        MemeData meme = data;
-        if (meme == null && reserveGroup != null && reserveSlot >= 1 && reserveSlot <= reserveGroup.reserve.Count)
-            meme = reserveGroup.reserve[reserveSlot - 1];
-        PreviewInEditor(meme);
+        PreviewInEditor(data);
     }
 #endif
 

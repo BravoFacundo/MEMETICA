@@ -29,9 +29,9 @@ public class PortalWindow : MonoBehaviour
     [Tooltip("Which way the other side faces (what you see through the window and where you look coming out): the " +
              "spin platform (the hub's AimPlatform: your next goal), the opposite of Exit's arrow, or its arrow")]
     public ExitLook exitLook = ExitLook.SpinPlatform;
-    [Tooltip("The other side turns with you: whichever way you walk in or look, the window shows the hub as you will " +
-             "come out, facing Exit Look (the spin platform), and you come out exactly like that, no turn. Off: the " +
-             "window is a fixed hole, you come out facing the way you went in")]
+    [Tooltip("The other side is set from the way you face when the window comes into view (within View Distance): " +
+             "walking in that way you come out facing Exit Look (the spin platform). From then on it is a fixed hole " +
+             "(looking around doesn't turn it). Off: the window itself sets it (a hole that never adapts to you)")]
     public bool alignToYou = true;
     [Tooltip("Coming out, you turn to face that way while your head looks up (whichever way you went in). With Align " +
              "To You there is nothing left to turn")]
@@ -75,12 +75,20 @@ public class PortalWindow : MonoBehaviour
     public float edgeMargin = 0.4f;
     [Tooltip("How fast you sink into it (m/s²)")]
     public float sinkAcceleration = 9f;
+    [Tooltip("As a respawn: you keep looking where you looked and keep your momentum, falling through and out (no head " +
+             "pose, no turn, you can look and steer in the air). Off: your head goes down as you sink and up again " +
+             "coming out (Look Down / Look Up Time, Turn To Exit)")]
+    public bool keepLook = true;
     [Tooltip("Seconds your head takes to look down as you sink")]
-    public float lookDownTime = 0.3f;
+    [ShowIf(nameof(keepLook), false)] public float lookDownTime = 0.3f;
     [Tooltip("Seconds your head takes to look up again after coming out")]
-    public float lookUpTime = 0.7f;
+    [ShowIf(nameof(keepLook), false)] public float lookUpTime = 0.7f;
 
     [Section("View")]
+    [Tooltip("Looking straight through it, the spin pedestal is right in the middle, wherever you stand by the window " +
+             "(standing to one side, the other side turns those few degrees so it doesn't miss it). Still a hole: you " +
+             "look around through it as always")]
+    public bool centerPedestal = true;
     [Tooltip("Size of the view, times your screen's (it goes full size while you go through, so there's no jump)")]
     [Range(0.25f, 1f)] public float resolution = 0.5f;
     [Tooltip("Meters: farther than this the camera above the hub doesn't draw")]
@@ -359,11 +367,13 @@ public class PortalWindow : MonoBehaviour
 
     // This side, as it maps onto the other: the window itself, or (Align To You) turned on its face to where you look,
     // so your way in always becomes Exit Look's way out
-    Quaternion Source
+    Quaternion Source => !alignToYou || player == null ? transform.rotation : lockedSource ?? LiveSource;
+    private Quaternion? lockedSource;   // (Align To You: taken once, when the window comes into view)
+
+    Quaternion LiveSource
     {
         get
         {
-            if (!alignToYou || player == null) return transform.rotation;
             Vector3 along = Vector3.ProjectOnPlane(player.transform.forward, transform.up);
             return along.sqrMagnitude > 1e-4f ? Quaternion.LookRotation(along.normalized, transform.up) : transform.rotation;
         }
@@ -373,7 +383,8 @@ public class PortalWindow : MonoBehaviour
     {
         bool wanted = exit != null && playerCamera != null && state != State.Hidden && screen != null && screen.enabled &&
                       (state == State.Sinking || (Vector3.Distance(playerCamera.transform.position, transform.position) < viewDistance && screen.isVisible));
-        if (!wanted) { if (view != null) view.enabled = false; return; }
+        if (!wanted) { if (view != null) view.enabled = false; lockedSource = null; return; }
+        if (lockedSource == null && alignToYou && player != null) lockedSource = LiveSource;   // a fixed hole from now on
 
         float scale = state == State.Sinking ? 1f : resolution;
         int width = Mathf.Max(64, Mathf.RoundToInt(playerCamera.pixelWidth * scale)), height = Mathf.Max(64, Mathf.RoundToInt(playerCamera.pixelHeight * scale));   // (your view's size, not the screen's)
@@ -388,10 +399,24 @@ public class PortalWindow : MonoBehaviour
 
         view.enabled = true;
         view.rect = FullRect;   // the whole texture (CopyFrom brought your Camera.rect: Classic's 4:3 window, black around it)
-        view.fieldOfView = playerCamera.fieldOfView;
         view.nearClipPlane = playerCamera.nearClipPlane;
         view.farClipPlane = playerCamera.farClipPlane;
-        view.transform.SetPositionAndRotation(MapPoint(playerCamera.transform.position), MapRotation(playerCamera.transform.rotation));
+        view.fieldOfView = playerCamera.fieldOfView;
+        Vector3 at = MapPoint(playerCamera.transform.position);
+        view.transform.SetPositionAndRotation(at, AimAtPedestal(at) * MapRotation(playerCamera.transform.rotation));
+    }
+
+    // Center Pedestal: the turn (around the vertical) that puts the spin pedestal straight ahead from there, instead of
+    // straight ahead from the middle of the window (standing to one side it missed it by a few degrees)
+    private AimPlatform spinPlatform;
+    Quaternion AimAtPedestal(Vector3 from)
+    {
+        if (!centerPedestal || exitLook != ExitLook.SpinPlatform) return Quaternion.identity;
+        if (spinPlatform == null) spinPlatform = FindObjectOfType<AimPlatform>();
+        if (spinPlatform == null) return Quaternion.identity;
+        Vector3 want = Vector3.ProjectOnPlane(spinPlatform.transform.position - from, Vector3.up);
+        if (want.sqrMagnitude < 0.01f) return Quaternion.identity;
+        return Quaternion.AngleAxis(Vector3.SignedAngle(ExitFacing, want, Vector3.up), Vector3.up);
     }
 
     // A camera drawing into a texture fills all of it: the texture already has your view's size and shape
@@ -479,8 +504,7 @@ public class PortalWindow : MonoBehaviour
         state = State.Sinking;
         ripple = 1f;
         Play(enterClip);
-        player.InputLocked = true;
-        look.LookLocked = true;
+        if (!keepLook) { player.InputLocked = true; look.LookLocked = true; }
         player.BeginScripted();
 
         // Sinking, faster and faster, the head going down to look at the screen
@@ -488,7 +512,7 @@ public class PortalWindow : MonoBehaviour
         for (float t = 0f; ; t += Time.deltaTime)
         {
             float down = Mathf.Clamp01(t / Mathf.Max(lookDownTime, 0.01f));
-            look.SetPose(down * down * (3f - 2f * down), 0f, 0f);
+            if (!keepLook) look.SetPose(down * down * (3f - 2f * down), 0f, 0f);
             material.SetFloat("_Scanlines", Mathf.Lerp(scanlines, 0f, down));   // fade out: you are almost there
             pixels = Mathf.Lerp(pixelate, 0f, down);
             speed += sinkAcceleration * Time.deltaTime;
@@ -500,8 +524,8 @@ public class PortalWindow : MonoBehaviour
 
         // Through: the same view, from above the hub
         Vector3 body = MapPoint(player.transform.position);
-        Vector3 facing = Vector3.ProjectOnPlane(MapRotation(player.transform.rotation) * Vector3.forward, Vector3.up);
-        Vector3 carried = Vector3.ProjectOnPlane(MapRotation(Quaternion.identity) * carry, Vector3.up).normalized * carry.magnitude;   // the same way, on the other side
+        Vector3 facing = Vector3.ProjectOnPlane(AimAtPedestal(body) * MapRotation(player.transform.rotation) * Vector3.forward, Vector3.up);   // (as the view showed it)
+        Vector3 carried = Vector3.ProjectOnPlane(AimAtPedestal(body) * MapRotation(Quaternion.identity) * carry, Vector3.up).normalized * carry.magnitude;   // the same way, on the other side
         player.FallFrom(body, Quaternion.LookRotation(facing.sqrMagnitude > 1e-4f ? facing.normalized : ExitFacing, Vector3.up), speed, exit.transform, carried);
         if (outClip != null) flat.PlayOneShot(outClip);
         if (turnPlatformToYou)   // (turned while it rose: it doesn't move again)
@@ -516,6 +540,8 @@ public class PortalWindow : MonoBehaviour
         pixels = pixelate;
         standing = 0f;
         ripple = 0f;
+
+        if (keepLook) yield break;   // (as a respawn: you go on looking and moving as you were)
 
         // Looking up again while you fall (landing first: the slam takes the head from there)
         landed = false;

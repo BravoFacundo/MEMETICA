@@ -1243,6 +1243,7 @@ MonoBehaviour:
   cellSize: 8
   playerRadius: 0.8
   orbRadius: 0.5
+  memeMargin: 0.25
   useChildMeshes: 1
   extraGroundMeshes: []
   groundColliders:
@@ -12950,6 +12951,7 @@ MonoBehaviour:
   cellSize: 8
   playerRadius: 0.8
   orbRadius: 0.5
+  memeMargin: 0.25
   useChildMeshes: 1
   extraGroundMeshes: []
   groundColliders:
@@ -14439,6 +14441,7 @@ MonoBehaviour:
   cellSize: 8
   playerRadius: 0.8
   orbRadius: 0.5
+  memeMargin: 0.25
   useChildMeshes: 1
   extraGroundMeshes: []
   groundColliders:
@@ -21285,8 +21288,10 @@ MonoBehaviour:
   standTime: 0.5
   edgeMargin: 0.4
   sinkAcceleration: 9
+  keepLook: 1
   lookDownTime: 0.3
   lookUpTime: 0.7
+  centerPedestal: 1
   resolution: 0.5
   viewDistance: 50
   scanlines: 0.12
@@ -21385,6 +21390,7 @@ MonoBehaviour:
   cellSize: 8
   playerRadius: 0.8
   orbRadius: 0.5
+  memeMargin: 0.25
   useChildMeshes: 1
   extraGroundMeshes: []
   groundColliders:
@@ -32075,6 +32081,7 @@ MonoBehaviour:
   cellSize: 8
   playerRadius: 0.8
   orbRadius: 0.5
+  memeMargin: 0.25
   useChildMeshes: 1
   extraGroundMeshes: []
   groundColliders:
@@ -43819,6 +43826,7 @@ MonoBehaviour:
   cellSize: 8
   playerRadius: 0.8
   orbRadius: 0.5
+  memeMargin: 0.25
   useChildMeshes: 1
   extraGroundMeshes: []
   groundColliders:
@@ -57280,6 +57288,7 @@ MonoBehaviour:
   cellSize: 8
   playerRadius: 0.8
   orbRadius: 0.5
+  memeMargin: 0.25
   useChildMeshes: 1
   extraGroundMeshes: []
   groundColliders:
@@ -83784,12 +83793,15 @@ MonoBehaviour:
   popupTime: 4
   arrowsGoingBack: 1
   arrowsOnRespawn: 1
+  arrowSprite: {fileID: 0}
   arrowPrefab: {fileID: 0}
   arrowColor: {r: 1, g: 0.85, b: 0.2, a: 0.9}
-  arrowCount: 3
+  maxArrows: 3
   arrowStart: 1.5
   arrowSpacing: 1.2
   arrowSize: 0.8
+  arrowHover: 0.15
+  arrowPop: 0.06
   arrowTime: 5
   log: 0
 --- !u!1 &468429046
@@ -114741,6 +114753,7 @@ MonoBehaviour:
   cellSize: 8
   playerRadius: 0.8
   orbRadius: 0.5
+  memeMargin: 0.25
   useChildMeshes: 1
   extraGroundMeshes: []
   groundColliders:
@@ -118164,6 +118177,7 @@ MonoBehaviour:
   cellSize: 8
   playerRadius: 0.8
   orbRadius: 0.5
+  memeMargin: 0.25
   useChildMeshes: 1
   extraGroundMeshes: []
   groundColliders:
@@ -171871,6 +171885,7 @@ MonoBehaviour:
   cellSize: 8
   playerRadius: 0.8
   orbRadius: 0.5
+  memeMargin: 0.25
   useChildMeshes: 1
   extraGroundMeshes: []
   groundColliders:
@@ -174125,6 +174140,7 @@ MonoBehaviour:
   cellSize: 8
   playerRadius: 0.8
   orbRadius: 0.5
+  memeMargin: 0.25
   useChildMeshes: 1
   extraGroundMeshes: []
   groundColliders:
@@ -184095,6 +184111,7 @@ MonoBehaviour:
   cellSize: 8
   playerRadius: 0.8
   orbRadius: 0.5
+  memeMargin: 0.25
   useChildMeshes: 1
   extraGroundMeshes: []
   groundColliders:
@@ -185659,6 +185676,7 @@ MonoBehaviour:
   cellSize: 8
   playerRadius: 0.8
   orbRadius: 0.5
+  memeMargin: 0.25
   useChildMeshes: 1
   extraGroundMeshes: []
   groundColliders:
@@ -198142,6 +198160,7 @@ MonoBehaviour:
   cellSize: 8
   playerRadius: 0.8
   orbRadius: 0.5
+  memeMargin: 0.25
   useChildMeshes: 1
   extraGroundMeshes: []
   groundColliders:
@@ -210831,6 +210850,7 @@ MonoBehaviour:
   cellSize: 8
   playerRadius: 0.8
   orbRadius: 0.5
+  memeMargin: 0.25
   useChildMeshes: 1
   extraGroundMeshes: []
   groundColliders:
@@ -216572,6 +216592,7 @@ MonoBehaviour:
   cellSize: 8
   playerRadius: 0.8
   orbRadius: 0.5
+  memeMargin: 0.25
   useChildMeshes: 1
   extraGroundMeshes: []
   groundColliders:
@@ -224942,6 +224963,7 @@ MonoBehaviour:
   cellSize: 8
   playerRadius: 0.8
   orbRadius: 0.5
+  memeMargin: 0.25
   useChildMeshes: 1
   extraGroundMeshes: []
   groundColliders:
@@ -275178,6 +275200,7 @@ MonoBehaviour:
   cellSize: 8
   playerRadius: 0.8
   orbRadius: 0.5
+  memeMargin: 0.25
   useChildMeshes: 1
   extraGroundMeshes: []
   groundColliders:
@@ -284892,6 +284915,7 @@ MonoBehaviour:
   cellSize: 8
   playerRadius: 0.8
   orbRadius: 0.5
+  memeMargin: 0.25
   useChildMeshes: 1
   extraGroundMeshes: []
   groundColliders:
@@ -287696,6 +287720,7 @@ MonoBehaviour:
   cellSize: 8
   playerRadius: 0.8
   orbRadius: 0.5
+  memeMargin: 0.25
   useChildMeshes: 1
   extraGroundMeshes: []
   groundColliders:
@@ -292225,6 +292250,7 @@ MonoBehaviour:
   cellSize: 8
   playerRadius: 0.8
   orbRadius: 0.5
+  memeMargin: 0.25
   useChildMeshes: 1
   extraGroundMeshes: []
   groundColliders:
@@ -293061,6 +293087,7 @@ MonoBehaviour:
   cellSize: 8
   playerRadius: 0.8
   orbRadius: 0.5
+  memeMargin: 0.25
   useChildMeshes: 1
   extraGroundMeshes: []
   groundColliders:
@@ -308390,6 +308417,7 @@ MonoBehaviour:
   cellSize: 8
   playerRadius: 0.8
   orbRadius: 0.5
+  memeMargin: 0.25
   useChildMeshes: 1
   extraGroundMeshes: []
   groundColliders:
@@ -321821,6 +321849,7 @@ MonoBehaviour:
   cellSize: 8
   playerRadius: 0.8
   orbRadius: 0.5
+  memeMargin: 0.25
   useChildMeshes: 1
   extraGroundMeshes: []
   groundColliders:
@@ -347193,6 +347222,7 @@ MonoBehaviour:
   cellSize: 8
   playerRadius: 0.8
   orbRadius: 0.5
+  memeMargin: 0.25
   useChildMeshes: 1
   extraGroundMeshes: []
   groundColliders:
@@ -365673,6 +365703,7 @@ MonoBehaviour:
   lockPlayer: 1
   focusView: 1
   focusRadius: -1
+  focusFov: 0
 --- !u!114 &1955025265
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -375693,6 +375724,7 @@ MonoBehaviour:
   cellSize: 8
   playerRadius: 0.8
   orbRadius: 0.5
+  memeMargin: 0.25
   useChildMeshes: 1
   extraGroundMeshes: []
   groundColliders:
@@ -382770,8 +382802,10 @@ MonoBehaviour:
   standTime: 0.5
   edgeMargin: 0.4
   sinkAcceleration: 9
+  keepLook: 1
   lookDownTime: 0.3
   lookUpTime: 0.7
+  centerPedestal: 1
   resolution: 0.5
   viewDistance: 50
   scanlines: 0.12
@@ -383432,7 +383466,7 @@ MonoBehaviour:
   endingPopup: {fileID: 0}
   endingPopupDelay: 1
   menuScene: Menu
-  skipTutorial: 0
+  skipTutorial: 1
   skipElevator: {fileID: 1639568607}
   skipLookAt: {fileID: 1770942441}
   skipMemeInFront: 1

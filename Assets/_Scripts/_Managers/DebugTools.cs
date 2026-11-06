@@ -1,7 +1,8 @@
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
-// Debug keys to test faster. Goes in Managers > DebugTools (Game and Game_Old).
+// Debug keys and debug starts, to test faster. Goes in Managers > DebugTools (Game and OriginalGame).
+// Skip Tutorial: pressing Play in the scene starts at the hub (the GameManager does it; from the menu its popup decides).
 //   F1  help on screen (keys and the selected start)
 //   F2  noclip: fly through everything, no gravity. WASD where you look, Space up, Ctrl down, Shift fast
 //   F3  hide all the UI and the crosshair (screenshots)
@@ -68,6 +69,9 @@ public class DebugTools : MonoBehaviour
     public bool simulateBuild = false;
     [Tooltip("Start used when pressing Play. -1 = normal game")]
     public int startAt = -1;
+    [Tooltip("Pressing Play in this scene starts at the hub, without the tutorial (GameManager: Skip Tutorial). Opened " +
+             "from the menu, its popup decides. A start (Start At) wins over it")]
+    public bool skipTutorial = false;
 
     [Header("Noclip")]
     public float flySpeed = 10f;
@@ -95,6 +99,8 @@ public class DebugTools : MonoBehaviour
     public static float ElevatorSpeed { get; private set; } = 1f;
     // Islands read it in their Start (after this Awake). DebugTools off in builds: always false
     public static bool AllIslandsUp { get; private set; }
+    // The GameManager reads it in its Awake (after this one). DebugTools off in builds: always false
+    public static bool SkipTutorial { get; private set; }
     // MemeChanger reads it (DebugTools off in builds: always false)
     public static bool LogMemeSounds { get; private set; }
 
@@ -114,12 +120,14 @@ public class DebugTools : MonoBehaviour
         {
             // Normal build: nothing changes the game by itself, only the chosen keys
             startAt = -1;
+            skipTutorial = false;
             allIslandsUp = false;
             fastElevators = false;
             logMemeSounds = false;
             if (buildKeys == DebugKey.None) { enabled = false; return; }
         }
         AllIslandsUp = allIslandsUp;
+        SkipTutorial = skipTutorial;
         LogMemeSounds = logMemeSounds;
         playerMove = FindObjectOfType<PlayerMove>();
         if (playerMove != null) characterController = playerMove.GetComponent<CharacterController>();
@@ -130,11 +138,12 @@ public class DebugTools : MonoBehaviour
     {
         ElevatorSpeed = 1f;
         AllIslandsUp = false;
+        SkipTutorial = false;
     }
 
     void Start()
     {
-        int index = pendingStart >= 0 ? pendingStart : LevelManager.FromMenu ? -1 : startAt;   // from the menu: its tutorial popup decides
+        int index = pendingStart >= 0 ? pendingStart : GameManager.FromMenu ? -1 : startAt;   // from the menu: its tutorial popup decides
         pendingStart = -1;
         selectedStart = Mathf.Max(index, 0);
         if (index >= 0 && index < starts.Length) StartCoroutine(ApplyStart(starts[index]));

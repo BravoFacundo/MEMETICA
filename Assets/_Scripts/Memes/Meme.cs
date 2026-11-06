@@ -14,7 +14,7 @@ using UnityEngine;
 // This class only detects (what happened, where the player is, whether they can see it); each representation
 // (MemeOrb, MemeWindow) decides what each change looks like and when it shows.
 // Object name: Meme_<ID> (e.g. Meme_3Aa). Pedestals compare their Key ID with that ID: the ID is the orb's place in
-// the level, the meme in it (MemeData) can be any. Data: a fixed one, or a spare from a MemeGroup (Reserve Slot).
+// the level, the meme in it (MemeData) can be any.
 [RequireComponent(typeof(Rigidbody))]
 [SelectionBase]   // clicking any of its parts in the Scene view selects this
 public class Meme : MonoBehaviour
@@ -24,13 +24,11 @@ public class Meme : MonoBehaviour
     [Section("Meme")]
     [Tooltip("The meme it holds: its images and sounds (Art/Memes/<Meme>/<Meme>.asset)")]
     public MemeData data;
-    [Tooltip("Takes a spare meme from this group instead (Data is then used only if the group has none for its slot)")]
-    public MemeGroup reserveGroup;
-    [ShowIf(nameof(reserveGroup))]
-    [Tooltip("Which spare: 1 = the first of the reserve (or the first drawn), 2 = the second…")]
-    public int reserveSlot = 1;
+    // Old (MemeGroup is going away): Migrate Managers puts the group's spare into Data, then clears these
+    [HideInInspector] public MemeGroup reserveGroup;
+    [HideInInspector] public int reserveSlot = 1;
 
-    // The meme it holds this game (Data, or the spare it got)
+    // The meme it holds this game (Data, or another one: the randomizer)
     public MemeData Data { get; protected set; }   // MemeChanger.SetMeme swaps it (the randomizer)
 
     public string ID => IDOf(gameObject);
@@ -77,7 +75,7 @@ public class Meme : MonoBehaviour
 
     protected virtual void Awake()
     {
-        Data = reserveGroup != null ? reserveGroup.Reserve(reserveSlot) ?? data : data;
+        Data = data;
         body = GetComponent<Rigidbody>();
         groundMask = LayerMask.GetMask("Ground");
         lastGroundY = lastIslandY = transform.position.y;

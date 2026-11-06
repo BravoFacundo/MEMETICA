@@ -133,8 +133,13 @@ public class RespawnPoint : MonoBehaviour
     float EditorHeight()
     {
         if (height > 0f) return height;
-        PlayerMove move = FindObjectOfType<PlayerMove>();
-        if (move != null && move.respawnStyle == RespawnStyle.Slam) return move.slamHeight;
+        PlayerRespawn respawn = FindObjectOfType<PlayerRespawn>();
+        if (respawn != null) { if (respawn.respawnStyle == RespawnStyle.Slam) return respawn.slamHeight; }
+        else
+        {
+            PlayerMove move = FindObjectOfType<PlayerMove>();   // (a Player not migrated yet: its old values)
+            if (move != null && move.oldRespawnStyle == RespawnStyle.Slam) return move.oldSlamHeight;
+        }
         LevelManager level = FindObjectOfType<LevelManager>();
         return level != null ? level.dropDistance : 8f;
     }

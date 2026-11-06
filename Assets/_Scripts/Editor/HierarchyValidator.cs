@@ -85,49 +85,38 @@ public static class HierarchyValidator
             if (ped.GetComponentInParent<Island>() != null && ped.GetComponentInParent<FloatMotion>() == null)
                 Warn($"Pedestal '{ped.name}' is not inside the floating part of its island (it won't float with it).", ped);
         }
-        var allPedestals = Object.FindObjectsOfType<Pedestal>(true);
-        foreach (var ped in allPedestals)
+        // 2b. Pedestal kinds: a white one has its key and clue, a randomizer its axes; nothing still by name
+        var memes = Object.FindObjectsOfType<Meme>(true);
+        foreach (var ped in Object.FindObjectsOfType<Pedestal>(true))
         {
-            if (!ped.KeylessPedestal && !ped.IsGrouped && ped.cluePainting == null) Warn($"Keyed pedestal '{ped.name}' has no Clue Painting (the easel with its clue).", ped);
-            if (ped.IsGrouped && allPedestals.Count(p => p.groupID == ped.groupID) < 2) Warn($"Pedestal '{ped.name}' is the only one in group '{ped.groupID}': it will complete alone.", ped);
-        }
-
-        // 2b. Pedestal ↔ orb names and controlled IDs (renaming orbs, islands or bridges breaks these)
-        if (level != null)
-        {
-            var memes = Object.FindObjectsOfType<Meme>(true);
-            var pedestals = Object.FindObjectsOfType<Pedestal>(true);
-            var names = new HashSet<string>(all.Select(g => LevelManager.NormalizeName(g.name)));
-
-            foreach (var ped in pedestals)
+            if (ped.ControlledIslands.Length > 0 || ped.ControlledBridges.Length > 0 || !string.IsNullOrEmpty(ped.groupID) ||
+                ped.GetComponent<MemeRandomizer>() != null || ped.GetComponent<PedestalReactions>() != null ||
+                (!ped.KeylessPedestal && !(ped is KeyPedestal)))
+                Warn($"Pedestal '{ped.name}' still has old data: run Memetica > Check > Migrate Pedestals.", ped);
+            if (ped is KeyPedestal key)
             {
-                if (!ped.KeylessPedestal)
-                {
-                    if (string.IsNullOrEmpty(ped.KeyID)) Error($"Keyed pedestal '{ped.name}' has no Key ID.", ped);
-                    else if (!memes.Any(m => m.ID.StartsWith(ped.KeyID))) Error($"Pedestal '{ped.name}' expects a meme whose ID starts with '{ped.KeyID}' (name '{Meme.NamePrefix}{ped.KeyID}...'), and there is none.", ped);
-                }
-                foreach (string id in ped.ControlledIslands)
-                    if (LevelManager.NormalizeName(id) != "0" && !names.Contains(LevelManager.NormalizeName(level.islandPrefix + id)) && !names.Contains(LevelManager.NormalizeName(level.elevatorPrefix + id)))
-                        Error($"Pedestal '{ped.name}' raises '{id}', but there is no '{level.islandPrefix}{id}' or '{level.elevatorPrefix}{id}'.", ped);
-                foreach (string id in ped.ControlledBridges)
-                    if (!names.Contains(LevelManager.NormalizeName(level.bridgePrefix + id)))
-                        Error($"Pedestal '{ped.name}' raises bridge '{id}', but there is no '{level.bridgePrefix}{id}'.", ped);
+                if (key.key == null && string.IsNullOrEmpty(key.keyId)) Error($"Key pedestal '{ped.name}' has no Key (nor Key ID).", ped);
+                else if (key.key == null && !memes.Any(m => m.ID.StartsWith(key.keyId))) Error($"Key pedestal '{ped.name}' expects a meme whose ID starts with '{key.keyId}', and there is none.", ped);
+                if (!Object.FindObjectsOfType<PedestalGroup>(true).Any(g => g.members.Contains(ped)) && key.Hint == null && Island.Of(ped.transform)?.GetComponentInChildren<Painting>(true) == null)
+                    Warn($"Key pedestal '{ped.name}' has no Hint (the easel with its clue), and there is no painting on its island.", ped);
             }
-
-            var keyIDs = pedestals.Where(p => !p.KeylessPedestal && !string.IsNullOrEmpty(p.KeyID)).Select(p => p.KeyID).ToList();
-            foreach (var meme in memes)
-            {
-                if (!meme.name.StartsWith(Meme.NamePrefix)) Warn($"Meme '{meme.name}' should be named '{Meme.NamePrefix}<ID>' (e.g. {Meme.NamePrefix}3Aa).", meme);
-                if (!keyIDs.Any(k => meme.ID.StartsWith(k)))
-                    Warn($"Meme '{meme.name}' matches no pedestal Key ID: it only works on keyless (black) pedestals (fine if that's intended).", meme);
-            }
+            if (ped is RandomizerPedestal randomizer)
+                foreach (var axis in randomizer.axes)
+                    if (axis.meme == null || axis.way.Count == 0)
+                        Warn($"Randomizer '{ped.name}' has an axis without a meme or without anything to raise.", ped);
+            if (ped.raises.Exists(t => t == null || !Pedestal.IsRaisable(t)))
+                Warn($"Pedestal '{ped.name}' has empty slots, or something that isn't an island, elevator or bridge, in Raises.", ped);
         }
+        foreach (var group in Object.FindObjectsOfType<PedestalGroup>(true))
+            if (group.members.Count(m => m != null) < 2) Warn($"Pedestal group '{group.name}' has fewer than 2 pedestals: they complete alone.", group);
+        foreach (var meme in memes)
+            if (!meme.name.StartsWith(Meme.NamePrefix)) Warn($"Meme '{meme.name}' should be named '{Meme.NamePrefix}<ID>' (e.g. {Meme.NamePrefix}3Aa).", meme);
 
         // 3. Orbs: their sticker and their meme
         foreach (var orb in Object.FindObjectsOfType<MemeOrb>(true))
         {
             if (orb.sticker == null) Error($"Orb '{orb.name}' has no Sticker reference.", orb);
-            if (orb.data == null && orb.reserveGroup == null) Warn($"Orb '{orb.name}' has no meme (Data or Reserve Group).", orb);
+            if (orb.data == null) Warn($"Orb '{orb.name}' has no meme (Data).", orb);
         }
 
         // 4. Falling platforms: pivots anywhere inside their bridge
