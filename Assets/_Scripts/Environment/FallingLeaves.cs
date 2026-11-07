@@ -7,6 +7,11 @@ using UnityEngine;
 // of their life. Before: the Collision module left them standing on their edge on the ground for good.
 // Everything is set on the particle system when the game starts (its Collision module is turned off).
 // WindParticles, on the same object, still turns them with the wind.
+// The leaves are the particle system's own: Unity moves them whether this looks at them or not. This only lands them:
+// each falling leaf measures once how far the ground below is (one ray), and measures again only if the wind carried it
+// more than a step sideways; a last short ray when it reaches that height lands it exactly (the island floats). Before:
+// one ray per falling leaf every frame. Not seen (off screen or farther than Check Distance) nothing is worked out: they
+// keep falling, and the ones that went under the ground meanwhile land as soon as you see them again.
 [RequireComponent(typeof(ParticleSystem))]
 public class FallingLeaves : MonoBehaviour
 {
@@ -20,22 +25,28 @@ public class FallingLeaves : MonoBehaviour
     public float fadeTime = 1.5f;
     [Tooltip("How fast they tumble while falling (turns per second, about)")]
     public float tumble = 0.5f;
+    [Tooltip("Meters from the camera: farther, the leaves aren't landed (too far to tell). They land once you come near")]
+    public float checkDistance = 60f;
 
     [Section("References")]
     [Tooltip("Memetica/LowPolySmoke (LowPolySmoke.mat): lit by the sun, colored by each leaf")]
     public Material material;
 
     private const float LandLift = 0.02f;   // above the ground, so it doesn't flicker into it
+    private const float Remeasure = 0.75f;  // meters a falling leaf drifts sideways before it measures the ground again
+    private const float NoGround = -100000f;
 
     private ParticleSystem ps;
     private ParticleSystem.Particle[] particles;
-    private readonly List<Vector4> landed = new List<Vector4>();   // x: 1 = landed, y: its yaw
-    private readonly List<Vector4> spots = new List<Vector4>();    // where it landed
+    private readonly List<Vector4> landed = new List<Vector4>();   // x: 0 = new, 0.5 = ground measured, 1 = landed | y: its yaw
+    private readonly List<Vector4> spots = new List<Vector4>();    // landed: where | falling: x, z where it measured, y the ground's height
+    private ParticleSystemRenderer leafRenderer;
     private Transform tree;
 
     private void Start()
     {
         ps = GetComponent<ParticleSystem>();
+        leafRenderer = GetComponent<ParticleSystemRenderer>();
         tree = transform.parent != null ? transform.parent : transform;
         SetUp();
         particles = new ParticleSystem.Particle[ps.main.maxParticles];
@@ -98,6 +109,10 @@ public class FallingLeaves : MonoBehaviour
     private void LateUpdate()
     {
         if (particles == null) return;   // before Start (e.g. right after a script reload)
+        if (!leafRenderer.isVisible) return;   // not seen: they fall on their own; the late ones land once seen
+        Camera cam = Camera.main;
+        if (cam != null && (cam.transform.position - transform.position).sqrMagnitude > checkDistance * checkDistance) return;
+
         int count = ps.GetParticles(particles);
         if (count == 0) return;
         ps.GetCustomParticleData(landed, ParticleSystemCustomData.Custom1);
@@ -107,20 +122,41 @@ public class FallingLeaves : MonoBehaviour
         for (int i = 0; i < count; i++)
         {
             ParticleSystem.Particle p = particles[i];
-            if (landed[i].x > 0f)
+            if (landed[i].x >= 1f)
             {
                 p.position = spots[i];
                 p.velocity = Vector3.zero;
                 p.rotation3D = new Vector3(0f, landed[i].y, 0f);
             }
-            else if (Lands(p, dt, out Vector3 spot))
+            else
             {
-                landed[i] = new Vector4(1f, p.rotation3D.y, 0f, 0f);
-                spots[i] = spot;
-                p.position = spot;
-                p.velocity = Vector3.zero;
-                p.rotation3D = new Vector3(0f, p.rotation3D.y, 0f);
-                p.remainingLifetime = Mathf.Min(p.remainingLifetime, fadeTime);
+                // The ground below it: measured once, again only if it drifted a step sideways
+                Vector3 pos = p.position;
+                Vector4 spot = spots[i];
+                float driftX = pos.x - spot.x, driftZ = pos.z - spot.z;
+                if (landed[i].x <= 0f || driftX * driftX + driftZ * driftZ > Remeasure * Remeasure)
+                {
+                    spot = new Vector4(pos.x, GroundBelow(pos), pos.z, 0f);
+                    spots[i] = spot;
+                    landed[i] = new Vector4(0.5f, 0f, 0f, 0f);
+                }
+
+                // Near that height (or already under it, while nobody looked): the exact spot, and it lands
+                float fall = Mathf.Max(-p.velocity.y, 0f) * dt;
+                if (spot.y > NoGround && pos.y - fall < spot.y + 0.3f)
+                {
+                    bool lands = Lands(p, dt, out Vector3 at);
+                    if (!lands && pos.y < spot.y) { at = new Vector3(pos.x, spot.y + LandLift, pos.z); lands = true; }   // went through it
+                    if (lands)
+                    {
+                        landed[i] = new Vector4(1f, p.rotation3D.y, 0f, 0f);
+                        spots[i] = at;
+                        p.position = at;
+                        p.velocity = Vector3.zero;
+                        p.rotation3D = new Vector3(0f, p.rotation3D.y, 0f);
+                        p.remainingLifetime = Mathf.Min(p.remainingLifetime, fadeTime);
+                    }
+                }
             }
 
             // The last Fade Time of its life: down to nothing (each frame the part of the time left it still has)
@@ -135,7 +171,22 @@ public class FallingLeaves : MonoBehaviour
         ps.SetParticles(particles, count);
     }
 
-    // Ground under it, within what it falls this frame: anything roughly flat that isn't its own tree nor something loose
+    // Height of the ground a leaf here would land on (not its own tree, the player or a meme), or No Ground (the void)
+    float GroundBelow(Vector3 from)
+    {
+        for (int tries = 0; tries < 3; tries++)
+        {
+            if (!Physics.Raycast(from, Vector3.down, out RaycastHit hit, 60f, Physics.DefaultRaycastLayers, QueryTriggerInteraction.Ignore)) return NoGround;
+            if (CanLandOn(hit)) return hit.point.y;
+            from = hit.point + Vector3.down * 0.05f;   // (through its tree's branches, or a meme, to what is under them)
+        }
+        return NoGround;
+    }
+
+    bool CanLandOn(RaycastHit hit) =>
+        hit.normal.y >= 0.5f && !hit.transform.IsChildOf(tree) &&
+        !(hit.collider is CharacterController) && (hit.rigidbody == null || hit.rigidbody.isKinematic);   // not on the player or a meme
+
     bool Lands(ParticleSystem.Particle p, float dt, out Vector3 spot)
     {
         spot = default;
@@ -143,8 +194,7 @@ public class FallingLeaves : MonoBehaviour
         const float above = 0.25f;
         if (!Physics.Raycast(p.position + Vector3.up * above, Vector3.down, out RaycastHit hit, above + fall + LandLift,
                              Physics.DefaultRaycastLayers, QueryTriggerInteraction.Ignore)) return false;
-        if (hit.normal.y < 0.5f || hit.transform.IsChildOf(tree)) return false;
-        if (hit.collider is CharacterController || (hit.rigidbody != null && !hit.rigidbody.isKinematic)) return false;   // not on the player or a meme
+        if (!CanLandOn(hit)) return false;
         spot = hit.point + hit.normal * LandLift;
         return true;
     }

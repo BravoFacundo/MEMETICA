@@ -133,7 +133,7 @@ public class GrassField : MonoBehaviour
         Matrix4x4 moved = Matrix4x4.TRS(transform.position, transform.rotation, Vector3.one) * builtWorldToField;
         bool hasMoved = moved != Matrix4x4.identity;
 
-        Plane[] frustumPlanes = GeometryUtility.CalculateFrustumPlanes(cam);
+        Plane[] frustumPlanes = PlanesOf(cam);
         Vector3 camPos = cam.transform.position;
         bool far = FarCamera != null && cam == FarCamera;
         float fadeStart = far ? farDistance * 0.9f : shrinkStart, fadeEnd = far ? farDistance : shrinkEnd;
@@ -251,6 +251,22 @@ public class GrassField : MonoBehaviour
     }
 
     // Player and orbs, sent once per frame to every grass material
+    // The camera's view planes, worked out once per camera per frame for every field, into the same array (before: a
+    // new array per field and camera, every frame: garbage for the collector)
+    private static readonly Plane[] planes = new Plane[6];
+    private static Camera planesCamera;
+    private static int planesFrame = -1;
+    private static Plane[] PlanesOf(Camera cam)
+    {
+        if (cam != planesCamera || Time.frameCount != planesFrame)
+        {
+            GeometryUtility.CalculateFrustumPlanes(cam, planes);
+            planesCamera = cam;
+            planesFrame = Time.frameCount;
+        }
+        return planes;
+    }
+
     private void UpdateInteractors()
     {
         if (lastInteractorFrame == Time.frameCount) return;
@@ -387,10 +403,12 @@ public class GrassField : MonoBehaviour
         if (clearAroundGameplay)
         {
             var targets = new List<Component>();
-            targets.AddRange(FindObjectsOfType<Pedestal>());
-            targets.AddRange(FindObjectsOfType<Bridge>());
             foreach (Pedestal pedestal in FindObjectsOfType<Pedestal>())
+            {
+                targets.Add(pedestal.Body);   // the physical pedestal only (the randomizer's root is its whole platform: rocks, mountain…)
                 if (pedestal.Hint != null) targets.Add(pedestal.Hint);
+            }
+            targets.AddRange(FindObjectsOfType<Bridge>());
             targets.AddRange(FindObjectsOfType<Elevator>());
 
             // Each mesh piece clears its own spot, so a long or diagonal bridge clears only under its planks, not a whole box

@@ -23,12 +23,6 @@ public class LevelSettings : MonoBehaviour
     [Tooltip("Seconds it stops at each point")]
     public float pauseTime = 0.5f;
 
-    [Section("Hop")]
-    [Tooltip("Seconds it stays at each point: x = y fixed, else random between them")]
-    public Vector2 hopInterval = new Vector2(1.5f, 1.5f);
-    [Tooltip("Seconds the jump takes")]
-    public float hopTime = 0.15f;
-
     [Section("Blink")]
     [Tooltip("Seconds it stays at each point: x = y fixed, else random between them")]
     public Vector2 blinkInterval = new Vector2(1.5f, 1.5f);
@@ -64,7 +58,7 @@ public class LevelSettings : MonoBehaviour
     }
 
     [ContextMenu("Apply Appearance")] void MenuAppearance() => ApplyAppearance(true);
-    [ContextMenu("Apply Stone Motions (Slide, Hop, Blink, Push)")] void MenuStones() => ApplyStones(true);
+    [ContextMenu("Apply Stone Motions (Slide, Blink, Push)")] void MenuStones() => ApplyStones(true);
     [ContextMenu("Apply Fall")] void MenuFall() => ApplyFall(true);
 
     int ApplyAppearance(bool log)
@@ -93,7 +87,6 @@ public class LevelSettings : MonoBehaviour
             switch (stone.motion)
             {
                 case PathStone.Motion.Slide: stone.travelTime = travelTime; stone.pauseTime = pauseTime; break;
-                case PathStone.Motion.Hop: stone.interval = hopInterval; stone.hopTime = hopTime; break;
                 case PathStone.Motion.Blink:
                     stone.interval = blinkInterval; stone.warningTime = warningTime; stone.blinkShake = blinkShake; stone.gapTime = gapTime;
                     break;
@@ -137,7 +130,6 @@ public class LevelSettings : MonoBehaviour
             switch (stone.motion)
             {
                 case PathStone.Motion.Slide: travelTime = stone.travelTime; pauseTime = stone.pauseTime; pushPlayer = stone.pushPlayer; break;
-                case PathStone.Motion.Hop: hopInterval = stone.interval; hopTime = stone.hopTime; pushPlayer = stone.pushPlayer; break;
                 case PathStone.Motion.Blink:
                     blinkInterval = stone.interval; warningTime = stone.warningTime; blinkShake = stone.blinkShake; gapTime = stone.gapTime;
                     pushPlayer = stone.pushPlayer;

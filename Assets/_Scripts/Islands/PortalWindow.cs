@@ -15,7 +15,8 @@ using UnityEngine;
 //            and land on the hub's respawn point (Exit) with the slam
 // With PlayerGrab's Bring For Portal, a meme window left behind comes to your hand before it takes you.
 // Made by Memetica > Level > Portal > New Portal Window (where the Scene view looks), inside its island.
-// The camera above the hub only draws while you are near and it can be seen.
+// The camera above the hub only draws while you are near (View Distance) and it can be seen. Farther, the window keeps
+// the last picture it took (grass and all): opened while you were far, it takes one picture then and shows that.
 [DefaultExecutionOrder(1000)]   // after the player and its camera moved this frame
 [SelectionBase]   // clicking any of its parts in the Scene view selects this
 public class PortalWindow : MonoBehaviour
@@ -91,8 +92,9 @@ public class PortalWindow : MonoBehaviour
     public bool centerPedestal = true;
     [Tooltip("Size of the view, times your screen's (it goes full size while you go through, so there's no jump)")]
     [Range(0.25f, 1f)] public float resolution = 0.5f;
-    [Tooltip("Meters: farther than this the camera above the hub doesn't draw")]
-    public float viewDistance = 60f;
+    [Tooltip("Meters: closer, the view is live (a second camera drawing the hub every frame). Farther, it shows the last " +
+             "picture it took (one is taken when it opens while you are far). Lower is cheaper")]
+    public float viewDistance = 30f;
     [Range(0f, 1f)] public float scanlines = 0.12f;
     [Tooltip("How pixelated the view is while open (0 = sharp). It goes away as you sink through")]
     [Range(0f, 1f)] public float pixelate = 0.3f;
@@ -406,12 +408,32 @@ public class PortalWindow : MonoBehaviour
 
     void UpdateView()
     {
-        bool wanted = exit != null && playerCamera != null && state != State.Hidden && screen != null && screen.enabled &&
-                      (state == State.Sinking || (Vector3.Distance(playerCamera.transform.position, transform.position) < viewDistance && screen.isVisible));
-        if (!wanted) { if (view != null) view.enabled = false; lockedSource = null; return; }
+        bool can = exit != null && playerCamera != null && state != State.Hidden && screen != null && screen.enabled;
+        bool near = can && (state == State.Sinking || Vector3.Distance(playerCamera.transform.position, transform.position) < viewDistance && screen.isVisible);
+        if (!near)
+        {
+            if (view != null) view.enabled = false;
+            lockedSource = null;
+            // Far: it keeps showing the last picture the camera took. None yet (it opened while you were far): one now,
+            // the same way, shown until you come near
+            if (can && texture == null && screen.isVisible)
+            {
+                PrepareView(resolution);
+                view.Render();
+                view.enabled = false;
+                lockedSource = null;
+            }
+            return;
+        }
+        PrepareView(state == State.Sinking ? 1f : resolution);
+        view.enabled = true;
+    }
+
+    // The camera above the hub, where your eyes would be seeing through the window (it doesn't draw by itself here)
+    void PrepareView(float scale)
+    {
         if (lockedSource == null && alignToYou && player != null) lockedSource = LiveSource;   // a fixed hole from now on
 
-        float scale = state == State.Sinking ? 1f : resolution;
         int width = Mathf.Max(64, Mathf.RoundToInt(playerCamera.pixelWidth * scale)), height = Mathf.Max(64, Mathf.RoundToInt(playerCamera.pixelHeight * scale));   // (your view's size, not the screen's)
         if (texture == null || texture.width != width || texture.height != height)
         {
@@ -422,7 +444,6 @@ public class PortalWindow : MonoBehaviour
         }
         if (view == null) MakeViewCamera();
 
-        view.enabled = true;
         view.rect = FullRect;   // the whole texture (CopyFrom brought your Camera.rect: Classic's 4:3 window, black around it)
         view.nearClipPlane = playerCamera.nearClipPlane;
         view.farClipPlane = playerCamera.farClipPlane;
@@ -456,6 +477,7 @@ public class PortalWindow : MonoBehaviour
         view.depth = playerCamera.depth - 1;   // before yours, this same frame
         view.targetTexture = texture;
         view.cullingMask = playerCamera.cullingMask;
+        view.enabled = false;   // (UpdateView turns it on while you are near)
         if (material != null) material.SetTexture("_MainTex", texture);
     }
 

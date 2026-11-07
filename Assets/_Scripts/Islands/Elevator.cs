@@ -269,7 +269,7 @@ public class Elevator : MonoBehaviour
         {
             if (ridePopups[i].modal)   // once, and the ride waits for its click
             {
-                if (!shown[i] && t >= ridePopups[i].showAt) { shown[i] = true; ModalPopup.Show(ridePopups[i].popup); }
+                if (!shown[i] && t >= ridePopups[i].showAt) { shown[i] = true; PopupManager.ShowModal(ridePopups[i].popup); }
                 continue;
             }
             bool visible = t >= ridePopups[i].showAt && t < ridePopups[i].hideAt;
@@ -281,8 +281,7 @@ public class Elevator : MonoBehaviour
 
     static void SetPopup(GameObject popup, bool visible)
     {
-        if (TutorialManager.Instance == null) return;
-        if (visible) TutorialManager.Instance.Show(popup); else TutorialManager.Instance.Hide(popup);
+        if (visible) PopupManager.Show(popup); else PopupManager.Hide(popup);
     }
 
     // The two points that bend the curve: the Via objects if set, otherwise automatic

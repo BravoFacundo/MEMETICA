@@ -366,24 +366,43 @@ public class RandomizerPedestal : Pedestal
         timeline = Timeline();
     }
 
-    // Right click on the component > Clean Ways: each axis keeps only its own parts (anything an earlier axis already
-    // raises goes out of the later ones; Migrate Pedestals left each axis with every earlier way in front of its own)
-    [ContextMenu("Clean Ways (each axis only its own)")]
-    void CleanWays()
+    // Right click on the component > Fill Ways From Names: each axis' way found in the scene by its names, in order:
+    //   Island_<its meme's title> (Island_TrollFace), Island_<n>1…3, Bridge_<n>1…4   (n: the axis' place, 1 for the first)
+    // Only the axes with an empty way (a way can't live in the prefab: it points to the scene's islands, so Apply on the
+    // prefab, or a reverted prefab, leaves them empty). It says what it found and what it didn't. Ctrl+Z undoes it
+    [ContextMenu("Fill Ways From Names")]
+    void FillWaysFromNames()
     {
-        UnityEditor.Undo.RecordObject(this, "Clean Ways");
-        var earlier = new HashSet<Transform>();
-        var report = new System.Text.StringBuilder($"[RandomizerPedestal] '{name}' ways cleaned:\n");
-        foreach (Axis axis in axes)
+        UnityEditor.Undo.RecordObject(this, "Fill Ways From Names");
+        var byName = new Dictionary<string, Transform>();
+        foreach (GameObject root in gameObject.scene.GetRootGameObjects())
+            foreach (Transform t in root.GetComponentsInChildren<Transform>(true))
+                if (!byName.ContainsKey(t.name)) byName[t.name] = t;
+
+        var report = new System.Text.StringBuilder($"[RandomizerPedestal] '{name}' ways:\n");
+        for (int i = 0; i < axes.Count; i++)
         {
-            int before = axis.way.Count;
-            axis.way.RemoveAll(t => t == null || earlier.Contains(t));
-            foreach (Transform t in axis.way) earlier.Add(t);
-            report.AppendLine($"  {(axis.meme != null ? axis.meme.name : "(no meme)")}: {before} → {axis.way.Count} ({string.Join(", ", axis.way.ConvertAll(t => t.name))})");
+            Axis axis = axes[i];
+            string memeName = axis.meme != null ? axis.meme.name : "(no meme)";
+            if (axis.way.Exists(t => t != null)) { report.AppendLine($"  {memeName}: already has its way, kept"); continue; }
+
+            string title = axis.meme != null && !string.IsNullOrEmpty(axis.meme.title) ? axis.meme.title
+                         : memeName.Substring(memeName.LastIndexOf('_') + 1);
+            var names = new List<string> { "Island_" + title.Replace(" ", "") };
+            for (int k = 1; k <= 3; k++) names.Add($"Island_{i + 1}{k}");
+            for (int k = 1; k <= 4; k++) names.Add($"Bridge_{i + 1}{k}");
+
+            axis.way = new List<Transform>();
+            var missing = new List<string>();
+            foreach (string wanted in names)
+                if (byName.TryGetValue(wanted, out Transform found)) axis.way.Add(found); else missing.Add(wanted);
+            report.AppendLine($"  {memeName}: {string.Join(", ", axis.way.ConvertAll(t => t.name))}" +
+                              (missing.Count > 0 ? $"   (not found: {string.Join(", ", missing)})" : ""));
         }
+        if (UnityEditor.PrefabUtility.IsPartOfPrefabInstance(this)) UnityEditor.PrefabUtility.RecordPrefabInstancePropertyModifications(this);
         UnityEditor.EditorUtility.SetDirty(this);
         timeline = Timeline();
-        Debug.Log(report.ToString(), this);
+        Debug.Log(report.ToString() + "Save the scene. Don't Apply them to the prefab: it can't keep scene objects.", this);
     }
 
     // Seconds from placing the meme to each part, for each axis (an estimate)

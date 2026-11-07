@@ -60,27 +60,11 @@ public class StonePath : MonoBehaviour
              "with the selected prefabs, or copies it from another stone path. Changing a Size resizes every stone using it")]
     public List<Model> models = new List<Model>();
 
-    [Section("Look")]
-    [Tooltip("Tints the stones: safe ones lighter, interactive ones darker")]
-    public bool tint = true;
-    public Color safeColor = new Color(0.85f, 0.85f, 0.85f);
-    public Color interactiveColor = new Color(0.55f, 0.55f, 0.58f);
-    [Tooltip("Stones that slide or hop leave a trail while they move, so you can read where they go (not Blink: it jumps)")]
-    public bool trails = true;
-    [Tooltip("Seconds the trail lasts behind the stone")]
-    public float trailSeconds = 1f;
-    [Tooltip("Meters wide at the stone (it thins to nothing)")]
+    [Section("Trail (Slide stones)")]
+    [Tooltip("Meters wide at the stone (it thins to nothing). Whether there are trails, their color and length: Resources/StoneTypes")]
     public float trailThickness = 0.9f;
     [Tooltip("Meters below the stone's middle it comes out (inside the model, so only the part behind it shows)")]
     public float trailDrop = 0.25f;
-    public Color trailTint = new Color(0.3f, 0.3f, 0.32f, 0.6f);   // the dark grey of the moving stones
-    [Tooltip("Fall stones: the color they pulse to while warning (stepped on, about to drop)")]
-    public Color crackColor = new Color(0.35f, 0.2f, 0.15f);
-    [Tooltip("Fall stones: cracks that appear on top while warning (a PNG with transparency, e.g. Art/Textures/Decal_CrackedStone). Empty: none")]
-    public Texture2D crackDecal;
-    [Tooltip("Fall stones: pieces that break off as they drop (small rock prefabs, e.g. _Prefabs/Effects/RockDebriesSmall). Empty: none")]
-    public GameObject[] fallDebris;
-    public int fallDebrisCount = 5;
 
     [Section("Appearance (stone by stone)")]
     [Tooltip("Seconds each stone takes to rise")]
@@ -124,6 +108,8 @@ public class StonePath : MonoBehaviour
     private readonly List<PathStone> stones = new List<PathStone>();
     private readonly Dictionary<Transform, Rest> rests = new Dictionary<Transform, Rest>();
     private readonly Dictionary<PathStone, float> lastPush = new Dictionary<PathStone, float>();
+    // Each moving stone's solid colliders and how far they reach from it (plus your body): found once, not every frame
+    private readonly Dictionary<PathStone, (Collider[] solid, float reach)> pushShapes = new Dictionary<PathStone, (Collider[], float)>();
     private Vector3 endA, endB;   // designed ends when there are no anchors
     private CharacterController player;
     private PlayerMove playerMove;
@@ -269,13 +255,25 @@ public class StonePath : MonoBehaviour
     {
         if (player == null || playerMove == null || moved.sqrMagnitude < 1e-6f || !stone.IsPresent) return;
         if (lastPush.TryGetValue(stone, out float last) && Time.time - last < 0.4f) return;
+        if (!pushShapes.TryGetValue(stone, out var shape))
+        {
+            Collider[] solid = System.Array.FindAll(stone.GetComponentsInChildren<Collider>(true), c => !c.isTrigger);
+            Bounds all = new Bounds(stone.transform.position, Vector3.zero);
+            bool measured = false;
+            foreach (Collider c in solid) if (c.enabled) { all.Encapsulate(c.bounds); measured = true; }   // (a turned off collider has no bounds)
+            if (!measured) return;   // gone right now (Blink): measured next time
+            shape = (solid, Vector3.Distance(stone.transform.position, all.center) + all.extents.magnitude + 2f);
+            pushShapes[stone] = shape;
+        }
+        Vector3 body = player.transform.position;
+        if ((body - stone.transform.position).sqrMagnitude > shape.reach * shape.reach) return;   // far: nothing to work out
+
         Transform under = PlayerRespawn.Instance.GroundUnder;
         if (under != null && under.IsChildOf(stone.transform)) return;   // on it: it carries you
 
-        Vector3 body = player.transform.position;
-        foreach (Collider c in stone.GetComponentsInChildren<Collider>())
+        foreach (Collider c in shape.solid)
         {
-            if (!c.enabled || c.isTrigger) continue;
+            if (c == null || !c.enabled) continue;
             if (!Physics.ComputePenetration(player, body, player.transform.rotation, c, c.transform.position, c.transform.rotation, out Vector3 away, out float depth)) continue;
             if (depth < 0.04f) continue;                                    // just touching
             Vector3 flat = new Vector3(moved.x, 0f, moved.z);

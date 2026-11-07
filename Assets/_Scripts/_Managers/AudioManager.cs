@@ -126,7 +126,7 @@ public class AudioManager : MonoBehaviour
             musicSource.volume = Mathf.MoveTowards(musicSource.volume, musicLevel * (Time.unscaledTime < memeUntil ? musicDuck : 1f), 2f * Time.unscaledDeltaTime);
 
         if (Time.unscaledTime < nextRoute) return;
-        nextRoute = Time.unscaledTime + 0.5f;
+        nextRoute = Time.unscaledTime + RouteEvery;
         RouteSources();
     }
 
@@ -156,12 +156,23 @@ public class AudioManager : MonoBehaviour
         return found != null && found.Length > 0 ? found[0] : null;
     }
 
+    // The whole scene (inactive ones too) once at the start; then every Route Every seconds only the active ones (the
+    // ones that can sound), to catch sources made while playing. Before: the whole scene, inactive too, twice a second
+    // (a search through thousands of objects: a small hitch each time). Sources set up with SetUp go in right away
+    const float RouteEvery = 2f;
+    private bool routedAll;
     void RouteSources()
     {
         if (musicSource != null && musicGroup != null && musicSource.outputAudioMixerGroup == null) musicSource.outputAudioMixerGroup = musicGroup;
         if (sfxGroup == null) return;
-        foreach (AudioSource source in FindObjectsOfType<AudioSource>(true))
-            if (source.outputAudioMixerGroup == null && source != musicSource) source.outputAudioMixerGroup = sfxGroup;   // (the ambience too)
+        foreach (AudioSource source in FindObjectsOfType<AudioSource>(!routedAll)) Route(source);
+        routedAll = true;
+    }
+
+    static void Route(AudioSource source)
+    {
+        if (Instance == null || Instance.sfxGroup == null || source == null) return;
+        if (source.outputAudioMixerGroup == null && source != Instance.musicSource) source.outputAudioMixerGroup = Instance.sfxGroup;   // (the ambience too)
     }
 
     //---- World sounds
@@ -181,6 +192,7 @@ public class AudioManager : MonoBehaviour
         source.minDistance = Mathf.Max(range.x, 0.01f);
         source.maxDistance = far;
         source.SetCustomCurve(AudioSourceCurveType.CustomRolloff, Rolloff(Mathf.Clamp01(range.x / far)));
+        Route(source);   // (through the mixer now, not at the next sweep)
     }
 
     // 1 up to Near (0-1 of the range), then fading like a real sound (1/distance), down to 0 at the end

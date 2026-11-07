@@ -1,7 +1,7 @@
 using UnityEngine;
 
-// Popup zone (before: TutorialTrigger): while the player is inside, its popup is shown (TutorialManager does the fading).
-// Close With X: it doesn't go away when you leave; the player closes it with its X (TutorialManager.Close), and it
+// Popup zone (before: TutorialTrigger): while the player is inside, its popup is shown (PopupManager does the fading).
+// Close With X: it doesn't go away when you leave; the player closes it with its X (PopupManager.Close), and it
 // comes back only if Only Once is off. Needs a collider marked as Trigger. Any mesh on it is hidden when the game starts,
 // so the zone can stay visible in the editor while you place it.
 [RequireComponent(typeof(Collider))]
@@ -11,7 +11,7 @@ public class PopupTrigger : MonoBehaviour
     public GameObject popup;
     [Tooltip("Hide the popup when the player leaves the zone")]
     public bool hideOnExit = true;
-    [Tooltip("It stays until the player closes it with its X (its WindowButton → TutorialManager.Close, with the popup)")]
+    [Tooltip("It stays until the player closes it with its X (its WindowButton → PopupManager.Close, with the popup)")]
     public bool closeWithX = false;
     [Tooltip("Close With X: shown only the first time")]
     public bool onlyOnce = true;
@@ -35,10 +35,10 @@ public class PopupTrigger : MonoBehaviour
     {
         if (inside || !IsPlayer(other)) return;
         inside = true;
-        if (modal) { if (!shown) { shown = true; ModalPopup.Show(popup); } return; }
+        if (modal) { if (!shown) { shown = true; PopupManager.ShowModal(popup); } return; }
         if (closeWithX && onlyOnce && shown) return;
         shown = true;
-        if (TutorialManager.Instance != null) TutorialManager.Instance.Show(popup, closeWithX);
+        PopupManager.Show(popup, closeWithX);
     }
 
     void OnTriggerExit(Collider other)
@@ -46,7 +46,7 @@ public class PopupTrigger : MonoBehaviour
         if (!inside || !IsPlayer(other)) return;
         inside = false;
         if (modal) return;   // (closed by its click)
-        if (hideOnExit && !closeWithX && TutorialManager.Instance != null) TutorialManager.Instance.Hide(popup);
+        if (hideOnExit && !closeWithX) PopupManager.Hide(popup);
     }
 
     static bool IsPlayer(Collider c) => c.GetComponentInParent<PlayerMove>() != null;

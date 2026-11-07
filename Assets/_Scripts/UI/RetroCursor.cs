@@ -86,7 +86,7 @@ public class RetroCursor : MonoBehaviour
     {
         bool ended = GameManager.Instance != null && GameManager.Instance.Ended;   // the blue screen / win screen: click on them
         bool freeHeld = freeWhilePlaying && Input.GetKey(freeKey);
-        Mode wanted = playerLook == null || UIManager.GameIsPaused || ended || freeHeld || ModalPopup.Open ? Mode.Free : Mode.Crosshair;   // (a modal popup: the arrow)
+        Mode wanted = playerLook == null || UIManager.GameIsPaused || ended || freeHeld || PopupManager.ModalOpen ? Mode.Free : Mode.Crosshair;   // (a modal popup: the arrow)
         bool paused = UIManager.GameIsPaused;
         if (!modeStarted || wanted != CurrentMode || paused != wasPaused) ApplyMode(wanted);   // the pause also locks / frees it
         wasPaused = paused;

@@ -1,0 +1,56 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0dffa75d4ad343fda28b9386095b1689, type: 3}
+  m_Name: StoneTypes
+  m_EditorClassIdentifier: 
+  safe:
+    tint: {r: 0.85, g: 0.85, b: 0.85, a: 1}
+    mark: {fileID: 0}
+    markColor: {r: 0, g: 0, b: 0, a: 0.5}
+    markSize: 1
+    relief: 0.5
+    warnClip: {fileID: 0}
+    goClip: {fileID: 0}
+    backClip: {fileID: 0}
+  fall:
+    tint: {r: 0.55, g: 0.55, b: 0.58, a: 1}
+    mark: {fileID: 2800000, guid: 40918d798856465a8293262a3efe4f1a, type: 3}
+    markColor: {r: 0.12, g: 0.1, b: 0.09, a: 0.7}
+    markSize: 0.8
+    relief: 0.6
+    warnClip: {fileID: 0}
+    goClip: {fileID: 0}
+    backClip: {fileID: 0}
+  slide:
+    tint: {r: 0.55, g: 0.55, b: 0.58, a: 1}
+    mark: {fileID: 2800000, guid: 67b0cdc8122a4ca2830753c873221d63, type: 3}
+    markColor: {r: 0.12, g: 0.12, b: 0.14, a: 0.55}
+    markSize: 1
+    relief: 0.5
+    warnClip: {fileID: 0}
+    goClip: {fileID: 0}
+    backClip: {fileID: 0}
+  blink:
+    tint: {r: 0.55, g: 0.55, b: 0.58, a: 1}
+    mark: {fileID: 2800000, guid: 210d7863b2c94da4b4e814c960ef56ee, type: 3}
+    markColor: {r: 0.12, g: 0.12, b: 0.14, a: 0.6}
+    markSize: 0.8
+    relief: 0.4
+    warnClip: {fileID: 0}
+    goClip: {fileID: 8300000, guid: c93c021999716e04ba594de733f5d922, type: 3}
+    backClip: {fileID: 8300000, guid: 0510cd71c7f976347bd2f7af46ee8c5e, type: 3}
+  crackDecal: {fileID: 2800000, guid: c9648c04824ea3640acbb34cb0e600c0, type: 3}
+  fallDebris: []
+  fallDebrisCount: 5
+  trails: 1
+  trailSeconds: 1
+  trailColor: {r: 0.3, g: 0.3, b: 0.32, a: 0.6}

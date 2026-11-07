@@ -23,6 +23,7 @@ public class VirusClock : MonoBehaviour
     private Color normal;
     private bool shown;
     private float shownAt;
+    private int shownSeconds = -1;   // what the label says now (rewritten only when it changes: no new text every frame)
 
     void Awake()
     {
@@ -43,10 +44,12 @@ public class VirusClock : MonoBehaviour
         transform.localScale = Vector3.one * (1f + 2.70158f * p * p * p + 1.70158f * p * p);
 
         if (label == null) return;
-        label.text = GameManager.Format(game.TimeLeft);
+        int seconds = Mathf.CeilToInt(Mathf.Max(game.TimeLeft, 0f));
+        if (seconds != shownSeconds) { shownSeconds = seconds; label.text = GameManager.Format(seconds); }
         bool warn = game.Running && game.TimeLeft <= warnSeconds;
         bool blinkOn = Mathf.Repeat(Time.unscaledTime * blinkRate, 1f) < 0.5f;
-        label.color = warn && blinkOn ? warnColor : normal;
+        Color color = warn && blinkOn ? warnColor : normal;
+        if (label.color != color) label.color = color;
     }
 
     void Show(bool on)

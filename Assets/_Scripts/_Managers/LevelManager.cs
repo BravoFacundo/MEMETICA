@@ -82,13 +82,22 @@ public class LevelManager : MonoBehaviour
 
 #if UNITY_EDITOR
     // Above each RespawnPoint: the fall the player makes when reappearing
+    private Transform[] gizmoPoints;
+    private double gizmoSearchAt;
     void OnDrawGizmos()
     {
         if (!showDropGizmos) return;
         Gizmos.color = new Color(1f, 0.85f, 0.3f, 0.8f);
-        foreach (Transform t in FindObjectsOfType<Transform>())
+        // The old ones (just named RespawnPoint), looked for again every 2 seconds, not on every repaint of the Scene view
+        // (before: every object of the scene, many times a second: the Scene view went slow)
+        if (gizmoPoints == null || UnityEditor.EditorApplication.timeSinceStartup > gizmoSearchAt)
         {
-            if (t.name != respawnPointName || t.TryGetComponent(out RespawnPoint _)) continue;   // (those draw their own)
+            gizmoSearchAt = UnityEditor.EditorApplication.timeSinceStartup + 2.0;
+            gizmoPoints = System.Array.FindAll(FindObjectsOfType<Transform>(), x => x.name == respawnPointName && !x.TryGetComponent(out RespawnPoint _));   // (those draw their own)
+        }
+        foreach (Transform t in gizmoPoints)
+        {
+            if (t == null) continue;
             Vector3 from = RespawnPosition(t, out float groundY);
             Gizmos.DrawLine(from, new Vector3(from.x, groundY, from.z));
             Gizmos.DrawWireSphere(from, 0.6f);
@@ -139,9 +148,9 @@ public class LevelManager : MonoBehaviour
         }
         has = any;
         if (any) return best;
-        foreach (Transform child in container.GetComponentsInChildren<Transform>(true))
+        foreach (Transform child in LegacyPointsIn(container))
         {
-            if (child.name != respawnPointName) continue;
+            if (child == null) continue;
             float d = (child.position - near).sqrMagnitude;
             if (d < nearest) { nearest = d; best = child; }
         }
@@ -154,8 +163,20 @@ public class LevelManager : MonoBehaviour
         if (island == null) return null;
         Island root = island.GetComponentInParent<Island>();
         Transform container = root != null ? root.transform : island.transform;
-        foreach (Transform child in container.GetComponentsInChildren<Transform>(true))
-            if (child.name == respawnPointName) return child;
+        foreach (Transform child in LegacyPointsIn(container)) if (child != null) return child;
         return null;
+    }
+
+    // The old respawn points of an island (just named RespawnPoint), looked for once per island (before: its whole
+    // hierarchy, 4 times a second while you stood on an island without a RespawnPoint)
+    private readonly System.Collections.Generic.Dictionary<Transform, Transform[]> legacyPoints = new System.Collections.Generic.Dictionary<Transform, Transform[]>();
+    Transform[] LegacyPointsIn(Transform container)
+    {
+        if (!legacyPoints.TryGetValue(container, out Transform[] found))
+        {
+            found = System.Array.FindAll(container.GetComponentsInChildren<Transform>(true), x => x.name == respawnPointName);
+            legacyPoints[container] = found;
+        }
+        return found;
     }
 }

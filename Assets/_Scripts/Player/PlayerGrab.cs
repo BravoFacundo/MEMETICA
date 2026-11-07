@@ -95,9 +95,9 @@ public partial class PlayerGrab : MonoBehaviour
 
     private void UpdateHeldMeme()
     {
-        if (UIManager.GameIsPaused || ModalPopup.Open || !canHold)
+        if (UIManager.GameIsPaused || PopupManager.ModalOpen || !canHold)
         {
-            if (logGrabs && GameInput.GrabDown) Debug.Log($"[PlayerGrab] Click ignored: paused {UIManager.GameIsPaused}, modal popup {ModalPopup.Open}, can hold {canHold}", this);
+            if (logGrabs && GameInput.GrabDown) Debug.Log($"[PlayerGrab] Click ignored: paused {UIManager.GameIsPaused}, modal popup {PopupManager.ModalOpen}, can hold {canHold}", this);
             return;
         }   // no grabbing while paused, a modal popup is up (its click closes it) or riding an elevator
         if (look.CursorFree) { if (logGrabs && GameInput.GrabDown) Debug.Log("[PlayerGrab] Click ignored: free cursor", this); LookingAtMeme = CanGrabLooked = false; return; }   // the click is the cursor's (RetroCursor)

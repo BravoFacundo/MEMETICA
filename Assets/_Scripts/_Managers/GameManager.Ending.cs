@@ -22,7 +22,7 @@ public partial class GameManager
     public float endingRiseAcceleration = 25f;
     [Tooltip("The top speed you rise at (m/s). Low: you don't go so high that the sky shows its seams")]
     public float endingRiseSpeed = 8f;
-    [Tooltip("Shown while you rise. A popup of the tutorial panel fades in through the TutorialManager; anything else is just turned on")]
+    [Tooltip("Shown while you rise (PopupManager: a popup of its panel fades in, anything else is just turned on)")]
     public GameObject endingPopup;
     [Tooltip("Seconds after the ending starts that it shows")]
     public float endingPopupDelay = 1f;
@@ -39,9 +39,7 @@ public partial class GameManager
         if (endingPopup != null)
         {
             yield return new WaitForSeconds(Mathf.Min(endingPopupDelay, endingDuration));
-            TutorialManager tutorial = TutorialManager.Instance;
-            if (tutorial != null && tutorial.popupCanvas != null && endingPopup.transform.IsChildOf(tutorial.popupCanvas)) tutorial.Show(endingPopup);
-            else endingPopup.SetActive(true);
+            PopupManager.Show(endingPopup);
         }
         yield return new WaitForSeconds(Mathf.Max(endingDuration - (endingPopup != null ? endingPopupDelay : 0f), 0f));
 

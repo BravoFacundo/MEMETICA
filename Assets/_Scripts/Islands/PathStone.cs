@@ -3,12 +3,12 @@ using System.Collections.Generic;
 using UnityEngine;
 
 // One stone of a stone path (StonePath). Its Motion is what it does when the player uses it:
-//   None   safe: it only rises with the path and floats with it (light grey, StonePath > Look)
+//   None   safe: it only rises with the path and floats with it
 //   Fall   stepped on, it warns (shake, crack) and drops, then rises back (Bridge > Falling Platforms values)
 //   Slide  glides between its points, pausing at each one: ride it, or get pushed off the path if it hits you
-//   Hop    stays at a point for Interval seconds, then jumps quickly to the next: time your jump
 //   Blink  stays at a point for Interval seconds, shakes for Warning Time, vanishes (whoever stands on it falls) and
 //          shows up at the next point after Gap Time: it can't carry you there, only timing works
+// How each kind looks and sounds (tint, mark, sounds): Resources/StoneTypes, the same for every stone of that kind.
 // Its points: its place (0) and its Shadows (1, 2…: ghosts of the stone, Memetica > Level > Stone Path > Add Shadow).
 // In the Scene view stone 6's shadows are 61, 62… Move them anywhere; they float with the path and hide while playing.
 // Route: the order it goes through its points (with one shadow they are all the same: place ↔ 61).
@@ -18,15 +18,16 @@ using UnityEngine;
 [SelectionBase]   // clicking any of its parts in the Scene view selects this
 public class PathStone : MonoBehaviour
 {
-    public enum Motion { None, Fall, Slide, Hop, Blink }
+    // Numbers fixed: they are what the scene saves (3 was Hop, removed: never used)
+    public enum Motion { None = 0, Fall = 1, Slide = 2, Blink = 4 }
     public enum Route { BackAndForth, ThroughPlace, Loop, Random }
 
     [Tooltip("Its look: one of the StonePath's Models")]
     [StoneModel] public int model = 0;
-    [Tooltip("None: safe (lighter). The rest: interactive (darker)")]
+    [Tooltip("What it does. Its look and sounds: Resources/StoneTypes")]
     public Motion motion = Motion.None;
 
-    [Section("Points", nameof(motion), Motion.Slide, Motion.Hop, Motion.Blink)]
+    [Section("Points", nameof(motion), Motion.Slide, Motion.Blink)]
     [Tooltip("Back And Forth: 0 → 61 → 62 → 61 → 0…\nThrough Place: back to its place between shadows: 61 → 0 → 62 → 0 → 61…\n" +
              "Loop: 0 → 61 → 62 → 0 → 61… (always the same way)\nRandom: any other point each time")]
     public Route route = Route.BackAndForth;
@@ -46,21 +47,15 @@ public class PathStone : MonoBehaviour
     [Tooltip("Seconds it stops at each point")]
     public float pauseTime = 0.5f;
 
-    [Section("Hop", nameof(motion), Motion.Hop, Motion.Blink)]
+    [Section("Blink", nameof(motion), Motion.Blink)]
     [Tooltip("Seconds it stays at each point: x = y fixed, else random between them")]
     public Vector2 interval = new Vector2(1.5f, 1.5f);
-    [Tooltip("Seconds the jump takes")]
-    [ShowIf(nameof(motion), Motion.Hop)] public float hopTime = 0.15f;
-
-    [Section("Blink", nameof(motion), Motion.Blink)]
     [Tooltip("Seconds it shakes before vanishing (the end of its Interval)")]
     public float warningTime = 0.6f;
     [Tooltip("Meters it shakes")]
     public float blinkShake = 0.06f;
     [Tooltip("Seconds it is gone before showing up at the next point")]
     public float gapTime = 0.5f;
-    public AudioClip vanishClip;
-    public AudioClip appearClip;
 
     // What StonePath reads every frame: between point From and point To (0 = its place, 1.. = its shadows)
     public int From { get; private set; }
@@ -71,7 +66,7 @@ public class PathStone : MonoBehaviour
     public bool IsPresent { get; private set; } = true;
     // Its motion may run (StonePath's rise wave: the moving stones start one after another once the path is up)
     public bool Started { get; set; } = true;
-    public bool Moves => (motion == Motion.Slide || motion == Motion.Hop || motion == Motion.Blink) && PointCount > 1;
+    public bool Moves => (motion == Motion.Slide || motion == Motion.Blink) && PointCount > 1;
     int PointCount => 1 + shadows.Count;
 
     private enum FallState { Resting, Warning, Falling, Down, Rising }
@@ -111,7 +106,7 @@ public class PathStone : MonoBehaviour
         audioSource.playOnAwake = false;
         AudioManager.SetUp(audioSource, AudioManager.World.Stone);   // heard near, not from the next course
 
-        if (Moves && motion != Motion.Blink && path != null && path.trails) MakeTrail();
+        if (Moves && motion == Motion.Slide && path != null && StoneTypes.Instance.trails) MakeTrail();
 
         // Its route, already Start Phase along (from its last point, backwards, if Start At End)
         timer = WaitTime();
@@ -146,11 +141,11 @@ public class PathStone : MonoBehaviour
         trail = holder.gameObject.AddComponent<TrailRenderer>();
         if (trailMaterial == null) trailMaterial = new Material(Shader.Find("Sprites/Default")) { name = "StoneTrail" };
         trail.sharedMaterial = trailMaterial;
-        trail.time = path.trailSeconds;
+        trail.time = StoneTypes.Instance.trailSeconds;
         trail.minVertexDistance = 0.1f;
         trail.widthMultiplier = path.trailThickness;
         trail.widthCurve = AnimationCurve.Linear(0f, 1f, 1f, 0f);
-        Color tint = path.trailTint;
+        Color tint = StoneTypes.Instance.trailColor;
         var gradient = new Gradient();
         gradient.SetKeys(new[] { new GradientColorKey(tint, 0f), new GradientColorKey(tint, 1f) },
                          new[] { new GradientAlphaKey(tint.a, 0f), new GradientAlphaKey(0f, 1f) });
@@ -190,8 +185,8 @@ public class PathStone : MonoBehaviour
         timer -= seconds;
         while (timer <= 0f)
         {
-            if (moving) { moving = false; From = To; timer += skipWait ? endWait : WaitTime(); skipWait = false; }
-            else { To = NextPoint(From); moving = true; moveDuration = MoveTime; timer += moveDuration; }
+            if (moving) { moving = false; From = To; timer += skipWait ? endWait : WaitTime(); skipWait = false; if (motion == Motion.Slide) Play(Kind.backClip); }
+            else { To = NextPoint(From); moving = true; moveDuration = MoveTime; timer += moveDuration; if (motion == Motion.Slide) Play(Kind.goClip); }
         }
         if (motion == Motion.Blink) { Blink(); return; }
         Progress = moving ? Smooth(1f - timer / moveDuration) : 0f;
@@ -199,16 +194,19 @@ public class PathStone : MonoBehaviour
 
     // Blink: gone while "moving", still where it was (so whoever stood on it falls right there, never carried), and
     // only once it shows up again it is at the next point. Shaking at the end of each wait
-    private bool blinkGone;
+    private bool blinkGone, blinkWarned;
     void Blink()
     {
         Progress = 0f;   // (at From: the jump happens when the wait starts at the next point, while nobody is on it)
-        Shake = !moving && timer < warningTime ? Jitter() : Vector3.zero;
+        bool warning = !moving && timer < warningTime;
+        Shake = warning ? Jitter() : Vector3.zero;
+        if (warning && !blinkWarned) Play(Kind.warnClip);   // once, as it starts shaking
+        blinkWarned = warning;
         if (moving == blinkGone) return;
         blinkGone = moving;
         foreach (Renderer r in renderers) if (r != null) r.enabled = !blinkGone;
         SetSolid(!blinkGone);   // whoever stands on it falls
-        Play(blinkGone ? vanishClip : appearClip);
+        Play(blinkGone ? Kind.goClip : Kind.backClip);
     }
 
     Vector3 Jitter()
@@ -240,10 +238,10 @@ public class PathStone : MonoBehaviour
     // Moves in one whole round of its route
     int RouteSteps => route == Route.BackAndForth || route == Route.ThroughPlace ? 2 * (PointCount - 1) : PointCount;
 
-    bool Hops => motion == Motion.Hop || motion == Motion.Blink;   // they wait Interval at each point
-    float WaitTime() => Mathf.Max(Hops ? Interval() : pauseTime, 0.01f);
-    float AverageWait => Hops ? (interval.x + Mathf.Max(interval.x, interval.y)) * 0.5f : pauseTime;
-    float MoveTime => Mathf.Max(motion == Motion.Hop ? hopTime : motion == Motion.Blink ? gapTime : travelTime, 0.01f);
+    bool Blinks => motion == Motion.Blink;   // it waits Interval at each point
+    float WaitTime() => Mathf.Max(Blinks ? Interval() : pauseTime, 0.01f);
+    float AverageWait => Blinks ? (interval.x + Mathf.Max(interval.x, interval.y)) * 0.5f : pauseTime;
+    float MoveTime => Mathf.Max(Blinks ? gapTime : travelTime, 0.01f);
     float Interval() => interval.y > interval.x ? Random.Range(interval.x, interval.y) : interval.x;
 
     static float Smooth(float p) => p * p * (3f - 2f * p);
@@ -348,7 +346,7 @@ public class PathStone : MonoBehaviour
         float depth = path != null ? path.fallDepth : 8f;
 
         fallState = FallState.Warning;
-        Play(s.crackClip);
+        Play(Kind.warnClip);
         PlayerLook.Shake(0.15f, s.cameraShakeAmount);
         for (float t = 0f; t < s.warningTime; t += Time.deltaTime * LevelManager.PlatformSpeed)
         {
@@ -361,9 +359,10 @@ public class PathStone : MonoBehaviour
 
         fallState = FallState.Falling;
         SetSolid(false);   // whoever is on it falls through
-        Play(s.fallClip);
-        if (path != null && path.fallDebris != null && path.fallDebris.Length > 0)
-            DebrisBurst.Spawn(path.fallDebris, path.fallDebrisCount, transform.position, Vector3.down, 2f, 0.6f);
+        Play(Kind.goClip);
+        StoneTypes types = StoneTypes.Instance;
+        if (types.fallDebris != null && types.fallDebris.Length > 0)
+            DebrisBurst.Spawn(types.fallDebris, types.fallDebrisCount, transform.position, Vector3.down, 2f, 0.6f);
         float speed = 0f;
         while (fallDown < depth)
         {
@@ -377,7 +376,7 @@ public class PathStone : MonoBehaviour
 
         fallState = FallState.Rising;
         Crack(0f);
-        Play(s.riseClip);
+        Play(Kind.backClip);
         while (fallDown > 0f)
         {
             fallDown = Mathf.MoveTowards(fallDown, 0f, s.riseSpeed * LevelManager.PlatformSpeed * Time.deltaTime);
@@ -386,7 +385,7 @@ public class PathStone : MonoBehaviour
         while (PlayerInside()) yield return null;   // someone inside it (jumped on it while it rose): solid once they are out
         SetSolid(true);   // only once back in its place (rising, it never catches someone falling)
         fallState = FallState.Resting;
-        ApplyColor();   // its own color again
+        ApplyColor();   // its own look again
         falling = null;
     }
 
@@ -425,14 +424,15 @@ public class PathStone : MonoBehaviour
     private float crackTurn = -1f;   // (< 0: not picked yet)
     void Crack(float amount)
     {
-        if (path == null || path.crackDecal == null) return;
+        Texture2D decal = StoneTypes.Instance.crackDecal;
+        if (decal == null) return;
         bool onMaterial = false;
         var stoneBlock = new MaterialPropertyBlock();
         foreach (Renderer r in renderers)
         {
             if (r == null || r is TrailRenderer || r.sharedMaterial == null || !r.sharedMaterial.HasProperty(CrackId)) continue;
             r.GetPropertyBlock(stoneBlock);
-            stoneBlock.SetTexture(CrackTexId, path.crackDecal);
+            stoneBlock.SetTexture(CrackTexId, decal);
             stoneBlock.SetFloat(CrackId, amount);
             if (crackTurn < 0f) crackTurn = Random.Range(0f, Mathf.PI * 2f);   // each stone its own way
             Vector3 middle = r.bounds.center - r.transform.position;   // its top's middle from the model's origin
@@ -462,7 +462,7 @@ public class PathStone : MonoBehaviour
         }
         crack.enabled = amount > 0f;
         var block = new MaterialPropertyBlock();
-        block.SetTexture("_MainTex", path.crackDecal);
+        block.SetTexture("_MainTex", decal);
         block.SetColor("_Color", new Color(1f, 1f, 1f, amount));
         crack.SetPropertyBlock(block);
     }
@@ -485,34 +485,30 @@ public class PathStone : MonoBehaviour
         return stone.Intersects(playerBody.bounds);
     }
 
-    // Its look in this color now (the warning before a fall)
-    void Tint(Color color)
+    // Its kind's look (Resources/StoneTypes): the tint, and its mark on a Memetica/Stone material
+    private StoneTypes.Kind Kind => StoneTypes.Instance.Of(motion);
+    private static readonly int ColorId = Shader.PropertyToID("_Color"), MarkTexId = Shader.PropertyToID("_MarkTex"),
+                                MarkColorId = Shader.PropertyToID("_MarkColor"), MarkSizeId = Shader.PropertyToID("_MarkSize"),
+                                MarkReliefId = Shader.PropertyToID("_MarkRelief");
+    public void ApplyColor()
     {
-        if (path == null || !path.tint) return;
+        if (!Application.isPlaying || renderers == null || System.Array.Exists(renderers, r => r == null))
+            renderers = GetComponentsInChildren<Renderer>(true);   // (its Model may have changed)
+        StoneTypes.Kind kind = Kind;
         var block = new MaterialPropertyBlock();
         foreach (Renderer r in renderers)
         {
             if (r == null || r is TrailRenderer) continue;
             r.GetPropertyBlock(block);
-            block.SetColor("_Color", color);
-            r.SetPropertyBlock(block);
-        }
-    }
-
-    // Safe ones light grey, every interactive one the same darker grey (StonePath > Look)
-    public void ApplyColor()
-    {
-        if (!Application.isPlaying || renderers == null || System.Array.Exists(renderers, r => r == null))
-            renderers = GetComponentsInChildren<Renderer>(true);   // (its Model may have changed)
-        StonePath owner = path != null ? path : GetComponentInParent<StonePath>();
-        if (owner == null || !owner.tint) return;
-        Color color = motion == Motion.None ? owner.safeColor : owner.interactiveColor;
-        var block = new MaterialPropertyBlock();
-        foreach (Renderer r in renderers)
-        {
-            if (r == null) continue;
-            r.GetPropertyBlock(block);
-            block.SetColor("_Color", color);
+            block.SetColor(ColorId, kind.tint);
+            if (r.sharedMaterial != null && r.sharedMaterial.HasProperty(MarkTexId))
+            {
+                bool marked = kind.mark != null;
+                if (marked) block.SetTexture(MarkTexId, kind.mark);
+                block.SetColor(MarkColorId, marked ? kind.markColor : Color.clear);   // (alpha 0: no mark)
+                block.SetFloat(MarkSizeId, kind.markSize);
+                block.SetFloat(MarkReliefId, kind.relief);
+            }
             r.SetPropertyBlock(block);
         }
     }

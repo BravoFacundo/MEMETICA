@@ -29,6 +29,7 @@ public class Obstacle : MonoBehaviour
     private static PlayerMove playerMove;
     private Collider[] colliders;
     private float lastKnock = -10f;
+    private float reach;   // meters from its middle to its farthest part, plus your size: farther, it can't touch you
 
     void Start()
     {
@@ -42,10 +43,22 @@ public class Obstacle : MonoBehaviour
         if (spinning != null && spinSpeed != 0f) spinning.Rotate(spinAxis, spinSpeed * Time.deltaTime, Space.Self);
     }
 
+    // Once its colliders are on (hidden in an island still down, they are off and have no size)
+    bool MeasureReach()
+    {
+        Bounds all = new Bounds(transform.position, Vector3.zero);
+        bool measured = false;
+        foreach (Collider c in colliders) if (c != null && c.enabled) { all.Encapsulate(c.bounds); measured = true; }
+        if (measured) reach = Vector3.Distance(transform.position, all.center) + all.extents.magnitude + 2f;   // (+ the player's body, and margin)
+        return measured;
+    }
+
     void LateUpdate()   // (after it floated and turned this frame)
     {
         if (!knock || player == null || !player.enabled || Time.time - lastKnock < 0.4f) return;
+        if (reach <= 0f && !MeasureReach()) return;
         Vector3 body = player.transform.position;
+        if ((body - transform.position).sqrMagnitude > reach * reach) return;   // far: nothing to work out
         foreach (Collider c in colliders)
         {
             if (c == null || !c.enabled || c.isTrigger) continue;

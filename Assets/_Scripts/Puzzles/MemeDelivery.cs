@@ -30,7 +30,7 @@ public class MemeDelivery : MonoBehaviour
 
     [Header("First Pick Up")]
     [Tooltip("Shown the first time you pick the meme up (also with the tutorial skipped): it stops the game until " +
-             "clicked (ModalPopup). E.g. 'With this window you can see your memes…'")]
+             "clicked (PopupManager modal). E.g. 'With this window you can see your memes…'")]
     public GameObject pickUpPopup;
     [Tooltip("Seconds after picking it up before it shows (e.g. to see the bridge go down first)")]
     public float pickUpPopupDelay = 0f;
@@ -72,7 +72,7 @@ public class MemeDelivery : MonoBehaviour
     IEnumerator ShowPickUpPopup()
     {
         if (pickUpPopupDelay > 0f) yield return new WaitForSeconds(pickUpPopupDelay);
-        ModalPopup.Show(pickUpPopup);
+        PopupManager.ShowModal(pickUpPopup);
     }
 
     void SeatNow()

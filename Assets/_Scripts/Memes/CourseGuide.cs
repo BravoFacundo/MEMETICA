@@ -56,7 +56,7 @@ public class CourseGuide : MonoBehaviour
     [Tooltip("Logs to the Console what it decides ([CourseGuide])")]
     public bool log = false;
 
-    private Coroutine arrowRoutine, popupRoutine;
+    private Coroutine arrowRoutine;
     private Material arrowMaterial;
     private Mesh chevron;
     private bool warnedWrongLevel;
@@ -254,22 +254,7 @@ public class CourseGuide : MonoBehaviour
 
     //---- Popup
 
-    void ShowPopup()
-    {
-        if (wrongWayPopup == null) return;
-        if (popupRoutine != null) StopCoroutine(popupRoutine);
-        popupRoutine = StartCoroutine(Popup());
-    }
-
-    IEnumerator Popup()
-    {
-        TutorialManager tutorial = TutorialManager.Instance;
-        bool onTutorial = tutorial != null && tutorial.popupCanvas != null && wrongWayPopup.transform.IsChildOf(tutorial.popupCanvas);
-        if (onTutorial) tutorial.Show(wrongWayPopup); else wrongWayPopup.SetActive(true);
-        yield return new WaitForSeconds(popupTime);
-        if (onTutorial) tutorial.Hide(wrongWayPopup); else wrongWayPopup.SetActive(false);
-        popupRoutine = null;
-    }
+    void ShowPopup() => PopupManager.ShowFor(wrongWayPopup, popupTime);   // (asked again while up: the time restarts)
 
     //---- The way: from the island you are on, along the bridges, to the island
 
