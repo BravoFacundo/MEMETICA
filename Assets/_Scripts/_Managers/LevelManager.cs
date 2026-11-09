@@ -3,7 +3,8 @@ using UnityEngine;
 // The level, the scenery: values every island, bridge and stone uses unless it overrides them. Goes in Managers > LevelManager.
 // - Drop Distance: one distance for heights and falls. Islands and bridges are placed where they end up: hidden ones
 //   wait Drop Distance below that and rise back to it (Island: Start Raised stays up)
-// - Lift: rise / lower timing for every island and bridge (each one can Override Timing)
+// - Lift: rise / lower timing for every island and bridge (each one can Override Timing), and how deep islands wait
+// - Island Rise Debris: rocks falling off an island while it rises, and pebbles now and then once it is up
 // - Platforms: the speed of every moving stone
 // - Respawn: where you start, and the RespawnPoint of each island
 // How the run starts and ends (fade in, skip tutorial, ending): the GameManager. Debug starts: DebugTools.
@@ -25,8 +26,34 @@ public class LevelManager : MonoBehaviour
     public float liftLowerDuration = 2.5f;
     [Tooltip("Meters it passes the top before settling")]
     public float liftOvershoot = 0.4f;
+    [Tooltip("Meters islands wait below their place (they rise from there). 0: Drop Distance. Bridges: Drop Distance")]
+    public float islandDepth = 0f;
     [Tooltip("Pedestals with In Order: seconds between one thing arriving and the next one starting")]
     public float sequenceGap = 0.3f;
+
+    [Section("Island Rise Debris", Closed = true)]
+    [Tooltip("Rocks falling off an island while it rises (RockDebries…), in its ground's material. Empty: none")]
+    public GameObject[] riseDebris;
+    [Tooltip("Rocks per second while it rises")]
+    public float riseDebrisRate = 14f;
+    [Tooltip("Each rock's size, as a part of the island's radius (0.15: a 10 m island throws 1.5 m rocks)")]
+    [Range(0.01f, 0.6f)] public float riseDebrisScale = 0.25f;
+    [Tooltip("Meters per second they are thrown down and out")]
+    public float riseDebrisSpeed = 3f;
+    [Tooltip("How open the cone down is (0: straight down, 1: wide)")]
+    [Range(0f, 1.5f)] public float riseDebrisCone = 0.6f;
+    [Tooltip("Seconds each rock lasts, shrinking to nothing")]
+    public float riseDebrisLife = 1.6f;
+    [Tooltip("Arriving (it stops at its place): rocks thrown down at once, that one time. 0: none")]
+    public int arriveDebrisCount = 12;
+    [Tooltip("Arriving: seconds before it reaches the top that they are thrown (it feels like it stopped a bit before)")]
+    public float arriveDebrisLead = 0.15f;
+    [Tooltip("Up and still: pebbles per second that keep falling off it, now and then. 0: none")]
+    public float idleDebrisRate = 0.5f;
+    [Tooltip("Up and still: each pebble's size, as a part of the island's radius")]
+    [Range(0.01f, 0.6f)] public float idleDebrisScale = 0.12f;
+    [Tooltip("Rising and up: only seen this close to the camera (meters). Arriving: always (it is only once)")]
+    public float riseDebrisRange = 300f;
 
     [Section("Platforms")]
     [Tooltip("Speed of every stone's motion and fall (Slide, Hop, Blink, Fall): under 1 slower and easier, over 1 faster " +

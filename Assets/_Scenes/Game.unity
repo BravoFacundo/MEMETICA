@@ -142392,7 +142392,7 @@ PrefabInstance:
     - target: {fileID: 3226923575914045670, guid: 840d3b26ea74ff14c89a5a61cc111612, type: 3}
       propertyPath: raises.Array.data[0]
       value: 
-      objectReference: {fileID: 0}
+      objectReference: {fileID: 1875009070}
     - target: {fileID: 3707322068011324572, guid: 840d3b26ea74ff14c89a5a61cc111612, type: 3}
       propertyPath: m_Center.x
       value: -0.000030206991
@@ -151087,8 +151087,8 @@ Transform:
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 676081916}
-  - {fileID: 1875009070}
   - {fileID: 768727548}
+  - {fileID: 1875009070}
   - {fileID: 1414447892}
   - {fileID: 841671058}
   m_Father: {fileID: 921181192}
@@ -203638,7 +203638,7 @@ PrefabInstance:
     - target: {fileID: 3226923575914045670, guid: 840d3b26ea74ff14c89a5a61cc111612, type: 3}
       propertyPath: raises.Array.data[0]
       value: 
-      objectReference: {fileID: 0}
+      objectReference: {fileID: 831647004}
     - target: {fileID: 3707322068011324572, guid: 840d3b26ea74ff14c89a5a61cc111612, type: 3}
       propertyPath: m_Center.x
       value: -0.000003881321
@@ -269819,7 +269819,7 @@ PrefabInstance:
     - target: {fileID: 3226923575914045670, guid: 840d3b26ea74ff14c89a5a61cc111612, type: 3}
       propertyPath: raises.Array.data[0]
       value: 
-      objectReference: {fileID: 0}
+      objectReference: {fileID: 1473045729}
     - target: {fileID: 3707322068011324572, guid: 840d3b26ea74ff14c89a5a61cc111612, type: 3}
       propertyPath: m_Center.x
       value: -0.0000018786818
@@ -375208,7 +375208,7 @@ MonoBehaviour:
   buildKeys: 0
   simulateBuild: 0
   startAt: -1
-  skipTutorial: 0
+  skipTutorial: 1
   flySpeed: 10
   flyFastSpeed: 30
   fastElevators: 0
@@ -420936,9 +420936,23 @@ MonoBehaviour:
   liftRiseDuration: 3
   liftLowerDuration: 2.5
   liftOvershoot: 0.4
+  islandDepth: 40
   sequenceGap: 0.3
+  riseDebris:
+  - {fileID: 7393098362869938263, guid: 5aa1ba37a2b5e2f45afd8a3af127e862, type: 3}
+  - {fileID: 7617200879849885303, guid: e9145b5c228689843b6d6ba2412aff73, type: 3}
+  riseDebrisRate: 14
+  riseDebrisScale: 0.15
+  riseDebrisSpeed: 3
+  riseDebrisCone: 0.6
+  riseDebrisLife: 1.6
+  arriveDebrisCount: 12
+  arriveDebrisLead: 0.15
+  idleDebrisRate: 0.5
+  idleDebrisScale: 0.07
+  riseDebrisRange: 300
   platformSpeed: 1
-  showDropGizmos: 1
+  showDropGizmos: 0
   startRespawnPoint: {fileID: 1325199851}
   activateOnPlay: []
   respawnPointName: RespawnPoint

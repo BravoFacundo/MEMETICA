@@ -157,13 +157,17 @@ public abstract class Lift : MonoBehaviour
         float travelEnd = rising ? Overshoot : 0f;
 
         // Travel: smooth start and end when rising, speeding up when lowering
+        bool arrived = false;
         for (float t = 0f; t < travelTime; t += Time.deltaTime)
         {
+            if (rising && !arrived && t >= travelTime - ArriveLead) { arrived = true; OnArriving(); }
             float p = t / travelTime;
             float eased = rising ? p * p * (3f - 2f * p) : p * p;
             SetHeight(Target() + Mathf.LerpUnclamped(start, travelEnd, eased));
             yield return null;
         }
+
+        if (rising && !arrived) OnArriving();
 
         // Settle: back down from the overshoot
         for (float t = 0f; t < settleTime; t += Time.deltaTime)
@@ -194,6 +198,34 @@ public abstract class Lift : MonoBehaviour
         if (clip != null && audioSource != null) audioSource.PlayOneShot(clip, AudioManager.WorldVolume);
     }
 
+    // Its own meshes: not those of a lift inside it, a respawn point or a portal. Ground only (an island): just its
+    // ground, the widest meshes (half the widest's footprint or more), not what stands on it (trees, rocks, pedestals):
+    // its top is the ground's level. Widest Mesh: its ground's main mesh (its look)
+    protected bool OwnBounds(bool groundOnly, out Bounds b, out MeshRenderer widestMesh)
+    {
+        b = default;
+        widestMesh = null;
+        var own = new List<MeshRenderer>();
+        float widest = 0f;
+        foreach (MeshRenderer r in GetComponentsInChildren<MeshRenderer>())
+        {
+            if (r.GetComponentInParent<Lift>() != this) continue;
+            if (r.GetComponentInParent<RespawnPoint>() != null || r.GetComponentInParent<PortalWindow>() != null) continue;
+            own.Add(r);
+            if (Footprint(r) > widest) { widest = Footprint(r); widestMesh = r; }
+        }
+        bool any = false;
+        foreach (MeshRenderer r in own)
+        {
+            if (groundOnly && Footprint(r) < widest * 0.5f) continue;
+            if (!any) { b = r.bounds; any = true; }
+            else b.Encapsulate(r.bounds);
+        }
+        return any;
+    }
+
+    static float Footprint(Renderer r) => r.bounds.size.x * r.bounds.size.z;
+
     //---- Hidden while down
 
     // Bridges that extend from A hide in their own way
@@ -223,28 +255,58 @@ public abstract class Lift : MonoBehaviour
     }
 
 #if UNITY_EDITOR
-    // Scene view (LevelManager > Debug > Show Drop Gizmos): a shadow where it waits hidden
+    // Scene view (LevelManager > Debug > Show Drop Gizmos). An island: a see-through dark blue cylinder its ground's
+    // size where it waits hidden. A bridge: a box and a line.
+    // Measured from its own meshes only (not the islands inside it, its respawn points or its portals)
     static LevelManager gizmoLevel;
     void OnDrawGizmos()
     {
         if (Application.isPlaying || !HidesWhenDown) return;
         if (gizmoLevel == null) gizmoLevel = FindObjectOfType<LevelManager>();
         if (gizmoLevel == null || !gizmoLevel.showDropGizmos) return;
+        if (!OwnBounds(this is Island, out Bounds b, out _)) return;
 
-        Renderer[] parts = GetComponentsInChildren<Renderer>();
-        if (parts.Length == 0) return;
-        Bounds b = parts[0].bounds;
-        foreach (Renderer r in parts) b.Encapsulate(r.bounds);
-        Vector3 down = Vector3.down * DropFrom(gizmoLevel);
-        Gizmos.color = new Color(0.45f, 0.7f, 1f, 0.15f);
-        Gizmos.DrawCube(b.center + down, b.size);
-        Gizmos.color = new Color(0.45f, 0.7f, 1f, 0.7f);
-        Gizmos.DrawWireCube(b.center + down, b.size);
-        Gizmos.DrawLine(b.center, b.center + down);
+        float drop = DropFrom(gizmoLevel);
+        Vector3 hidden = b.center + Vector3.down * drop;
+        if (!(this is Island))   // a bridge: a box where it waits, and a line up to its place
+        {
+            Gizmos.color = Dark;
+            Gizmos.DrawWireCube(hidden, b.size);
+            Gizmos.color = Light;
+            Gizmos.DrawLine(hidden, b.center);
+            return;
+        }
+
+        float radius = Mathf.Max(b.extents.x, b.extents.z);
+
+        // The island where it waits: dark blue, see-through all over (Unity's cylinder, sized by its own mesh), solid edges
+        Vector3 top = hidden + Vector3.up * b.extents.y, bottom = hidden - Vector3.up * b.extents.y;
+        if (cylinder == null) cylinder = Resources.GetBuiltinResource<Mesh>("Cylinder.fbx");
+        Gizmos.color = new Color(Dark.r, Dark.g, Dark.b, 0.35f);
+        Bounds unit = cylinder.bounds;
+        Vector3 scale = new Vector3(radius * 2f / unit.size.x, b.size.y / unit.size.y, radius * 2f / unit.size.z);
+        Gizmos.DrawMesh(cylinder, hidden - Vector3.Scale(unit.center, scale), Quaternion.identity, scale);
+        UnityEditor.Handles.color = Dark;
+        UnityEditor.Handles.DrawWireDisc(top, Vector3.up, radius, 3f);
+        UnityEditor.Handles.DrawWireDisc(bottom, Vector3.up, radius, 3f);
+        for (int i = 0; i < 8; i++)
+        {
+            Vector3 side = Quaternion.Euler(0f, i * 45f, 0f) * Vector3.forward * radius;
+            UnityEditor.Handles.DrawLine(top + side, bottom + side, 3f);
+        }
     }
+
+    static readonly Color Dark = new Color(0.1f, 0.25f, 0.8f, 1f);     // where it waits
+    static readonly Color Light = new Color(0.3f, 0.6f, 1f, 0.9f);     // a bridge's line up to its place
+    static Mesh cylinder;
+
+
 #endif
 
     // Hooks for Island and Bridge (camera shake, effects)
     protected virtual void OnMoveStarted(bool rising) { }
     protected virtual void OnMoveFinished(bool rising) { }
+    // Rising: as it reaches the top (before settling back from the overshoot), Arrive Lead seconds early
+    protected virtual void OnArriving() { }
+    protected virtual float ArriveLead => 0f;
 }
