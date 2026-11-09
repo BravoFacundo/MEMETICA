@@ -1,7 +1,8 @@
 //First Person Camera: looking around, zoom, and what the camera does on its own.
 //Being able to see far away is necessary for players to solve the puzzles, it allows them to plan their moves.
 //  Look & Zoom   mouse and right click
-//  Focus         someone wants you to look at something (the raffle, your way rising): you can still look around it,
+//  Focus         someone wants you to look at something (the raffle, your way rising): first the view turns until it
+//                is right in the middle of the screen (the mouse waits meanwhile); then you can look around it,
 //                within Focus Radius. Near its edge the mouse turns you less and less (a soft wall), and outside it
 //                (the focus moved, or a new one) the view eases back, speeding up and slowing down, never in jumps.
 //                Optionally a small zoom meanwhile (its FOV). No Cinemachine: it only limits the angles
@@ -50,6 +51,9 @@ public class PlayerLook : MonoBehaviour
     public float focusZoomTime = 0.8f;
     private Func<Vector3> focus;
     private float focusRadiusNow, focusFov, yawSpeed, pitchSpeed;
+    private bool centering;   // a new focus: turning until it is in the middle (then the radius applies)
+    private float focusPullNow;   // this focus' seconds to turn (Focus Pull, or its own)
+    private float centeringUntil;   // (a target that keeps moving: centered enough after this, the mouse is free again)
     private bool easingFocusZoom;
 
     [Section("Paintings")]
@@ -171,9 +175,14 @@ public class PlayerLook : MonoBehaviour
 
     // Look around this, never far from it (radius in degrees; -1: Focus Radius). It can move (a rising island).
     // FOV above 0: a small zoom meanwhile (eased in Focus Zoom Time); 0: as you are
-    public void Focus(Func<Vector3> target, float radius = -1f, float fov = 0f)
+    // Pull above 0: its own seconds to turn there (something fast to see: a bridge falling); else Focus Pull
+    public void Focus(Func<Vector3> target, float radius = -1f, float fov = 0f, float pull = -1f)
     {
         focus = target;
+        focusPullNow = pull > 0f ? pull : focusPull;
+        centering = true;
+        centeringUntil = Time.time + focusPullNow * 4f;
+        yawSpeed = pitchSpeed = 0f;
         focusRadiusNow = radius >= 0f ? radius : focusRadius;
         focusFov = fov;
     }
@@ -181,7 +190,7 @@ public class PlayerLook : MonoBehaviour
     public void Focus(Vector3 point, float radius = -1f, float fov = 0f) => Focus(() => point, radius, fov);
 
     // Free again (a focus' zoom eases back to the normal view)
-    public void ReleaseFocus() { focus = null; yawSpeed = pitchSpeed = 0f; }
+    public void ReleaseFocus() { focus = null; centering = false; yawSpeed = pitchSpeed = 0f; }
     public bool Focused => focus != null;
 
     // How far you look from the focus now (degrees: sideways, and down/up as xRotation), and where it is
@@ -201,6 +210,7 @@ public class PlayerLook : MonoBehaviour
     // The mouse turns you less and less toward the edge, nothing at it (turning back in: always full)
     void SoftWall(ref float mouseX, ref float mouseY)
     {
+        if (centering) { mouseX = mouseY = 0f; return; }   // (still turning to it: the mouse waits)
         if (!FocusOffsets(out float yawOff, out float pitchOff, out _)) return;
         float wideYaw = focusRadiusNow, widePitch = focusRadiusNow * focusVertical;
         if (mouseX * yawOff > 0f) mouseX *= Resistance(Mathf.Abs(yawOff), wideYaw);
@@ -219,10 +229,12 @@ public class PlayerLook : MonoBehaviour
         if (focus == null || LookLocked || Time.deltaTime <= 0f) { yawSpeed = pitchSpeed = 0f; return; }   // (an animation has the head; the pause: still)
         if (!FocusOffsets(out float yawOff, out float pitchOff, out float targetPitch)) return;
 
-        float wideYaw = focusRadiusNow, widePitch = focusRadiusNow * focusVertical;
+        // Centering: to the middle (0); then only back inside the radius when outside it
+        float wideYaw = centering ? 0f : focusRadiusNow, widePitch = centering ? 0f : focusRadiusNow * focusVertical;
         float edgeYaw = Mathf.Clamp(yawOff, -wideYaw, wideYaw), edgePitch = Mathf.Clamp(pitchOff, -widePitch, widePitch);
-        float newYawOff = edgeYaw != yawOff ? Mathf.SmoothDamp(yawOff, edgeYaw, ref yawSpeed, focusPull) : yawOff;
-        float newPitchOff = edgePitch != pitchOff ? Mathf.SmoothDamp(pitchOff, edgePitch, ref pitchSpeed, focusPull) : pitchOff;
+        if (centering && ((Mathf.Abs(yawOff) < 0.5f && Mathf.Abs(pitchOff) < 0.5f) || Time.time > centeringUntil)) { centering = false; yawSpeed = pitchSpeed = 0f; return; }   // there
+        float newYawOff = edgeYaw != yawOff ? Mathf.SmoothDamp(yawOff, edgeYaw, ref yawSpeed, focusPullNow) : yawOff;
+        float newPitchOff = edgePitch != pitchOff ? Mathf.SmoothDamp(pitchOff, edgePitch, ref pitchSpeed, focusPullNow) : pitchOff;
         if (edgeYaw == yawOff) yawSpeed = 0f;
         if (edgePitch == pitchOff) pitchSpeed = 0f;
 

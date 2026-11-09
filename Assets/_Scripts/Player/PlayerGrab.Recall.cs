@@ -10,6 +10,8 @@
 //                          whose Key Meme it shows), it goes in even if you don't look at it (once per pedestal)
 //Close, it flies straight to its place on your HUD; farther than Fly Up To, it just appears there.
 //Coming back it shows its Leave change (you forgot it) if it hasn't yet; optionally else its Fall change.
+//None of this until you picked the window up once: before that it stays where it is (the tutorial's pedestal holds it
+//while you cross its course: coming to you there would drop the bridge under you).
 //Only with a MemeDock on the Player (the HUD version of the window): without it (OriginalGame) none of this happens.
 
 using System.Collections;
@@ -69,6 +71,8 @@ public partial class PlayerGrab
     private Transform lastPlace;
     // Not brought (Far, Bring When Leaving) until picked up once: the tutorial skipped leaves it on the floor in front of you
     private readonly HashSet<MemeWindow> waitingPickUp = new HashSet<MemeWindow>();
+    // The ones you have held at least once: only those ever come to you
+    private readonly HashSet<MemeWindow> heldOnce = new HashSet<MemeWindow>();
 
     public void WaitForPickUp(MemeWindow window) { if (window != null) waitingPickUp.Add(window); }
 
@@ -84,6 +88,8 @@ public partial class PlayerGrab
     {
         if (!RecallOn) return;
         if (waitingPickUp.Count > 0) waitingPickUp.RemoveWhere(w => w == null || w.IsHeld);   // picked up: as always from now on
+        if (heldObject != null && heldObject.TryGetComponent(out MemeWindow inHand)) heldOnce.Add(inHand);
+        foreach (MemeWindow window in windows) if (window != null && window.IsHeld) heldOnce.Add(window);   // (on the HUD too)
         if (flying != null || player == null) return;
         if (Time.time >= nextSearch) { windows = FindObjectsOfType<MemeWindow>(); nextSearch = Time.time + 2f; }
         bool free = FreeToCome(false);
@@ -144,7 +150,7 @@ public partial class PlayerGrab
     {
         if (window == null || window.IsHeld || !window.gameObject.activeInHierarchy) return false;
         if (window.TryGetComponent(out DexCollectible _)) return false;   // an optional meme: not yours
-        if (waitingPickUp.Contains(window)) return false;   // (not picked up yet: it waits where it was put)
+        if (waitingPickUp.Contains(window) || !heldOnce.Contains(window)) return false;   // (never picked up yet: it waits where it is)
         if (window.TryGetComponent(out Rigidbody body) && !body.isKinematic && body.velocity.sqrMagnitude > 1f) return false;   // still falling
         Pedestal pedestal = window.CurrentPedestal;
         if (pedestal == null || HoldsTheWay(pedestal)) return true;   // (a black one: LeftBehind decides)

@@ -18,6 +18,9 @@ public class Elevator : MonoBehaviour
     public float rideDuration = 4f;
     [Tooltip("Start riding as soon as the game starts (intro elevator)")]
     public bool rideOnStart = false;
+    [Tooltip("When you can move again, as a part of the ride (0.95: just before it docks, so you are already walking " +
+             "as it arrives). Its Locks stay until it docks: you move on it, you can't step off it in the air. 1: once docked")]
+    [Range(0f, 1f)] public float moveAt = 0.95f;
 
     [Header("Path (curve)")]
     [Tooltip("Island it leaves from: it first moves away from it. Empty = leaves straight up")]
@@ -62,6 +65,11 @@ public class Elevator : MonoBehaviour
     public float returnDelay = 1f;
     [Tooltip("Meters from it that count as off it too (also standing on anything else does)")]
     public float leaveDistance = 6f;
+    [Tooltip("Back home (Return When Left), standing on it takes you up again (no popups): the way back up if you fall " +
+             "down there (the tutorial's ground below). Then it comes back down again once you step off")]
+    [ShowIf(nameof(returnWhenLeft))] public bool rideAgain = false;
+    [Tooltip("Seconds standing on it before it leaves")]
+    [ShowIf(nameof(returnWhenLeft))] public float boardDelay = 0.6f;
 
     public bool IsRiding { get; private set; }
     // At its Dock Point: after its ride (Rode In) or placed there at once (DebugTools)
@@ -124,6 +132,7 @@ public class Elevator : MonoBehaviour
             ControlPoints(from, to, out Vector3 p1, out Vector3 p2);
             transform.position = Bezier(from, p1, p2, to, t * t * (3f - 2f * t));
             UpdatePopups(t, shown);
+            if (player != null && !player.playerCanMove && t >= moveAt) player.playerCanMove = true;   // (Move At: before it docks)
             yield return null;
         }
 
@@ -207,6 +216,46 @@ public class Elevator : MonoBehaviour
         }
 
         yield return RideHome();
+        if (rideAgain) StartCoroutine(RideAgainWhenBoarded(player));
+    }
+
+    // Home, empty: you stand on it a moment, it takes you up (as its first ride, without popups or its pedestal)
+    IEnumerator RideAgainWhenBoarded(PlayerMove player)
+    {
+        for (float onSince = -1f; ; )
+        {
+            if (PlayerOff(player) == false) { if (onSince < 0f) onSince = Time.time; if (Time.time - onSince >= boardDelay) break; }
+            else onSince = -1f;
+            yield return null;
+        }
+
+        IsRiding = true;
+        player.playerCanMove = false;
+        player.transform.SetParent(transform);
+        if (locks != null) locks.SetActive(true);
+        Transform startParent = transform.parent;
+        Vector3 startLocal = startParent != null ? startParent.InverseTransformPoint(transform.position) : transform.position;
+        for (float t = 0f; t < 1f; )
+        {
+            t = Mathf.Min(1f, t + Time.deltaTime * DebugTools.ElevatorSpeed / Mathf.Max(rideDuration, 0.01f));
+            Vector3 from = startParent != null ? startParent.TransformPoint(startLocal) : startLocal;
+            ControlPoints(from, dockPoint.position, out Vector3 p1, out Vector3 p2);
+            transform.position = Bezier(from, p1, p2, dockPoint.position, t * t * (3f - 2f * t));
+            if (!player.playerCanMove && t >= moveAt) player.playerCanMove = true;
+            yield return null;
+        }
+
+        transform.position = dockPoint.position;
+        Island island = dockPoint.GetComponentInParent<Island>();
+        if (island != null) transform.SetParent(DockParent(island));
+        player.transform.SetParent(null);
+        player.playerCanMove = true;
+        Transform respawn = island != null ? LevelManager.Instance.RespawnPointOf(island.gameObject) : null;
+        if (respawn != null) PlayerRespawn.Instance.SetRespawn(respawn);
+        if (locks != null) locks.SetActive(false);
+        IsRiding = false;
+        Docked = true;
+        StartCoroutine(ReturnWhenLeft());   // (and down again once you step off)
     }
 
     // Off it: standing on something else, or far. In the air near it: no answer (null)

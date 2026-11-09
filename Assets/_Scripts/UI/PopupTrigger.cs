@@ -20,12 +20,15 @@ public class PopupTrigger : MonoBehaviour
 
     bool inside;
     bool shown;
+    Collider zone, player;   // (the player's body: checked while inside)
+    float nextCheck;
 
     // When the component is added: make the collider a trigger
     void Reset() => GetComponent<Collider>().isTrigger = true;
 
     void Awake()
     {
+        zone = GetComponent<Collider>();
         if (TryGetComponent(out Renderer r)) r.enabled = false;
         if (!GetComponent<Collider>().isTrigger)
             Debug.LogWarning("[PopupTrigger] '" + name + "' collider is not a Trigger: it will block the player.", this);
@@ -35,6 +38,7 @@ public class PopupTrigger : MonoBehaviour
     {
         if (inside || !IsPlayer(other)) return;
         inside = true;
+        player = other;
         if (modal) { if (!shown) { shown = true; PopupManager.ShowModal(popup); } return; }
         if (closeWithX && onlyOnce && shown) return;
         shown = true;
@@ -43,8 +47,30 @@ public class PopupTrigger : MonoBehaviour
 
     void OnTriggerExit(Collider other)
     {
-        if (!inside || !IsPlayer(other)) return;
+        if (inside && IsPlayer(other)) Leave();
+    }
+
+    // Unity says nothing when the player leaves without walking out: a teleport (respawn, portal), the noclip of the debug
+    // tools (its body turned off). So while inside it checks it itself, 10 times a second: the body still overlaps?
+    void Update()
+    {
+        if (!inside || Time.time < nextCheck) return;
+        nextCheck = Time.time + 0.1f;
+        if (!StillInside()) Leave();
+    }
+
+    bool StillInside()
+    {
+        if (player == null || !player.enabled || !player.gameObject.activeInHierarchy || zone == null || !zone.enabled) return false;
+        Vector3 body = player.bounds.center;
+        float reach = player.bounds.extents.magnitude;   // (partly inside counts, as for the trigger)
+        return (zone.ClosestPoint(body) - body).sqrMagnitude <= reach * reach;
+    }
+
+    void Leave()
+    {
         inside = false;
+        player = null;
         if (modal) return;   // (closed by its click)
         if (hideOnExit && !closeWithX) PopupManager.Hide(popup);
     }

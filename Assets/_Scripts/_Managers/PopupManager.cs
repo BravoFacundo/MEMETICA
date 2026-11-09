@@ -16,6 +16,8 @@ using UnityEngine;
 // Modal: time frozen (the elevator, the platforms, the countdown…), you can't move or look, and any click, key or
 // gamepad button (not the pause keys) closes it after Min Time, then everything goes on. One at a time.
 // A scene without a PopupManager still shows them (one is made, without Popup Canvas: every panel on and off).
+// Sound: each time a popup appears (not while it stays up, or asked again) one of Appear Sounds (a SoundSet: at random,
+// each as it is or disguised, a little higher or lower each time); one that stops the game, one of Modal Sounds.
 public class PopupManager : MonoBehaviour
 {
     private static PopupManager instance;
@@ -40,6 +42,13 @@ public class PopupManager : MonoBehaviour
     [Header("Fade")]
     [Tooltip("Seconds to fade a popup in or out")]
     public float fadeTime = 0.25f;
+
+    [Header("Sound")]
+    [Tooltip("When a popup appears: one of these, at random. Each one as it is or Disguised (changed to sound like its own)")]
+    public SoundSet appearSounds = new SoundSet();
+    [Tooltip("When a popup that stops the game appears (the virus alert, 'Click to continue'): a sound of its own, so you " +
+             "hear the difference. Empty: Appear Sounds")]
+    public SoundSet modalSounds = new SoundSet();
 
     // A modal popup is open now (the game is stopped for it): the cursor shows, grabbing waits
     public static bool ModalOpen { get; private set; }
@@ -104,9 +113,15 @@ public class PopupManager : MonoBehaviour
 
     bool Fades(GameObject popup) => popupCanvas != null && popup.transform.IsChildOf(popupCanvas);
 
-    void Request(GameObject popup, bool closable)
+    void Request(GameObject popup, bool closable, bool modal = false)
     {
-        if (!Fades(popup)) { popup.SetActive(true); return; }
+        if (!Fades(popup))
+        {
+            if (!popup.activeSelf) PlayAppear(modal);
+            popup.SetActive(true);
+            return;
+        }
+        if (Count(popup) == 0) PlayAppear(modal);   // (it wasn't asked for: it appears now, or comes back while fading out)
         requests[popup] = Count(popup) + 1;
         CanvasGroup g = GroupOf(popup);
         g.blocksRaycasts = g.interactable = closable;
@@ -159,6 +174,8 @@ public class PopupManager : MonoBehaviour
         return g;
     }
 
+    void PlayAppear(bool modal) => (modal && !modalSounds.IsEmpty ? modalSounds : appearSounds).Play(gameObject);
+
     //---- Modal
 
     IEnumerator Modal(GameObject popup, System.Action closed, float minTime)
@@ -170,7 +187,7 @@ public class PopupManager : MonoBehaviour
         bool wasInput = player != null && player.InputLocked, wasLook = look != null && look.LookLocked;
         if (player != null) player.InputLocked = true;
         if (look != null) look.LookLocked = true;
-        Request(popup, true);   // (it takes clicks: its own buttons, if any)
+        Request(popup, true, true);   // (it takes clicks: its own buttons, if any)
 
         // A click during Min Time isn't lost: it closes it as soon as Min Time is over
         bool clicked = false;

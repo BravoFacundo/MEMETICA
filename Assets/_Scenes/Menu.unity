@@ -13376,7 +13376,7 @@ MonoBehaviour:
     sceneAsset: {fileID: 102900000, guid: 8898672d3f6b92b4eb477ba3a003e905, type: 3}
     sceneName: Game
   originalGameScene:
-    sceneAsset: {fileID: 0}
+    sceneAsset: {fileID: 102900000, guid: e7519bc308ac1c74192663fda617eeea, type: 3}
     sceneName: OriginalGame
   menuScene:
     sceneAsset: {fileID: 102900000, guid: 684aaed47ca867843a3e848a14f70460, type: 3}

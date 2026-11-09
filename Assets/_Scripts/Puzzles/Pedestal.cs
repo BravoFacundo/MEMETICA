@@ -356,9 +356,31 @@ public class Pedestal : MonoBehaviour
         if (!rejecting && !broken && !(done && retire != null)) Play(incorrectClip);   // (pushed out by us: its "wrong" already sounded)
         rejecting = false;
 
-        if (done && retire != null) { retire.Retire(); return; }   // used: into the ground, its way stays up
+        if (done && retire != null)   // used: into the ground (its way stays up, unless Lower Way)
+        {
+            retire.Retire();
+            if (retire.lowerWay && !broken) { LowerBridges(); WatchWay(retire.watchTime, retire.watchTurn); }
+            return;
+        }
         if (lower && !broken) LowerBridges();
         OnTakenOff();
+    }
+
+    // Your view held on its way a while (PedestalRetire > Lower Way: you see the bridge fall)
+    void WatchWay(float seconds, float turn)
+    {
+        Transform first = raises.Find(t => t != null);
+        PlayerLook look = PlayerLook.Instance;
+        if (first == null || look == null || seconds <= 0f) return;
+        Vector3 offset = AimPlatform.CenterOf(first) - first.position;   // (its middle, not its pivot: measured once)
+        look.Focus(() => first.position + offset, -1f, 0f, turn);
+        look.StartCoroutine(ReleaseViewAfter(look, seconds));
+    }
+
+    static IEnumerator ReleaseViewAfter(PlayerLook look, float seconds)
+    {
+        yield return new WaitForSeconds(seconds);   // (a modal popup meanwhile stops this too)
+        look.ReleaseFocus();
     }
 
     // Its meme was taken off (a randomizer stops a raffle in the middle)

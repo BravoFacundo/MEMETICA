@@ -5,6 +5,7 @@ using UnityEngine;
 // pedestal (growing in, with Appear Clip and Appear Effect), hangs a moment and drops into the socket. The pedestal
 // takes it as if you had placed it (a white one raises its bridge). The tutorial: the intro elevator arrives and the
 // meme window falls onto the tutorial pedestal, so its bridge isn't there while you ride up.
+// Your view is held on it a moment (Watch): from a little before it appears until it lies in the socket and a bit after.
 // The meme is hidden until then. Without a ride (tutorial skipped, a DebugTools start) it isn't hidden, or it is
 // seated on the pedestal at once.
 // Goes on the pedestal.
@@ -27,6 +28,12 @@ public class MemeDelivery : MonoBehaviour
     public float hangTime = 0.3f;
     [Tooltip("Seconds the fall takes (speeding up)")]
     public float fallTime = 0.5f;
+
+    [Header("Watch")]
+    [Tooltip("Seconds your view is held on it once it appears (you see it fall onto the pedestal). 0: free")]
+    public float watchTime = 1.5f;
+    [Tooltip("Seconds before it appears that your view already goes there (to see it appear)")]
+    public float watchLead = 0.3f;
 
     [Header("First Pick Up")]
     [Tooltip("Shown the first time you pick the meme up (also with the tutorial skipped): it stops the game until " +
@@ -83,7 +90,10 @@ public class MemeDelivery : MonoBehaviour
 
     IEnumerator Deliver()
     {
-        yield return new WaitForSeconds(delay);
+        float lead = watchTime > 0f ? Mathf.Clamp(watchLead, 0f, delay) : 0f;
+        yield return new WaitForSeconds(delay - lead);
+        if (watchTime > 0f) StartCoroutine(Watch(lead + watchTime));
+        if (lead > 0f) yield return new WaitForSeconds(lead);
         Vector3 top = pedestal.socket.position + Vector3.up * height;
         Transform t = meme.transform;
         Show(top);
@@ -119,6 +129,16 @@ public class MemeDelivery : MonoBehaviour
             yield return null;
         }
         if (!pedestal.HasMeme) pedestal.Receive(meme.gameObject);
+    }
+
+    // Your view on where it appears, then on it as it falls (it can still look around a little: Focus)
+    IEnumerator Watch(float seconds)
+    {
+        PlayerLook look = PlayerLook.Instance;
+        if (look == null) yield break;
+        look.Focus(() => meme != null && meme.gameObject.activeInHierarchy ? meme.transform.position : pedestal.socket.position + Vector3.up * height);
+        yield return new WaitForSeconds(seconds);
+        look.ReleaseFocus();
     }
 
     // On, still, out of any parent, at its size, there

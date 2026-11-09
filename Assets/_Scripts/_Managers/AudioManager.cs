@@ -169,7 +169,7 @@ public class AudioManager : MonoBehaviour
         routedAll = true;
     }
 
-    static void Route(AudioSource source)
+    public static void Route(AudioSource source)
     {
         if (Instance == null || Instance.sfxGroup == null || source == null) return;
         if (source.outputAudioMixerGroup == null && source != Instance.musicSource) source.outputAudioMixerGroup = Instance.sfxGroup;   // (the ambience too)

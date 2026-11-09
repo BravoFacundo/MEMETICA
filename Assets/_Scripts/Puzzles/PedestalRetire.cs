@@ -5,16 +5,23 @@ using UnityEngine;
 // it goes into the ground and takes nothing until it comes back up.
 //   Swallowed   the earth swallows it, slowly and shaking, for good (the target island's pedestal: its meme was
 //               downloaded)
+//   Stays       it stays where it is, but takes nothing more (the tutorial's: you see it, it is done)
 //   Slammed     it slams into the ground, not all the way (its top still shows), and comes back up when you land
 //               near it from a respawn (Rise Radius), or when something calls Restore (the hub's pedestal: ready
 //               for the next round). On a randomizer it slams in as soon as the meme is chosen, with the meme on it
 //               (RandomizerPedestal), so you see the island on the horizon
-// Goes on a Pedestal (white or randomizer). What moves is the pedestal's Body (the randomizer: the pedestal on its
+// Lower Way (the tutorial's pedestal): taken off, its way goes down too, and your view is held on it a few seconds
+// (Watch Time) while the pedestal goes into the ground: you see the bridge fall, and nothing snaps onto it meanwhile.
+// Respawn Swap (the tutorial's): two RespawnPoints of its island. Before its meme is taken off, Respawn Before is the
+// island's; after, Respawn After (in front of the pedestal) replaces it: any fall brings you back there. And landing on
+// ground Catch Depth meters below where you were then (the island's lower floor, with no way back up) does too, until you
+// stand on another island.
+// Goes on a Pedestal (white, black or randomizer). What moves is the pedestal's Body (the randomizer: the pedestal on its
 // platform, not the platform). Without it, the pedestal works as always (OriginalGame).
 [RequireComponent(typeof(Pedestal))]
 public class PedestalRetire : MonoBehaviour
 {
-    public enum Mode { Swallowed, Slammed }
+    public enum Mode { Swallowed, Slammed, Stays }
     public enum When { MemeTakenOff, Result }
 
     public Mode mode = Mode.Slammed;
@@ -26,6 +33,21 @@ public class PedestalRetire : MonoBehaviour
     public bool dropMeme = false;
     [Tooltip("Seconds after its meme is taken off before it goes down (so you see it)")]
     public float delay = 0.4f;
+    [Tooltip("Meme Taken Off: its way (what it raised) goes down too, as a pedestal without this would. Off: its way stays up")]
+    public bool lowerWay = false;
+    [Tooltip("Lower Way: seconds your view is held on its way going down (as the randomizer does). 0: free")]
+    [ShowIf(nameof(lowerWay))] public float watchTime = 2f;
+    [Tooltip("Lower Way: seconds the view takes to turn to it (short: it falls fast, you must get there in time)")]
+    [ShowIf(nameof(lowerWay))] public float watchTurn = 0.1f;
+
+    [Section("Respawn Swap", Closed = true)]
+    [Tooltip("The island's RespawnPoint until its meme is taken off (then turned off). Empty: none to turn off")]
+    public RespawnPoint respawnBefore;
+    [Tooltip("The RespawnPoint from then on, in front of the pedestal (off until then: it turns it off at the start). Empty: off")]
+    public RespawnPoint respawnAfter;
+    [Tooltip("Meters below where you were when its meme was taken off: landing lower than that (the floor below) brings " +
+             "you back to Respawn After")]
+    public float catchDepth = 4f;
 
     [Section("Slammed", nameof(mode), Mode.Slammed)]
     [Tooltip("Part of its height that goes into the ground (0.5 = half; less than 1: its top still shows)")]
@@ -74,6 +96,7 @@ public class PedestalRetire : MonoBehaviour
         restLocal = body.localPosition;
         height = MeasureHeight();   // now, before it holds a meme
         audioSource = GetComponent<AudioSource>();
+        if (respawnAfter != null) respawnAfter.gameObject.SetActive(false);   // (its turn comes when the meme is taken off)
     }
 
     void OnEnable() { PlayerRespawn.RespawnTouchedDown += OnRespawn; PortalWindow.Arrived += OnPortal; }
@@ -98,13 +121,46 @@ public class PedestalRetire : MonoBehaviour
     {
         if (!IsUp) return;
         IsUp = false;
+        if (respawnAfter != null && when == When.MemeTakenOff) SwapRespawn();
+        if (mode == Mode.Stays) return;   // (where it is: it only takes nothing more)
         Run(mode == Mode.Swallowed ? Swallow() : Slam());
+    }
+
+    // Respawn Before off, Respawn After on and yours now; then the floor below watched
+    void SwapRespawn()
+    {
+        if (respawnBefore != null) respawnBefore.gameObject.SetActive(false);
+        respawnAfter.gameObject.SetActive(true);
+        if (PlayerRespawn.Instance != null) PlayerRespawn.Instance.SetRespawn(respawnAfter.transform);
+        StartCoroutine(CatchFalls());
+    }
+
+    // Landed on ground Catch Depth below where you were: back to Respawn After. Until you stand on another island
+    IEnumerator CatchFalls()
+    {
+        PlayerMove player = FindObjectOfType<PlayerMove>();
+        PlayerRespawn respawn = PlayerRespawn.Instance;
+        if (player == null || respawn == null) yield break;
+        float floor = player.transform.position.y - catchDepth;
+        Transform home = Outermost(Island.Of(transform));
+        while (true)
+        {
+            yield return null;
+            Transform under = respawn.GroundUnder;
+            Transform island = under != null ? Outermost(Island.Of(under)) : null;
+            if (island != null && home != null && island != home) yield break;   // somewhere else now: done
+            if (player.isGrounded && !respawn.Respawning && player.transform.position.y < floor)
+            {
+                respawn.RespawnAt(respawnAfter.transform);
+                yield return new WaitForSeconds(1f);   // (landing there first)
+            }
+        }
     }
 
     // Back up and ready (the portal back to the hub will call it; for now landing from a respawn nearby does)
     public void Restore()
     {
-        if (IsUp || mode == Mode.Swallowed || moving != null) return;   // (still going in: not yet)
+        if (IsUp || mode != Mode.Slammed || moving != null) return;   // (only a slammed one comes back; still going in: not yet)
         Run(Rise());
     }
 
@@ -113,6 +169,14 @@ public class PedestalRetire : MonoBehaviour
         if (IsUp || mode != Mode.Slammed || riseOn != RiseOn.AnyRespawn || riseRadius <= 0f) return;
         PlayerMove player = FindObjectOfType<PlayerMove>();
         if (player != null && Vector3.Distance(player.transform.position, transform.position) <= riseRadius) Restore();
+    }
+
+    // The island everything here is part of (the tutorial's elevator is part of its island)
+    static Transform Outermost(Transform island)
+    {
+        for (Transform p = island != null ? island.parent : null; p != null; p = p.parent)
+            if (Island.IsIsland(p)) island = p;
+        return island;
     }
 
     //---- Movements

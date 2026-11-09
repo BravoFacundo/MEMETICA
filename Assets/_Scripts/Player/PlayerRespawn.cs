@@ -25,9 +25,12 @@ public class PlayerRespawn : MonoBehaviour
     public static PlayerRespawn Instance { get; private set; }
 
     [Section("Respawn")]
-    [Tooltip("Classic: you reappear high above (LevelManager's Drop Distance) and brake before the ground. Slam: you " +
+    [Tooltip("Classic: you reappear high above (Respawn Height) and brake before the ground. Slam: you " +
              "reappear close above and slam down on your face (Slam Respawn below)")]
     public RespawnStyle respawnStyle = RespawnStyle.Slam;
+    [Tooltip("Classic: meters above the ground of the RespawnPoint you reappear (its own Height, if it has one, wins). " +
+             "Before: the LevelManager's Drop Distance, the same as the islands' (30: a very long fall)")]
+    [ShowIf(nameof(respawnStyle), RespawnStyle.Classic)] public float respawnHeight = 12f;
     [Tooltip("After reappearing it falls fast, then brakes over these last meters before the ground. 0 = no brake")]
     [ShowIf(nameof(respawnStyle), RespawnStyle.Classic)] public float respawnBrakeDistance = 6f;
     [Tooltip("Falling speed it brakes down to (m/s); the last bit it falls on its own")]
@@ -217,7 +220,8 @@ public class PlayerRespawn : MonoBehaviour
         lastIsland = groundIsland;
         nextRespawnCheck = Time.time + 0.25f;
         Transform point = LevelManager.Instance.RespawnPointOf(groundIsland, transform.position);
-        if (point == null && move.isGrounded) point = SafeSpot(groundIsland, hit.point);   // no RespawnPoint on it: where you last stood
+        // No RespawnPoint on it: where you last stood (not on an elevator: it moves, and it isn't a place to come back to)
+        if (point == null && move.isGrounded && !groundIsland.TryGetComponent(out Elevator _)) point = SafeSpot(groundIsland, hit.point);
         if (point != null) respawnPoint = point;
         return false;
     }
@@ -245,6 +249,14 @@ public class PlayerRespawn : MonoBehaviour
         lastGroundHit = null;   // the ground is checked again next frame
     }
 
+    // Back to that point now, as after a fall (PedestalRetire's Respawn Swap: down on a floor you can't climb back from)
+    public void RespawnAt(Transform point)
+    {
+        if (point == null || Respawning) return;
+        respawnPoint = point;
+        Respawn();
+    }
+
     private void Respawn()
     {
         VoidRespawned?.Invoke();
@@ -256,10 +268,10 @@ public class PlayerRespawn : MonoBehaviour
             respawnPoint = LevelManager.Instance.startRespawnPoint; lastIsland = null; lastGroundHit = null;
         }
 
-        // Drop Distance above the ground of the RespawnPoint: it falls down onto it (and brakes before landing)
+        // Respawn Height above the ground of the RespawnPoint: it falls down onto it (and brakes before landing)
         Vector3 from = LevelManager.Instance.RespawnPosition(respawnPoint, out float groundY);
         respawnPoint.TryGetComponent(out RespawnPoint spot);
-        if (spot != null && spot.height > 0f) from.y = groundY + spot.height;   // its own height
+        from.y = groundY + (spot != null && spot.height > 0f ? spot.height : respawnHeight);   // its own height, or Respawn Height
         lastGroundY = groundY;
         awaitingLanding = true;
         touchedDown = false;
