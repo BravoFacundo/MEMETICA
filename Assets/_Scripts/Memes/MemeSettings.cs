@@ -82,6 +82,12 @@ public class MemeSettings : ScriptableObject
     [Tooltip("Seconds the meme in your hand takes to turn into its Fall change once you fall into the void (almost at once: the joke is the surprise)")]
     public float fallSwapTime = 0.05f;
 
+    [Header("One change after another (Leave, then Fall…)")]
+    [Tooltip("Seconds a change shows at least before the next one can cut it (the next one waits): you see and hear each")]
+    public float minChangeShow = 1.2f;
+    [Tooltip("Seconds the cut change's sound takes to fade out (not a hard stop)")]
+    public float soundCutFade = 0.25f;
+
     [Header("Changes you must see (fall alone (meteor), leave)")]
     [Tooltip("Meters: it changes in front of you when you come this close and it is on screen (close: it happens right in your face)")]
     public float revealDistance = 1.25f;

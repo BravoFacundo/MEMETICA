@@ -24,7 +24,7 @@ MonoBehaviour:
   m_MinSize: {x: 400, y: 100}
   m_MaxSize: {x: 32384, y: 16192}
   vertical: 0
-  controlID: 24862
+  controlID: 27767
   draggingID: 0
 --- !u!114 &2
 MonoBehaviour:
@@ -149,7 +149,7 @@ MonoBehaviour:
   m_MinSize: {x: 300, y: 100}
   m_MaxSize: {x: 24288, y: 16192}
   vertical: 1
-  controlID: 24863
+  controlID: 27719
   draggingID: 0
 --- !u!114 &4
 MonoBehaviour:
@@ -176,7 +176,7 @@ MonoBehaviour:
   m_MinSize: {x: 300, y: 50}
   m_MaxSize: {x: 24288, y: 8096}
   vertical: 0
-  controlID: 24864
+  controlID: 27695
   draggingID: 0
 --- !u!114 &5
 MonoBehaviour:
@@ -240,7 +240,7 @@ MonoBehaviour:
     m_OverlaysVisible: 1
   m_SceneHierarchy:
     m_TreeViewState:
-      scrollPos: {x: 0, y: 0}
+      scrollPos: {x: 0, y: 2056.9092}
       m_SelectedIDs: 
       m_LastClickedID: 0
       m_ExpandedIDs: 76deffffe2deffff8eedffff585f000034620000346500001c6800003c6a00000e6d0000ac6d0000ce6f000086700000fa710000a6730000f67300009a74000038760000c876000068770000467800008c7800009e7a000022820000b48a0000d08c00005e8e000082900000989100002a930000
@@ -850,7 +850,7 @@ MonoBehaviour:
     m_SkipHidden: 0
     m_SearchArea: 1
     m_Folders:
-    - Assets/_Prefabs/Effects
+    - Assets/_Prefabs
     m_Globs: []
     m_OriginalText: 
     m_ImportLogFlags: 0
@@ -858,15 +858,15 @@ MonoBehaviour:
   m_ViewMode: 1
   m_StartGridSize: 96
   m_LastFolders:
-  - Assets/_Prefabs/Effects
+  - Assets/_Prefabs
   m_LastFoldersGridSize: 96
   m_LastProjectPath: C:\Users\Facu\Documents\.Unity Projects\Educational\MEMETICA
   m_LockTracker:
     m_IsLocked: 0
   m_FolderTreeState:
     scrollPos: {x: 0, y: 0}
-    m_SelectedIDs: 642f0400
-    m_LastClickedID: 274276
+    m_SelectedIDs: 889a0000
+    m_LastClickedID: 39560
     m_ExpandedIDs: 00000000249a0000269a0000289a00002a9a00002c9a00002e9a0000309a0000329a0000349a0000889a0000ffffff7f
     m_RenameOverlay:
       m_UserAcceptedRename: 0
@@ -1220,8 +1220,8 @@ MonoBehaviour:
     y: 0
     width: 327.2727
     height: 808.7636
-  m_MinSize: {x: 276, y: 71}
-  m_MaxSize: {x: 4001, y: 4021}
+  m_MinSize: {x: 275, y: 50}
+  m_MaxSize: {x: 4000, y: 4000}
   m_ActualView: {fileID: 17}
   m_Panes:
   - {fileID: 17}

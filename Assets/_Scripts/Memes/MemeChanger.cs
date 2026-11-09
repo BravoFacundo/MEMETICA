@@ -56,6 +56,13 @@ public abstract class MemeChanger : Meme
     private readonly HashSet<int> movesSeen = new HashSet<int>();   // Changes Once: the Moves already shown
     private GameObject lastFallIsland;   // the island you fell from the last time its Fall change showed   // their change happened once: they join the sweep
 
+    private bool showingStill;          // a video's kept frame (the sweep), its player stopped
+    private float changeShownAt = -99f;
+    private float fallEndsAt;           // when its Fall change's sound ends (landing doesn't cut it) // when the last change came up (the next one waits Min Change Show)
+    private MemeImage sweepFinale;      // the sweep ends on this one, played (the target island's last Move)
+    private readonly Dictionary<UnityEngine.Video.VideoClip, RenderTexture> stills =
+        new Dictionary<UnityEngine.Video.VideoClip, RenderTexture>();   // a frame of each video already shown (the sweep shows it)
+
     private float cover;                // 0 clear, 1 the image is hidden
     private Coroutine coverClearing;
 
@@ -88,6 +95,8 @@ public abstract class MemeChanger : Meme
         sfx.playOnAwake = false; sfx.spatialBlend = 1f; sfx.minDistance = 4f;
         memeSource = gameObject.AddComponent<AudioSource>();
         memeSource.playOnAwake = false; memeSource.spatialBlend = 1f; memeSource.minDistance = 4f;
+        fadingSource = gameObject.AddComponent<AudioSource>();   // (the cut one fades out here)
+        fadingSource.playOnAwake = false; fadingSource.spatialBlend = 1f; fadingSource.minDistance = 4f;
         if (CurrentPlayer != null) lastPlayerPos = CurrentPlayer.transform.position;
 
         if (!SetUpLook()) return;
@@ -109,6 +118,8 @@ public abstract class MemeChanger : Meme
 
     // No meme on it (empty window)
     public bool IsEmpty => !hasMeme;
+    // A change, the sweep or the fall back still going on (PortalWindow waits for it before emptying it)
+    public bool IsChanging => changeRoutine != null || revealRoutine != null || sweepRoutine != null;
 
     // Its Leave change (you forgot it and it came to you: PlayerGrab's Recall), right now, if it hasn't shown it yet. False: it
     // has none left to show
@@ -135,7 +146,9 @@ public abstract class MemeChanger : Meme
 
     IEnumerator InstantChange(MemeImage image)
     {
+        yield return ShownLongEnough();
         ClearCover();
+        changeShownAt = Time.time;
         SetImage(image);
         Play(Settings.changeClip);
         float soundLength = PlayChange(image);
@@ -291,12 +304,28 @@ public abstract class MemeChanger : Meme
 
         StopChanges();
         fallingWithPlayer = true;
-        changeRoutine = StartCoroutine(CoverSwap(() =>
+        changeRoutine = StartCoroutine(FallChange());
+    }
+
+    IEnumerator FallChange()
+    {
+        yield return ShownLongEnough();   // (a Leave just before it: seen and heard first)
+        yield return CoverSwap(() =>
         {
-            SetImage(Data.fall); Play(Settings.changeClip); PlayChange(Data.fall);
+            SetImage(Data.fall); Play(Settings.changeClip);
+            float soundLength = PlayChange(Data.fall);
+            changeShownAt = Time.time;
+            fallEndsAt = Time.time + (soundLength > 0f ? soundLength : Settings.minChangeShow);
             fallSeen = true;
             MemeDex.Report(Data, Data.fall);
-        }, Settings.fallSwapTime));
+        }, Settings.fallSwapTime);
+        changeRoutine = null;
+    }
+
+    // The change showing now has been up Min Change Show seconds (else: wait the rest; it goes on meanwhile)
+    IEnumerator ShownLongEnough()
+    {
+        while (Time.time - changeShownAt < Settings.minChangeShow) yield return null;
     }
 
     // In your hand, the fall is over (you reappeared, landed and got up): back to its base image
@@ -308,8 +337,10 @@ public abstract class MemeChanger : Meme
         changeRoutine = StartCoroutine(BackAfterFall());
     }
 
+    // Landed before its Fall played out (a short fall, the portal): it plays to the end first
     IEnumerator BackAfterFall()
     {
+        while (Time.time < fallEndsAt - Settings.mistOut) yield return null;
         yield return CoverSwap(() => { ShowBase(); Play(Settings.returnClip); }, Settings.mistIn);
         nextChangeAt = movingTime + Random.Range(Settings.changeInterval.x, Settings.changeInterval.y);
         changeRoutine = null;
@@ -342,7 +373,7 @@ public abstract class MemeChanger : Meme
     // The Move an island gives comes from its number: Island_11 → Move 1, Island_12 → 2, Island_13 → 3 (its last digit).
     // The last Move isn't an island's: it comes out at the end of the sweep, placed on the white pedestal of the target
     // island (named as the meme's axis: MemeData > Meme > Title: TrollFace → Island_TrollFace; case and spaces don't
-    // matter): Reveal Last Move. Any other name (Island_HUB, Island_Tutorial, Island_1A optional) → none.
+    // matter): End Sweep On Last Move. Any other name (Island_HUB, Island_Tutorial, Island_1A optional) → none.
     // The hub, the tutorial and optional islands (Lift: Role) never give one. Going back: nothing again.
     // OriginalGame (MemeOrb): as before (one more for the random pick on each new island)
     protected virtual bool ChangesOnce => false;
@@ -356,17 +387,22 @@ public abstract class MemeChanger : Meme
         ShowChange(Data.variants[move - 1]);
     }
 
-    // The last Move, at the end of the sweep on the target island's white pedestal (KeyPedestal, right): it shows
-    // (with its sound, into the MemeDex) and goes back to the base image. Waits until it is over (then the pedestal may
-    // download the meme). Anywhere else, or already seen: nothing
-    public IEnumerator RevealLastMove(GameObject island)
+    // The last Move: on the target island's white pedestal (KeyPedestal, its Key) the sweep ends on it instead of the
+    // base image, and it plays there (its video, its sound, into the MemeDex) until its sound ends, then back to the
+    // base. Call it before Sweep. False: anywhere else, or already seen (the sweep ends on the base as always)
+    public bool EndSweepOnLastMove(GameObject island)
     {
-        if (!ChangesOnce || !hasMeme || Data == null || island == null || !IsTarget(island.name)) yield break;
+        if (!ChangesOnce || !hasMeme || Data == null || island == null || !IsTarget(island.name)) return false;
         int moves = Mathf.Min(Data.variants.Count, MemeDex.Instance != null ? MemeDex.Instance.movesPerAxis : 4);
-        if (moves < 1 || !MemeImage.Exists(Data.variants[moves - 1]) || !movesSeen.Add(moves)) yield break;
-        while (sweepRoutine != null) yield return null;   // (the sweep first)
-        ShowChange(Data.variants[moves - 1]);
-        while (changeRoutine != null) yield return null;
+        if (moves < 1 || !MemeImage.Exists(Data.variants[moves - 1]) || !movesSeen.Add(moves)) return false;
+        sweepFinale = Data.variants[moves - 1];
+        return true;
+    }
+
+    // Until the sweep is over (its last Move goes on playing)
+    public IEnumerator WaitForSweepEnd()
+    {
+        while (sweepRoutine != null) yield return null;
     }
 
     // Named as its axis: Island_<Title>
@@ -503,6 +539,7 @@ public abstract class MemeChanger : Meme
     {
         if (mutationRoutine != null) { StopCoroutine(mutationRoutine); mutationRoutine = null; }
         if (changeRoutine != null) { StopCoroutine(changeRoutine); changeRoutine = null; }
+        yield return ShownLongEnough();
         // The cover comes up slowly while the new image shows through now and then, faster and faster
         Play(Settings.warnClip);
         for (float t = 0f; t < Settings.revealTime; )
@@ -530,10 +567,12 @@ public abstract class MemeChanger : Meme
 
     IEnumerator ChangeRoutine(MemeImage image, bool coverAlreadyUp = false)
     {
+        if (!coverAlreadyUp) yield return ShownLongEnough();
         float soundLength = 0f;
         yield return CoverSwap(() =>
         {
             SetImage(image); Play(Settings.changeClip); soundLength = PlayChange(image);
+            changeShownAt = Time.time;
             if (image == Data.fall) fallSeen = true;
             if (image == Data.leave) leaveSeen = true;
             MemeDex.Report(Data, image);   // Fall, Leave or a Move: into the MemeDex
@@ -582,7 +621,7 @@ public abstract class MemeChanger : Meme
     // else its Fallback Sound; else MemeSettings' fallback. Returns its length (0: none, or a loop)
     float PlayChange(MemeImage image)
     {
-        if (image.video != null && image.videoSound) { memeSource.Stop(); return (float)image.video.length; }   // its video's own sound
+        if (image.video != null && image.videoSound) { FadeOutMemeSound(); return (float)image.video.length; }   // its video's own sound
         MemeSound sound = image.sound != null ? new MemeSound { clip = image.sound, loop = image.loop }   // its own, next to it
                         : Pick(Data.fallbackSounds)
                         ?? (Data.fallbackSound != null ? new MemeSound { clip = Data.fallbackSound } : null);
@@ -592,13 +631,39 @@ public abstract class MemeChanger : Meme
             if (fallback != null) sound = new MemeSound { clip = fallback };
         }
         if (sound == null) return 0f;
-        // One at a time: the previous change's sound stops (hopping islands fast doesn't pile them up)
-        memeSource.Stop();
+        // One at a time: the previous change's sound fades out quickly (hopping islands fast doesn't pile them up)
+        FadeOutMemeSound();
         memeSource.clip = sound.clip;
         memeSource.loop = sound.loop;   // a loop lasts until it goes back (ShowBase)
         memeSource.Play();
         if (DebugTools.LogMemeSounds) Debug.Log($"[Meme sound] {name}: {sound.clip.name} (change: {(image == Data.fall ? "Fall" : image == Data.leave ? "Leave" : "Move")}{(sound.loop ? ", loop" : "")}) frame {Time.frameCount}", this);
         return sound.loop ? 0f : sound.clip.length;
+    }
+
+    // The sound playing now goes on in the other source, fading out in Sound Cut Fade (not cut dry)
+    private AudioSource fadingSource;
+    private Coroutine fading;
+    void FadeOutMemeSound()
+    {
+        if (fadingSource == null || !memeSource.isPlaying || Settings.soundCutFade <= 0f) { memeSource.Stop(); return; }
+        if (fading != null) StopCoroutine(fading);
+        fadingSource.Stop();
+        fadingSource.clip = memeSource.clip;
+        fadingSource.loop = false;
+        fadingSource.volume = memeSource.volume;
+        fadingSource.Play();
+        fadingSource.timeSamples = Mathf.Min(memeSource.timeSamples, memeSource.clip.samples - 1);
+        memeSource.Stop();
+        fading = StartCoroutine(FadeOut(fadingSource, Settings.soundCutFade));
+    }
+
+    IEnumerator FadeOut(AudioSource source, float seconds)
+    {
+        float from = source.volume;
+        for (float t = 0f; t < seconds; t += Time.deltaTime) { source.volume = Mathf.Lerp(from, 0f, t / seconds); yield return null; }
+        source.Stop();
+        source.volume = from;
+        fading = null;
     }
 
     static MemeSound Pick(MemeSound[] sounds)
@@ -664,11 +729,28 @@ public abstract class MemeChanger : Meme
         float step = duration * Settings.sweepPortion / Mathf.Max(shownInSweep.Count + 1, 1);
         foreach (MemeImage image in shownInSweep)
         {
-            SetImage(image); Play(Settings.sweepTickClip);
+            SetImage(image, true); Play(Settings.sweepTickClip);   // (a video: a frame of it, at once)
             yield return new WaitForSeconds(step);
         }
-        ShowBase(); StartCoroutine(Flash(1f));
+        MemeImage finale = sweepFinale;
+        sweepFinale = null;
+        if (finale != null) changeRoutine = StartCoroutine(Finale(finale));   // (set before the sweep is over: no gap)
+        else { ShowBase(); StartCoroutine(Flash(1f)); }
         sweepRoutine = null;
+    }
+
+    // The sweep ends on it: no cover, it just stays and plays, then back to the base
+    IEnumerator Finale(MemeImage image)
+    {
+        SetImage(image); Play(Settings.changeClip);
+        float soundLength = PlayChange(image);
+        changeShownAt = Time.time;
+        MemeDex.Report(Data, image);
+        StartCoroutine(Flash(1f));
+        yield return new WaitForSeconds(soundLength > 0f ? Mathf.Max(0f, soundLength - Settings.mistOut)
+                                                       : Random.Range(Settings.variantDuration.x, Settings.variantDuration.y));
+        yield return CoverSwap(() => { ShowBase(); Play(Settings.returnClip); }, Settings.mistIn);
+        changeRoutine = null;
     }
 
     //---- The image
@@ -694,12 +776,14 @@ public abstract class MemeChanger : Meme
             videoWasPlaying = videoPlayer != null && videoPlayer.isPlaying;
             if (videoWasPlaying) videoPlayer.Pause();
             if (memeSource != null) memeSource.Pause();
+            if (fadingSource != null) fadingSource.Pause();
             if (sfx != null) sfx.Pause();
         }
         else
         {
             if (videoWasPlaying && videoPlayer != null) videoPlayer.Play();
             if (memeSource != null) memeSource.UnPause();
+            if (fadingSource != null) fadingSource.UnPause();
             if (sfx != null) sfx.UnPause();
         }
     }
@@ -711,14 +795,20 @@ public abstract class MemeChanger : Meme
         if (videoPlayer != null && videoPlayer.isPaused && shown != null && shown.video != null) videoPlayer.Play();
     }
 
-    // Its picture now; its video (if any) plays and takes over from its first frame
-    void SetImage(MemeImage image)
+    // Its picture now; its video (if any) plays and takes over from its first frame. Still (the sweep): a video shows a
+    // frame of it already seen at once, and doesn't play (each image there lasts a blink)
+    void SetImage(MemeImage image, bool still = false)
     {
         if (!MemeImage.Exists(image)) return;
         shown = image;
         showingVideoFrame = false;
-        if (image.picture != null) ShowTexture(image.picture);
+        RenderTexture frame = image.video != null && image.picture == null && stills.TryGetValue(image.video, out RenderTexture f) ? f : null;
+        if (image.picture == null && frame == null && videoTexture != null && shownTexture == videoTexture) HoldFrame();   // (not black meanwhile)
+        if (image.picture != null) Display(image.picture);
+        else if (frame != null) Display(frame);
         OnImageShown(image);
+        showingStill = still && frame != null;
+        if (showingStill) { if (videoPlayer != null) videoPlayer.Stop(); return; }
 
         if (image.video == null) { if (videoPlayer != null) videoPlayer.Stop(); return; }
         if (videoPlayer == null) videoPlayer = CreateVideoPlayer();
@@ -736,17 +826,59 @@ public abstract class MemeChanger : Meme
     // The video's frames once it has one (until then, its picture)
     void UpdateVideoFrame()
     {
-        if (shown == null || shown.video == null || videoPlayer == null) return;
+        if (shown == null || shown.video == null || videoPlayer == null || showingStill) return;
         // Showing it: the build's player may hand a new texture later (the old one would stay black): follow it
         if (showingVideoFrame)
         {
-            if (videoPlayer.texture != null && videoPlayer.texture != videoTexture) ShowTexture(videoTexture = videoPlayer.texture);
+            if (videoPlayer.texture != null && videoPlayer.texture != videoTexture) Display(videoTexture = videoPlayer.texture);
+            if (videoPlayer.frame >= StillFrame) KeepStill(shown.video, videoPlayer.texture);   // (well into it: not a black frame)
             return;
         }
-        if (!videoPlayer.isPlaying || videoPlayer.frame < 1 || videoPlayer.texture == null) return;
-        ShowTexture(videoTexture = videoPlayer.texture);
+        // Its first frames come black (the decoder starting): until then the picture before stays, never black
+        if (!videoPlayer.isPlaying || videoPlayer.frame < FirstShownFrame || videoPlayer.texture == null) return;
+        Display(videoTexture = videoPlayer.texture);
         showingVideoFrame = true;
         if (VideoWaits) videoPlayer.Pause();   // its first frame, until picked up
+    }
+
+    // The video frame showing now, copied: switching clips blanks the player's own texture, and it is still on screen
+    private RenderTexture held;
+    private Texture shownTexture;
+    void HoldFrame()
+    {
+        if (held == null || held.width != videoTexture.width || held.height != videoTexture.height)
+        {
+            if (held != null) held.Release();
+            held = new RenderTexture(videoTexture.width, videoTexture.height, 0) { name = name + " (held frame)" };
+        }
+        Graphics.Blit(videoTexture, held);
+        Display(held);
+    }
+
+    // Every texture shown goes through here (so it knows what is on screen)
+    void Display(Texture texture)
+    {
+        shownTexture = texture;
+        ShowTexture(texture);
+    }
+
+    const int FirstShownFrame = 3;   // the first video frame it shows (before: black while it starts)
+    const int StillFrame = 10;       // the frame it keeps for the sweep
+
+    // A frame of this video, kept (the sweep shows it without playing it)
+    void KeepStill(UnityEngine.Video.VideoClip clip, Texture texture)
+    {
+        if (clip == null || texture == null || stills.ContainsKey(clip)) return;
+        var copy = new RenderTexture(texture.width, texture.height, 0) { name = clip.name + " (still)" };
+        Graphics.Blit(texture, copy);
+        stills[clip] = copy;
+    }
+
+    void OnDestroy()
+    {
+        foreach (RenderTexture rt in stills.Values) if (rt != null) rt.Release();
+        stills.Clear();
+        if (held != null) held.Release();
     }
 
     // Plays to a texture we read (no render texture), looping and silent (the change sounds are its sound)

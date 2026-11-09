@@ -65,6 +65,9 @@ public class KeyPedestal : Pedestal
     {
         Play(chargeClip);
         Think(true);
+        // Its Key on the target island: the sweep ends on its last Move, which plays here (MemeChanger)
+        Transform island = Island.Of(transform);
+        if (Fits(MemeObject) && CurrentMeme is MemeChanger window && island != null) window.EndSweepOnLastMove(island.gameObject);
         if (CurrentMeme != null) CurrentMeme.Sweep(Length(chargeClip));
         yield return new WaitForSeconds(Length(chargeClip));
         if (Fits(MemeObject)) SetCorrect();
@@ -77,11 +80,11 @@ public class KeyPedestal : Pedestal
         if (CurrentMeme is MemeChanger window) StartCoroutine(Finish(window));
     }
 
-    // On the target island: its last Move comes out first (MemeChanger); then, if it downloads, the window empties
+    // When the sweep is over (on the target island it ended on its last Move, still playing), if it downloads, the
+    // window empties
     IEnumerator Finish(MemeChanger window)
     {
-        Transform island = Island.Of(transform);
-        if (island != null) yield return window.RevealLastMove(island.gameObject);
+        yield return window.WaitForSweepEnd();
         if (downloadMeme && window != null) window.SetMeme(null);   // downloaded
     }
 

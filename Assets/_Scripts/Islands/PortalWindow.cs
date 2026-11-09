@@ -68,6 +68,9 @@ public class PortalWindow : MonoBehaviour
     public bool fallChange = true;
     [Tooltip("The meme window you carry empties once you landed in the hub (its meme downloaded)")]
     public bool emptyOnLanding = false;
+    [Tooltip("Empty On Landing: its Fall change plays out first; but this close to the hub's randomizer pedestal (meters) it " +
+             "empties at once (you never get there with it full)")]
+    public float emptyNear = 8f;
     [Tooltip("On: in its middle you fall into it (it never holds you there). Off: you stand on it Stand Time, then sink")]
     public bool fallIn = true;
     [Tooltip("Fall In off: seconds standing on it before you sink")]
@@ -341,8 +344,22 @@ public class PortalWindow : MonoBehaviour
         yield return null;
         for (float t = 0f; t < 15f && PlayerRespawn.Instance.Respawning; t += Time.deltaTime) yield return null;
         MemeChanger window = CarriedWindow;
-        if (emptyOnLanding && window != null) window.SetMeme(null);
+        if (emptyOnLanding && window != null)
+        {
+            yield return new WaitForSeconds(0.2f);   // (its fall back starts once you are up)
+            while (window != null && window.IsChanging && !NearRandomizer()) yield return null;   // its Fall plays out
+            if (window != null) window.SetMeme(null);
+        }
         Arrived?.Invoke();   // the hub's pedestal comes back up (PedestalRetire)
+    }
+
+    // Close to a randomizer pedestal (the hub's)
+    bool NearRandomizer()
+    {
+        if (player == null) return false;
+        foreach (RandomizerPedestal pedestal in FindObjectsOfType<RandomizerPedestal>())
+            if (Vector3.Distance(player.transform.position, pedestal.Body.position) <= emptyNear) return true;
+        return false;
     }
 
     // You came back through a portal and got up in the hub
