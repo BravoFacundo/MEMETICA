@@ -74,7 +74,15 @@ public class KeyPedestal : Pedestal
     protected override void OnRight()
     {
         if (CurrentMeme != null && CurrentMeme.Data != null) MemeDex.Report(CurrentMeme.Data, CurrentMeme.Data.baseImage);   // its Base into the MemeDex
-        if (downloadMeme && CurrentMeme is MemeChanger window) window.SetMeme(null);   // downloaded
+        if (CurrentMeme is MemeChanger window) StartCoroutine(Finish(window));
+    }
+
+    // On the target island: its last Move comes out first (MemeChanger); then, if it downloads, the window empties
+    IEnumerator Finish(MemeChanger window)
+    {
+        Transform island = Island.Of(transform);
+        if (island != null) yield return window.RevealLastMove(island.gameObject);
+        if (downloadMeme && window != null) window.SetMeme(null);   // downloaded
     }
 
     protected override bool LowersWhenTakenOff(GameObject meme) => Fits(meme);

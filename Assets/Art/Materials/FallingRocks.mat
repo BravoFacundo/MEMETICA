@@ -53,6 +53,10 @@ Material:
         m_Texture: {fileID: 2800000, guid: 3c038a1766530664d947c0bef2b1b187, type: 3}
         m_Scale: {x: 0.4, y: 0.6}
         m_Offset: {x: 0, y: 0}
+    - _MarkTex:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
     - _MetallicGlossMap:
         m_Texture: {fileID: 2800000, guid: aac7b3b675e138c44b5970dcedfb513c, type: 3}
         m_Scale: {x: 1, y: 1}
@@ -68,15 +72,18 @@ Material:
     m_Ints: []
     m_Floats:
     - _BumpScale: 1
-    - _Crack: 0.24
+    - _Crack: 0.5
+    - _CrackOpen: 0
     - _CrackScale: 0.12
-    - _CrackSize: 3
+    - _CrackSize: 3.5
     - _Cutoff: 0.5
     - _DetailNormalMapScale: 1
     - _DstBlend: 0
     - _GlossMapScale: 1
     - _Glossiness: 0.18
     - _GlossyReflections: 1
+    - _MarkRelief: 0.5
+    - _MarkSize: 1
     - _Metallic: 0
     - _Mode: 0
     - _OcclusionStrength: 1
@@ -92,4 +99,5 @@ Material:
     - _CrackFit: {r: 0, g: 1, b: 0, a: 0}
     - _CrackOffset: {r: -0.39, g: 0.23, b: 0.5, a: -0.76}
     - _EmissionColor: {r: 0, g: 0, b: 0, a: 1}
+    - _MarkColor: {r: 0, g: 0, b: 0, a: 0}
   m_BuildTextureStacks: []

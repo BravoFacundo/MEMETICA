@@ -5424,7 +5424,7 @@ GameObject:
   m_Component:
   - component: {fileID: 4319837987669466275}
   m_Layer: 6
-  m_Name: Area1
+  m_Name: Island_01
   m_TagString: Isla
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0

@@ -5683,6 +5683,12 @@ MonoBehaviour:
   when: 0
   dropMeme: 0
   delay: 0.2
+  lowerWay: 0
+  watchTime: 2
+  watchTurn: 0.1
+  respawnBefore: {fileID: 0}
+  respawnAfter: {fileID: 0}
+  catchDepth: 4
   slamPortion: 0.2
   slamTime: 0.18
   riseOn: 0
@@ -5692,6 +5698,18 @@ MonoBehaviour:
   riseClip: {fileID: 8300000, guid: 8f183ec1614434d47875b411ecdee0c9, type: 3}
   swallowTime: 2.5
   swallowClip: {fileID: 0}
+  rock: {fileID: 7393098362869938263, guid: 5aa1ba37a2b5e2f45afd8a3af127e862, type: 3}
+  rockCount: {x: 5, y: 7}
+  rockWidth: {x: 0.25, y: 0.45}
+  rockStretch: 2
+  rockTilt: 40
+  rockReach: 0.8
+  rockFlip: 1
+  rockRadius: 0
+  rockGap: -0.05
+  rockBurstTime: 0.1
+  rockTremble: 0.04
+  rockCloseLean: 25
   slamShake: 0.08
   tremble: 0.03
   dust: {fileID: 0}

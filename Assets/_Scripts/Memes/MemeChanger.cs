@@ -340,8 +340,9 @@ public abstract class MemeChanger : Meme
 
     // Changes Once (Game): every change shows only once per meme (Fall, Leave, each Move), and no random mutations.
     // The Move an island gives comes from its number: Island_11 → Move 1, Island_12 → 2, Island_13 → 3 (its last digit).
-    // The target island is named as the meme's axis (MemeData > Meme > Title: TrollFace → Island_TrollFace; case and
-    // spaces don't matter) → the last Move. Any other name (Island_HUB, Island_Tutorial, Island_1A optional) → none.
+    // The last Move isn't an island's: it comes out at the end of the sweep, placed on the white pedestal of the target
+    // island (named as the meme's axis: MemeData > Meme > Title: TrollFace → Island_TrollFace; case and spaces don't
+    // matter): Reveal Last Move. Any other name (Island_HUB, Island_Tutorial, Island_1A optional) → none.
     // The hub, the tutorial and optional islands (Lift: Role) never give one. Going back: nothing again.
     // OriginalGame (MemeOrb): as before (one more for the random pick on each new island)
     protected virtual bool ChangesOnce => false;
@@ -350,9 +351,22 @@ public abstract class MemeChanger : Meme
     {
         if (island == null || !Meme.Unlocks(island)) return;
         int moves = Mathf.Min(Data.variants.Count, MemeDex.Instance != null ? MemeDex.Instance.movesPerAxis : 4);
-        int move = IsTarget(island.name) ? moves : MoveOf(island.name);
-        if (move < 1 || move > moves || !MemeImage.Exists(Data.variants[move - 1]) || !movesSeen.Add(move)) return;
+        int move = MoveOf(island.name);   // (the target island: none here, its pedestal gives the last one)
+        if (move < 1 || move >= moves || !MemeImage.Exists(Data.variants[move - 1]) || !movesSeen.Add(move)) return;
         ShowChange(Data.variants[move - 1]);
+    }
+
+    // The last Move, at the end of the sweep on the target island's white pedestal (KeyPedestal, right): it shows
+    // (with its sound, into the MemeDex) and goes back to the base image. Waits until it is over (then the pedestal may
+    // download the meme). Anywhere else, or already seen: nothing
+    public IEnumerator RevealLastMove(GameObject island)
+    {
+        if (!ChangesOnce || !hasMeme || Data == null || island == null || !IsTarget(island.name)) yield break;
+        int moves = Mathf.Min(Data.variants.Count, MemeDex.Instance != null ? MemeDex.Instance.movesPerAxis : 4);
+        if (moves < 1 || !MemeImage.Exists(Data.variants[moves - 1]) || !movesSeen.Add(moves)) yield break;
+        while (sweepRoutine != null) yield return null;   // (the sweep first)
+        ShowChange(Data.variants[moves - 1]);
+        while (changeRoutine != null) yield return null;
     }
 
     // Named as its axis: Island_<Title>
@@ -640,7 +654,10 @@ public abstract class MemeChanger : Meme
     {
         // Ends before the pedestal charge and goes back to the base image silently,
         // so it doesn't cover the accept or reject sound
-        var shownInSweep = new List<MemeImage>(images.GetRange(1, images.Count - 1));   // its variants, and fall / leave once seen
+        // Its variants (Game: only the Moves already seen: the last one comes out at the end), and fall / leave once seen
+        var shownInSweep = new List<MemeImage>();
+        if (!ChangesOnce) shownInSweep.AddRange(images.GetRange(1, images.Count - 1));
+        else for (int i = 0; i < Data.variants.Count; i++) if (movesSeen.Contains(i + 1) && MemeImage.Exists(Data.variants[i])) shownInSweep.Add(Data.variants[i]);
         if (Data.HasFall && fallSeen) shownInSweep.Add(Data.fall);
         if (Data.HasLeave && leaveSeen) shownInSweep.Add(Data.leave);
 
