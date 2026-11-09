@@ -44,16 +44,63 @@ public class StoneTypes : ScriptableObject
     [Header("Fall")]
     [Tooltip("Cracks that open on top while it warns (a PNG with transparency, e.g. Art/Textures/Decal_CrackedStone). Empty: none")]
     public Texture2D crackDecal;
-    [Tooltip("Pieces that break off as it drops (small rock prefabs, e.g. _Prefabs/Effects/RockDebriesSmall). Empty: none")]
-    public GameObject[] fallDebris;
-    public int fallDebrisCount = 5;
+    [Tooltip("How cracked it always shows, before you step on it (0: clean until then). Then the cracks open all the way")]
+    [Range(0f, 1f)] public float fallIdleCrack = 0.35f;
+    [Tooltip("It bursts: the stone hides and this many smaller copies of it fly out, flat side up, to the sides and down")]
+    public Vector2Int shardCount = new Vector2Int(4, 5);
+    [Tooltip("Size of each shard, times the stone's")]
+    [Range(0.1f, 0.8f)] public float shardSize = 0.35f;
+    [Tooltip("Meters per second they shoot out (sideways; down: half of it)")]
+    public float shardSpeed = 4f;
+    [Tooltip("Seconds they fly before they are gone (shrinking at the end)")]
+    public float shardTime = 1f;
+    [Tooltip("Seconds the shards take to come back together into the stone")]
+    public float assembleTime = 0.6f;
+    [Tooltip("Part of that (0-1) when the stone shows again, the shards gone: it is them closing up (before they touch)")]
+    [Range(0.5f, 1f)] public float assembleShowAt = 0.8f;
 
     [Header("Slide")]
     [Tooltip("A trail behind it while it moves, so you can read where it goes (its width and height: StonePath > Trail)")]
     public bool trails = true;
     [Tooltip("Seconds the trail lasts behind the stone")]
-    public float trailSeconds = 1f;
+    public float trailSeconds = 1.8f;
     public Color trailColor = new Color(0.3f, 0.3f, 0.32f, 0.6f);
+    [Tooltip("Meters the trail sways to each side (a winding line; small: you still read the way). 0: straight")]
+    public float trailWobble = 0.2f;
+    [Tooltip("Meters of the way for one sway to each side and back")]
+    public float trailWaveLength = 3f;
+    [Tooltip("Pieces that come off its trail while it moves (small rock prefabs). Empty: none")]
+    public GameObject[] slideDebris;
+    [Tooltip("Pieces per second while it moves")]
+    public float slideDebrisRate = 2f;
+    [Tooltip("Meters per second it must be going to drop pieces (slowing into a point, or setting off: none)")]
+    public float slideDebrisMinSpeed = 1.5f;
+    [Tooltip("Size of each piece when it comes off, times the stone's width (it shrinks from there: from the platform down to nothing)")]
+    [Range(0.05f, 0.6f)] public float slideDebrisSize = 0.25f;
+    [Tooltip("Seconds a piece floats where it came off the trail (bobbing, shrinking slowly) before it drops")]
+    public float slideDebrisHang = 1f;
+    [Tooltip("Meters it drops, shrinking fast to nothing (it goes, it doesn't fall into the void)")]
+    public float slideDebrisDrop = 1.2f;
+
+    [Header("Blink")]
+    [Tooltip("Where it is going to show up, a tiny copy of it shakes there from its warning on, and at the end grows at " +
+             "once into the stone itself")]
+    public bool blinkPreview = true;
+    [Tooltip("Size of the tiny copy, times the stone's")]
+    [Range(0.05f, 0.6f)] public float previewSmall = 0.15f;
+    [Tooltip("Meters it shakes while small")]
+    public float previewShake = 0.05f;
+    [Tooltip("Seconds of the end in which it grows to full size (short: at once)")]
+    public float previewGrowTime = 0.15f;
+    [Tooltip("Pebbles per second it throws to the sides while small and shaking (as if grinding). 0: none. They use " +
+             "Slide Debris' rocks")]
+    public float previewPebbleRate = 8f;
+    [Tooltip("Size of each pebble, times the stone's width")]
+    [Range(0.02f, 0.3f)] public float previewPebbleSize = 0.06f;
+
+    [Header("Effects")]
+    [Tooltip("Meters from the camera: farther, no pieces drop or pop (you wouldn't see them; they cost)")]
+    public float effectsRange = 45f;
 
     public Kind Of(PathStone.Motion motion)
     {

@@ -20,8 +20,9 @@ Shader "Memetica/Stone"
         [Header(Cracks)]
         _CrackTex ("Cracks (PNG with transparency)", 2D) = "black" {}
         _Crack ("Cracked (0-1, set by the stone)", Range(0, 1)) = 0
+        _CrackOpen ("Split apart (0-1, set by the stone: as it drops)", Range(0, 1)) = 0
         _CrackColor ("Crack Color", Color) = (0.08, 0.06, 0.05, 1)
-        _CrackSize ("Picture size (times the stone's width)", Range(0.5, 2)) = 1.1
+        _CrackSize ("Picture size (times the stone's width: bigger, fewer and bigger pieces)", Range(0.5, 6)) = 2.25
         [HideInInspector] _CrackFit ("Fit (set by the stone)", Vector) = (0, 1, 0, 0)
         [Header(Mark (set by the stone from StoneTypes))]
         _MarkTex ("Mark", 2D) = "black" {}
@@ -42,7 +43,7 @@ Shader "Memetica/Stone"
         sampler2D _MainTex, _CrackTex, _MarkTex;
         float4 _MarkTex_TexelSize;
         fixed4 _Color, _CrackColor, _MarkColor;
-        half _Glossiness, _Crack, _CrackSize, _MarkRelief;
+        half _Glossiness, _Crack, _CrackOpen, _CrackSize, _MarkRelief;
         float _MarkSize;
         float4 _CrackFit;   // x, z: its top's middle from the model's origin (meters, world) | y: its width | w: turn
 
@@ -64,7 +65,9 @@ Shader "Memetica/Stone"
             float2 uv = d / max(_CrackFit.y * _CrackSize, 0.01) + 0.5;
             half inside = all(uv == saturate(uv));
             half top = saturate(normal.y * 2.0 + 0.3);   // the top, and partway down the sides
-            return tex2D(_CrackTex, uv).a * inside * top;
+            half lines = tex2D(_CrackTex, uv).a;
+            lines = saturate(lines * (1 + _CrackOpen * 6));   // Open: the lines widen into gaps (it comes apart)
+            return lines * inside * lerp(top, 1, _CrackOpen);   // (and down the sides too)
         }
 
         // Where the mark is laid: meters from the model's origin, in tiles (it travels with the stone)

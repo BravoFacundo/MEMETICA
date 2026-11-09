@@ -13109,6 +13109,7 @@ MonoBehaviour:
   delay: 0.4
   lowerWay: 1
   watchTime: 3
+  watchTurn: 0.1
   respawnBefore: {fileID: 1764533302}
   respawnAfter: {fileID: 1380502265}
   catchDepth: 3
@@ -129328,6 +129329,7 @@ MonoBehaviour:
   delay: 0.4
   lowerWay: 0
   watchTime: 3
+  watchTurn: 0.1
   respawnBefore: {fileID: 0}
   respawnAfter: {fileID: 0}
   catchDepth: 4
@@ -142803,6 +142805,7 @@ MonoBehaviour:
   delay: 0.4
   lowerWay: 0
   watchTime: 3
+  watchTurn: 0.1
   respawnBefore: {fileID: 0}
   respawnAfter: {fileID: 0}
   catchDepth: 4
@@ -203929,6 +203932,7 @@ MonoBehaviour:
   delay: 0.4
   lowerWay: 0
   watchTime: 3
+  watchTurn: 0.1
   respawnBefore: {fileID: 0}
   respawnAfter: {fileID: 0}
   catchDepth: 4
@@ -212653,6 +212657,7 @@ MonoBehaviour:
   delay: 0.4
   lowerWay: 0
   watchTime: 3
+  watchTurn: 0.1
   respawnBefore: {fileID: 0}
   respawnAfter: {fileID: 0}
   catchDepth: 4
@@ -270116,6 +270121,7 @@ MonoBehaviour:
   delay: 0.4
   lowerWay: 0
   watchTime: 3
+  watchTurn: 0.1
   respawnBefore: {fileID: 0}
   respawnAfter: {fileID: 0}
   catchDepth: 4
@@ -426379,6 +426385,7 @@ MonoBehaviour:
   delay: 0.4
   lowerWay: 0
   watchTime: 3
+  watchTurn: 0.1
   respawnBefore: {fileID: 0}
   respawnAfter: {fileID: 0}
   catchDepth: 4

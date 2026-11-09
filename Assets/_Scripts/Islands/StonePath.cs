@@ -227,7 +227,10 @@ public class StonePath : MonoBehaviour
             Vector3 place = Vector3.Lerp(from, to, stone.Progress);
             Quaternion turn = Quaternion.Slerp(fromTurn, toTurn, stone.Progress);
             Vector3 before = stone.transform.position;
-            stone.transform.SetPositionAndRotation(place + stone.Shake + Vector3.down * stone.Down, turn);
+            stone.transform.SetPositionAndRotation(place + stone.Shake + Vector3.down * stone.Down, turn * stone.Tumble);
+            int preview = stone.PreviewPoint;   // (Blink: where it will show up)
+            if (preview >= 0) stone.ShowPreview(PointOf(stone, preview, origin, rotation, length, out Quaternion previewTurn), previewTurn);
+            else stone.HidePreview();
             if (stone.Moves && stone.pushPlayer) PushPlayer(stone, stone.transform.position - before);
         }
     }

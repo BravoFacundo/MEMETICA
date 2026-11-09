@@ -9,6 +9,8 @@ using UnityEngine;
 //   Blink  stays at a point for Interval seconds, shakes for Warning Time, vanishes (whoever stands on it falls) and
 //          shows up at the next point after Gap Time: it can't carry you there, only timing works
 // How each kind looks and sounds (tint, mark, sounds): Resources/StoneTypes, the same for every stone of that kind.
+// And what tells them apart in play (StoneTypes): a Fall stone always shows cracks, and comes apart as it drops; a Slide
+// one leaves a winding trail and drops pieces as it goes; a Blink one shows where it will appear (a rock grows there).
 // Its points: its place (0) and its Shadows (1, 2…: ghosts of the stone, Memetica > Level > Stone Path > Add Shadow).
 // In the Scene view stone 6's shadows are 61, 62… Move them anywhere; they float with the path and hide while playing.
 // Route: the order it goes through its points (with one shadow they are all the same: place ↔ 61).
@@ -67,6 +69,10 @@ public class PathStone : MonoBehaviour
     // Its motion may run (StonePath's rise wave: the moving stones start one after another once the path is up)
     public bool Started { get; set; } = true;
     public bool Moves => (motion == Motion.Slide || motion == Motion.Blink) && PointCount > 1;
+    // A turn on top of its place (StonePath applies it; none for now)
+    public Quaternion Tumble { get; private set; } = Quaternion.identity;
+    // Blink: the point where it will show up, while that is shown (its warning and while it is gone); -1: none
+    public int PreviewPoint => motion == Motion.Blink && IsPresent && previewGrow >= 0f ? (moving ? To : upcoming) : -1;
     int PointCount => 1 + shadows.Count;
 
     private enum FallState { Resting, Warning, Falling, Down, Rising }
@@ -112,6 +118,8 @@ public class PathStone : MonoBehaviour
         timer = WaitTime();
         if (startAtEnd && Moves) goToEnd = true;   // (once its bridge is up: it rises in its own place)
         else if (Moves) Advance(startPhase * RouteSteps * (AverageWait + MoveTime));
+        if (motion == Motion.Fall) Crack(StoneTypes.Instance.fallIdleCrack);   // always cracked: you see it will break
+        lastPosition = transform.position;
     }
 
     //---- Every frame (StonePath)
@@ -125,7 +133,11 @@ public class PathStone : MonoBehaviour
         if (Moves && !settling && goToEnd) GoToEnd();
         float idle = path != null ? path.SpeedFactor : 1f;   // (its path's Idle Speed: the same for all its stones)
         if (Moves && !settling) Advance(Time.deltaTime * LevelManager.PlatformSpeed * idle);   // (Platform Speed: the whole route, waits too)
-        else if (!Moves) { From = To = 0; Progress = 0f; }
+        else
+        {
+            previewGrow = -1f;   // (not running its route: nothing to show)
+            if (!Moves) { From = To = 0; Progress = 0f; }
+        }
     }
 
     //---- Trail (StonePath > Look: only while it is up and moving its route)
@@ -167,6 +179,7 @@ public class PathStone : MonoBehaviour
     void GoToEnd()
     {
         goToEnd = false;
+        upcoming = -1;
         To = PointCount - 1;
         direction = -1;
         lastShadow = PointCount - 1;
@@ -177,6 +190,7 @@ public class PathStone : MonoBehaviour
         skipWait = true;
     }
     private bool goToEnd, skipWait;
+    private int upcoming = -1;   // the next point, chosen as soon as it arrives at one (Blink shows it)
     private float endWait;
 
     // Waits at a point, moves to the next one, waits there…
@@ -185,9 +199,10 @@ public class PathStone : MonoBehaviour
         timer -= seconds;
         while (timer <= 0f)
         {
-            if (moving) { moving = false; From = To; timer += skipWait ? endWait : WaitTime(); skipWait = false; if (motion == Motion.Slide) Play(Kind.backClip); }
-            else { To = NextPoint(From); moving = true; moveDuration = MoveTime; timer += moveDuration; if (motion == Motion.Slide) Play(Kind.goClip); }
+            if (moving) { moving = false; From = To; upcoming = NextPoint(From); timer += skipWait ? endWait : WaitTime(); skipWait = false; if (motion == Motion.Slide) Play(Kind.backClip); }
+            else { To = upcoming >= 0 ? upcoming : NextPoint(From); upcoming = -1; moving = true; moveDuration = MoveTime; timer += moveDuration; if (motion == Motion.Slide) Play(Kind.goClip); }
         }
+        if (!moving && upcoming < 0) upcoming = NextPoint(From);   // (where it goes next is known all through the wait)
         if (motion == Motion.Blink) { Blink(); return; }
         Progress = moving ? Smooth(1f - timer / moveDuration) : 0f;
     }
@@ -200,10 +215,13 @@ public class PathStone : MonoBehaviour
         Progress = 0f;   // (at From: the jump happens when the wait starts at the next point, while nobody is on it)
         bool warning = !moving && timer < warningTime;
         Shake = warning ? Jitter() : Vector3.zero;
+        float span = Mathf.Max(warningTime + moveDuration, 0.01f);   // (from its warning until it shows up there)
+        previewGrow = warning ? (warningTime - timer) / span : moving ? (warningTime + moveDuration - timer) / span : -1f;
         if (warning && !blinkWarned) Play(Kind.warnClip);   // once, as it starts shaking
         blinkWarned = warning;
         if (moving == blinkGone) return;
         blinkGone = moving;
+        if (!blinkGone) PopPreview();   // it shows up where the rock grew
         foreach (Renderer r in renderers) if (r != null) r.enabled = !blinkGone;
         SetSolid(!blinkGone);   // whoever stands on it falls
         Play(blinkGone ? Kind.goClip : Kind.backClip);
@@ -352,36 +370,29 @@ public class PathStone : MonoBehaviour
         {
             Vector2 jitter = Random.insideUnitCircle * s.shakeAmount;
             Shake = new Vector3(jitter.x, 0f, jitter.y);
-            Crack(Mathf.Clamp01(t / Mathf.Max(s.warningTime * 0.6f, 0.01f)));   // the cracks open up
+            Crack(Mathf.Lerp(StoneTypes.Instance.fallIdleCrack, 1f, Mathf.Clamp01(t / Mathf.Max(s.warningTime * 0.6f, 0.01f))));   // the cracks open up
             yield return null;
         }
         Shake = Vector3.zero;
 
+        // It bursts: hidden, its shards fly out to the sides and down (whoever stood on it falls)
         fallState = FallState.Falling;
-        SetSolid(false);   // whoever is on it falls through
+        SetSolid(false);
         Play(Kind.goClip);
-        StoneTypes types = StoneTypes.Instance;
-        if (types.fallDebris != null && types.fallDebris.Length > 0)
-            DebrisBurst.Spawn(types.fallDebris, types.fallDebrisCount, transform.position, Vector3.down, 2f, 0.6f);
-        float speed = 0f;
-        while (fallDown < depth)
-        {
-            speed = Mathf.Min(speed + s.fallAcceleration * Time.deltaTime, s.maxFallSpeed);   // (the drop itself: real gravity)
-            fallDown = Mathf.Min(fallDown + speed * Time.deltaTime, depth);
-            yield return null;
-        }
+        SetLook(false);
+        StartCoroutine(Shatter());
+        fallDown = depth;   // (hidden down there, as before)
 
         fallState = FallState.Down;
         for (float t = 0f; t < s.returnDelay; t += Time.deltaTime * LevelManager.PlatformSpeed) yield return null;
 
+        // Back: in its place, its shards fly together into it, then it is there again
         fallState = FallState.Rising;
-        Crack(0f);
+        fallDown = 0f;
+        yield return null;   // (StonePath puts it back in its place first: the shards close there, not down below)
+        Crack(StoneTypes.Instance.fallIdleCrack);   // whole again (cracked as always)
         Play(Kind.backClip);
-        while (fallDown > 0f)
-        {
-            fallDown = Mathf.MoveTowards(fallDown, 0f, s.riseSpeed * LevelManager.PlatformSpeed * Time.deltaTime);
-            yield return null;
-        }
+        yield return Assemble();   // (it shows itself before they touch)
         while (PlayerInside()) yield return null;   // someone inside it (jumped on it while it rose): solid once they are out
         SetSolid(true);   // only once back in its place (rising, it never catches someone falling)
         fallState = FallState.Resting;
@@ -422,7 +433,8 @@ public class PathStone : MonoBehaviour
     private static readonly int CrackId = Shader.PropertyToID("_Crack"), CrackTexId = Shader.PropertyToID("_CrackTex"),
                                 CrackFitId = Shader.PropertyToID("_CrackFit");
     private float crackTurn = -1f;   // (< 0: not picked yet)
-    void Crack(float amount)
+    private static readonly int CrackOpenId = Shader.PropertyToID("_CrackOpen");   // (the picture's size: the material's Picture Size)
+    void Crack(float amount, float open = 0f)
     {
         Texture2D decal = StoneTypes.Instance.crackDecal;
         if (decal == null) return;
@@ -434,13 +446,14 @@ public class PathStone : MonoBehaviour
             r.GetPropertyBlock(stoneBlock);
             stoneBlock.SetTexture(CrackTexId, decal);
             stoneBlock.SetFloat(CrackId, amount);
-            if (crackTurn < 0f) crackTurn = Random.Range(0f, Mathf.PI * 2f);   // each stone its own way
+            stoneBlock.SetFloat(CrackOpenId, open);
+            if (crackTurn < 0f) crackTurn = (Mathf.Abs(name.GetHashCode()) % 6283) / 1000f;   // each stone its own way (always the same)
             Vector3 middle = r.bounds.center - r.transform.position;   // its top's middle from the model's origin
             stoneBlock.SetVector(CrackFitId, new Vector4(middle.x, Mathf.Min(r.bounds.size.x, r.bounds.size.z), middle.z, crackTurn));
             r.SetPropertyBlock(stoneBlock);
             onMaterial = true;
         }
-        if (onMaterial) return;
+        if (onMaterial || !Application.isPlaying) return;   // (the flat quad only while playing)
         if (crack == null)
         {
             if (amount <= 0f) return;
@@ -499,7 +512,7 @@ public class PathStone : MonoBehaviour
         foreach (Renderer r in renderers)
         {
             if (r == null || r is TrailRenderer) continue;
-            r.GetPropertyBlock(block);
+            block.Clear();   // (from scratch: anything set before, e.g. an old crack size, no longer hides the material's)
             block.SetColor(ColorId, kind.tint);
             if (r.sharedMaterial != null && r.sharedMaterial.HasProperty(MarkTexId))
             {
@@ -511,6 +524,248 @@ public class PathStone : MonoBehaviour
             }
             r.SetPropertyBlock(block);
         }
+        if (motion == Motion.Fall) Crack(StoneTypes.Instance.fallIdleCrack);   // (the Scene view shows it cracked too)
+        else Crack(0f);
+    }
+
+    //---- What tells it apart in play (StoneTypes)
+
+    private float previewGrow = -1f;   // Blink: 0 → 1 from its warning until it shows up (-1: no preview now)
+    private Transform preview;
+    private Vector3 previewFull;        // its scale when grown
+    private Vector3 lastPosition;
+    private float wave, debrisDue;
+
+    // Blink: a tiny copy of it where it will show up, shaking; at the end it grows at once into the stone (StonePath gives
+    // the place and its turn every frame)
+    public void ShowPreview(Vector3 at, Quaternion turn)
+    {
+        StoneTypes types = StoneTypes.Instance;
+        if (!types.blinkPreview || previewGrow < 0f) { HidePreview(); return; }
+        if (preview == null) MakePreview();
+        if (preview == null) return;
+        if (!preview.gameObject.activeSelf) preview.gameObject.SetActive(true);
+        float span = Mathf.Max(warningTime + gapTime, 0.01f);
+        float growFrom = 1f - Mathf.Clamp01(types.previewGrowTime / span);   // (the last Grow Time of it)
+        float grow = previewGrow <= growFrom ? 0f : Smooth((previewGrow - growFrom) / Mathf.Max(1f - growFrom, 0.001f));
+        float size = Mathf.Lerp(types.previewSmall, 1f, grow);
+        Vector3 shake = grow < 1f ? Random.insideUnitSphere * types.previewShake * (1f - grow) : Vector3.zero;
+        preview.SetPositionAndRotation(at + shake, turn);
+        preview.localScale = previewFull * size;
+
+        // Small and shaking: pebbles fly off to the sides, as if it ground its way there
+        if (grow > 0f || types.previewPebbleRate <= 0f || types.slideDebris == null || types.slideDebris.Length == 0) return;
+        pebblesDue += types.previewPebbleRate * Time.deltaTime;
+        if (pebblesDue < 1f) return;
+        pebblesDue -= 1f;
+        if (!InRange(at, types)) return;
+        Vector2 side = Random.insideUnitCircle.normalized;
+        DebrisBurst.Spawn(types.slideDebris, 1, at, new Vector3(side.x, 0.4f, side.y), 2.5f, 0.3f, Width() * types.previewPebbleSize, 0.8f, 0f,
+                          PieceMaterial(), PieceLook());
+    }
+    private float pebblesDue;
+
+    public void HidePreview()
+    {
+        if (preview != null && preview.gameObject.activeSelf) preview.gameObject.SetActive(false);
+    }
+
+    void MakePreview()
+    {
+        preview = CloneLook(name + "_Preview");
+        previewFull = transform.lossyScale;
+    }
+
+    // A copy of its look (its Model), nothing that collides or runs, in its colors, hidden (the preview, the shards)
+    Transform CloneLook(string copyName, bool cracked = true)
+    {
+        Transform copy = new GameObject(copyName).transform;
+        foreach (Transform child in transform)
+        {
+            if (child.GetComponentInChildren<Renderer>(true) == null || child.GetComponent<TrailRenderer>() != null || child.name == "Cracks") continue;
+            Transform part = Instantiate(child.gameObject, copy).transform;
+            part.localPosition = child.localPosition;
+            part.localRotation = child.localRotation;
+            part.localScale = child.localScale;
+        }
+        foreach (Collider c in copy.GetComponentsInChildren<Collider>(true)) Destroy(c);
+        foreach (MonoBehaviour b in copy.GetComponentsInChildren<MonoBehaviour>(true)) b.enabled = false;
+        var block = new MaterialPropertyBlock();
+        Renderer own = System.Array.Find(renderers, r => r != null && !(r is TrailRenderer));
+        if (own != null) own.GetPropertyBlock(block);   // (its tint, mark and cracks)
+        if (!cracked) { block.SetFloat(CrackId, 0f); block.SetFloat(CrackOpenId, 0f); }   // (already broken: pieces, no cracks)
+        foreach (Renderer r in copy.GetComponentsInChildren<Renderer>(true)) { r.enabled = true; r.SetPropertyBlock(block); }
+        copy.gameObject.SetActive(false);
+        return copy;
+    }
+
+    // Its own look shown or not (the shards take its place meanwhile)
+    void SetLook(bool on)
+    {
+        foreach (Renderer r in renderers) if (r != null && !(r is TrailRenderer)) r.enabled = on;
+    }
+
+    //---- Fall: it bursts into shards, and they come back together into it
+
+    private readonly List<Transform> shards = new List<Transform>();
+    private readonly List<Vector3> shardVelocity = new List<Vector3>();
+    private readonly List<float> shardSpin = new List<float>();
+    static readonly Vector3 ShardGravity = new Vector3(0f, -9.8f, 0f);
+
+    // Smaller copies of it, flat side up, each thrown its own way: to the sides and down (a cone under it)
+    void ThrowShards(StoneTypes types)
+    {
+        int count = Random.Range(Mathf.Max(1, types.shardCount.x), Mathf.Max(types.shardCount.x, types.shardCount.y) + 1);
+        while (shards.Count < count) { shards.Add(CloneLook(name + "_Shard", false)); shardVelocity.Add(Vector3.zero); shardSpin.Add(0f); }
+        float turn = Random.Range(0f, 360f);
+        for (int i = 0; i < shards.Count; i++)
+        {
+            bool used = i < count;
+            shards[i].gameObject.SetActive(used);
+            if (!used) continue;
+            float angle = turn + 360f * i / count + Random.Range(-20f, 20f);   // spread all around
+            Vector3 side = Quaternion.Euler(0f, angle, 0f) * Vector3.forward;
+            shardVelocity[i] = (side + Vector3.down * 0.5f) * types.shardSpeed * Random.Range(0.8f, 1.2f);
+            shardSpin[i] = Random.Range(-90f, 90f);
+        }
+    }
+
+    // Where a shard is Time seconds after the burst, from Center (flat side up, turning slowly around its vertical)
+    void PlaceShard(int i, Vector3 center, float time, float size)
+    {
+        Transform shard = shards[i];
+        shard.SetPositionAndRotation(center + shardVelocity[i] * time + 0.5f * ShardGravity * time * time,
+                                     transform.rotation * Quaternion.Euler(0f, shardSpin[i] * time, 0f));
+        shard.localScale = transform.lossyScale * size;
+    }
+
+    IEnumerator Shatter()
+    {
+        StoneTypes types = StoneTypes.Instance;
+        ThrowShards(types);
+        Vector3 center = transform.position;
+        float duration = Mathf.Max(types.shardTime, 0.05f);
+        for (float t = 0f; t < duration; t += Time.deltaTime)
+        {
+            float shrink = t < duration * 0.7f ? 1f : 1f - (t - duration * 0.7f) / (duration * 0.3f);   // gone at the end
+            for (int i = 0; i < shards.Count; i++) if (shards[i].gameObject.activeSelf) PlaceShard(i, center, t, types.shardSize * shrink);
+            yield return null;
+        }
+        foreach (Transform shard in shards) shard.gameObject.SetActive(false);
+    }
+
+    // The burst backwards, in its place: they fly in from below and around and close into the stone
+    IEnumerator Assemble()
+    {
+        StoneTypes types = StoneTypes.Instance;
+        ThrowShards(types);
+        float duration = Mathf.Max(types.assembleTime, 0.05f);
+        float showAt = duration * Mathf.Clamp01(types.assembleShowAt);
+        for (float t = 0f; t < showAt; t += Time.deltaTime)
+        {
+            float left = 1f - t / duration;                       // 1 → 0: from far, into it
+            float time = left * duration;
+            float size = Mathf.Lerp(types.shardSize, Mathf.Max(types.shardSize, 0.6f), 1f - left);   // a little bigger as they close (they fill it)
+            for (int i = 0; i < shards.Count; i++) if (shards[i].gameObject.activeSelf) PlaceShard(i, transform.position, time, size);
+            yield return null;
+        }
+        SetLook(true);   // the stone itself is their closing up
+        foreach (Transform shard in shards) shard.gameObject.SetActive(false);
+    }
+
+    // It showed up: the copy (grown into it by now) goes
+    void PopPreview() => HidePreview();
+
+    // Slide: its trail sways side to side, and pieces drop off it while it moves
+    void LateUpdate()
+    {
+        if (!Application.isPlaying) return;
+        Vector3 moved = transform.position - lastPosition;
+        lastPosition = transform.position;
+        if (motion != Motion.Slide || !IsPresent || !moving) return;
+        StoneTypes types = StoneTypes.Instance;
+
+        Vector3 flat = new Vector3(moved.x, 0f, moved.z);
+        if (trail != null && path != null && flat.sqrMagnitude > 1e-8f)
+        {
+            wave += flat.magnitude / Mathf.Max(types.trailWaveLength, 0.1f) * Mathf.PI * 2f;
+            Vector3 side = Vector3.Cross(Vector3.up, flat.normalized);
+            trail.transform.position = Middle() + Vector3.down * path.trailDrop + side * Mathf.Sin(wave) * types.trailWobble;
+        }
+
+        // Pieces off the trail, only while it really goes (not slowing into a point or setting off: they'd only drop)
+        if (types.slideDebris == null || types.slideDebris.Length == 0 || types.slideDebrisRate <= 0f) return;
+        float speed = Time.deltaTime > 0f ? flat.magnitude / Time.deltaTime : 0f;
+        if (speed < types.slideDebrisMinSpeed) { debrisDue = 0f; return; }
+        debrisDue += types.slideDebrisRate * Time.deltaTime;
+        if (debrisDue < 1f) return;
+        debrisDue -= 1f;
+        Vector3 from = trail != null ? trail.transform.position : Middle();   // on the trail (winding with it), behind the stone
+        if (InRange(from, types))
+            DebrisBurst.Float(types.slideDebris[Random.Range(0, types.slideDebris.Length)], from, Width() * types.slideDebrisSize,
+                              types.slideDebrisHang, types.slideDebrisDrop, PieceMaterial(), PieceLook());
+    }
+
+    // Meters wide its look is (measured once, while it shows)
+    private float width = -1f;
+    float Width()
+    {
+        if (width > 0f) return width;
+        Renderer[] own = System.Array.FindAll(renderers, r => r != null && r.enabled && !(r is TrailRenderer));
+        if (own.Length == 0) return 1f;
+        Bounds b = own[0].bounds;
+        foreach (Renderer r in own) b.Encapsulate(r.bounds);
+        width = Mathf.Max(b.size.x, b.size.z, 0.1f);
+        return width;
+    }
+
+    // Its middle (not its pivot, which may be on its top): where the trail comes out
+    private Vector3 middleOffset;
+    private bool middleKnown;
+    Vector3 Middle()
+    {
+        if (!middleKnown)
+        {
+            Renderer[] own = System.Array.FindAll(renderers, r => r != null && r.enabled && !(r is TrailRenderer));
+            if (own.Length == 0) return transform.position;
+            Bounds b = own[0].bounds;
+            foreach (Renderer r in own) b.Encapsulate(r.bounds);
+            middleOffset = transform.InverseTransformPoint(b.center);
+            middleKnown = true;
+        }
+        return transform.TransformPoint(middleOffset);
+    }
+
+    // Pieces that come off it: its material and colors, no cracks (the same stone, broken)
+    Material PieceMaterial()
+    {
+        Renderer own = System.Array.Find(renderers, r => r != null && !(r is TrailRenderer));
+        return own != null ? own.sharedMaterial : null;
+    }
+
+    private MaterialPropertyBlock pieceLook;
+    MaterialPropertyBlock PieceLook()
+    {
+        if (pieceLook != null) return pieceLook;
+        pieceLook = new MaterialPropertyBlock();
+        Renderer own = System.Array.Find(renderers, r => r != null && !(r is TrailRenderer));
+        if (own != null) own.GetPropertyBlock(pieceLook);
+        pieceLook.SetFloat(CrackId, 0f);
+        pieceLook.SetFloat(CrackOpenId, 0f);
+        return pieceLook;
+    }
+
+    static Camera viewer;
+    static bool InRange(Vector3 at, StoneTypes types)
+    {
+        if (viewer == null) viewer = Camera.main;
+        return viewer == null || (viewer.transform.position - at).sqrMagnitude < types.effectsRange * types.effectsRange;
+    }
+
+    void OnDestroy()
+    {
+        if (preview != null) Destroy(preview.gameObject);
+        foreach (Transform shard in shards) if (shard != null) Destroy(shard.gameObject);
     }
 }
 

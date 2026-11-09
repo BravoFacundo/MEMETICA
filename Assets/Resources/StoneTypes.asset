@@ -49,8 +49,29 @@ MonoBehaviour:
     goClip: {fileID: 8300000, guid: c93c021999716e04ba594de733f5d922, type: 3}
     backClip: {fileID: 8300000, guid: 0510cd71c7f976347bd2f7af46ee8c5e, type: 3}
   crackDecal: {fileID: 2800000, guid: c9648c04824ea3640acbb34cb0e600c0, type: 3}
-  fallDebris: []
-  fallDebrisCount: 5
+  fallIdleCrack: 0.35
+  shardCount: {x: 4, y: 5}
+  shardSize: 0.35
+  shardSpeed: 4
+  shardTime: 1
+  assembleTime: 0.6
+  assembleShowAt: 0.8
   trails: 1
-  trailSeconds: 1
+  trailSeconds: 1.8
   trailColor: {r: 0.3, g: 0.3, b: 0.32, a: 0.6}
+  trailWobble: 0.2
+  trailWaveLength: 3
+  slideDebris:
+  - {fileID: 7617200879849885303, guid: e9145b5c228689843b6d6ba2412aff73, type: 3}
+  slideDebrisRate: 2
+  slideDebrisMinSpeed: 1.5
+  slideDebrisSize: 0.25
+  slideDebrisHang: 1
+  slideDebrisDrop: 1.2
+  blinkPreview: 1
+  previewSmall: 0.15
+  previewShake: 0.05
+  previewGrowTime: 0.15
+  previewPebbleRate: 8
+  previewPebbleSize: 0.06
+  effectsRange: 45

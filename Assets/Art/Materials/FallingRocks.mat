@@ -70,7 +70,7 @@ Material:
     - _BumpScale: 1
     - _Crack: 0.24
     - _CrackScale: 0.12
-    - _CrackSize: 2
+    - _CrackSize: 3
     - _Cutoff: 0.5
     - _DetailNormalMapScale: 1
     - _DstBlend: 0
