@@ -3,13 +3,21 @@
 // Example: Button_Play → On Open → UIManager.PlayGame()
 // Menu: the Play icons (with the tutorial popup first). Game: the Screens (pause and end screen, one at a time, the
 // HUD hidden behind them), Play Again and back to the Menu. Both: loading with the busy cursor, quitting, windows.
-// At the start everything is put as it should be, however it was left on or off in the scene (Arrange): what must work
-// is turned on (with its parents: the HUD, the HUD meme windows, the virus timer, the cursor, Start Open), what waits
-// to be opened is turned off (the pause, the end screen, the tutorial popup, Start Closed). So turn things on or off
-// in the hierarchy freely while you work on them.
+// Screens: the HUD, the pause, the end screen (later the MemeDex…), each with its Role. Appear In Order: each time it
+// opens its parts appear one after another (ScreenAppear: its children that are on, in hierarchy order or reversed,
+// each with its UIWindow's sound).
+// On or off, however they were left in the scene (turn things on or off freely while you work on them):
+//   At the start (Arrange): on (with their parents) what must work from the first frame: the HUD, its meme windows,
+//   the virus timer, the cursor. Off: the screens that wait to be opened (Pause, End, Other), the tutorial popup and
+//   every window that Opens With Button (UIWindow: Configuration, Recycle Bin, Exit?…).
+//   Opening a screen (Pause, End, Other: however it is opened): its parts (its children) are turned on, except the
+//   ones that Open With Button (a window inside it that a button opens) - then they appear in order, if it does.
+// The scoreboard and the MemeDex are screens of their own (Other): their buttons call OpenWindow / CloseWindow.
 
 using System.Collections;
+using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.Serialization;
 using UnityEngine.EventSystems;
 using UnityEngine.SceneManagement;
 
@@ -31,27 +39,86 @@ public class UIManager : MonoBehaviour
     [Tooltip("Play Again loads the same game skipping its tutorial (the same player: they already did it)")]
     public bool playAgainSkipsTutorial = true;
 
+    public enum ScreenRole { Other, Hud, Pause, End }
+
+    [System.Serializable]
+    public class ScreenEntry
+    {
+        public GameObject target;
+        [Tooltip("Hud: fades out while another screen is open. Pause: Esc / P / Start opens it (the game freezes, the " +
+                 "cursor is free). End: the end screen (GameManager shows it; no pause over it). Other: any (the MemeDex…)")]
+        public ScreenRole role = ScreenRole.Other;
+        [Tooltip("Each time it opens, its parts appear one after another (its children that are on), each with its sound")]
+        public bool appearInOrder;
+        [Tooltip("Appear In Order: from the last child up")]
+        public bool reverse;
+
+        public Transform Parts => target.transform;   // (its parts: its children)
+
+        [System.NonSerialized] public bool wasOn;
+        [System.NonSerialized] public ScreenAppear appear;
+        [System.NonSerialized] public Coroutine running;
+        [System.NonSerialized] public bool closing;
+    }
+
     [Section("Screens (Game)")]
-    [Tooltip("The HUD group (meme window, virus timer, tutorial popups): fades out while a Screen is open. Needs a CanvasGroup (added if missing)")]
-    public CanvasGroup hud;
-    [Tooltip("Esc / P / Start opens it: the game freezes and the cursor is free. Empty: no pause in this scene (the Menu)")]
-    public GameObject pauseScreen;
-    [Tooltip("The end screen (GameManager shows it): while it is open there is no pause")]
-    public GameObject endScreen;
+    [Tooltip("The HUD, the pause, the end screen…: one each, with its role. Empty: none in this scene (the Menu)")]
+    public List<ScreenEntry> screens = new List<ScreenEntry>();
     [Tooltip("Seconds the HUD takes to fade out or in")]
     public float hudFadeTime = 0.15f;
 
-    [Section("Windows")]
-    [Tooltip("The windows that are popups (a question: Exit?, the tutorial one): opening, AudioManager's Popup Sound. " +
-             "Any other window: Open Sound (Configuration, Recycle Bin, the pause). The Tutorial Popup counts already")]
-    public GameObject[] popups;
+    [Section("Appear In Order", Closed = true)]
+    [Tooltip("Seconds before the first part")]
+    public float appearDelay = 0.05f;
+    [Tooltip("Seconds between one part and the next, however many there are")]
+    public float appearInterval = 0.15f;
+    [Tooltip("Seconds each part takes to pop in or out; a single window too (opening and closing: the Menu's)")]
+    public float appearPopTime = 0.25f;
+    [Tooltip("A click or a key meanwhile: the rest appear at once")]
+    public bool appearSkipOnInput = true;
 
-    [Section("At the Start", Closed = true)]
-    [Tooltip("Turned on at the start (with their parents), however they were left: windows that must be there when " +
-             "their screen opens (the pause's own windows, an end screen page's parts…)")]
-    public GameObject[] startOpen;
-    [Tooltip("Turned off at the start, however they were left: windows that wait for a button to open them")]
-    public GameObject[] startClosed;
+    // Before the list (moved into it once: OnValidate / Awake)
+    [SerializeField, HideInInspector, FormerlySerializedAs("hud")] private CanvasGroup oldHud;
+    [SerializeField, HideInInspector, FormerlySerializedAs("pauseScreen")] private GameObject oldPause;
+    [SerializeField, HideInInspector, FormerlySerializedAs("endScreen")] private GameObject oldEnd;
+
+    // The screen with this role (null: none)
+    GameObject ScreenOf(ScreenRole role)
+    {
+        foreach (ScreenEntry s in screens) if (s != null && s.role == role && s.target != null) return s.target;
+        return null;
+    }
+    public GameObject pauseScreen => ScreenOf(ScreenRole.Pause);
+    public GameObject endScreen => ScreenOf(ScreenRole.End);
+    private CanvasGroup hudGroup;
+    public CanvasGroup hud
+    {
+        get
+        {
+            if (hudGroup != null) return hudGroup;
+            GameObject g = ScreenOf(ScreenRole.Hud);
+            if (g == null) return null;
+            hudGroup = g.GetComponent<CanvasGroup>();
+            if (hudGroup == null) hudGroup = g.AddComponent<CanvasGroup>();
+            return hudGroup;
+        }
+    }
+
+    // The three old fields into the list (once)
+    void MoveOldScreens()
+    {
+        if (oldHud == null && oldPause == null && oldEnd == null) return;
+        if (screens.Count == 0)
+        {
+            if (oldHud != null) screens.Add(new ScreenEntry { target = oldHud.gameObject, role = ScreenRole.Hud });
+            if (oldPause != null) screens.Add(new ScreenEntry { target = oldPause, role = ScreenRole.Pause });
+            if (oldEnd != null) screens.Add(new ScreenEntry { target = oldEnd, role = ScreenRole.End });
+        }
+        oldHud = null; oldPause = null; oldEnd = null;
+    }
+#if UNITY_EDITOR
+    void OnValidate() => MoveOldScreens();
+#endif
 
     [Section("Loading", Closed = true)]
     [Tooltip("Minimum seconds a load takes (busy cursor, music fading out), even if the scene is ready before")]
@@ -70,7 +137,11 @@ public class UIManager : MonoBehaviour
     private PlayerLook Look => look != null ? look : (look = FindObjectOfType<PlayerLook>());
     bool EndOpen => endScreen != null && endScreen.activeInHierarchy;
 
-    void Awake() => Arrange();
+    void Awake()
+    {
+        MoveOldScreens();
+        Arrange();
+    }
 
     // Everything as it should be at the start, whatever was left on or off in the scene
     void Arrange()
@@ -81,13 +152,21 @@ public class UIManager : MonoBehaviour
         foreach (VirusClock clock in FindObjectsOfType<VirusClock>(true)) Reveal(clock.gameObject);       // (hidden until the countdown)
         foreach (EndScreen end in FindObjectsOfType<EndScreen>(true)) Reveal(end.gameObject);             // (it keeps its screen hidden)
         foreach (RetroCursor cursor in FindObjectsOfType<RetroCursor>(true)) Reveal(cursor.gameObject);
-        if (startOpen != null) foreach (GameObject g in startOpen) Reveal(g);
 
         // Off (their parents on): what waits to be opened
-        Close(pauseScreen);
-        Close(endScreen);
+        foreach (ScreenEntry sc in screens) if (sc != null && sc.target != null && sc.role != ScreenRole.Hud) Close(sc.target);
         Close(tutorialPopup);
-        if (startClosed != null) foreach (GameObject g in startClosed) if (g != null) g.SetActive(false);
+        foreach (UIWindow window in FindObjectsOfType<UIWindow>(true)) if (window.opensWithButton) window.gameObject.SetActive(false);
+    }
+
+    // A screen opening: its parts on, but the ones a button opens (closed)
+    static void Prepare(ScreenEntry sc)
+    {
+        foreach (Transform part in sc.Parts)
+        {
+            bool byButton = part.TryGetComponent(out UIWindow w) && w.opensWithButton;
+            if (part.gameObject.activeSelf == byButton) part.gameObject.SetActive(!byButton);
+        }
     }
 
     // It and every parent on
@@ -112,6 +191,33 @@ public class UIManager : MonoBehaviour
         Time.timeScale = 1f;
         if (pauseScreen != null) pauseScreen.SetActive(false);
         if (hud != null) { hud.alpha = 1f; hud.blocksRaycasts = hud.interactable = true; }
+        foreach (ScreenEntry sc in screens) if (sc != null) sc.wasOn = sc.target != null && sc.target.activeInHierarchy && !(sc.role == ScreenRole.Hud && sc.appearInOrder);   // (the HUD may appear at the start)
+    }
+
+    // A screen that just opened (whoever opened it): its parts on (Prepare), then, Appear In Order, hidden and shown one
+    // by one. Here, after every Update: nothing shows a frame before. Closed halfway: its parts are left as they are
+    void LateUpdate()
+    {
+        foreach (ScreenEntry sc in screens)
+        {
+            if (sc == null || sc.target == null) continue;
+            bool on = sc.target.activeInHierarchy;
+            if (on == sc.wasOn) continue;
+            sc.wasOn = on;
+            if (on && sc.role != ScreenRole.Hud) Prepare(sc);   // (the HUD's parts show and hide themselves)
+            if (!sc.appearInOrder) continue;
+            if (sc.appear == null) sc.appear = new ScreenAppear();
+            if (sc.running != null) { StopCoroutine(sc.running); sc.running = null; }
+            if (on) sc.running = StartCoroutine(sc.appear.Play(sc.Parts, sc.reverse, appearDelay, appearInterval, appearPopTime, appearSkipOnInput));
+            else sc.appear.ShowAll();
+        }
+    }
+
+    // A screen whose parts appear in order (they sound, not the screen)
+    bool AppearsInOrder(GameObject window)
+    {
+        foreach (ScreenEntry sc in screens) if (sc != null && sc.target == window && sc.appearInOrder) return true;
+        return false;
     }
 
     void Update()
@@ -189,7 +295,7 @@ public class UIManager : MonoBehaviour
     void StartGame(bool skipTutorial)
     {
         if (loading || string.IsNullOrEmpty(pendingScene)) return;
-        if (tutorialPopup != null) tutorialPopup.SetActive(false);
+        if (tutorialPopup != null) CloseWindow(tutorialPopup);   // (it shrinks away while the game loads)
         GameManager.SkipFromMenu = skipTutorial;   // the game scene's GameManager reads it when it starts
         StartCoroutine(LoadScene(pendingScene));
     }
@@ -201,14 +307,24 @@ public class UIManager : MonoBehaviour
     {
         if (loading) return;
         GameManager.SkipFromMenu = playAgainSkipsTutorial;
+        CloseScreens();   // (its windows go away while it reloads)
         StartCoroutine(LoadScene(SceneManager.GetActiveScene().name));
     }
 
-    // The pause window and the end screen (Game → Menu)
+    // The pause window and the end screen (Game → Menu): their windows go away (still paused, the busy cursor) while
+    // the Menu loads
     public void GoToMenu()
     {
         if (loading) return;
+        CloseScreens();
         StartCoroutine(LoadScene(menuScene));
+    }
+
+    // Every open screen but the HUD closes (its windows disappear in order); the pause stays (time frozen)
+    void CloseScreens()
+    {
+        foreach (ScreenEntry sc in screens)
+            if (sc != null && sc.target != null && sc.role != ScreenRole.Hud && sc.target.activeSelf) CloseWindow(sc.target);
     }
 
     public void QuitGame()
@@ -222,18 +338,77 @@ public class UIManager : MonoBehaviour
 
     public void OpenWindow(GameObject window)
     {
-        if (!window.activeSelf) AudioManager.PlayUI(IsPopup(window) ? UISound.Popup : UISound.Open);
+        // Still disappearing (opened again while closing): it appears again from the start
+        ScreenEntry closingOne = EntryOf(window);
+        if (closingOne != null && closingOne.closing)
+        {
+            StopCoroutine(closingOne.running);
+            closingOne.closing = false;
+            closingOne.running = null;
+            closingOne.appear.ShowAll();
+            closingOne.wasOn = false;   // (LateUpdate: prepared and shown in order again)
+        }
+        // Its sound (UIWindow: Window or Popup; without one, Window). A screen whose parts appear in order: they sound
+        bool wasOff = !window.activeSelf || Popping(window, false);
+        if (wasOff && !AppearsInOrder(window))
+            AudioManager.PlayUI(UIWindow.SoundOf(window) ?? UISound.Open);
         window.SetActive(true);
         window.transform.SetAsLastSibling();   // the one opened comes to the front
+        if (wasOff && closingOne == null) PopWindow(window, true);   // (a window, not a screen: it grows in place)
     }
 
-    bool IsPopup(GameObject window) =>
-        window == tutorialPopup || (popups != null && System.Array.IndexOf(popups, window) >= 0);
+    // A window growing in as it opens, shrinking out as it closes (WindowPop); asked again halfway, the new one wins
+    private readonly WindowPop windowPop = new WindowPop();
+    private readonly Dictionary<GameObject, Coroutine> windowPops = new Dictionary<GameObject, Coroutine>();
+    private readonly HashSet<GameObject> windowsClosing = new HashSet<GameObject>();
+
+    void PopWindow(GameObject window, bool open)
+    {
+        if (windowPops.TryGetValue(window, out Coroutine running) && running != null) { StopCoroutine(running); windowPop.Restore(window.transform); }
+        if (open) windowsClosing.Remove(window); else windowsClosing.Add(window);
+        windowPops[window] = StartCoroutine(PopRoutine(window, open));
+    }
+
+    IEnumerator PopRoutine(GameObject window, bool open)
+    {
+        yield return windowPop.Run(window.transform, open, appearPopTime);
+        windowPops.Remove(window);
+        windowsClosing.Remove(window);
+    }
+
+    // Shrinking out now (closing: true) or growing in (false)
+    bool Popping(GameObject window, bool growing) => window.activeSelf && windowsClosing.Contains(window) != growing;
 
     public void CloseWindow(GameObject window)
     {
-        if (window.activeSelf) AudioManager.PlayUI(UISound.Close);
+        if (!window.activeSelf) return;
+        AudioManager.PlayUI(UISound.Close);
+        // A screen whose parts appear in order: they disappear the other way round first, then it closes
+        ScreenEntry sc = EntryOf(window);
+        if (sc != null && sc.appearInOrder && sc.appear != null && !sc.closing)
+        {
+            if (sc.running != null) StopCoroutine(sc.running);
+            sc.closing = true;
+            sc.running = StartCoroutine(CloseInOrder(sc));
+            return;
+        }
+        if (sc != null && sc.closing) return;   // (already disappearing)
+        if (sc == null) { if (!windowsClosing.Contains(window)) PopWindow(window, false); return; }   // (a window: it shrinks, then turns off)
         window.SetActive(false);
+    }
+
+    IEnumerator CloseInOrder(ScreenEntry sc)
+    {
+        yield return sc.appear.Disappear(appearInterval, appearPopTime);
+        sc.closing = false;
+        sc.running = null;
+        sc.target.SetActive(false);   // (LateUpdate leaves its parts as they are for next time)
+    }
+
+    ScreenEntry EntryOf(GameObject window)
+    {
+        foreach (ScreenEntry sc in screens) if (sc != null && sc.target == window) return sc;
+        return null;
     }
 
     // ---------- Inside ----------

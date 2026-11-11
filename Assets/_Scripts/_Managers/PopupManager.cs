@@ -55,6 +55,8 @@ public class PopupManager : MonoBehaviour
 
     private readonly Dictionary<GameObject, int> requests = new Dictionary<GameObject, int>();
     private readonly Dictionary<GameObject, CanvasGroup> popups = new Dictionary<GameObject, CanvasGroup>();
+    private readonly Dictionary<GameObject, Vector3> popupScales = new Dictionary<GameObject, Vector3>();
+    private readonly Dictionary<GameObject, Vector3> popupPlaces = new Dictionary<GameObject, Vector3>();
     private readonly Dictionary<GameObject, Coroutine> timed = new Dictionary<GameObject, Coroutine>();
     private readonly List<GameObject> fading = new List<GameObject>();   // (reused every frame)
     private CanvasGroup canvasGroup;
@@ -158,7 +160,13 @@ public class PopupManager : MonoBehaviour
             CanvasGroup g = popups[popup];
             float target = Count(popup) > 0 ? 1f : 0f;
             g.alpha = Mathf.MoveTowards(g.alpha, target, step);
-            if (target == 0f && g.alpha == 0f) popup.SetActive(false);   // fully faded out
+            // Growing in place from its middle as it fades in; shrinking into it as it fades out (UIPop)
+            UIPop.Scale(popup.transform, popupScales[popup], popupPlaces[popup], target == 1f ? UIPop.Grow(g.alpha) : UIPop.Shrink(1f - g.alpha));
+            if (target == 0f && g.alpha == 0f)   // fully faded out
+            {
+                UIPop.Scale(popup.transform, popupScales[popup], popupPlaces[popup], 1f);   // (as it was, for next time)
+                popup.SetActive(false);
+            }
         }
     }
 
@@ -172,6 +180,8 @@ public class PopupManager : MonoBehaviour
         g.alpha = 0f;
         g.blocksRaycasts = g.interactable = false;
         popups[popup] = g;
+        popupScales[popup] = popup.transform.localScale;
+        popupPlaces[popup] = popup.transform.localPosition;
         return g;
     }
 

@@ -308,6 +308,7 @@ GameObject:
   - component: {fileID: 40587723}
   - component: {fileID: 40587725}
   - component: {fileID: 40587724}
+  - component: {fileID: 40587726}
   m_Layer: 0
   m_Name: Window_RecycleBin
   m_TagString: Untagged
@@ -375,6 +376,20 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 40587722}
   m_CullTransparentMesh: 1
+--- !u!114 &40587726
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 40587722}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c3a4ba21bc91455fa941333100567dfa, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  kind: 0
+  opensWithButton: 1
 --- !u!1001 &40779986
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -4905,6 +4920,7 @@ GameObject:
   - component: {fileID: 198076236}
   - component: {fileID: 198076235}
   - component: {fileID: 198076237}
+  - component: {fileID: 198076238}
   m_Layer: 0
   m_Name: Window_Configuration
   m_TagString: Untagged
@@ -4948,7 +4964,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_Material: {fileID: 0}
-  m_Color: {r: 0.96862745, g: 0.1333443, b: 0, a: 1}
+  m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_RaycastTarget: 1
   m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
   m_Maskable: 1
@@ -4996,6 +5012,20 @@ MonoBehaviour:
   sensitivitySlider: {fileID: 857220693}
   displayMarks: []
   languageMarks: []
+--- !u!114 &198076238
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 198076233}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c3a4ba21bc91455fa941333100567dfa, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  kind: 0
+  opensWithButton: 1
 --- !u!64 &210352199
 MeshCollider:
   m_ObjectHideFlags: 0
@@ -13384,15 +13414,15 @@ MonoBehaviour:
     sceneName: Menu
   tutorialPopup: {fileID: 686991305}
   playAgainSkipsTutorial: 1
-  hud: {fileID: 0}
-  pauseScreen: {fileID: 0}
-  endScreen: {fileID: 0}
+  screens: []
   hudFadeTime: 0.15
-  popups:
-  - {fileID: 5333254025703458507}
-  - {fileID: 686991305}
-  startOpen: []
-  startClosed: []
+  appearDelay: 0.05
+  appearInterval: 0.15
+  appearPopTime: 0.25
+  appearSkipOnInput: 1
+  oldHud: {fileID: 0}
+  oldPause: {fileID: 0}
+  oldEnd: {fileID: 0}
   minLoadingTime: 1.5
   quitDelay: 2
 --- !u!1001 &433468135
@@ -31208,6 +31238,7 @@ GameObject:
   - component: {fileID: 686991308}
   - component: {fileID: 686991307}
   - component: {fileID: 686991309}
+  - component: {fileID: 686991310}
   m_Layer: 0
   m_Name: Window_Tutorial
   m_TagString: Untagged
@@ -31291,6 +31322,20 @@ MonoBehaviour:
   spanish: 
   englishSprite: {fileID: 21300000, guid: f8c201dabeeb00346922547055c451e3, type: 3}
   spanishSprite: {fileID: 21300000, guid: dd6d05bbb10aa1a4ba4554ac360c4e94, type: 3}
+--- !u!114 &686991310
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 686991305}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c3a4ba21bc91455fa941333100567dfa, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  kind: 1
+  opensWithButton: 1
 --- !u!1 &697699920
 GameObject:
   m_ObjectHideFlags: 0
@@ -31454,13 +31499,6 @@ MonoBehaviour:
     keepFor: 0
   clickSound:
     sounds:
-    - clip: {fileID: 8300000, guid: 7f7b7e6309b95c84bab5084784f4deb7, type: 3}
-      disguise: 1
-      semitones: -3
-      crush: 0.3
-      muffle: 0.2
-      echo: 0.1
-      made: 1
     - clip: {fileID: 8300000, guid: 5924fd6ffc0241e4597714b9b42e70bc, type: 3}
       disguise: 1
       semitones: -3
@@ -42152,6 +42190,18 @@ MonoBehaviour:
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
           m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
+      - m_Target: {fileID: 425335312}
+        m_TargetAssemblyTypeName: UIManager, Assembly-CSharp
+        m_MethodName: CloseWindow
+        m_Mode: 2
+        m_Arguments:
+          m_ObjectArgument: {fileID: 198076233}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.GameObject, UnityEngine
           m_IntArgument: 0
           m_FloatArgument: 0
           m_StringArgument: 
@@ -99436,10 +99486,10 @@ RectTransform:
   - {fileID: 1739959175850101517}
   - {fileID: 6005807000017632501}
   - {fileID: 686991306}
-  - {fileID: 871345575}
   - {fileID: 40587723}
   - {fileID: 198076234}
   - {fileID: 248704477}
+  - {fileID: 871345575}
   m_Father: {fileID: 5260232610926787216}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
@@ -109706,6 +109756,18 @@ MonoBehaviour:
           m_StringArgument: 
           m_BoolArgument: 0
         m_CallState: 2
+      - m_Target: {fileID: 425335312}
+        m_TargetAssemblyTypeName: UIManager, Assembly-CSharp
+        m_MethodName: CloseWindow
+        m_Mode: 2
+        m_Arguments:
+          m_ObjectArgument: {fileID: 198076233}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.GameObject, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
   sound: 1
 --- !u!114 &2062234550
 MonoBehaviour:
@@ -118370,6 +118432,7 @@ GameObject:
   - component: {fileID: 8538533441036550326}
   - component: {fileID: 2505483505889248256}
   - component: {fileID: 1696475948}
+  - component: {fileID: 8538533441036550327}
   m_Layer: 0
   m_Name: Window_Exit
   m_TagString: Untagged
@@ -119864,6 +119927,20 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 5333254025703458507}
   m_CullTransparentMesh: 1
+--- !u!114 &8538533441036550327
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5333254025703458507}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c3a4ba21bc91455fa941333100567dfa, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  kind: 1
+  opensWithButton: 1
 --- !u!4 &8539454825170945824
 Transform:
   m_ObjectHideFlags: 0

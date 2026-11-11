@@ -6,8 +6,9 @@ using UnityEngine.UI;
 // live in SettingsManager (saved with PlayerPrefs); this is only their view.
 //   Pages:   one GameObject per tab; each tab button calls SelectTab(index) (WindowButton → On Click). Opens on Default Page.
 //   Sliders: changes apply live (you hear/feel them right away).
-//   Apply:   keeps the changes and closes.  Cancel: goes back to the values it had when opened, and closes.
-//   Closing the window any other way (e.g. Continue in the pause) keeps the changes.
+//   Apply:   keeps the changes (saved): Cancel goes back to here from now on. The window stays open.
+//   Cancel:  back to the values it had when it opened, or at the last Apply. The window stays open.
+//   Closing it (its Close / Minimize: UIManager.CloseWindow in the Menu, UIManager.Resume in the pause) keeps the changes.
 public class SettingsWindow : MonoBehaviour
 {
     [Header("Pages")]
@@ -46,12 +47,7 @@ public class SettingsWindow : MonoBehaviour
 
     void OnEnable()
     {
-        savedMaster = SettingsManager.MasterVolume;
-        savedMusic = SettingsManager.MusicVolume;
-        savedSfx = SettingsManager.SfxVolume;
-        savedSensitivity = SettingsManager.MouseSensitivity;
-        savedLanguage = SettingsManager.Language;
-        savedDisplay = SettingsManager.DisplayMode;
+        Remember();
 
         RefreshSliders();
         RefreshLanguageMarks();
@@ -85,9 +81,22 @@ public class SettingsWindow : MonoBehaviour
         RefreshMarks(displayMarks, mode);
     }
 
+    // The changes were already applied live: kept (saved), and Cancel comes back to them from now on
     public void Apply()
     {
-        gameObject.SetActive(false);   // changes were already applied live; OnDisable saves them
+        SettingsManager.Save();
+        Remember();
+    }
+
+    // The values Cancel goes back to: now (when it opens, at Apply)
+    void Remember()
+    {
+        savedMaster = SettingsManager.MasterVolume;
+        savedMusic = SettingsManager.MusicVolume;
+        savedSfx = SettingsManager.SfxVolume;
+        savedSensitivity = SettingsManager.MouseSensitivity;
+        savedLanguage = SettingsManager.Language;
+        savedDisplay = SettingsManager.DisplayMode;
     }
 
     public void Cancel()
@@ -99,7 +108,9 @@ public class SettingsWindow : MonoBehaviour
         SettingsManager.Language = savedLanguage;
         SettingsManager.DisplayMode = savedDisplay;
         SettingsManager.NotifyChanged();
-        gameObject.SetActive(false);
+        RefreshSliders();
+        RefreshLanguageMarks();
+        RefreshMarks(displayMarks, (int)SettingsManager.DisplayMode);
     }
 
     // ---------- Internal ----------

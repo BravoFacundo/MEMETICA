@@ -3,10 +3,10 @@ using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.Video;
 
-// The end screen (win or lose). Goes on Canvas_HUD (always on): it keeps Screen and its Pages hidden until the run
-// ends; GameManager > End Screen (the same Screen) turns it on then. Pages are its parts, one shown at a time:
-// User Score (this run), Scoreboard, MemeDex… Their buttons call EndScreen.ShowPage (0, 1, 2…). Start Page shows first.
-// User Score's contents: this run's stats and the last meme you unlocked (each text optional). With Labels:
+// The end screen (win or lose): this run's stats and the last meme you unlocked. Goes on Canvas_HUD (always on): it
+// keeps Screen hidden until the run ends; GameManager > End Screen (the same Screen) turns it on then. The scoreboard
+// and the MemeDex are screens of their own (UIManager > Screens, Other): their buttons call UIManager.OpenWindow /
+// CloseWindow. Its contents (each text optional). With Labels:
 // "Time Played: 03:12" (its label in English or Spanish, as the game's language); without: only the value.
 // Its other buttons call UIManager: Play Again → UIManager.PlayAgain, Menu → UIManager.GoToMenu.
 public class EndScreen : MonoBehaviour
@@ -23,10 +23,6 @@ public class EndScreen : MonoBehaviour
     [Header("Screen")]
     [Tooltip("The end screen's root (also GameManager > End Screen): hidden until the run ends")]
     public GameObject screen;
-    [Tooltip("Its parts, one shown at a time: User Score, Scoreboard, MemeDex…")]
-    public GameObject[] pages;
-    [Tooltip("The page shown when it opens (0: the first)")]
-    public int startPage = 0;
 
     [Header("Labels")]
     [Tooltip("On: each stat reads 'Time Played: 03:12'. Off: only the value")]
@@ -63,7 +59,6 @@ public class EndScreen : MonoBehaviour
     void Awake()
     {
         if (screen != null) screen.SetActive(false);
-        ShowPage(startPage);
     }
 
     void OnEnable()
@@ -83,14 +78,6 @@ public class EndScreen : MonoBehaviour
     {
         if (state != GameManager.State.Won && state != GameManager.State.Lost) return;
         Fill();
-        ShowPage(startPage);
-    }
-
-    // Only that page on (the buttons call it)
-    public void ShowPage(int index)
-    {
-        if (pages == null) return;
-        for (int i = 0; i < pages.Length; i++) if (pages[i] != null) pages[i].SetActive(i == index);
     }
 
     void Set(TMP_Text text, Label label, string value)
