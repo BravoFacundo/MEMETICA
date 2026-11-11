@@ -13,15 +13,27 @@ using UnityEngine;
 public class SoundSet
 {
     [System.Serializable]
-    public class Sound
+    public class Sound : ISerializationCallbackReceiver
     {
         public AudioClip clip;
         [Tooltip("Off: as it is. On: changed with the values below")]
-        public bool disguise;
+        public bool disguise = true;
         [Range(-12, 12)] public int semitones = -3;
-        [Range(0f, 1f)] public float crush = 0.4f;
-        [Range(0f, 1f)] public float muffle = 0.3f;
-        [Range(0f, 1f)] public float echo = 0f;
+        [Range(0f, 1f)] public float crush = 0.3f;
+        [Range(0f, 1f)] public float muffle = 0.2f;
+        [Range(0f, 1f)] public float echo = 0.1f;
+
+        // A new entry (+ in the Inspector, the first of an empty list) comes zeroed: it gets the disguise above.
+        // Entries that already have a clip keep what they have
+        [SerializeField, HideInInspector] private bool made;
+        public void OnBeforeSerialize() { }
+        public void OnAfterDeserialize()
+        {
+            if (made) return;
+            made = true;
+            if (clip != null) return;
+            disguise = true; semitones = -3; crush = 0.3f; muffle = 0.2f; echo = 0.1f;
+        }
     }
 
     [Tooltip("One of these each time, at random (never the same twice in a row). Empty: silent")]
@@ -29,31 +41,38 @@ public class SoundSet
     [Range(0f, 1f)] public float volume = 0.8f;
     [Tooltip("Each time a little higher or lower (0.05 = ±5%), so the same sound doesn't feel repeated")]
     [Range(0f, 0.3f)] public float pitchVariation = 0.05f;
+    [Tooltip("Seconds the same sound repeats: played again within this time after the last one, the same one again (a " +
+             "double click, clicks in a row). 0: another one each time")]
+    public float keepFor = 0f;
 
     [System.NonSerialized] private AudioSource clean, disguised;
     [System.NonSerialized] private AudioLowPassFilter lowPass;
     [System.NonSerialized] private AudioEchoFilter echoFilter;
     [System.NonSerialized] private BitCrusher crusher;
     [System.NonSerialized] private int last = -1;
+    [System.NonSerialized] private float lastAt = -99f;   // when it last played (Keep For)
 
     public bool IsEmpty => sounds == null || sounds.Length == 0;
 
-    public void Play(GameObject host)
+    // Pitch: on top of its variation (MenuIntro: each step a little higher). Returns the seconds it lasts (0: nothing)
+    public float Play(GameObject host, float pitch = 1f)
     {
-        if (IsEmpty || host == null) return;
-        int pick = Random.Range(0, sounds.Length);
-        if (sounds.Length > 1 && pick == last) pick = (pick + 1 + Random.Range(0, sounds.Length - 1)) % sounds.Length;
+        if (IsEmpty || host == null) return 0f;
+        bool keep = keepFor > 0f && last >= 0 && last < sounds.Length && Time.unscaledTime - lastAt <= keepFor;
+        int pick = keep ? last : Random.Range(0, sounds.Length);
+        if (!keep && sounds.Length > 1 && pick == last) pick = (pick + 1 + Random.Range(0, sounds.Length - 1)) % sounds.Length;
         last = pick;
+        lastAt = Time.unscaledTime;
         Sound sound = sounds[pick];
-        if (sound == null || sound.clip == null) return;
+        if (sound == null || sound.clip == null) return 0f;
         if (clean == null) MakeSources(host);
 
-        float vary = 1f + Random.Range(-pitchVariation, pitchVariation);
+        float vary = (1f + Random.Range(-pitchVariation, pitchVariation)) * pitch;
         if (!sound.disguise)
         {
             clean.pitch = vary;
             clean.PlayOneShot(sound.clip, volume);
-            return;
+            return sound.clip.length / Mathf.Max(Mathf.Abs(clean.pitch), 0.01f);
         }
         disguised.pitch = Mathf.Pow(2f, sound.semitones / 12f) * vary;
         crusher.amount = sound.crush;
@@ -63,6 +82,7 @@ public class SoundSet
         echoFilter.wetMix = sound.echo * 0.6f;
         echoFilter.decayRatio = 0.3f + sound.echo * 0.3f;
         disguised.PlayOneShot(sound.clip, volume);
+        return sound.clip.length / Mathf.Max(Mathf.Abs(disguised.pitch), 0.01f);
     }
 
     // Two sources on a child of the host: one as it is, one with the effects (so a clean sound never goes through them)

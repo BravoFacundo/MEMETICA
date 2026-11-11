@@ -45,6 +45,30 @@ public class AudioManager : MonoBehaviour
     [Tooltip("Its level before the slider (the Sfx slider turns it)")]
     [Range(0f, 1f)] public float ambienceLevel = 0.6f;
 
+    [Section("Startup and Shutdown (Menu)")]
+    [Tooltip("Plays as the scene starts, and the music begins once it is over (Menu: the computer starting up). " +
+             "Each sound as it is or Disguised. Empty: the music at once")]
+    public SoundSet startupSound = new SoundSet();
+    [Tooltip("Only the first time the game opens (back from a game to the Menu: straight to the music)")]
+    public bool startupOnlyOnce = true;
+    [Tooltip("Quitting (UIManager > Quit): once the music faded out it plays, and the game closes when it is over")]
+    public SoundSet shutdownSound = new SoundSet();
+
+    [Section("UI Sounds", Closed = true)]
+    [Tooltip("Every left click with the free cursor (the Menu, the pause…), anywhere: a double click sounds twice. " +
+             "Each sound as it is or Disguised. Empty: silent")]
+    public SoundSet clickSound = new SoundSet();
+    [Tooltip("A window opens (UIManager.OpenWindow: Configuration, Recycle Bin, the pause…). As the game's modal popups")]
+    public SoundSet openSound = new SoundSet();
+    [Tooltip("A popup opens (UIManager > Popups: Exit?, the tutorial question…). As the game's popups. Empty: Open Sound")]
+    public SoundSet popupSound = new SoundSet();
+    [Tooltip("A window closes (UIManager.CloseWindow, Continue in the pause)")]
+    public SoundSet closeSound = new SoundSet();
+    [Tooltip("Something not allowed: a locked button clicked (WindowButton: Error, e.g. Button_NotAllowed), a notice " +
+             "(NotificationWindow: \"use double click\")")]
+    [UnityEngine.Serialization.FormerlySerializedAs("deniedSound")]
+    public SoundSet errorSound = new SoundSet();
+
     [Section("World Sounds (Game)", Closed = true)]
     [Tooltip("Stones: meters at full volume (x) and from where they aren't heard (y)")]
     public Vector2 stoneRange = DefaultStoneRange;
@@ -69,9 +93,27 @@ public class AudioManager : MonoBehaviour
         RouteSources();
         ApplySettings();
         SettingsManager.Changed += ApplySettings;
-        if (music != null) PlayMusic(music);
         if (ambience != null) PlayAmbience(ambience);
+        StartCoroutine(StartUp());
     }
+
+    // The startup sound (if any, and its turn), then the music
+    static bool startedUp;   // (the whole session: the Menu again later doesn't start up again)
+    IEnumerator StartUp()
+    {
+        if (music != null) music.LoadAudioData();   // (loaded now, while the startup sounds: no hitch when it starts)
+        float wait = 0f;
+        if (!startupOnlyOnce || !startedUp) wait = startupSound.Play(gameObject);
+        startedUp = true;
+        if (music == null || musicStopped) yield break;
+        // Booked on the audio clock for the exact moment the startup ends (not a frame later, whatever the frame rate).
+        // Fading out before then (changing scene, quitting) stops it before it starts
+        PlayMusic(music, wait > 0f ? AudioSettings.dspTime + wait : 0);
+    }
+
+    // Quitting: the shutdown sound. Returns the seconds it lasts (UIManager closes the game after them)
+    public float PlayShutdown() => shutdownSound.Play(gameObject);
+    private bool musicStopped;   // faded out (changing scene, quitting): the startup doesn't bring it back
 
     void OnDestroy() => SettingsManager.Changed -= ApplySettings;
 
@@ -85,14 +127,15 @@ public class AudioManager : MonoBehaviour
         SetVolume(SfxParam, SettingsManager.SfxVolume);
     }
 
-    public void PlayMusic(AudioClip clip)
+    // At: a moment on the audio clock (AudioSettings.dspTime) to start exactly then. 0: now
+    public void PlayMusic(AudioClip clip, double at = 0)
     {
         if (musicSource == null) return;   // scene without music (e.g. Game for now)
         StopAllCoroutines();
         musicSource.clip = clip;
         musicSource.loop = true;
         musicSource.volume = musicLevel;
-        musicSource.Play();
+        if (at > 0) musicSource.PlayScheduled(at); else musicSource.Play();
         fading = false;
     }
 
@@ -108,6 +151,7 @@ public class AudioManager : MonoBehaviour
     // Changing scene (UIManager): the music and the ambience fade out together
     public void FadeOutMusic(float duration)
     {
+        musicStopped = true;
         if (musicSource == null && ambienceSource == null) return;   // nothing to fade
         StopAllCoroutines();
         fading = true;
@@ -212,6 +256,22 @@ public class AudioManager : MonoBehaviour
 
     // A meme is sounding (MemeChanger, DexCollectible): for these seconds the world sounds go quieter
     private static float memeUntil;
+    // A UI sound (buttons, windows). One per frame: a button that opens or closes a window only sounds as that.
+    // Click (the cursor's, each press) always sounds, and overlaps: clicks in a row are heard one after the other
+    public static void PlayUI(UISound which)
+    {
+        if (Instance == null || which == UISound.None) return;
+        if (which == UISound.Click) { Instance.clickSound.Play(Instance.gameObject); return; }
+        if (Time.frameCount == uiFrame) return;
+        SoundSet set = which == UISound.Open ? Instance.openSound
+                     : which == UISound.Popup ? (Instance.popupSound.IsEmpty ? Instance.openSound : Instance.popupSound)
+                     : which == UISound.Close ? Instance.closeSound : Instance.errorSound;
+        if (set.IsEmpty) return;
+        set.Play(Instance.gameObject);
+        uiFrame = Time.frameCount;
+    }
+    static int uiFrame = -1;
+
     public static void MemeSounding(float seconds = 0.2f) => memeUntil = Mathf.Max(memeUntil, Time.unscaledTime + seconds);
 
     // The volume a world sound starts at now
@@ -235,3 +295,6 @@ public class AudioManager : MonoBehaviour
         source.Stop();
     }
 }
+
+// The UI's sounds (AudioManager > UI Sounds)
+public enum UISound { None, Click, Open, Close, Error, Popup }

@@ -90,6 +90,7 @@ public class RetroCursor : MonoBehaviour
         bool paused = UIManager.GameIsPaused;
         if (!modeStarted || wanted != CurrentMode || paused != wasPaused) ApplyMode(wanted);   // the pause also locks / frees it
         wasPaused = paused;
+        if (CurrentMode == Mode.Free && Input.GetMouseButtonDown(0)) AudioManager.PlayUI(UISound.Click);   // every click, as you press
 
         if (playerLook == null || UIManager.GameIsPaused) return;   // Menu / pause: the UI buttons set the icon
         if (CurrentMode == Mode.Crosshair) SetState(RandomizerPedestal.Busy ? CursorState.Hidden : AimState());   // (raffling, the platform turning: no aim)

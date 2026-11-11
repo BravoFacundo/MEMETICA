@@ -30,11 +30,15 @@ Material:
         m_Offset: {x: 0, y: 0}
     m_Ints: []
     m_Floats:
-    - _Curve: 1
+    - _Curve: 0.5
+    - _CurveBelow: 1
+    - _DomeRadius: 0
     - _Exposure: 1
     - _Flip: 0
-    - _Horizon: 0
+    - _Horizon: -0.18
+    - _HorizonY: 0
     - _Mirror: 1
+    - _Soft: 0
     m_Colors:
     - _Tint: {r: 1, g: 1, b: 1, a: 1}
   m_BuildTextureStacks: []

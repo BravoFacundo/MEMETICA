@@ -5677,6 +5677,7 @@ MonoBehaviour:
           m_StringArgument: 
           m_BoolArgument: 0
         m_CallState: 2
+  sound: 1
 --- !u!114 &275999675
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -13387,6 +13388,11 @@ MonoBehaviour:
   pauseScreen: {fileID: 0}
   endScreen: {fileID: 0}
   hudFadeTime: 0.15
+  popups:
+  - {fileID: 5333254025703458507}
+  - {fileID: 686991305}
+  startOpen: []
+  startClosed: []
   minLoadingTime: 1.5
   quitDelay: 2
 --- !u!1001 &433468135
@@ -13617,6 +13623,7 @@ MonoBehaviour:
   onClick:
     m_PersistentCalls:
       m_Calls: []
+  sound: 1
 --- !u!114 &449921307
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -19322,6 +19329,7 @@ MonoBehaviour:
           m_StringArgument: 
           m_BoolArgument: 0
         m_CallState: 2
+  sound: 1
 --- !u!114 &492246109
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -19537,6 +19545,7 @@ MonoBehaviour:
           m_StringArgument: 
           m_BoolArgument: 0
         m_CallState: 2
+  sound: 1
 --- !u!114 &512248878
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -25477,6 +25486,7 @@ MonoBehaviour:
           m_StringArgument: 
           m_BoolArgument: 0
         m_CallState: 2
+  sound: 1
 --- !u!1001 &614470888
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -25940,6 +25950,7 @@ MonoBehaviour:
           m_StringArgument: 
           m_BoolArgument: 0
         m_CallState: 2
+  sound: 1
 --- !u!114 &641301233
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -31409,6 +31420,98 @@ MonoBehaviour:
   musicDuck: 0.4
   ambience: {fileID: 8300000, guid: ce9b98ba572ca214e88e53dff27d395b, type: 3}
   ambienceLevel: 0.616
+  startupSound:
+    sounds:
+    - clip: {fileID: 8300000, guid: 292fa755dd0ea1f45ab5df836888bc02, type: 3}
+      disguise: 1
+      semitones: -3
+      crush: 0.3
+      muffle: 0.2
+      echo: 0.1
+      made: 1
+    - clip: {fileID: 8300000, guid: 347dfcc744ef26e47b936fcdd1be7dcb, type: 3}
+      disguise: 1
+      semitones: -3
+      crush: 0.3
+      muffle: 0.2
+      echo: 0.1
+      made: 1
+    volume: 0.8
+    pitchVariation: 0.05
+    keepFor: 0
+  startupOnlyOnce: 1
+  shutdownSound:
+    sounds:
+    - clip: {fileID: 8300000, guid: 2e4214f6cd835ea408a7ff3f5f2bf87b, type: 3}
+      disguise: 1
+      semitones: -3
+      crush: 0.3
+      muffle: 0.2
+      echo: 0.1
+      made: 1
+    volume: 0.8
+    pitchVariation: 0.05
+    keepFor: 0
+  clickSound:
+    sounds:
+    - clip: {fileID: 8300000, guid: 7f7b7e6309b95c84bab5084784f4deb7, type: 3}
+      disguise: 1
+      semitones: -3
+      crush: 0.3
+      muffle: 0.2
+      echo: 0.1
+      made: 1
+    - clip: {fileID: 8300000, guid: 5924fd6ffc0241e4597714b9b42e70bc, type: 3}
+      disguise: 1
+      semitones: -3
+      crush: 0.3
+      muffle: 0.2
+      echo: 0.1
+      made: 1
+    volume: 0.8
+    pitchVariation: 0.05
+    keepFor: 0.5
+  openSound:
+    sounds:
+    - clip: {fileID: 8300000, guid: d305fdc7fcc485e45964e5e4312e96e7, type: 3}
+      disguise: 1
+      semitones: -3
+      crush: 0.3
+      muffle: 0.2
+      echo: 0.1
+      made: 1
+    volume: 0.8
+    pitchVariation: 0.05
+    keepFor: 0
+  popupSound:
+    sounds:
+    - clip: {fileID: 8300000, guid: fd3861719a66c984c87bf66c9e11e047, type: 3}
+      disguise: 1
+      semitones: -3
+      crush: 0.3
+      muffle: 0.2
+      echo: 0.1
+      made: 1
+    volume: 0.6
+    pitchVariation: 0.05
+    keepFor: 0
+  closeSound:
+    sounds: []
+    volume: 0.8
+    pitchVariation: 0.05
+    keepFor: 0
+  errorSound:
+    sounds:
+    - clip: {fileID: 8300000, guid: 4dfbb81afd1189b4995ac1147f98ea26, type: 3}
+      disguise: 1
+      semitones: -2
+      crush: 0.3
+      muffle: 0.2
+      echo: 0.1
+      made: 1
+    volume: 0.6
+    pitchVariation: 0.05
+    keepFor: 0
   stoneRange: {x: 4, y: 30}
   liftRange: {x: 10, y: 70}
   duckVolume: 0.35
@@ -42037,7 +42140,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   onHover: 3
-  doubleClick: 1
+  doubleClick: 0
   hintOnSingleClick: 1
   onClick:
     m_PersistentCalls:
@@ -42054,6 +42157,7 @@ MonoBehaviour:
           m_StringArgument: 
           m_BoolArgument: 0
         m_CallState: 2
+  sound: 1
 --- !u!114 &824866417
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -42329,6 +42433,7 @@ MonoBehaviour:
   onClick:
     m_PersistentCalls:
       m_Calls: []
+  sound: 1
 --- !u!114 &828835699
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -42876,6 +42981,7 @@ MonoBehaviour:
   onClick:
     m_PersistentCalls:
       m_Calls: []
+  sound: 1
 --- !u!114 &864513838
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -48036,8 +48142,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 385bf7b6085e466f9a8e50210a450c0f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  sound: {fileID: 8300000, guid: 2a82f056cea226f40a2095543b839bea, type: 3}
-  volume: 1
   showTime: 3
   slideTime: 0.25
 --- !u!1 &888874330
@@ -48771,6 +48875,7 @@ MonoBehaviour:
   onClick:
     m_PersistentCalls:
       m_Calls: []
+  sound: 1
 --- !u!114 &950685478
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -53902,6 +54007,7 @@ MonoBehaviour:
           m_StringArgument: 
           m_BoolArgument: 0
         m_CallState: 2
+  sound: 1
 --- !u!114 &976773934
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -70757,6 +70863,7 @@ MonoBehaviour:
           m_StringArgument: 
           m_BoolArgument: 0
         m_CallState: 2
+  sound: 1
 --- !u!1 &1248650708
 GameObject:
   m_ObjectHideFlags: 0
@@ -71147,6 +71254,7 @@ MonoBehaviour:
           m_StringArgument: 
           m_BoolArgument: 0
         m_CallState: 2
+  sound: 1
 --- !u!1 &1279382757
 GameObject:
   m_ObjectHideFlags: 0
@@ -72601,6 +72709,7 @@ MonoBehaviour:
           m_StringArgument: 
           m_BoolArgument: 0
         m_CallState: 2
+  sound: 1
 --- !u!114 &1408235862
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -73412,6 +73521,7 @@ MonoBehaviour:
   onClick:
     m_PersistentCalls:
       m_Calls: []
+  sound: 1
 --- !u!114 &1505769255
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -78504,6 +78614,7 @@ MonoBehaviour:
           m_StringArgument: 
           m_BoolArgument: 0
         m_CallState: 2
+  sound: 1
 --- !u!114 &1519203690
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -79378,6 +79489,7 @@ MonoBehaviour:
           m_StringArgument: 
           m_BoolArgument: 0
         m_CallState: 2
+  sound: 1
 --- !u!114 &1616327895
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -81378,6 +81490,7 @@ MonoBehaviour:
           m_StringArgument: 
           m_BoolArgument: 0
         m_CallState: 2
+  sound: 1
 --- !u!114 &1692453503
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -82148,6 +82261,7 @@ MonoBehaviour:
           m_StringArgument: 
           m_BoolArgument: 0
         m_CallState: 2
+  sound: 1
 --- !u!114 &1769997907
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -87239,7 +87353,7 @@ Camera:
   m_Enabled: 1
   serializedVersion: 2
   m_ClearFlags: 2
-  m_BackGroundColor: {r: 0, g: 0.49411768, b: 0.62352943, a: 1}
+  m_BackGroundColor: {r: 0.08235294, g: 0.67058825, b: 0.8196079, a: 1}
   m_projectionMatrixMode: 1
   m_GateFitMode: 2
   m_FOVAxisMode: 0
@@ -97982,6 +98096,7 @@ MonoBehaviour:
           m_StringArgument: 
           m_BoolArgument: 0
         m_CallState: 2
+  sound: 1
 --- !u!1001 &1888340978
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -98135,6 +98250,7 @@ MonoBehaviour:
           m_StringArgument: 
           m_BoolArgument: 0
         m_CallState: 2
+  sound: 1
 --- !u!114 &1896607771
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -98603,6 +98719,7 @@ MonoBehaviour:
           m_StringArgument: 
           m_BoolArgument: 0
         m_CallState: 2
+  sound: 1
 --- !u!114 &1936760859
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -98709,6 +98826,7 @@ MonoBehaviour:
           m_StringArgument: 
           m_BoolArgument: 0
         m_CallState: 2
+  sound: 1
 --- !u!114 &1939735517
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -104483,6 +104601,7 @@ MonoBehaviour:
           m_StringArgument: 
           m_BoolArgument: 0
         m_CallState: 2
+  sound: 1
 --- !u!114 &2038860016
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -109570,7 +109689,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   onHover: 3
-  doubleClick: 1
+  doubleClick: 0
   hintOnSingleClick: 1
   onClick:
     m_PersistentCalls:
@@ -109587,6 +109706,7 @@ MonoBehaviour:
           m_StringArgument: 
           m_BoolArgument: 0
         m_CallState: 2
+  sound: 1
 --- !u!114 &2062234550
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -110138,6 +110258,7 @@ MonoBehaviour:
           m_StringArgument: 
           m_BoolArgument: 0
         m_CallState: 2
+  sound: 1
 --- !u!114 &2088855017
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -111363,6 +111484,7 @@ MonoBehaviour:
           m_StringArgument: 
           m_BoolArgument: 0
         m_CallState: 2
+  sound: 1
 --- !u!114 &828249531476723325
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -118235,6 +118357,7 @@ MonoBehaviour:
           m_StringArgument: 
           m_BoolArgument: 0
         m_CallState: 2
+  sound: 1
 --- !u!1 &5333254025703458507
 GameObject:
   m_ObjectHideFlags: 0
@@ -118844,6 +118967,7 @@ MonoBehaviour:
           m_StringArgument: 
           m_BoolArgument: 0
         m_CallState: 2
+  sound: 1
 --- !u!114 &6817227335777837000
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -119123,6 +119247,7 @@ MonoBehaviour:
           m_StringArgument: 
           m_BoolArgument: 0
         m_CallState: 2
+  sound: 1
 --- !u!23 &7146861674818233821
 MeshRenderer:
   m_ObjectHideFlags: 0
@@ -119839,6 +119964,7 @@ MonoBehaviour:
   onClick:
     m_PersistentCalls:
       m_Calls: []
+  sound: 1
 --- !u!114 &8755849388350554916
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -119899,6 +120025,7 @@ MonoBehaviour:
           m_StringArgument: 
           m_BoolArgument: 0
         m_CallState: 2
+  sound: 1
 --- !u!64 &8762866134282001472
 MeshCollider:
   m_ObjectHideFlags: 0
@@ -120017,7 +120144,7 @@ SceneRoots:
   m_Roots:
   - {fileID: 1914313587}
   - {fileID: 348224149}
-  - {fileID: 313531437}
   - {fileID: 363801713}
   - {fileID: 738353737}
   - {fileID: 1479239295}
+  - {fileID: 313531437}

@@ -3,12 +3,17 @@
 // Example: Button_Play → On Open → UIManager.PlayGame()
 // Menu: the Play icons (with the tutorial popup first). Game: the Screens (pause and end screen, one at a time, the
 // HUD hidden behind them), Play Again and back to the Menu. Both: loading with the busy cursor, quitting, windows.
+// At the start everything is put as it should be, however it was left on or off in the scene (Arrange): what must work
+// is turned on (with its parents: the HUD, the HUD meme windows, the virus timer, the cursor, Start Open), what waits
+// to be opened is turned off (the pause, the end screen, the tutorial popup, Start Closed). So turn things on or off
+// in the hierarchy freely while you work on them.
 
 using System.Collections;
 using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.SceneManagement;
 
+[DefaultExecutionOrder(-100)]   // (before the rest: what it turns on wakes up before anyone looks for it)
 public class UIManager : MonoBehaviour
 {
     [Section("Scenes")]
@@ -36,10 +41,22 @@ public class UIManager : MonoBehaviour
     [Tooltip("Seconds the HUD takes to fade out or in")]
     public float hudFadeTime = 0.15f;
 
+    [Section("Windows")]
+    [Tooltip("The windows that are popups (a question: Exit?, the tutorial one): opening, AudioManager's Popup Sound. " +
+             "Any other window: Open Sound (Configuration, Recycle Bin, the pause). The Tutorial Popup counts already")]
+    public GameObject[] popups;
+
+    [Section("At the Start", Closed = true)]
+    [Tooltip("Turned on at the start (with their parents), however they were left: windows that must be there when " +
+             "their screen opens (the pause's own windows, an end screen page's parts…)")]
+    public GameObject[] startOpen;
+    [Tooltip("Turned off at the start, however they were left: windows that wait for a button to open them")]
+    public GameObject[] startClosed;
+
     [Section("Loading", Closed = true)]
     [Tooltip("Minimum seconds a load takes (busy cursor, music fading out), even if the scene is ready before")]
     public float minLoadingTime = 1.5f;
-    [Tooltip("Seconds it \"thinks\" before closing the game")]
+    [Tooltip("Seconds it \"thinks\" before closing the game (the music fades out meanwhile; then AudioManager's Shutdown Sound)")]
     public float quitDelay = 2f;
 
     private bool loading;
@@ -52,6 +69,41 @@ public class UIManager : MonoBehaviour
     private PlayerLook look;
     private PlayerLook Look => look != null ? look : (look = FindObjectOfType<PlayerLook>());
     bool EndOpen => endScreen != null && endScreen.activeInHierarchy;
+
+    void Awake() => Arrange();
+
+    // Everything as it should be at the start, whatever was left on or off in the scene
+    void Arrange()
+    {
+        // On (and their parents): what has to work from the first frame; they hide themselves if they should
+        if (hud != null) Reveal(hud.gameObject);
+        foreach (HudWindow window in FindObjectsOfType<HudWindow>(true)) Reveal(window.gameObject);       // (the meme window on the HUD)
+        foreach (VirusClock clock in FindObjectsOfType<VirusClock>(true)) Reveal(clock.gameObject);       // (hidden until the countdown)
+        foreach (EndScreen end in FindObjectsOfType<EndScreen>(true)) Reveal(end.gameObject);             // (it keeps its screen hidden)
+        foreach (RetroCursor cursor in FindObjectsOfType<RetroCursor>(true)) Reveal(cursor.gameObject);
+        if (startOpen != null) foreach (GameObject g in startOpen) Reveal(g);
+
+        // Off (their parents on): what waits to be opened
+        Close(pauseScreen);
+        Close(endScreen);
+        Close(tutorialPopup);
+        if (startClosed != null) foreach (GameObject g in startClosed) if (g != null) g.SetActive(false);
+    }
+
+    // It and every parent on
+    static void Reveal(GameObject g)
+    {
+        if (g == null) return;
+        for (Transform t = g.transform; t != null; t = t.parent) if (!t.gameObject.activeSelf) t.gameObject.SetActive(true);
+    }
+
+    // Off, its parents on (so opening it later shows it)
+    static void Close(GameObject g)
+    {
+        if (g == null) return;
+        if (g.transform.parent != null) Reveal(g.transform.parent.gameObject);
+        g.SetActive(false);
+    }
 
     void Start()
     {
@@ -80,7 +132,7 @@ public class UIManager : MonoBehaviour
     {
         if (!GameIsPaused) return;
         GameIsPaused = false;
-        if (pauseScreen != null) pauseScreen.SetActive(false);
+        if (pauseScreen != null) CloseWindow(pauseScreen);
         if (RetroCursor.Instance != null) RetroCursor.Instance.SetFollowMouse(false);   // back to the fixed aim (RetroCursor sets the icon)
         Time.timeScale = 1f;
         if (Look != null) Look.playerCanLook = true;
@@ -170,12 +222,17 @@ public class UIManager : MonoBehaviour
 
     public void OpenWindow(GameObject window)
     {
+        if (!window.activeSelf) AudioManager.PlayUI(IsPopup(window) ? UISound.Popup : UISound.Open);
         window.SetActive(true);
         window.transform.SetAsLastSibling();   // the one opened comes to the front
     }
 
+    bool IsPopup(GameObject window) =>
+        window == tutorialPopup || (popups != null && System.Array.IndexOf(popups, window) >= 0);
+
     public void CloseWindow(GameObject window)
     {
+        if (window.activeSelf) AudioManager.PlayUI(UISound.Close);
         window.SetActive(false);
     }
 
@@ -185,12 +242,14 @@ public class UIManager : MonoBehaviour
     {
         loading = true;
 
-        // As when loading: busy cursor, nothing clickable and the music fades out
+        // As when loading: busy cursor, nothing clickable and the music fades out; then the shutdown sound, to its end
         if (EventSystem.current != null) EventSystem.current.enabled = false;
         if (RetroCursor.Instance != null) RetroCursor.Instance.SetBusy(true);
         if (AudioManager.Instance != null) AudioManager.Instance.FadeOutMusic(quitDelay);
 
         yield return new WaitForSecondsRealtime(quitDelay);
+        float shutdown = AudioManager.Instance != null ? AudioManager.Instance.PlayShutdown() : 0f;
+        if (shutdown > 0f) yield return new WaitForSecondsRealtime(shutdown);
 
 #if UNITY_EDITOR
         UnityEditor.EditorApplication.isPlaying = false;   // in the Editor: stops Play

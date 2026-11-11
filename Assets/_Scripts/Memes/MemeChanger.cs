@@ -803,7 +803,7 @@ public abstract class MemeChanger : Meme
         shown = image;
         showingVideoFrame = false;
         RenderTexture frame = image.video != null && image.picture == null && stills.TryGetValue(image.video, out RenderTexture f) ? f : null;
-        if (image.picture == null && frame == null && videoTexture != null && shownTexture == videoTexture) HoldFrame();   // (not black meanwhile)
+        if (image.picture == null && frame == null && videoTexture != null && displayedTexture == videoTexture) HoldFrame();   // (not black meanwhile)
         if (image.picture != null) Display(image.picture);
         else if (frame != null) Display(frame);
         OnImageShown(image);
@@ -843,7 +843,7 @@ public abstract class MemeChanger : Meme
 
     // The video frame showing now, copied: switching clips blanks the player's own texture, and it is still on screen
     private RenderTexture held;
-    private Texture shownTexture;
+    private Texture displayedTexture;
     void HoldFrame()
     {
         if (held == null || held.width != videoTexture.width || held.height != videoTexture.height)
@@ -858,7 +858,7 @@ public abstract class MemeChanger : Meme
     // Every texture shown goes through here (so it knows what is on screen)
     void Display(Texture texture)
     {
-        shownTexture = texture;
+        displayedTexture = texture;
         ShowTexture(texture);
     }
 

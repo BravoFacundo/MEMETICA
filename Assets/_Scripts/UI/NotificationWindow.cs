@@ -1,17 +1,14 @@
 using System.Collections;
 using UnityEngine;
 
-// A notice that slides down from above into its place (e.g. the top right corner) with a sound, stays a moment and
+// A notice that slides down from above into its place (e.g. the top right corner) with a sound (AudioManager > UI
+// Sounds > Error Sound: it is an error, like a locked button), stays a moment and
 // goes back up. Used for "Use double click to open icons": a desktop icon (WindowButton with Double Click) clicked once.
 // Goes on the notice's window (your design; its text with Localized for both languages), inside a canvas, placed where
 // it should be seen. It can start off or on: it hides itself. Asked again while visible, it sounds again and stays
 // longer. One per scene (WindowButton finds it).
 public class NotificationWindow : MonoBehaviour
 {
-    [Header("Sound")]
-    public AudioClip sound;
-    [Range(0f, 1f)] public float volume = 1f;
-
     [Header("Timing")]
     [Tooltip("Seconds it stays in place")]
     public float showTime = 3f;
@@ -21,7 +18,6 @@ public class NotificationWindow : MonoBehaviour
     private static NotificationWindow instance;
     private RectTransform rect;
     private Vector2 shownPosition;
-    private AudioSource source;
     private bool visible;
 
     void Awake()
@@ -29,10 +25,6 @@ public class NotificationWindow : MonoBehaviour
         instance = this;
         rect = (RectTransform)transform;
         shownPosition = rect.anchoredPosition;   // where you placed it
-        source = gameObject.AddComponent<AudioSource>();
-        source.playOnAwake = false;
-        source.spatialBlend = 0f;
-        source.ignoreListenerPause = true;
         rect.anchoredPosition = HiddenPosition;   // it slides in from there
         if (!visible) gameObject.SetActive(false);
     }
@@ -51,7 +43,7 @@ public class NotificationWindow : MonoBehaviour
         visible = true;
         if (!gameObject.activeSelf) gameObject.SetActive(true);
         transform.SetAsLastSibling();   // over the windows
-        if (sound != null) source.PlayOneShot(sound, volume);   // every single click
+        AudioManager.PlayUI(UISound.Error);   // every single click
         StopAllCoroutines();
         StartCoroutine(Run());
     }

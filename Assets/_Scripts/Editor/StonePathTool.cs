@@ -110,7 +110,7 @@ public static class StonePathTool
         Undo.RegisterCreatedObjectUndo(look, "Stone Model");
         look.name = ModelName;
         look.transform.localPosition = Vector3.zero;
-        look.transform.localRotation = Quaternion.identity;
+        look.transform.localRotation = prefab.transform.localRotation;   // (its own turn: models imported lying down stay upright)
         look.transform.localScale = LookScale(model);   // the stone's own size: the stone (its scale)
         foreach (FallingPlatform platform in look.GetComponentsInChildren<FallingPlatform>(true)) platform.enabled = false;   // the stone falls itself
 
@@ -140,7 +140,7 @@ public static class StonePathTool
         Undo.RegisterCreatedObjectUndo(look, "Stone Shadow");
         look.name = ModelName;
         look.transform.localPosition = Vector3.zero;
-        look.transform.localRotation = Quaternion.identity;
+        look.transform.localRotation = model.prefab.transform.localRotation;
         look.transform.localScale = LookScale(model);
         foreach (MonoBehaviour script in look.GetComponentsInChildren<MonoBehaviour>(true)) Object.DestroyImmediate(script);
         foreach (Collider c in look.GetComponentsInChildren<Collider>(true)) Object.DestroyImmediate(c);

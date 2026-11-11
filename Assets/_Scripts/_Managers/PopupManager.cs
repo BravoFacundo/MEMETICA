@@ -64,6 +64,7 @@ public class PopupManager : MonoBehaviour
         if (instance != null && instance != this) { Destroy(this); return; }
         instance = this;
         if (popupCanvas == null) return;   // (only on and off)
+        for (Transform t = popupCanvas; t != null; t = t.parent) if (!t.gameObject.activeSelf) t.gameObject.SetActive(true);   // (on, whatever was left)
 
         // One CanvasGroup on the whole panel: hides everything during pause. Clicks: only the closable popups (their own group)
         canvasGroup = popupCanvas.GetComponent<CanvasGroup>();

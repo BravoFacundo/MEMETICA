@@ -23,6 +23,9 @@ public class WindowButton : MonoBehaviour, IPointerEnterHandler, IPointerExitHan
     public bool hintOnSingleClick = true;
     [Tooltip("What happens on click")]
     public UnityEvent onClick;
+    [Tooltip("Its sound on top of the click (every click already sounds: RetroCursor). Error: a locked button. " +
+             "A window it opens or closes sounds by itself (UIManager)")]
+    public UISound sound = UISound.None;
 
     private bool hovering;
     private Coroutine waitingSecond;
@@ -52,6 +55,7 @@ public class WindowButton : MonoBehaviour, IPointerEnterHandler, IPointerExitHan
         }
         StopWaiting();
         onClick.Invoke();
+        if (sound != UISound.Click) AudioManager.PlayUI(sound);   // (after: if it opened or closed a window, that one already sounded)
     }
 
     // No second click in time: it was a single click, the notice says how to open it
