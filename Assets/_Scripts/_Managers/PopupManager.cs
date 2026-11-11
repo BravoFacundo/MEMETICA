@@ -99,11 +99,12 @@ public class PopupManager : MonoBehaviour
         m.timed[popup] = m.StartCoroutine(m.HideAfter(popup, seconds));
     }
 
-    // Stops the game until it is clicked; Closed is called once it is gone and the game runs again
-    public static void ShowModal(GameObject popup, System.Action closed = null, float minTime = 0.6f)
+    // Stops the game until it is clicked (a left click on it, as a button: the cursor turns into the pointing hand over
+    // it); Closed is called once it is gone and the game runs again
+    public static void ShowModal(GameObject popup, System.Action closed = null)
     {
         if (popup == null) { closed?.Invoke(); return; }
-        Instance.StartCoroutine(Instance.Modal(popup, closed, minTime));
+        Instance.StartCoroutine(Instance.Modal(popup, closed));
     }
 
     // Its X button (WindowButton → On Click, with the popup): it goes away whoever asked for it
@@ -189,7 +190,7 @@ public class PopupManager : MonoBehaviour
 
     //---- Modal
 
-    IEnumerator Modal(GameObject popup, System.Action closed, float minTime)
+    IEnumerator Modal(GameObject popup, System.Action closed)
     {
         while (ModalOpen) yield return null;   // (another one first)
         ModalOpen = true;
@@ -200,22 +201,26 @@ public class PopupManager : MonoBehaviour
         if (look != null) look.LookLocked = true;
         Request(popup, true, true);   // (it takes clicks: its own buttons, if any)
 
-        // A click during Min Time isn't lost: it closes it as soon as Min Time is over
-        bool clicked = false;
+        // Only a left click on it closes it (the whole popup is its button); over it, the pointing hand
+        RectTransform area = popup.transform as RectTransform;
+        Canvas canvas = popup.GetComponentInParent<Canvas>();
+        Camera eye = canvas != null && canvas.rootCanvas.renderMode != RenderMode.ScreenSpaceOverlay ? canvas.rootCanvas.worldCamera : null;
+        bool wasOver = false;
         for (float shownFor = 0f; ; )
         {
             if (!UIManager.GameIsPaused)
             {
                 Time.timeScale = 0f;   // (again every frame: leaving the pause sets it back to 1)
                 shownFor += Time.unscaledDeltaTime;
-                bool mouse = Input.GetMouseButtonDown(0) || Input.GetMouseButtonDown(1) || Input.GetMouseButtonDown(2);
-                bool key = Input.anyKeyDown && !Input.GetKeyDown(KeyCode.Escape) && !Input.GetKeyDown(KeyCode.P) &&
-                           !Input.GetKeyDown(KeyCode.JoystickButton7);   // (not the pause keys)
-                if ((mouse || key) && shownFor >= 0.15f) clicked = true;   // (not the click that opened it)
-                if (clicked && shownFor >= minTime) break;
+                bool over = area == null || RectTransformUtility.RectangleContainsScreenPoint(area, Input.mousePosition, eye);
+                // (every frame: from the first one, whatever else set the arrow meanwhile - the free cursor starting)
+                if (RetroCursor.Instance != null) RetroCursor.Instance.SetState(over ? CursorState.Point : CursorState.Default);
+                wasOver = over;
+                if (over && Input.GetMouseButtonDown(0) && shownFor >= 0.15f) break;   // (not the click that opened it)
             }
             yield return null;
         }
+        if (wasOver && RetroCursor.Instance != null) RetroCursor.Instance.SetState(CursorState.Default);
 
         Release(popup, true);
         if (!UIManager.GameIsPaused) Time.timeScale = 1f;

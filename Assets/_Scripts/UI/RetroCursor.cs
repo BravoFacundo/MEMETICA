@@ -94,7 +94,7 @@ public class RetroCursor : MonoBehaviour
 
         if (playerLook == null || UIManager.GameIsPaused) return;   // Menu / pause: the UI buttons set the icon
         if (CurrentMode == Mode.Crosshair) SetState(RandomizerPedestal.Busy ? CursorState.Hidden : AimState());   // (raffling, the platform turning: no aim)
-        else UpdateWindows();
+        else if (!PopupManager.ModalOpen) UpdateWindows();   // (a modal popup sets the icon itself: the hand over it)
     }
 
     void LateUpdate()

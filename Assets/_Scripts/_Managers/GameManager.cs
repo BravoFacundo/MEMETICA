@@ -52,8 +52,6 @@ public partial class GameManager : MonoBehaviour
     public TMPro.TMP_Text virusMinutesText;
     [Tooltip("Seconds after the way started rising before it shows")]
     public float alertDelay = 1f;
-    [Tooltip("Seconds it stays at least: the game stops until it is clicked after that (PopupManager modal: 'Click to start')")]
-    public float alertMinTime = 1.5f;
     public AudioClip alertClip;
 
     [Section("Lose (blue screen)")]
@@ -113,7 +111,7 @@ public partial class GameManager : MonoBehaviour
         if (virusMinutesText != null) virusMinutesText.text = virusMinutesText.text.Replace("{min}", Mathf.RoundToInt(minutes).ToString());
         PlayClip(alertClip);
         bool closed = false;
-        PopupManager.ShowModal(virusAlert, () => closed = true, alertMinTime);   // the game stops until clicked
+        PopupManager.ShowModal(virusAlert, () => closed = true);   // the game stops until it is clicked
         StartTimer();   // the clock shows with it, stopped (time is frozen): it runs once clicked
         while (!closed) yield return null;
     }
