@@ -1,0 +1,12 @@
+{
+    "runs": [
+        { "name": "Uiiai", "date": "", "mode": "Expo", "won": false, "seconds": 480, "falls": -1, "total": 34, "memes": [], "memeCount": 13, "recovered": true, "notes": "Expo v1 (8 min). Axes: Dinosaur. Secrets 2. Tutorial played. Raffles 2. Meme lost 4 times" },
+        { "name": "PianoCat", "date": "", "mode": "Expo", "won": false, "seconds": 480, "falls": -1, "total": 34, "memes": [], "memeCount": 18, "recovered": true, "notes": "Expo v1 (8 min). Axes: Dogs, Dinosaur. Secrets 2. Tutorial played. Raffles 3. Meme lost 0" },
+        { "name": "Marcelo", "date": "", "mode": "Expo", "won": false, "seconds": 480, "falls": -1, "total": 34, "memes": [], "memeCount": 20, "recovered": true, "notes": "Expo v1 (8 min). Axes: TrollFace, Dogs. Secrets 2. Tutorial played. Raffles 3. Meme lost 0" },
+        { "name": "InternetExplorer", "date": "", "mode": "Expo", "won": false, "seconds": 480, "falls": -1, "total": 34, "memes": [], "memeCount": 18, "recovered": true, "notes": "Expo v1 (8 min). Axes: TrollFace, Cats. Secrets 0. Tutorial played. Raffles 4. Meme lost 0" },
+        { "name": "Ciber", "date": "", "mode": "Expo", "won": false, "seconds": 480, "falls": -1, "total": 34, "memes": [], "memeCount": 13, "recovered": true, "notes": "Expo v1 (8 min). Axes: Dogs. Secrets 2. Tutorial skipped. Raffles 2. Meme lost 2" },
+        { "name": "DinoFart", "date": "", "mode": "Expo", "won": false, "seconds": 480, "falls": -1, "total": 34, "memes": [], "memeCount": 22, "recovered": true, "notes": "Expo v1 (8 min). Axes: Dogs, Cats. Secrets 3. Tutorial played. Raffles 3. Meme lost 1" },
+        { "name": "Doge", "date": "", "mode": "Expo", "won": false, "seconds": 480, "falls": -1, "total": 34, "memes": [], "memeCount": 20, "recovered": true, "notes": "Expo v1 (8 min). Axes: Cats, TrollFace, Dogs. Secrets 2. Tutorial played. Raffles 3. Meme lost 0" },
+        { "name": "DinoFart002", "date": "", "mode": "Expo", "won": false, "seconds": 480, "falls": -1, "total": 34, "memes": [], "memeCount": 29, "recovered": true, "notes": "Expo v1 (8 min). Axes: Dogs, Cats, TrollFace. Secrets 5. Tutorial played. Raffles 4. Meme lost 0" }
+    ]
+}

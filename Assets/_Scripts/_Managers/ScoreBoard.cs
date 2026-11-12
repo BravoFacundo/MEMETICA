@@ -12,7 +12,10 @@ using UnityEngine;
 //   Falls     fewer falls first: Flawless (0 falls) at the top, then more memes, then less time
 //   Time      less time first: Speedrun, then more memes
 // A file next to the game's other saved data (Application.persistentDataPath/scores.json): it stays between plays on
-// that computer (the exhibition PC keeps everyone's).
+// that computer (the exhibition PC keeps everyone's). Itch: each run also goes to the online leaderboard
+// (OnlineScoreBoard); not sent (no internet), it goes next time the game opens online (ScoreUploader). Expo: only here,
+// until uploaded by hand (ScoreUploader's key in the build, Memetica > Scores in the Editor). Uploaded: marked so.
+// Medals (to decide; for now): Gold, all the memes (Perfect); Silver, no falls (Flawless).
 public static class ScoreBoard
 {
     [System.Serializable]
@@ -26,11 +29,18 @@ public static class ScoreBoard
         public int falls;        // into the void (RunStats)
         public int total;        // memes there were to unlock (the MemeDex then)
         public List<string> memes = new List<string>();   // MemeDex keys, in unlock order
-        public int Count => memes.Count;
+        public int memeCount;    // how many, when the list isn't known (recovered runs)
+        public bool recovered;   // put back by hand from notes (no falls, its time: the whole countdown)
+        public string notes;     // anything else known about it
+        public bool uploaded;    // already in the online leaderboard
+        public int Count => memes.Count > 0 ? memes.Count : memeCount;
 
-        public bool Flawless => falls == 0;
+        public bool Flawless => falls == 0;   // (-1: not known)
         public bool Perfect => total > 0 && Count >= total;
+        public Medal Medal => Perfect ? Medal.Gold : Flawless ? Medal.Silver : Medal.None;
     }
+
+    public enum Medal { None, Silver, Gold }
 
     public enum Order { Best, Memes, Falls, Time }
 
@@ -50,7 +60,14 @@ public static class ScoreBoard
     [System.Serializable]
     class Saved { public List<Run> runs = new List<Run>(); }
 
-    static string FilePath => Path.Combine(Application.persistentDataPath, "scores.json");
+    public static string FilePath => Path.Combine(Application.persistentDataPath, "scores.json");
+
+    // The runs of any scores file (a copy from the exhibition PC, recovered ones…)
+    public static List<Run> ReadFile(string path)
+    {
+        try { return JsonUtility.FromJson<Saved>(File.ReadAllText(path)).runs ?? new List<Run>(); }
+        catch (System.Exception e) { Debug.LogWarning($"[ScoreBoard] Couldn't read {path}: {e.Message}"); return new List<Run>(); }
+    }
 
     // Every run (of that build, if given), best first (Order.Best)
     public static List<Run> Load(GameManager.ScoreMode? mode = null) => Load(mode.HasValue ? mode.Value.ToString() : null);
@@ -67,14 +84,34 @@ public static class ScoreBoard
         return Sorted(runs, Order.Best);
     }
 
-    // Adds a run. Returns its place (1 = best)
+    // Adds a run (only with a name: no name, no score). Returns its place (1 = best). Itch: online too
     public static int Save(Run run)
     {
+        if (run == null || string.IsNullOrWhiteSpace(run.name)) return 0;
         List<Run> runs = Load((string)null);
         runs.Add(run);
+        Write(runs);
+        if (run.mode == GameManager.ScoreMode.Itch.ToString()) _ = OnlineScoreBoard.UploadPending(false);   // (online now: it goes)
+        return Load(run.mode).FindIndex(r => r.name == run.name) + 1;
+    }
+
+    static void Write(List<Run> runs)
+    {
         try { File.WriteAllText(FilePath, JsonUtility.ToJson(new Saved { runs = runs }, true)); }
         catch (System.Exception e) { Debug.LogWarning($"[ScoreBoard] Couldn't save {FilePath}: {e.Message}"); }
-        return Load(run.mode).FindIndex(r => r.name == run.name) + 1;
+    }
+
+    // The runs not online yet (with a name). Expo too, or only Itch's
+    public static List<Run> NotUploaded(bool expoToo) =>
+        Load((string)null).FindAll(r => !r.uploaded && !string.IsNullOrWhiteSpace(r.name) && (expoToo || r.mode == GameManager.ScoreMode.Itch.ToString()));
+
+    // These are online now (by name)
+    public static void MarkUploaded(ICollection<string> names)
+    {
+        if (names.Count == 0) return;
+        List<Run> runs = Load((string)null);
+        foreach (Run r in runs) if (names.Contains(r.name)) r.uploaded = true;
+        Write(runs);
     }
 
     // Someone already has it (names are unique: the name screen says it's taken)

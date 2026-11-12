@@ -11,6 +11,7 @@ using UnityEngine.SceneManagement;
 //   F8  the meme in your hand changes as if you had carried it onto another island (the next Move)
 //   F9 / F10  win / lose now (GameManager)   |   F11  the countdown starts (if it hadn't) with 10 seconds left
 //   F12 the MemeDex so far (in unlock order, then what is missing) to the Console
+//   N   (the run ended) saves it as a score named TEST001, TEST002… (until the name screen exists)
 //   (L switches English / Spanish: that one is in DebugLock, so it also works in the Menu)
 // All Islands Up: every island is already up when the game starts (to walk the whole level)
 // Log Meme Sounds: every sound a meme plays goes to the Console ([Meme sound] who: clip (why) frame), to find repeated ones
@@ -58,6 +59,7 @@ public class DebugTools : MonoBehaviour
         WinLose = 1 << 6,         // F9 / F10
         TenSecondsLeft = 1 << 7,  // F11
         MemeDexLog = 1 << 8,      // F12
+        TestScore = 1 << 9,       // N
     }
 
     [Header("Configuration")]
@@ -183,6 +185,12 @@ public class DebugTools : MonoBehaviour
             if (Pressed(KeyCode.F11, DebugKey.TenSecondsLeft)) GameManager.Instance.SkipTo(10f);
         }
         if (Pressed(KeyCode.F12, DebugKey.MemeDexLog) && MemeDex.Instance != null) MemeDex.Instance.LogProgress();
+        if (Pressed(KeyCode.N, DebugKey.TestScore) && GameManager.Instance != null && GameManager.Instance.Ended && MemeDex.Instance != null)
+        {
+            ScoreBoard.Run run = MemeDex.Instance.CurrentRun(ScoreBoard.NextFree("TEST"));
+            int place = ScoreBoard.Save(run);
+            Debug.Log($"[DebugTools] Saved '{run.name}' ({run.mode}): {run.Count}/{run.total} memes, {run.seconds:0} s, falls {run.falls}, place {place}.");
+        }
         ElevatorSpeed = fastElevators ? fastElevatorSpeed : 1f;
 
         if (noclip && !UIManager.GameIsPaused) Fly();
