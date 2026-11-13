@@ -22,6 +22,7 @@ public static class GameInput
         get
         {
             Tick();
+            if (Blocked) return Vector2.zero;
             Vector2 stick = Stick("Pad Move X", "Pad Move Y");
             Vector2 move = keyMove + stick;
             return Vector2.ClampMagnitude(move, 1f);
@@ -41,15 +42,18 @@ public static class GameInput
         }
     }
 
-    public static bool Run => Input.GetKey(KeyCode.LeftShift) || Pad(KeyCode.JoystickButton8);
+    public static bool Run => !Blocked && Input.GetKey(KeyCode.LeftShift) || Pad(KeyCode.JoystickButton8);
 
     //---- Buttons (this frame)
 
-    public static bool JumpDown => Input.GetKeyDown(KeyCode.Space) || Pad(KeyCode.JoystickButton0, true);
+    // A value is being typed in the debug console: the keyboard is its (the mouse still looks and grabs)
+    static bool Blocked => DebugConsole.Typing;
+
+    public static bool JumpDown => !Blocked && Input.GetKeyDown(KeyCode.Space) || Pad(KeyCode.JoystickButton0, true);
     public static bool GrabDown => Input.GetMouseButtonDown(0) || Pad(KeyCode.JoystickButton5, true) || TriggerDown(ref rt, "Pad RT");
     public static bool ZoomHeld => Input.GetMouseButton(1) || Pad(KeyCode.JoystickButton4) || Trigger("Pad LT");
-    public static bool DropDown => Input.GetKeyDown(KeyCode.Q) || Pad(KeyCode.JoystickButton1, true);
-    public static bool PauseDown => Input.GetKeyDown(KeyCode.Escape) || Input.GetKeyDown(KeyCode.P) || Pad(KeyCode.JoystickButton7, true);
+    public static bool DropDown => !Blocked && Input.GetKeyDown(KeyCode.Q) || Pad(KeyCode.JoystickButton1, true);
+    public static bool PauseDown => !Blocked && (Input.GetKeyDown(KeyCode.Escape) || Input.GetKeyDown(KeyCode.P)) || Pad(KeyCode.JoystickButton7, true);
 
     //---- Inside
 

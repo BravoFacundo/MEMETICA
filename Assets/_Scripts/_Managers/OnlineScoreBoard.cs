@@ -12,7 +12,7 @@ using UnityEngine;
 // with it as its metadata, so the game can show any order and medal (ScoreBoard).
 // The leaderboard: Leaderboard below (its ID in Unity Cloud: Highest to lowest, Best score, no tiers). A new version
 // from zero: a new leaderboard there (itch_v2…) and its ID here; the old one stays.
-// UploadPending sends this computer's runs not online yet (ScoreBoard.Save, ScoreUploader); Memetica > Scores uploads a
+// UploadPending sends this computer's runs not online yet (ScoreBoard.Save, ScoreUploader, ScoreConsole); Memetica > Scores uploads a
 // scores file (the exhibition's copy, recovered ones) and prints the table. Without internet it only logs it (the runs
 // stay in the local file, not marked: they go next time).
 public static class OnlineScoreBoard
@@ -58,9 +58,9 @@ public static class OnlineScoreBoard
     }
 
     // This computer's runs not online yet (Expo too: by hand), one by one; the ones already there (same name) are only
-    // marked. Returns how many went, and how many were already there
+    // marked. Returns how many went, and how many were already there. Progress: after each one sent (done, of, its name)
     static bool uploading;
-    public static async Task<(int sent, int already)> UploadPending(bool expoToo)
+    public static async Task<(int sent, int already)> UploadPending(bool expoToo, System.Action<int, int, string> progress = null)
     {
         if (uploading) return (0, 0);
         uploading = true;
@@ -78,6 +78,7 @@ public static class OnlineScoreBoard
                 if (!await Submit(run, Leaderboard)) break;   // (no internet: the rest next time)
                 done.Add(run.name);
                 sent++;
+                progress?.Invoke(sent, pending.Count, run.name);
             }
             ScoreBoard.MarkUploaded(done);
         }

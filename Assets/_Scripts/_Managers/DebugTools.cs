@@ -1,9 +1,10 @@
+using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
 // Debug keys and debug starts, to test faster. Goes in Managers > DebugTools (Game and OriginalGame).
 // Skip Tutorial: pressing Play in the scene starts at the hub (the GameManager does it; from the menu its popup decides).
-//   F1  help on screen (keys and the selected start)
+//   F1  the console (DebugConsole): these keys, their state and the selected start (they work with it hidden too)
 //   F2  noclip: fly through everything, no gravity. WASD where you look, Space up, Ctrl down, Shift fast
 //   F3  hide all the UI and the crosshair (screenshots)
 //   F4 / F6  previous / next start   |   F5  restart the scene at the selected start
@@ -11,8 +12,8 @@ using UnityEngine.SceneManagement;
 //   F8  the meme in your hand changes as if you had carried it onto another island (the next Move)
 //   F9 / F10  win / lose now (GameManager)   |   F11  the countdown starts (if it hadn't) with 10 seconds left
 //   F12 the MemeDex so far (in unlock order, then what is missing) to the Console
-//   N   (the run ended) saves it as a score named TEST001, TEST002… (until the name screen exists)
-//   (L switches English / Spanish: that one is in DebugLock, so it also works in the Menu)
+//   8   (the run ended) saves it as a score named TEST001, TEST002… (until the name screen exists)
+//   (0 locks and 9 switches English / Spanish: the console's own, so they also work in the Menu)
 // All Islands Up: every island is already up when the game starts (to walk the whole level)
 // Log Meme Sounds: every sound a meme plays goes to the Console ([Meme sound] who: clip (why) frame), to find repeated ones
 // Starts: the player appears at Spawn Point with islands and bridges already up, elevators already docked
@@ -20,7 +21,8 @@ using UnityEngine.SceneManagement;
 // Editor and Development Builds: every key. Normal build (exhibition): only the keys in Build Keys,
 // and the rest (Start At, All Islands Up, Fast Elevators, Log Meme Sounds) stays off. Build Keys empty: DebugTools off.
 // Simulate Build: in the Editor, act like the normal build (to try Build Keys before building).
-// Every key, in the Editor too, only works once unlocked (DebugLock: type its Code on the numpad; again to lock).
+// Every key, in the Editor too, only works once unlocked (F1 asks for DebugLock's password) and not while the console
+// asks for a value.
 [DefaultExecutionOrder(-50)]   // before the elevators, so a start can dock them before the intro ride begins
 public class DebugTools : MonoBehaviour
 {
@@ -50,7 +52,7 @@ public class DebugTools : MonoBehaviour
     public enum DebugKey
     {
         None = 0,
-        Help = 1 << 0,            // F1
+        Help = 1 << 0,            // (unused: F1 is the console's, always there)
         Noclip = 1 << 1,          // F2
         HideUI = 1 << 2,          // F3
         Starts = 1 << 3,          // F4 / F6 / F5
@@ -59,7 +61,7 @@ public class DebugTools : MonoBehaviour
         WinLose = 1 << 6,         // F9 / F10
         TenSecondsLeft = 1 << 7,  // F11
         MemeDexLog = 1 << 8,      // F12
-        TestScore = 1 << 9,       // N
+        TestScore = 1 << 9,       // 8
     }
 
     [Header("Configuration")]
@@ -109,7 +111,6 @@ public class DebugTools : MonoBehaviour
     private Transform cameraTransform;
     private Canvas[] hiddenCanvases;
     private int selectedStart;
-    private bool showHelp;
     private bool noclip;
     private bool fullAccess;   // Editor / Development Build: every key and option
 
@@ -134,8 +135,11 @@ public class DebugTools : MonoBehaviour
         if (Camera.main != null) cameraTransform = Camera.main.transform;
     }
 
+    void OnEnable() => DebugConsole.AddSection(this, "DEBUG  (" + (fullAccess ? "every key" : "build: only the * keys") + ")", HelpLines, 10);
+
     void OnDisable()
     {
+        DebugConsole.RemoveSections(this);
         ElevatorSpeed = 1f;
         AllIslandsUp = false;
         SkipTutorial = false;
@@ -153,7 +157,7 @@ public class DebugTools : MonoBehaviour
     // Is this key on now? (every key in the Editor / Development Build; in a normal build, only Build Keys, and only unlocked)
     bool Allowed(DebugKey key) => DebugLock.Unlocked && (fullAccess || (buildKeys & key) != 0);
 
-    bool Pressed(KeyCode keyCode, DebugKey key) => Input.GetKeyDown(keyCode) && Allowed(key);
+    bool Pressed(KeyCode keyCode, DebugKey key) => Allowed(key) && DebugConsole.Pressed(keyCode);   // (its console line lights up)
 
     // All Islands Up: the bridges too (and their stones), once everything started
     System.Collections.IEnumerator AllBridgesUp()
@@ -165,18 +169,13 @@ public class DebugTools : MonoBehaviour
     void Update()
     {
         LogMemeSounds = logMemeSounds;   // switchable while playing
-        if (!DebugLock.Unlocked)   // locked again: no help, no flying
-        {
-            showHelp = false;
-            if (noclip) SetNoclip(false);
-        }
-        if (Pressed(KeyCode.F1, DebugKey.Help)) showHelp = !showHelp;
+        if (!DebugLock.Unlocked && noclip) SetNoclip(false);   // locked again: no flying
         if (Pressed(KeyCode.F2, DebugKey.Noclip)) SetNoclip(!noclip);
         if (Pressed(KeyCode.F3, DebugKey.HideUI)) ToggleUI();
         if (Pressed(KeyCode.F4, DebugKey.Starts)) SelectStart(-1);
         if (Pressed(KeyCode.F6, DebugKey.Starts)) SelectStart(1);
         if (Pressed(KeyCode.F5, DebugKey.Starts)) RestartAtSelectedStart();
-        if (Pressed(KeyCode.F7, DebugKey.FastElevators)) { fastElevators = !fastElevators; showHelp = Allowed(DebugKey.Help); }
+        if (Pressed(KeyCode.F7, DebugKey.FastElevators)) fastElevators = !fastElevators;
         if (Pressed(KeyCode.F8, DebugKey.MemeChange)) ForceMemeChange();
         if (GameManager.Instance != null)
         {
@@ -185,15 +184,10 @@ public class DebugTools : MonoBehaviour
             if (Pressed(KeyCode.F11, DebugKey.TenSecondsLeft)) GameManager.Instance.SkipTo(10f);
         }
         if (Pressed(KeyCode.F12, DebugKey.MemeDexLog) && MemeDex.Instance != null) MemeDex.Instance.LogProgress();
-        if (Pressed(KeyCode.N, DebugKey.TestScore) && GameManager.Instance != null && GameManager.Instance.Ended && MemeDex.Instance != null)
-        {
-            ScoreBoard.Run run = MemeDex.Instance.CurrentRun(ScoreBoard.NextFree("TEST"));
-            int place = ScoreBoard.Save(run);
-            Debug.Log($"[DebugTools] Saved '{run.name}' ({run.mode}): {run.Count}/{run.total} memes, {run.seconds:0} s, falls {run.falls}, place {place}.");
-        }
+        if (Allowed(DebugKey.TestScore) && DebugConsole.Pressed(8)) SaveTestRun();
         ElevatorSpeed = fastElevators ? fastElevatorSpeed : 1f;
 
-        if (noclip && !UIManager.GameIsPaused) Fly();
+        if (noclip && !UIManager.GameIsPaused && !DebugConsole.Typing) Fly();
     }
 
     //---- Noclip
@@ -223,7 +217,7 @@ public class DebugTools : MonoBehaviour
     {
         if (hiddenCanvases == null)
         {
-            hiddenCanvases = System.Array.FindAll(FindObjectsOfType<Canvas>(), c => c.isRootCanvas && c.enabled);
+            hiddenCanvases = System.Array.FindAll(FindObjectsOfType<Canvas>(), c => c.isRootCanvas && c.enabled && !DebugConsole.IsConsoleCanvas(c));
             foreach (Canvas c in hiddenCanvases) c.enabled = false;
         }
         else
@@ -239,7 +233,6 @@ public class DebugTools : MonoBehaviour
     {
         if (starts.Length == 0) return;
         selectedStart = (selectedStart + step + starts.Length) % starts.Length;
-        showHelp = Allowed(DebugKey.Help);
     }
 
     void RestartAtSelectedStart()
@@ -318,35 +311,42 @@ public class DebugTools : MonoBehaviour
     {
         Meme held = Meme.Held;
         if (held != null) held.DebugIslandChange();
-        else Debug.Log("[DebugTools] F8: pick up a meme first.");
+        else DebugConsole.Log("F8: pick up a meme first");
     }
 
-    //---- Help on screen
-
-    void OnGUI()
+    // The run ended: saved as a score named TEST001, TEST002…
+    void SaveTestRun()
     {
-        if (!showHelp) return;
+        if (GameManager.Instance == null || !GameManager.Instance.Ended || MemeDex.Instance == null) { DebugConsole.Log("8: only once the run ended"); return; }
+        ScoreBoard.Run run = MemeDex.Instance.CurrentRun(ScoreBoard.NextFree("TEST"));
+        int place = ScoreBoard.Save(run);
+        DebugConsole.Log($"Saved '{run.name}' ({run.mode}): {run.Count}/{run.total} memes, {run.seconds:0} s, falls {run.falls}, place {place}");
+    }
+
+    //---- In the console
+
+    List<DebugConsole.Line> HelpLines()
+    {
         string startName = starts.Length > 0 ? (selectedStart + 1) + "/" + starts.Length + "  " + starts[selectedStart].name : "none (add them in DebugTools)";
         string gameState = GameManager.Instance != null ? GameManager.Instance.Current + ", " + GameManager.Format(GameManager.Instance.TimeLeft) : "no GameManager";
-        string language = DebugLock.LanguageKey + "  English / Spanish" + Mark(true);
-        string text =
-            "DEBUG  (" + (fullAccess ? "every key" : "build: only the * keys") + ")   * = works in the normal build   numpad " + DebugLock.Code + ": lock\n" +
-            Line("F1  this help", DebugKey.Help) +
-            Line("F2  noclip " + (noclip ? "ON" : "off") + "  (WASD, Space up, Ctrl down, Shift fast)", DebugKey.Noclip) +
-            Line("F3  hide UI " + (hiddenCanvases != null ? "ON" : "off"), DebugKey.HideUI) +
-            Line("F4 / F6  start: " + startName + "   F5  restart at that start", DebugKey.Starts) +
-            Line("F7  fast elevators " + (fastElevators ? "ON (x" + fastElevatorSpeed + ")" : "off"), DebugKey.FastElevators) +
-            Line("F8  the meme in your hand changes (next Move)", DebugKey.MemeChange) +
-            Line("F9 / F10  win / lose now  (" + gameState + ")", DebugKey.WinLose) +
-            Line("F11  10 s left", DebugKey.TenSecondsLeft) +
-            Line("F12  MemeDex to the Console", DebugKey.MemeDexLog) +
-            language;
-        GUI.Box(new Rect(10, 10, 470, 200), "");
-        GUI.Label(new Rect(20, 15, 450, 190), text);
+        return new List<DebugConsole.Line>
+        {
+            Line("F2", "noclip " + (noclip ? "ON" : "off") + "  (WASD, Space up, Ctrl down, Shift fast)", DebugKey.Noclip),
+            Line("F3", "hide UI " + (hiddenCanvases != null ? "ON" : "off"), DebugKey.HideUI),
+            Line("F4", "previous start", DebugKey.Starts),
+            Line("F6", "next start   (" + startName + ")", DebugKey.Starts),
+            Line("F5", "restart at that start", DebugKey.Starts),
+            Line("F7", "fast elevators " + (fastElevators ? "ON (x" + fastElevatorSpeed + ")" : "off"), DebugKey.FastElevators),
+            Line("F8", "the meme in your hand changes (next Move)", DebugKey.MemeChange),
+            Line("F9", "win now   (" + gameState + ")", DebugKey.WinLose),
+            Line("F10", "lose now", DebugKey.WinLose),
+            Line("F11", "10 s left", DebugKey.TenSecondsLeft),
+            Line("F12", "MemeDex to the Console", DebugKey.MemeDexLog),
+            Line("8", "save this run as TEST###  (once it ended)", DebugKey.TestScore),
+        };
     }
 
-    // A help line; unavailable keys (normal build) show as "(off)"
-    string Line(string text, DebugKey key) => text + Mark((buildKeys & key) != 0) + (Allowed(key) ? "" : "  (off)") + "\n";
-
-    static string Mark(bool inBuild) => inBuild ? "  *" : "";
+    // A console line; * works in the normal build, off: not in this one
+    DebugConsole.Line Line(string key, string text, DebugKey flag) =>
+        new DebugConsole.Line(key, text + ((buildKeys & flag) != 0 ? "  *" : ""), !Allowed(flag) && DebugLock.Unlocked);
 }

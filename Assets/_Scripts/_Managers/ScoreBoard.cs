@@ -14,7 +14,8 @@ using UnityEngine;
 // A file next to the game's other saved data (Application.persistentDataPath/scores.json): it stays between plays on
 // that computer (the exhibition PC keeps everyone's). Itch: each run also goes to the online leaderboard
 // (OnlineScoreBoard); not sent (no internet), it goes next time the game opens online (ScoreUploader). Expo: only here,
-// until uploaded by hand (ScoreUploader's key in the build, Memetica > Scores in the Editor). Uploaded: marked so.
+// until uploaded by hand (the debug console in the build: ScoreConsole; Memetica > Scores in the Editor). Uploaded:
+// marked so. Test (the console marks it): never goes online.
 // Medals (to decide; for now): Gold, all the memes (Perfect); Silver, no falls (Flawless).
 public static class ScoreBoard
 {
@@ -33,6 +34,7 @@ public static class ScoreBoard
         public bool recovered;   // put back by hand from notes (no falls, its time: the whole countdown)
         public string notes;     // anything else known about it
         public bool uploaded;    // already in the online leaderboard
+        public bool test;        // a try, not a visitor's (the console marks it): never goes online
         public int Count => memes.Count > 0 ? memes.Count : memeCount;
 
         public bool Flawless => falls == 0;   // (-1: not known)
@@ -103,7 +105,55 @@ public static class ScoreBoard
 
     // The runs not online yet (with a name). Expo too, or only Itch's
     public static List<Run> NotUploaded(bool expoToo) =>
-        Load((string)null).FindAll(r => !r.uploaded && !string.IsNullOrWhiteSpace(r.name) && (expoToo || r.mode == GameManager.ScoreMode.Itch.ToString()));
+        Load((string)null).FindAll(r => !r.uploaded && !r.test && !string.IsNullOrWhiteSpace(r.name) && (expoToo || r.mode == GameManager.ScoreMode.Itch.ToString()));
+
+    //---- By hand (the debug console: ScoreConsole). Only this computer's file: what is online stays as it was
+
+    // Every run of the file, every build
+    public static List<Run> All() => Load((string)null);
+
+    // Another name (not taken). False: no such run, or the name is taken
+    public static bool Rename(string name, string newName)
+    {
+        if (string.IsNullOrWhiteSpace(newName) || IsTaken(newName)) return false;
+        return Change(name, r => r.name = newName.Trim());
+    }
+
+    // Out of the file
+    public static bool Delete(string name)
+    {
+        List<Run> runs = Load((string)null);
+        if (runs.RemoveAll(r => r.name == name) == 0) return false;
+        Write(runs);
+        return true;
+    }
+
+    // Test or not (a test never goes online). Returns what it is now
+    public static bool ToggleTest(string name)
+    {
+        bool now = false;
+        Change(name, r => now = r.test = !r.test);
+        return now;
+    }
+
+    static bool Change(string name, System.Action<Run> change)
+    {
+        List<Run> runs = Load((string)null);
+        Run run = runs.Find(r => r.name == name);
+        if (run == null) return false;
+        change(run);
+        Write(runs);
+        return true;
+    }
+
+    // A copy of the file next to it (scores_backup_<date>.json). Returns its path (none: no file yet)
+    public static string Backup()
+    {
+        if (!File.Exists(FilePath)) return null;
+        string backup = Path.Combine(Path.GetDirectoryName(FilePath), $"scores_backup_{System.DateTime.Now:yyyy-MM-dd_HH-mm-ss}.json");
+        try { File.Copy(FilePath, backup); return backup; }
+        catch (System.Exception e) { Debug.LogWarning($"[ScoreBoard] Couldn't back up {FilePath}: {e.Message}"); return null; }
+    }
 
     // These are online now (by name)
     public static void MarkUploaded(ICollection<string> names)
